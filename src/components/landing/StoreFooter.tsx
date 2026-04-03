@@ -16,81 +16,66 @@ export function StoreFooter({ store, containerClass }: StoreFooterProps) {
     <footer className="pt-8 sm:pt-12">
       <div className={cn('mx-auto px-4 pb-8 sm:px-6 sm:pb-12', containerClass)}>
         <div
-          className="overflow-hidden rounded-[34px] border px-6 py-8 sm:px-8 sm:py-10"
+          className="overflow-hidden px-6 py-8 sm:px-8 sm:py-10"
           style={{
-            borderColor: 'var(--store-border)',
+            borderRadius: 'calc(var(--store-card-radius) + 10px)',
+            border: '1px solid var(--store-card-border)',
             background:
-              'linear-gradient(145deg, color-mix(in srgb, var(--store-bg) 88%, white 12%), color-mix(in srgb, var(--store-bg) 92%, var(--store-text) 8%))',
+              'linear-gradient(145deg, color-mix(in srgb, var(--store-surface) 90%, white 10%), color-mix(in srgb, var(--store-bg) 96%, var(--store-text) 4%))',
+            boxShadow: 'var(--store-shadow)',
           }}
         >
-          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
+          <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr_0.85fr]">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em]" style={{ color: 'var(--store-secondary)' }}>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'var(--store-secondary)' }}>
                 {store.name}
               </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight" style={{ color: 'var(--store-text)' }}>
+              <h2 className="store-heading mt-3 text-3xl font-semibold tracking-tight" style={{ color: 'var(--store-text)' }}>
                 Compra simple, conversacion directa y cierre rapido.
               </h2>
-              <p className="mt-4 max-w-xl text-sm leading-7" style={{ color: 'color-mix(in srgb, var(--store-text) 70%, transparent)' }}>
-                El pedido llega por WhatsApp con los productos y total estimado listos para continuar la atencion sin fricciones.
+              <p className="mt-4 max-w-xl text-sm leading-7 sm:text-[15px]" style={{ color: 'var(--store-soft-text)' }}>
+                El pedido llega por WhatsApp con los productos, cantidades y total estimado listos para continuar la atencion sin fricciones.
               </p>
             </div>
 
             <FooterColumn title="Contacto">
               {phone ? (
-                <a
+                <FooterLink
                   href={`https://wa.me/${phone}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-3"
-                  style={{ color: 'var(--store-text)' }}
-                >
-                  <MessageCircle className="mt-0.5 size-4 shrink-0" style={{ color: 'var(--store-primary)' }} />
-                  WhatsApp
-                </a>
+                  icon={<MessageCircle className="size-4" />}
+                  label="WhatsApp"
+                />
               ) : null}
               {instagram ? (
-                <a
+                <FooterLink
                   href={`https://instagram.com/${instagram}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-3"
-                  style={{ color: 'var(--store-text)' }}
-                >
-                  <AtSign className="mt-0.5 size-4 shrink-0" style={{ color: 'var(--store-primary)' }} />
-                  @{instagram}
-                </a>
+                  icon={<AtSign className="size-4" />}
+                  label={`@${instagram}`}
+                />
               ) : null}
-              {store.address ? (
-                <div className="flex items-start gap-3" style={{ color: 'var(--store-text)' }}>
-                  <MapPin className="mt-0.5 size-4 shrink-0" style={{ color: 'var(--store-primary)' }} />
-                  {store.address}
-                </div>
-              ) : null}
+              {store.address ? <FooterRow icon={<MapPin className="size-4" />}>{store.address}</FooterRow> : null}
             </FooterColumn>
 
             <FooterColumn title="Atencion">
               {store.hours ? (
-                <div className="flex items-start gap-3" style={{ color: 'var(--store-text)' }}>
-                  <Clock className="mt-0.5 size-4 shrink-0" style={{ color: 'var(--store-primary)' }} />
-                  {store.hours}
-                </div>
+                <FooterRow icon={<Clock className="size-4" />}>{store.hours}</FooterRow>
               ) : (
-                <p style={{ color: 'color-mix(in srgb, var(--store-text) 65%, transparent)' }}>
-                  Configura horarios en el admin para sumar confianza y contexto.
+                <p style={{ color: 'var(--store-soft-text)' }}>
+                  Configura horarios en el admin para sumar confianza y contexto operativo.
                 </p>
               )}
             </FooterColumn>
           </div>
 
           <div
-            className="mt-8 border-t pt-5 text-xs"
+            className="mt-8 flex flex-col gap-2 border-t pt-5 text-xs sm:flex-row sm:items-center sm:justify-between"
             style={{
-              borderColor: 'var(--store-border)',
-              color: 'color-mix(in srgb, var(--store-text) 45%, transparent)',
+              borderColor: 'var(--store-card-border)',
+              color: 'var(--store-muted-text)',
             }}
           >
-            Powered by Volta Store
+            <span>Powered by Volta Store</span>
+            <span>Catalogo premium con cierre conversacional</span>
           </div>
         </div>
       </div>
@@ -107,8 +92,48 @@ function FooterColumn({
 }) {
   return (
     <div className="space-y-4 text-sm leading-6">
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">{title}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'var(--store-muted-text)' }}>
+        {title}
+      </p>
       <div className="space-y-3">{children}</div>
+    </div>
+  )
+}
+
+function FooterLink({
+  href,
+  icon,
+  label,
+}: {
+  href: string
+  icon: React.ReactNode
+  label: string
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-start gap-3 transition hover:opacity-90"
+      style={{ color: 'var(--store-text)' }}
+    >
+      <span style={{ color: 'var(--store-primary)' }}>{icon}</span>
+      {label}
+    </a>
+  )
+}
+
+function FooterRow({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <div className="flex items-start gap-3" style={{ color: 'var(--store-text)' }}>
+      <span style={{ color: 'var(--store-primary)' }}>{icon}</span>
+      <span>{children}</span>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { ShoppingBag } from 'lucide-react'
+import { ArrowUpRight, ShoppingBag } from 'lucide-react'
 import { useCartStore } from '@/lib/stores/cart'
 import { cn } from '@/lib/utils'
 import type { Store } from '@/types/store'
@@ -20,76 +20,113 @@ export function StoreNav({ store, containerClass }: StoreNavProps) {
     <>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-black focus:px-4 focus:py-2 focus:text-white"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:px-4 focus:py-2"
+        style={{
+          backgroundColor: 'var(--store-text)',
+          color: 'var(--store-bg)',
+        }}
       >
         Ir al contenido
       </a>
 
-      <nav
-        className="sticky top-0 z-40 border-b"
-        style={{
-          backgroundColor: 'color-mix(in srgb, var(--store-bg) 82%, white 18%)',
-          borderColor: 'var(--store-border)',
-          backdropFilter: 'blur(18px)',
-        }}
-      >
-        <div className={cn('mx-auto flex h-[4.5rem] items-center justify-between gap-4 px-4 sm:px-6', containerClass)}>
+      <nav className="sticky top-0 z-40 px-3 pt-3 sm:px-5">
+        <div
+          className={cn(
+            'mx-auto flex h-[4.75rem] items-center justify-between gap-4 rounded-[calc(var(--store-radius)+14px)] border px-4 sm:px-5',
+            containerClass,
+          )}
+          style={{
+            background:
+              'linear-gradient(180deg, color-mix(in srgb, var(--store-bg) 82%, white 18%), color-mix(in srgb, var(--store-surface) 88%, transparent))',
+            borderColor: 'var(--store-card-border)',
+            boxShadow: 'var(--store-card-shadow)',
+            backdropFilter: 'blur(calc(var(--store-card-blur) + 8px))',
+          }}
+        >
           <div className="flex min-w-0 items-center gap-3">
             {store.logo_url ? (
-              <Image
-                src={store.logo_url}
-                alt={store.name}
-                width={44}
-                height={44}
-                className="size-11 rounded-2xl object-cover"
-              />
+              <div
+                className="relative size-12 overflow-hidden rounded-[calc(var(--store-radius)*0.9)] border"
+                style={{
+                  borderColor: 'var(--store-card-border)',
+                  boxShadow: '0 10px 24px color-mix(in srgb, var(--store-text) 10%, transparent)',
+                }}
+              >
+                <Image src={store.logo_url} alt={store.name} fill className="object-cover" />
+              </div>
             ) : (
               <div
-                className="flex size-11 items-center justify-center rounded-2xl text-sm font-bold"
+                className="flex size-12 items-center justify-center rounded-[calc(var(--store-radius)*0.9)] text-sm font-black"
                 style={{
-                  backgroundColor: 'color-mix(in srgb, var(--store-primary) 10%, transparent)',
-                  color: 'var(--store-primary)',
+                  background:
+                    'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-accent) 56%, white 44%))',
+                  color: 'var(--store-bg)',
+                  boxShadow: '0 14px 34px color-mix(in srgb, var(--store-primary) 26%, transparent)',
                 }}
               >
                 {store.name.slice(0, 1)}
               </div>
             )}
+
             <div className="min-w-0">
-              <p className="truncate text-base font-semibold tracking-tight" style={{ color: 'var(--store-text)' }}>
+              <p className="store-heading truncate text-base font-semibold sm:text-[1.05rem]" style={{ color: 'var(--store-text)' }}>
                 {store.name}
               </p>
-              <p className="truncate text-xs" style={{ color: 'color-mix(in srgb, var(--store-text) 55%, transparent)' }}>
-                Catalogo directo por WhatsApp
-              </p>
+              <div className="mt-1 flex items-center gap-2">
+                <span
+                  className="size-2 rounded-full"
+                  style={{
+                    backgroundColor: 'var(--store-secondary)',
+                    boxShadow: '0 0 0 4px color-mix(in srgb, var(--store-secondary) 16%, transparent)',
+                  }}
+                />
+                <p className="truncate text-[11px] font-medium uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
+                  Checkout directo por WhatsApp
+                </p>
+              </div>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={toggleCart}
-            className="relative inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-medium transition hover:opacity-95 active:scale-[0.98]"
-            style={{
-              background:
-                'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
-              color: 'var(--store-bg)',
-              boxShadow: 'var(--store-shadow)',
-            }}
-            aria-label="Ver carrito"
-          >
-            <ShoppingBag className="size-4" />
-            <span className="hidden sm:block">Carrito</span>
-            {count > 0 ? (
+          <div className="flex items-center gap-2 sm:gap-3">
+            <a
+              href="#catalogo"
+              className="hidden items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition sm:inline-flex"
+              style={{
+                borderColor: 'var(--store-card-border)',
+                color: 'var(--store-soft-text)',
+                backgroundColor: 'color-mix(in srgb, var(--store-surface) 82%, transparent)',
+              }}
+            >
+              Explorar
+              <ArrowUpRight className="size-4" />
+            </a>
+
+            <button
+              type="button"
+              onClick={toggleCart}
+              className="store-button relative inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 active:translate-y-0"
+              style={{
+                minHeight: 'var(--store-control-height)',
+                background:
+                  'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
+                color: 'var(--store-bg)',
+                boxShadow: '0 18px 38px color-mix(in srgb, var(--store-primary) 24%, transparent)',
+              }}
+              aria-label="Ver carrito"
+            >
+              <ShoppingBag className="size-4" />
+              <span className="hidden sm:block">Carrito</span>
               <span
-                className="inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-semibold"
+                className="inline-flex min-w-6 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-bold"
                 style={{
-                  backgroundColor: 'var(--store-secondary)',
-                  color: 'color-mix(in srgb, var(--store-text) 80%, black 20%)',
+                  backgroundColor: 'color-mix(in srgb, var(--store-bg) 16%, white 84%)',
+                  color: 'var(--store-primary)',
                 }}
               >
                 {count}
               </span>
-            ) : null}
-          </button>
+            </button>
+          </div>
         </div>
       </nav>
     </>

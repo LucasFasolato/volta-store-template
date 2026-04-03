@@ -30,10 +30,17 @@ export type AdminStoreData = {
   content: StoreContent
 }
 
+export type FontFamily = 'geist' | 'inter' | 'manrope' | 'plus-jakarta'
+export type FontPreset = 'elegant' | 'modern' | 'minimal' | 'bold'
+export type HeadingScale = 'compact' | 'default' | 'large'
+export type HeadingWeight = 'medium' | 'semibold' | 'bold'
+export type BodyScale = 'sm' | 'base' | 'lg'
+export type VisualMode = 'light' | 'dark' | 'auto'
+export type UIDensity = 'compact' | 'comfortable' | 'spacious'
+export type SpacingScale = 'tight' | 'balanced' | 'airy'
+export type CardStyle = 'soft' | 'sharp' | 'glass'
+export type ButtonStyle = 'rounded' | 'square' | 'pill'
 export type CardLayout = 'grid' | 'list'
 export type ImageRatio = '1:1' | '4:5' | '3:4' | '16:9'
-export type FontFamily = 'inter' | 'manrope' | 'geist' | 'dm-sans'
-export type HeadingScale = 'compact' | 'default' | 'large'
-export type BodyScale = 'sm' | 'base' | 'lg'
 export type BorderRadius = 'none' | 'sm' | 'md' | 'lg' | 'full'
 export type ContainerWidth = 'sm' | 'md' | 'lg' | 'xl' | 'full'

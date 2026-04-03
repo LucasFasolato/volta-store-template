@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { ArrowDownRight, MapPin, MessageCircle, Clock3 } from 'lucide-react'
+import { ArrowUpRight, Clock3, MapPin, MessageCircle, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { sanitizePhoneNumber } from '@/lib/utils/format'
 import type { Store, StoreContent } from '@/types/store'
@@ -11,78 +11,83 @@ type HeroSectionProps = {
 }
 
 export function HeroSection({ content, store, containerClass }: HeroSectionProps) {
-  const whatsappHref = store.whatsapp
-    ? `https://wa.me/${sanitizePhoneNumber(store.whatsapp)}`
-    : '#catalogo'
+  const whatsappHref = store.whatsapp ? `https://wa.me/${sanitizePhoneNumber(store.whatsapp)}` : '#catalogo'
 
-  const metaItems = [
-    store.address
-      ? { icon: MapPin, label: store.address }
-      : null,
-    store.hours
-      ? { icon: Clock3, label: store.hours }
-      : null,
+  const supportItems = [
+    store.address ? { icon: MapPin, label: store.address } : null,
+    store.hours ? { icon: Clock3, label: store.hours } : null,
   ].filter(Boolean) as Array<{ icon: React.ElementType; label: string }>
 
   return (
-    <section className="relative overflow-hidden pt-6 sm:pt-8">
+    <section className="relative" style={{ paddingTop: 'calc(var(--store-space-section) * 0.25)' }}>
       <div className={cn('mx-auto px-4 sm:px-6', containerClass)}>
         <div
-          className="relative overflow-hidden rounded-[34px] border px-6 py-10 sm:px-8 sm:py-14 lg:px-12 lg:py-16"
+          className="relative overflow-hidden rounded-[calc(var(--store-card-radius)_*_1.15)]"
           style={{
-            borderColor: 'var(--store-border)',
+            padding: 'clamp(1.5rem, 2vw, 2rem)',
             background:
-              content.hero_image_url
-                ? 'linear-gradient(135deg, color-mix(in srgb, var(--store-bg) 18%, transparent), color-mix(in srgb, var(--store-bg) 88%, transparent))'
-                : 'linear-gradient(135deg, color-mix(in srgb, var(--store-bg) 86%, white 14%), color-mix(in srgb, var(--store-bg) 94%, var(--store-text) 6%))',
+              'linear-gradient(135deg, color-mix(in srgb, var(--store-surface) 92%, transparent), color-mix(in srgb, var(--store-bg) 88%, var(--store-text) 12%))',
             boxShadow: 'var(--store-shadow)',
+            border: '1px solid var(--store-border)',
           }}
         >
           {content.hero_image_url ? (
             <>
               <div className="absolute inset-0">
-                <Image
-                  src={content.hero_image_url}
-                  alt={content.hero_title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
+                <Image src={content.hero_image_url} alt={content.hero_title} fill className="object-cover" priority />
               </div>
               <div
                 className="absolute inset-0"
                 style={{
                   background:
-                    'linear-gradient(105deg, color-mix(in srgb, var(--store-bg) 88%, transparent) 0%, color-mix(in srgb, var(--store-bg) 72%, transparent) 42%, color-mix(in srgb, var(--store-bg) 94%, transparent) 100%)',
+                    'linear-gradient(104deg, color-mix(in srgb, var(--store-bg) 94%, transparent) 4%, color-mix(in srgb, var(--store-bg) 76%, transparent) 42%, color-mix(in srgb, var(--store-bg) 96%, transparent) 100%)',
                 }}
               />
             </>
-          ) : null}
+          ) : (
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  'radial-gradient(circle at top right, color-mix(in srgb, var(--store-accent) 14%, transparent), transparent 32%), radial-gradient(circle at left center, color-mix(in srgb, var(--store-secondary) 16%, transparent), transparent 30%)',
+              }}
+            />
+          )}
 
-          <div className="relative z-10 grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-            <div className="max-w-2xl">
+          <div className="relative z-10 grid gap-8 xl:grid-cols-[1.15fr_0.85fr] xl:items-end">
+            <div className="max-w-3xl px-2 py-4 sm:px-4 sm:py-8">
               {content.support_text ? (
                 <p
-                  className="mb-4 text-xs font-semibold uppercase tracking-[0.24em]"
-                  style={{ color: 'var(--store-secondary)' }}
+                  className="mb-5 inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.24em]"
+                  style={{
+                    color: 'var(--store-secondary)',
+                    backgroundColor: 'color-mix(in srgb, var(--store-secondary) 12%, transparent)',
+                    border: '1px solid color-mix(in srgb, var(--store-secondary) 16%, transparent)',
+                  }}
                 >
+                  <Sparkles className="size-3" />
                   {content.support_text}
                 </p>
               ) : null}
 
               <h1
-                className="max-w-3xl font-semibold leading-[0.95] tracking-[-0.04em]"
+                className="store-display max-w-4xl text-balance"
                 style={{
                   color: 'var(--store-text)',
-                  fontSize: 'clamp(2.7rem, 8vw, 5.5rem)',
+                  fontSize: 'clamp(3rem, 7vw, 6.4rem)',
+                  transform: 'scale(var(--store-heading-scale))',
+                  transformOrigin: 'left top',
                 }}
               >
                 {content.hero_title}
               </h1>
 
               <p
-                className="mt-5 max-w-xl text-base leading-7 sm:text-lg"
-                style={{ color: 'color-mix(in srgb, var(--store-text) 78%, transparent)' }}
+                className="mt-6 max-w-2xl text-base leading-8 sm:text-lg"
+                style={{
+                  color: 'var(--store-soft-text)',
+                  fontSize: 'calc(1rem * var(--store-body-scale))',
+                }}
               >
                 {content.hero_subtitle}
               </p>
@@ -90,26 +95,28 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
                   href="#catalogo"
-                  className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition hover:opacity-95 active:scale-[0.98]"
+                  className="store-button inline-flex items-center justify-center px-6 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 hover:opacity-95"
                   style={{
                     background:
-                      'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 72%, black 28%))',
+                      'linear-gradient(135deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 78%, black 22%))',
                     color: 'var(--store-bg)',
+                    boxShadow: '0 16px 36px color-mix(in srgb, var(--store-primary) 20%, transparent)',
                   }}
                 >
                   Ver catalogo
-                  <ArrowDownRight className="ml-2 size-4" />
+                  <ArrowUpRight className="ml-2 size-4" />
                 </a>
 
                 <a
                   href={whatsappHref}
                   target={store.whatsapp ? '_blank' : undefined}
                   rel={store.whatsapp ? 'noreferrer noopener' : undefined}
-                  className="inline-flex items-center justify-center rounded-full border px-6 py-3 text-sm font-medium transition hover:bg-white/8"
+                  className="store-button inline-flex items-center justify-center border px-6 text-sm font-medium transition duration-200 hover:-translate-y-0.5"
                   style={{
                     borderColor: 'var(--store-border-strong)',
                     color: 'var(--store-text)',
-                    backgroundColor: 'color-mix(in srgb, var(--store-bg) 72%, transparent)',
+                    backgroundColor: 'color-mix(in srgb, var(--store-surface) 74%, transparent)',
+                    backdropFilter: 'blur(14px)',
                   }}
                 >
                   <MessageCircle className="mr-2 size-4" />
@@ -118,45 +125,53 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
               </div>
             </div>
 
-            <div
-              className="rounded-[28px] border p-5 backdrop-blur-xl"
-              style={{
-                borderColor: 'var(--store-border)',
-                backgroundColor: 'color-mix(in srgb, var(--store-bg) 78%, transparent)',
-              }}
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.22em]" style={{ color: 'color-mix(in srgb, var(--store-text) 55%, transparent)' }}>
-                Compra directa
-              </p>
-              <p className="mt-3 text-lg font-semibold" style={{ color: 'var(--store-text)' }}>
-                Elegi productos, arma tu pedido y confirmalo en un solo mensaje.
-              </p>
+            <div className="hidden xl:block">
+              <div
+                className="store-card p-6"
+                style={{
+                  background:
+                    'linear-gradient(180deg, color-mix(in srgb, var(--store-surface) 80%, transparent), color-mix(in srgb, var(--store-bg) 80%, transparent))',
+                }}
+              >
+                <p className="admin-label" style={{ color: 'var(--store-muted-text)' }}>
+                  Direct checkout
+                </p>
+                <h2 className="store-heading mt-4 text-[1.45rem]" style={{ color: 'var(--store-text)' }}>
+                  Disenada para convertir sin friccion
+                </h2>
+                <p className="mt-3 text-sm leading-7" style={{ color: 'var(--store-soft-text)' }}>
+                  El cliente navega, arma el pedido y llega a WhatsApp con un mensaje impecable y listo para cerrar.
+                </p>
 
-              <div className="mt-5 space-y-3">
-                {metaItems.length > 0 ? (
-                  metaItems.map((item) => {
-                    const Icon = item.icon
-                    return (
-                      <div key={item.label} className="flex items-start gap-3">
-                        <div
-                          className="mt-0.5 flex size-9 items-center justify-center rounded-full"
-                          style={{ backgroundColor: 'color-mix(in srgb, var(--store-primary) 10%, transparent)' }}
-                        >
-                          <Icon className="size-4" style={{ color: 'var(--store-primary)' }} />
+                <div className="mt-6 space-y-4">
+                  {supportItems.length > 0 ? (
+                    supportItems.map((item) => {
+                      const Icon = item.icon
+                      return (
+                        <div key={item.label} className="flex items-start gap-3">
+                          <div
+                            className="flex size-10 items-center justify-center rounded-full"
+                            style={{ backgroundColor: 'color-mix(in srgb, var(--store-accent) 12%, transparent)' }}
+                          >
+                            <Icon className="size-4" style={{ color: 'var(--store-accent)' }} />
+                          </div>
+                          <p className="text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+                            {item.label}
+                          </p>
                         </div>
-                        <p className="text-sm leading-6" style={{ color: 'color-mix(in srgb, var(--store-text) 75%, transparent)' }}>
-                          {item.label}
-                        </p>
-                      </div>
-                    )
-                  })
-                ) : (
-                  <div className="rounded-[22px] border border-dashed p-4" style={{ borderColor: 'var(--store-border)' }}>
-                    <p className="text-sm leading-6" style={{ color: 'color-mix(in srgb, var(--store-text) 68%, transparent)' }}>
-                      Personaliza direccion, horarios o redes desde el panel para reforzar confianza y conversion.
-                    </p>
-                  </div>
-                )}
+                      )
+                    })
+                  ) : (
+                    <div
+                      className="rounded-[calc(var(--store-card-radius)_*_0.7)] border border-dashed p-4"
+                      style={{ borderColor: 'var(--store-border)' }}
+                    >
+                      <p className="text-sm leading-7" style={{ color: 'var(--store-soft-text)' }}>
+                        Configura horarios, direccion o redes desde el admin para reforzar confianza desde el primer scroll.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

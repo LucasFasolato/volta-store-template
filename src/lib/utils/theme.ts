@@ -1,54 +1,97 @@
+import {
+  BODY_SCALE_MAP,
+  BORDER_RADIUS_MAP,
+  BUTTON_RADIUS_MAP,
+  CARD_STYLE_TOKENS,
+  CONTAINER_WIDTH_MAP,
+  DENSITY_MAP,
+  FONT_FAMILY_MAP,
+  HEADING_SCALE_MAP,
+  HEADING_WEIGHT_MAP,
+  IMAGE_RATIO_MAP,
+  SPACING_SCALE_MAP,
+} from '@/data/defaults'
+import { getAccessibleTextColor, mixHexColors, withAlpha } from '@/lib/utils/color'
 import type { StoreTheme } from '@/types/store'
-import { BORDER_RADIUS_MAP, IMAGE_RATIO_MAP } from '@/data/defaults'
 
-/**
- * Generate CSS custom properties from a store theme.
- * These are injected as inline styles on the store wrapper.
- */
-export function buildThemeVars(theme: StoreTheme): React.CSSProperties {
+export function buildThemeVars(
+  theme: StoreTheme,
+  resolvedMode: 'light' | 'dark',
+): React.CSSProperties {
+  const isDark = resolvedMode === 'dark'
+  const background = isDark ? mixHexColors(theme.background_color, '#020617', 0.78) : theme.background_color
+  const surface = isDark ? mixHexColors(theme.surface_color, '#08111f', 0.68) : theme.surface_color
+  const text = isDark ? mixHexColors(theme.text_color, '#f8fafc', 0.84) : theme.text_color
+  const primary = isDark ? mixHexColors(theme.primary_color, '#f8fafc', 0.14) : theme.primary_color
+  const secondary = isDark ? mixHexColors(theme.secondary_color, '#d1fae5', 0.16) : theme.secondary_color
+  const accent = isDark ? mixHexColors(theme.accent_color, '#dbeafe', 0.18) : theme.accent_color
+  const density = DENSITY_MAP[theme.ui_density] ?? DENSITY_MAP.comfortable
+  const spacing = SPACING_SCALE_MAP[theme.spacing_scale] ?? SPACING_SCALE_MAP.balanced
+  const cardStyle = CARD_STYLE_TOKENS[theme.card_style] ?? CARD_STYLE_TOKENS.soft
+  const borderRadius = BORDER_RADIUS_MAP[theme.border_radius] ?? BORDER_RADIUS_MAP.lg
+  const cardRadius =
+    theme.card_style === 'sharp'
+      ? `calc(${borderRadius} * 0.72)`
+      : theme.card_style === 'glass'
+        ? `calc(${borderRadius} * 1.08)`
+        : borderRadius
+
   return {
-    '--store-primary': theme.primary_color,
-    '--store-secondary': theme.secondary_color,
-    '--store-bg': theme.background_color,
-    '--store-text': theme.text_color,
-    '--store-surface': 'color-mix(in srgb, var(--store-bg) 88%, white 12%)',
-    '--store-surface-strong': 'color-mix(in srgb, var(--store-bg) 92%, var(--store-text) 8%)',
-    '--store-surface-soft': 'color-mix(in srgb, var(--store-text) 4%, var(--store-bg) 96%)',
-    '--store-border': 'color-mix(in srgb, var(--store-text) 10%, transparent)',
-    '--store-border-strong': 'color-mix(in srgb, var(--store-text) 18%, transparent)',
-    '--store-shadow': '0 18px 48px color-mix(in srgb, var(--store-text) 10%, transparent)',
-    '--store-radius': BORDER_RADIUS_MAP[theme.border_radius] ?? '8px',
-    '--store-image-ratio': IMAGE_RATIO_MAP[theme.image_ratio] ?? '4 / 5',
+    '--store-primary': primary,
+    '--store-secondary': secondary,
+    '--store-accent': accent,
+    '--store-bg': background,
+    '--store-surface': surface,
+    '--store-text': text,
+    '--store-soft-text': withAlpha(text, isDark ? 0.76 : 0.72),
+    '--store-muted-text': withAlpha(text, isDark ? 0.54 : 0.5),
+    '--store-border': withAlpha(text, isDark ? 0.12 : 0.1),
+    '--store-border-strong': withAlpha(text, isDark ? 0.18 : 0.16),
+    '--store-shadow': isDark
+      ? '0 32px 80px rgba(2, 6, 23, 0.36)'
+      : '0 24px 60px rgba(15, 23, 42, 0.12)',
+    '--store-glow': withAlpha(accent, isDark ? 0.2 : 0.14),
+    '--store-card-radius': cardRadius,
+    '--store-button-radius': BUTTON_RADIUS_MAP[theme.button_style] ?? BUTTON_RADIUS_MAP.rounded,
+    '--store-radius': borderRadius,
+    '--store-image-ratio': IMAGE_RATIO_MAP[theme.image_ratio] ?? IMAGE_RATIO_MAP['4:5'],
+    '--store-font-heading': FONT_FAMILY_MAP[theme.heading_font] ?? FONT_FAMILY_MAP['plus-jakarta'],
+    '--store-font-body': FONT_FAMILY_MAP[theme.body_font] ?? FONT_FAMILY_MAP.geist,
+    '--store-heading-scale': HEADING_SCALE_MAP[theme.heading_scale] ?? HEADING_SCALE_MAP.default,
+    '--store-body-scale': BODY_SCALE_MAP[theme.body_scale] ?? BODY_SCALE_MAP.base,
+    '--store-heading-weight': HEADING_WEIGHT_MAP[theme.heading_weight] ?? HEADING_WEIGHT_MAP.semibold,
+    '--store-control-height': density.control,
+    '--store-card-padding': density.cardPadding,
+    '--store-section-gap': density.sectionGap,
+    '--store-space-base': spacing.base,
+    '--store-space-section': spacing.section,
+    '--store-space-cluster': spacing.cluster,
+    '--store-card-background':
+      theme.card_style === 'glass'
+        ? `linear-gradient(180deg, ${withAlpha(getAccessibleTextColor(surface), 0.06)}, ${withAlpha(
+            getAccessibleTextColor(surface),
+            0.01,
+          )}), ${withAlpha(surface, cardStyle.backgroundOpacity)}`
+        : theme.card_style === 'sharp'
+          ? `linear-gradient(180deg, ${withAlpha(surface, 0.96)}, ${withAlpha(
+              mixHexColors(surface, background, 0.24),
+              0.98,
+            )})`
+          : `linear-gradient(180deg, ${withAlpha(surface, 0.98)}, ${withAlpha(
+              mixHexColors(surface, background, 0.22),
+              1,
+            )})`,
+    '--store-card-border': withAlpha(text, cardStyle.borderOpacity),
+    '--store-card-shadow': cardStyle.shadow,
+    '--store-card-blur': cardStyle.blur,
+    colorScheme: resolvedMode,
   } as React.CSSProperties
 }
 
-/**
- * Map font_family to Google Fonts URL.
- */
-export const FONT_URLS: Record<string, string> = {
-  inter: 'https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap',
-  manrope: 'https://fonts.googleapis.com/css2?family=Manrope:wght@300..800&display=swap',
-  geist: 'https://fonts.googleapis.com/css2?family=Geist:wght@300..800&display=swap',
-  'dm-sans': 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300..700&display=swap',
-}
-
-export const FONT_FAMILY_CSS: Record<string, string> = {
-  inter: "'Inter', sans-serif",
-  manrope: "'Manrope', sans-serif",
-  geist: "'Geist', sans-serif",
-  'dm-sans': "'DM Sans', sans-serif",
-}
-
-export const CONTAINER_CLASS: Record<string, string> = {
-  sm: 'max-w-3xl',
-  md: 'max-w-4xl',
-  lg: 'max-w-6xl',
-  xl: 'max-w-7xl',
-  full: 'max-w-full',
-}
+export const CONTAINER_CLASS: Record<string, string> = CONTAINER_WIDTH_MAP
 
 export const GRID_COLS_CLASS: Record<number, string> = {
-  2: 'grid-cols-2 md:grid-cols-2',
-  3: 'grid-cols-2 md:grid-cols-3',
-  4: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4',
+  2: 'grid-cols-1 sm:grid-cols-2',
+  3: 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3',
+  4: 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4',
 }

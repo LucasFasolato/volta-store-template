@@ -77,14 +77,25 @@ export interface Database {
           store_id: string
           primary_color: string
           secondary_color: string
+          accent_color: string
           background_color: string
+          surface_color: string
           text_color: string
+          visual_mode: string
           border_radius: string
           container_width: string
+          font_preset: string
+          heading_font: string
+          body_font: string
           font_family: string
           heading_scale: string
+          heading_weight: string
           body_scale: string
+          ui_density: string
+          spacing_scale: string
+          card_style: string
           card_layout: string
+          button_style: string
           grid_columns: number
           image_ratio: string
           created_at: string
@@ -95,14 +106,25 @@ export interface Database {
           store_id: string
           primary_color?: string
           secondary_color?: string
+          accent_color?: string
           background_color?: string
+          surface_color?: string
           text_color?: string
+          visual_mode?: string
           border_radius?: string
           container_width?: string
+          font_preset?: string
+          heading_font?: string
+          body_font?: string
           font_family?: string
           heading_scale?: string
+          heading_weight?: string
           body_scale?: string
+          ui_density?: string
+          spacing_scale?: string
+          card_style?: string
           card_layout?: string
+          button_style?: string
           grid_columns?: number
           image_ratio?: string
           created_at?: string
@@ -111,14 +133,25 @@ export interface Database {
         Update: {
           primary_color?: string
           secondary_color?: string
+          accent_color?: string
           background_color?: string
+          surface_color?: string
           text_color?: string
+          visual_mode?: string
           border_radius?: string
           container_width?: string
+          font_preset?: string
+          heading_font?: string
+          body_font?: string
           font_family?: string
           heading_scale?: string
+          heading_weight?: string
           body_scale?: string
+          ui_density?: string
+          spacing_scale?: string
+          card_style?: string
           card_layout?: string
+          button_style?: string
           grid_columns?: number
           image_ratio?: string
           updated_at?: string

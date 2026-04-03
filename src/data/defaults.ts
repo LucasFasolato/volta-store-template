@@ -5,16 +5,27 @@ type LayoutInsert = Database['public']['Tables']['store_layout']['Insert']
 type ContentInsert = Database['public']['Tables']['store_content']['Insert']
 
 export const DEFAULT_THEME: Omit<ThemeInsert, 'store_id'> = {
-  primary_color: '#101828',
-  secondary_color: '#2f855a',
-  background_color: '#f7f4ee',
-  text_color: '#17212b',
+  primary_color: '#0f172a',
+  secondary_color: '#0f766e',
+  accent_color: '#2563eb',
+  background_color: '#f6f8fb',
+  surface_color: '#ffffff',
+  text_color: '#0b1220',
+  visual_mode: 'light',
   border_radius: 'lg',
   container_width: 'lg',
-  font_family: 'manrope',
+  font_preset: 'modern',
+  heading_font: 'plus-jakarta',
+  body_font: 'geist',
+  font_family: 'geist',
   heading_scale: 'default',
+  heading_weight: 'semibold',
   body_scale: 'base',
+  ui_density: 'comfortable',
+  spacing_scale: 'balanced',
+  card_style: 'soft',
   card_layout: 'grid',
+  button_style: 'rounded',
   grid_columns: 2,
   image_ratio: '4:5',
 }
@@ -29,17 +40,88 @@ export const DEFAULT_LAYOUT: Omit<LayoutInsert, 'store_id'> = {
 }
 
 export const DEFAULT_CONTENT: Omit<ContentInsert, 'store_id'> = {
-  hero_title: 'Coleccion curada para comprar facil por WhatsApp',
+  hero_title: 'Catálogo premium listo para vender por WhatsApp',
   hero_subtitle:
-    'Una tienda simple, rapida y lista para convertir visitas en pedidos reales sin friccion.',
-  support_text: 'Atencion personal · Envio o retiro coordinado',
+    'Una experiencia visual refinada para convertir visitas en pedidos reales con claridad, velocidad y confianza.',
+  support_text: 'Atencion personal / Envios o retiro coordinado',
 }
 
 export const FONT_OPTIONS = [
-  { value: 'inter', label: 'Inter', preview: 'The quick brown fox' },
-  { value: 'manrope', label: 'Manrope', preview: 'The quick brown fox' },
-  { value: 'geist', label: 'Geist', preview: 'The quick brown fox' },
-  { value: 'dm-sans', label: 'DM Sans', preview: 'The quick brown fox' },
+  { value: 'geist', label: 'Geist', description: 'Precisa y tecnológica' },
+  { value: 'inter', label: 'Inter', description: 'Neutral y ultra legible' },
+  { value: 'manrope', label: 'Manrope', description: 'Editorial y sofisticada' },
+  { value: 'plus-jakarta', label: 'Plus Jakarta Sans', description: 'Expresiva y premium' },
+] as const
+
+export const FONT_PRESETS = [
+  {
+    value: 'elegant',
+    label: 'Elegante',
+    description: 'Más editorial y refinada',
+    heading_font: 'manrope',
+    body_font: 'inter',
+    heading_weight: 'semibold',
+  },
+  {
+    value: 'modern',
+    label: 'Moderna',
+    description: 'Nítida, rápida y de producto',
+    heading_font: 'plus-jakarta',
+    body_font: 'geist',
+    heading_weight: 'semibold',
+  },
+  {
+    value: 'minimal',
+    label: 'Minimal',
+    description: 'Limpia y silenciosa',
+    heading_font: 'inter',
+    body_font: 'inter',
+    heading_weight: 'medium',
+  },
+  {
+    value: 'bold',
+    label: 'Bold',
+    description: 'Más presencia y contraste',
+    heading_font: 'plus-jakarta',
+    body_font: 'geist',
+    heading_weight: 'bold',
+  },
+] as const
+
+export const HEADING_WEIGHT_OPTIONS = [
+  { value: 'medium', label: 'Medium' },
+  { value: 'semibold', label: 'Semibold' },
+  { value: 'bold', label: 'Bold' },
+] as const
+
+export const VISUAL_MODE_OPTIONS = [
+  { value: 'light', label: 'Light', description: 'Claro, nítido y editorial' },
+  { value: 'dark', label: 'Dark', description: 'Más profundo y tecnológico' },
+  { value: 'auto', label: 'Auto', description: 'Sigue el sistema del usuario' },
+] as const
+
+export const UI_DENSITY_OPTIONS = [
+  { value: 'compact', label: 'Compact', description: 'Más información por pantalla' },
+  { value: 'comfortable', label: 'Comfortable', description: 'Equilibrio entre aire y densidad' },
+  { value: 'spacious', label: 'Spacious', description: 'Más aire y presencia' },
+] as const
+
+export const SPACING_SCALE_OPTIONS = [
+  { value: 'tight', label: 'Tight' },
+  { value: 'balanced', label: 'Balanced' },
+  { value: 'airy', label: 'Airy' },
+] as const
+
+export const CARD_STYLE_OPTIONS = [
+  { value: 'soft', label: 'Soft', description: 'Capas suaves con profundidad sutil' },
+  { value: 'sharp', label: 'Sharp', description: 'Más precisión y borde limpio' },
+  { value: 'glass', label: 'Glass', description: 'Blur, transparencia y brillo controlado' },
+] as const
+
+export const BUTTON_STYLE_OPTIONS = [
+  { value: 'rounded', label: 'Rounded' },
+  { value: 'square', label: 'Square' },
+  { value: 'pill', label: 'Pill' },
 ] as const
 
 export const BORDER_RADIUS_OPTIONS = [
@@ -51,11 +133,9 @@ export const BORDER_RADIUS_OPTIONS = [
 ] as const
 
 export const CONTAINER_WIDTH_OPTIONS = [
-  { value: 'sm', label: 'Angosto (720px)' },
-  { value: 'md', label: 'Mediano (960px)' },
-  { value: 'lg', label: 'Normal (1152px)' },
-  { value: 'xl', label: 'Amplio (1280px)' },
-  { value: 'full', label: 'Completo' },
+  { value: 'sm', label: 'Narrow' },
+  { value: 'lg', label: 'Default' },
+  { value: 'xl', label: 'Wide' },
 ] as const
 
 export const IMAGE_RATIO_OPTIONS = [
@@ -83,19 +163,26 @@ export const CONTENT_LIMITS = {
   store_name: 48,
 } as const
 
+export const FONT_FAMILY_MAP: Record<string, string> = {
+  geist: 'var(--font-geist-sans), sans-serif',
+  inter: 'var(--font-inter), sans-serif',
+  manrope: 'var(--font-manrope), sans-serif',
+  'plus-jakarta': 'var(--font-plus-jakarta), sans-serif',
+}
+
 export const CONTAINER_WIDTH_MAP: Record<string, string> = {
-  sm: 'max-w-3xl',
-  md: 'max-w-4xl',
-  lg: 'max-w-6xl',
-  xl: 'max-w-7xl',
+  sm: 'max-w-5xl',
+  md: 'max-w-6xl',
+  lg: 'max-w-7xl',
+  xl: 'max-w-[90rem]',
   full: 'max-w-full',
 }
 
 export const BORDER_RADIUS_MAP: Record<string, string> = {
   none: '0px',
-  sm: '4px',
-  md: '8px',
-  lg: '16px',
+  sm: '8px',
+  md: '14px',
+  lg: '22px',
   full: '9999px',
 }
 
@@ -104,4 +191,64 @@ export const IMAGE_RATIO_MAP: Record<string, string> = {
   '4:5': '4 / 5',
   '3:4': '3 / 4',
   '16:9': '16 / 9',
+}
+
+export const HEADING_SCALE_MAP: Record<string, string> = {
+  compact: '0.92',
+  default: '1',
+  large: '1.12',
+}
+
+export const BODY_SCALE_MAP: Record<string, string> = {
+  sm: '0.95',
+  base: '1',
+  lg: '1.08',
+}
+
+export const HEADING_WEIGHT_MAP: Record<string, string> = {
+  medium: '560',
+  semibold: '640',
+  bold: '720',
+}
+
+export const DENSITY_MAP: Record<string, { control: string; cardPadding: string; sectionGap: string }> = {
+  compact: { control: '42px', cardPadding: '18px', sectionGap: '72px' },
+  comfortable: { control: '48px', cardPadding: '22px', sectionGap: '88px' },
+  spacious: { control: '54px', cardPadding: '28px', sectionGap: '108px' },
+}
+
+export const SPACING_SCALE_MAP: Record<string, { base: string; section: string; cluster: string }> = {
+  tight: { base: '0.92', section: '4.5rem', cluster: '1.15rem' },
+  balanced: { base: '1', section: '5.5rem', cluster: '1.4rem' },
+  airy: { base: '1.12', section: '6.75rem', cluster: '1.75rem' },
+}
+
+export const BUTTON_RADIUS_MAP: Record<string, string> = {
+  rounded: '18px',
+  square: '12px',
+  pill: '9999px',
+}
+
+export const CARD_STYLE_TOKENS: Record<
+  string,
+  { borderOpacity: number; backgroundOpacity: number; shadow: string; blur: string }
+> = {
+  soft: {
+    borderOpacity: 0.1,
+    backgroundOpacity: 0.88,
+    shadow: '0 20px 50px rgba(2, 8, 23, 0.12)',
+    blur: '0px',
+  },
+  sharp: {
+    borderOpacity: 0.16,
+    backgroundOpacity: 0.96,
+    shadow: '0 16px 36px rgba(2, 8, 23, 0.1)',
+    blur: '0px',
+  },
+  glass: {
+    borderOpacity: 0.14,
+    backgroundOpacity: 0.72,
+    shadow: '0 26px 60px rgba(2, 8, 23, 0.18)',
+    blur: '18px',
+  },
 }

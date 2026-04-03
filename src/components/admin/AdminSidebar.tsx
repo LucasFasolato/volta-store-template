@@ -45,21 +45,32 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
   }
 
   return (
-    <aside className="admin-gradient fixed inset-y-0 left-0 hidden w-72 border-r border-white/6 px-4 py-4 lg:block">
-      <div className="surface-panel premium-ring flex h-full flex-col rounded-[32px] p-4">
-        <div className="rounded-[24px] border border-white/8 bg-white/4 p-4">
+    <aside className="admin-gradient fixed inset-y-0 left-0 hidden w-72 px-4 py-4 lg:block">
+      <div className="surface-panel premium-ring flex h-full flex-col rounded-[34px] border border-white/8 p-4">
+        <div className="rounded-[26px] border border-white/8 bg-white/[0.035] p-4">
           <div className="flex items-center gap-3">
-            <div className="flex size-11 items-center justify-center rounded-2xl bg-emerald-400 text-base font-black text-black">
+            <div
+              className="flex size-12 items-center justify-center rounded-2xl text-base font-black"
+              style={{
+                background: 'linear-gradient(145deg, #34d399, #5eead4)',
+                color: '#04130e',
+                boxShadow: '0 18px 36px rgba(52, 211, 153, 0.24)',
+              }}
+            >
               V
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">{storeName}</p>
-              <p className="mt-1 text-xs text-neutral-500">Panel premium de administracion</p>
+              <p className="truncate font-heading text-[15px] font-semibold tracking-[-0.03em] text-white">{storeName}</p>
+              <p className="mt-1 text-xs uppercase tracking-[0.18em] text-neutral-500">Control premium</p>
             </div>
           </div>
         </div>
 
-        <nav className="mt-4 flex-1 space-y-1">
+        <div className="mt-6">
+          <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">Workspace</p>
+        </div>
+
+        <nav className="mt-3 flex-1 space-y-1.5">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon
             const active = isActive(item)
@@ -69,14 +80,22 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 rounded-[20px] px-4 py-3 text-sm font-medium transition',
+                  'group flex items-center gap-3 rounded-[20px] px-4 py-3 text-sm font-medium transition',
                   active
-                    ? 'border border-emerald-400/20 bg-emerald-400/10 text-emerald-200'
-                    : 'text-neutral-400 hover:bg-white/5 hover:text-white',
+                    ? 'border border-emerald-300/20 bg-emerald-400/10 text-white shadow-[0_18px_40px_rgba(16,185,129,0.08)]'
+                    : 'border border-transparent text-neutral-400 hover:border-white/8 hover:bg-white/[0.045] hover:text-white',
                 )}
               >
-                <Icon className="size-4 shrink-0" />
-                {item.label}
+                <div
+                  className={cn(
+                    'flex size-9 items-center justify-center rounded-2xl transition',
+                    active ? 'bg-emerald-400/14 text-emerald-200' : 'bg-white/[0.035] text-neutral-500 group-hover:text-white',
+                  )}
+                >
+                  <Icon className="size-4 shrink-0" />
+                </div>
+                <span className="flex-1">{item.label}</span>
+                {active ? <span className="size-1.5 rounded-full bg-emerald-300" /> : null}
               </Link>
             )
           })}
@@ -86,7 +105,7 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
           <Link
             href={`/tienda/${storeSlug}`}
             target="_blank"
-            className="flex items-center gap-3 rounded-[20px] px-4 py-3 text-sm text-neutral-300 transition hover:bg-white/5 hover:text-white"
+            className="flex items-center gap-3 rounded-[20px] border border-transparent px-4 py-3 text-sm text-neutral-300 transition hover:border-white/8 hover:bg-white/[0.045] hover:text-white"
           >
             <Store className="size-4 shrink-0" />
             Ver tienda
@@ -96,7 +115,7 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
           <form action={signOut}>
             <button
               type="submit"
-              className="flex w-full items-center gap-3 rounded-[20px] px-4 py-3 text-sm text-neutral-400 transition hover:bg-red-400/10 hover:text-red-300"
+              className="flex w-full items-center gap-3 rounded-[20px] border border-transparent px-4 py-3 text-sm text-neutral-400 transition hover:border-red-400/10 hover:bg-red-400/10 hover:text-red-200"
             >
               <LogOut className="size-4 shrink-0" />
               Salir

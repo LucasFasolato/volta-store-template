@@ -20,34 +20,41 @@ export function FeaturedSection({
   if (products.length === 0) return null
 
   return (
-    <section className="py-16 sm:py-20">
+    <section className="py-[var(--store-space-section)]">
       <div className={cn('mx-auto px-4 sm:px-6', containerClass)}>
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <p
-              className="text-xs font-semibold uppercase tracking-[0.24em]"
-              style={{ color: 'color-mix(in srgb, var(--store-text) 50%, transparent)' }}
-            >
+        <div
+          className="mb-8 flex flex-col gap-5 rounded-[calc(var(--store-card-radius)*0.9)] p-6 sm:flex-row sm:items-end sm:justify-between"
+          style={{
+            background:
+              'linear-gradient(145deg, color-mix(in srgb, var(--store-surface) 88%, white 12%), color-mix(in srgb, var(--store-bg) 94%, transparent))',
+            border: '1px solid var(--store-card-border)',
+          }}
+        >
+          <div className="max-w-2xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'var(--store-muted-text)' }}>
               Seleccion curada
             </p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl" style={{ color: 'var(--store-text)' }}>
+            <h2 className="store-heading mt-3 text-3xl font-semibold tracking-tight sm:text-[2.2rem]" style={{ color: 'var(--store-text)' }}>
               {COPY.product.featured}
             </h2>
+            <p className="mt-3 text-sm leading-7 sm:text-[15px]" style={{ color: 'var(--store-soft-text)' }}>
+              Piezas con mejor traccion visual, listas para abrir conversacion y acelerar la conversion.
+            </p>
           </div>
 
           <a
             href="#catalogo"
-            className="hidden items-center text-sm font-medium sm:inline-flex"
+            className="inline-flex items-center gap-2 text-sm font-semibold transition"
             style={{ color: 'var(--store-primary)' }}
           >
             Ir al catalogo
-            <ArrowRight className="ml-2 size-4" />
+            <ArrowRight className="size-4" />
           </a>
         </div>
 
         <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-4">
           {products.slice(0, 8).map((product) => (
-            <div key={product.id} className="w-[17rem] shrink-0 sm:w-auto">
+            <div key={product.id} className="w-[18rem] shrink-0 sm:w-auto">
               <ProductCard product={product} theme={theme} onClick={() => onSelectProduct(product)} />
             </div>
           ))}
