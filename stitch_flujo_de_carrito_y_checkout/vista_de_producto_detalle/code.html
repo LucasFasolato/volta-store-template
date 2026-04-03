@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Editorial Merchant - Product Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error": "#ffffff",
+              "primary-container": "#434343",
+              "on-tertiary": "#ffffff",
+              "on-error-container": "#93000a",
+              "surface-variant": "#d3e4fe",
+              "on-secondary-fixed-variant": "#15503e",
+              "on-primary": "#ffffff",
+              "surface-dim": "#cbdbf5",
+              "tertiary": "#4d1f1b",
+              "on-tertiary-fixed": "#370e0b",
+              "surface-container-low": "#eff4ff",
+              "on-secondary-fixed": "#002117",
+              "secondary-fixed": "#b4efd6",
+              "tertiary-container": "#68342f",
+              "primary-fixed": "#e5e2e1",
+              "on-secondary": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-container": "#376e5b",
+              "on-tertiary-fixed-variant": "#6c3832",
+              "surface-tint": "#5f5e5e",
+              "inverse-surface": "#213145",
+              "outline-variant": "#bfc9c3",
+              "inverse-primary": "#c8c6c5",
+              "on-primary-fixed": "#1c1b1b",
+              "error": "#ba1a1a",
+              "on-surface": "#0b1c30",
+              "on-tertiary-container": "#e69e96",
+              "on-primary-fixed-variant": "#474746",
+              "outline": "#707974",
+              "secondary-fixed-dim": "#99d3ba",
+              "background": "#f8f9ff",
+              "on-primary-container": "#b1afaf",
+              "primary": "#2d2d2d",
+              "surface": "#f8f9ff",
+              "error-container": "#ffdad6",
+              "surface-bright": "#f8f9ff",
+              "secondary": "#306855",
+              "surface-container-high": "#dce9ff",
+              "on-surface-variant": "#404944",
+              "tertiary-fixed-dim": "#ffb4ab",
+              "secondary-container": "#b4efd6",
+              "inverse-on-surface": "#eaf1ff",
+              "surface-container": "#e5eeff",
+              "primary-fixed-dim": "#c8c6c5",
+              "tertiary-fixed": "#ffdad6",
+              "surface-container-highest": "#d3e4fe",
+              "on-background": "#0b1c30"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            boxShadow: {
+              'ambient': '0px 12px 32px rgba(11, 28, 48, 0.06)'
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl transition-all duration-300">
+<nav class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
+<div class="text-xl font-black text-[#2d2d2d] dark:text-white tracking-tighter uppercase font-headline">
+                The Editorial Merchant
+            </div>
+<div class="hidden md:flex items-center space-y-0 space-x-8">
+<a class="text-slate-500 font-headline tracking-tighter uppercase font-bold text-sm hover:text-[#306855] transition-colors duration-300" href="#">Shop</a>
+<a class="text-slate-500 font-headline tracking-tighter uppercase font-bold text-sm hover:text-[#306855] transition-colors duration-300" href="#">Categories</a>
+<a class="text-slate-500 font-headline tracking-tighter uppercase font-bold text-sm hover:text-[#306855] transition-colors duration-300" href="#">FAQ</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant scale-95 active:scale-90 transition-transform">chat</button>
+<div class="relative">
+<button class="material-symbols-outlined text-on-surface-variant scale-95 active:scale-90 transition-transform">shopping_bag</button>
+<span class="absolute -top-1 -right-1 bg-secondary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">2</span>
+</div>
+</div>
+</nav>
+</header>
+<main class="pt-24 pb-20 max-w-7xl mx-auto px-6">
+<!-- Product Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20">
+<!-- Left: Image Gallery (Editorial Asymmetry) -->
+<div class="lg:col-span-7 space-y-6">
+<div class="relative aspect-[4/5] rounded-xl overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="Premium minimalist linen jacket in soft olive green tone, studio photography, clean editorial aesthetic with soft shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAToQW6iShS49abw1gmzUE8ECj69pnJ4bIZw50T-wHEAMJmJZT3BcXzS28cPd8ZSkhAMqhWK_A5klyXSn03ygj6B2_rftQiY3_tqY_UsXgBg0V38wFaAB_7lvpeiJNgpe5oTrX5Ycg9jO-kBzfZ0TjAga2_RESBRbTefOz_bAumfgoCY5w_F-pEm4a79elm09KKfs-aZORKeNEgl8IL15z7670FNnuCV9chKsokdDfxrXtu4Padt6jwJS1L9wY1og1JZQt5JML1lFk"/>
+<div class="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-full">
+<span class="text-[10px] font-headline font-bold uppercase tracking-widest text-primary">New Arrival</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-4">
+<div class="aspect-square rounded-lg overflow-hidden bg-surface-container-low cursor-pointer hover:opacity-80 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="Close up detail of linen fabric texture and tortoiseshell buttons on a green garment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgKR8mu4MqxynaU2wbgmeIR9IwlT2k1jp-G4OqJ6OtqzatiPCMgFLCKRp9FEKydKcScjLthWH-CBNzfUqM4-L44xRx6kguwdm7EM8a9Vd2i-y5dFucC6sCX_7TcppsPochIG4SZwLZ0qcIT2IURORfsQs99pT6IB44a-WpLIz-OQcTPKWyyYwvDI6gRtLrQylQstXLfB3oK5Nn-u2KQz3kY94s6zbo9D2WdTysQ3AWB_5NNYBUkZqJt4QNSdmlOw4nl2lmpI_HwJI"/>
+</div>
+<div class="aspect-square rounded-lg overflow-hidden bg-surface-container-low cursor-pointer hover:opacity-80 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="Rear view of a model wearing a green minimalist jacket against a neutral studio background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACzslRYLsyuNW8AwvmjcW87Lfc-lnwEArPBGvjOqFOSVk9QEWspgkEs1iRNQPuXzRoCs5ELKXh0xj-xrzuNy4_AGzLCZMQxkfQBqwdK10xlIskJXWFuKwIf-H2z9npqurIVT47nCRF_ccuPXSR2JuRZUMcAAGgnM_8wEMadVqCauhufY-tG0HR1WSfNtBQvK1hl8mCAuUbdNx1B0Sr6_LiaM2zC3DyWMLGAHNSWJxKYJ-HP0OuwVk1rrf9pK170eVc5JbilrebP0g"/>
+</div>
+<div class="aspect-square rounded-lg overflow-hidden bg-surface-container-low cursor-pointer hover:opacity-80 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="Detail of a sleeve cuff and stitching on a high-quality olive linen jacket" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMfpfzcq2GhbJaNlcej-3p3kmpmK2ZDdH0MkGGvQlTEZoixKH-f8eA2Tu1R9sCiuUPTZCfPceBh_t1VPIsTuaKFzjcQx4leUXnt3fH3KExRI4Lva1ycmUE-ca4ya1sTwWu-f-HzwM_FPThyWHGTcylqECdaAqxuNYK44KxL5XpCxNCGyRfJx5dlP4VWQFS9GFY0KH6WIhRpRM4NElhIMm4UWAHD0eF--Ufqqpv858D26tOt1BnCegjS1qbdkwsaGEBnE4uxVHFuCg"/>
+</div>
+</div>
+</div>
+<!-- Right: Product Details -->
+<div class="lg:col-span-5 flex flex-col">
+<nav class="mb-8 flex gap-2 items-center text-xs text-on-surface-variant font-label uppercase tracking-widest">
+<a class="hover:text-primary transition-colors" href="#">Shop</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Outerwear</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-bold">Linen Field Jacket</span>
+</nav>
+<h1 class="text-4xl lg:text-5xl font-headline font-extrabold tracking-tighter text-on-surface mb-2">
+                    Linen Field Jacket
+                </h1>
+<p class="text-2xl font-headline font-bold text-secondary mb-8">$285.00</p>
+<div class="space-y-10">
+<!-- Description -->
+<div class="space-y-3">
+<h3 class="text-xs font-label uppercase font-bold tracking-widest text-on-surface-variant">Description</h3>
+<p class="text-body leading-relaxed text-on-surface/80">
+                            A contemporary take on a classic silhouette. Crafted from high-density Italian linen, this field jacket features a tailored fit, unstructured shoulders, and four utility pockets. Designed for the modern traveler.
+                        </p>
+</div>
+<!-- Variants: Color -->
+<div class="space-y-4">
+<h3 class="text-xs font-label uppercase font-bold tracking-widest text-on-surface-variant">Color: <span class="text-on-surface">Olive Drab</span></h3>
+<div class="flex gap-3">
+<button class="w-8 h-8 rounded-full bg-[#306855] ring-2 ring-offset-2 ring-[#306855]"></button>
+<button class="w-8 h-8 rounded-full bg-[#2d2d2d] hover:ring-2 hover:ring-offset-2 hover:ring-slate-300 transition-all"></button>
+<button class="w-8 h-8 rounded-full bg-[#e5e2e1] hover:ring-2 hover:ring-offset-2 hover:ring-slate-300 transition-all"></button>
+</div>
+</div>
+<!-- Variants: Size -->
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<h3 class="text-xs font-label uppercase font-bold tracking-widest text-on-surface-variant">Size</h3>
+<button class="text-[10px] font-label uppercase font-bold tracking-widest text-secondary hover:underline underline-offset-4">Size Guide</button>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="px-5 py-2 rounded-lg border border-outline-variant hover:border-primary transition-colors text-sm font-label">S</button>
+<button class="px-5 py-2 rounded-lg bg-primary text-white text-sm font-label">M</button>
+<button class="px-5 py-2 rounded-lg border border-outline-variant hover:border-primary transition-colors text-sm font-label">L</button>
+<button class="px-5 py-2 rounded-lg border border-outline-variant hover:border-primary transition-colors text-sm font-label">XL</button>
+</div>
+</div>
+<!-- Quantity & Add to Cart -->
+<div class="space-y-6 pt-6">
+<div class="flex items-center gap-6">
+<h3 class="text-xs font-label uppercase font-bold tracking-widest text-on-surface-variant">Quantity</h3>
+<div class="flex items-center border border-outline-variant rounded-lg overflow-hidden">
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<span class="w-10 text-center font-bold text-sm">1</span>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<button class="w-full py-5 rounded-full bg-gradient-to-br from-primary to-primary-container text-white font-headline font-bold uppercase tracking-widest text-sm scale-100 active:scale-95 transition-transform shadow-lg">
+                                Agregar al Carrito
+                            </button>
+<button class="w-full py-4 rounded-full border-2 border-secondary text-secondary font-headline font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-2 hover:bg-secondary/5 transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat</span>
+                                Order via WhatsApp
+                            </button>
+</div>
+</div>
+</div>
+<!-- Product Meta -->
+<div class="mt-12 pt-8 border-t border-outline-variant/30 space-y-4">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">local_shipping</span>
+<span class="text-xs font-body">Complimentary shipping on orders over $250</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-lg">verified_user</span>
+<span class="text-xs font-body">Authenticity guaranteed and 30-day returns</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Related Products Section -->
+<div class="mt-32">
+<div class="flex justify-between items-end mb-12">
+<h2 class="text-3xl font-headline font-extrabold tracking-tighter text-on-surface">You May Also Like</h2>
+<a class="text-xs font-label uppercase font-bold tracking-widest text-secondary hover:underline underline-offset-4" href="#">View All Selection</a>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<!-- Related Item 1 -->
+<div class="group cursor-pointer">
+<div class="aspect-[4/5] bg-surface-container-low rounded-xl overflow-hidden mb-4 relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="High quality white cotton t-shirt flat lay on a grey surface with minimalist styling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3BAMiEt1RzmhIq3Vz6jylXMy_jApwSugbsojpTOEae1Lk8slKcN4Jx74_gkZGyhqGs84cpEJkF5yh5ybPqAJzXCFsH0DPaXXT7XjKgs5Vorte7PsqHZ-ARcyM9uYWq_siY3tDndybz3gDLidT8KKNGqRp19TpnCnTGFamjk-L3A7jPF9p1ZYESyFGjzW-dyv-5NJP75VLJornHn0FUKaRE1Ib7GbXWEfZ4Hd9oFSfTooxJI6Gpok1H5i4bAnrzvkCtn8d_ddXQSM"/>
+<button class="absolute bottom-4 right-4 bg-white/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-ambient">
+<span class="material-symbols-outlined text-primary">add_shopping_cart</span>
+</button>
+</div>
+<h3 class="text-sm font-headline font-bold text-on-surface mb-1">Premium Cotton Tee</h3>
+<p class="text-sm text-secondary font-headline font-bold">$45.00</p>
+</div>
+<!-- Related Item 2 -->
+<div class="group cursor-pointer">
+<div class="aspect-[4/5] bg-surface-container-low rounded-xl overflow-hidden mb-4 relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Modern dark indigo denim jeans neatly folded against a clean background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5GVc_rAa4wzl38BzH5rti5L-W8B6S70y2K8xNAVgDqXXiLj0FtjjVxe3QL_YUj5O2BIaSiOGa1uyS39Zg2j-I7sofdpUGURz-n78xuztbeXPYvLiu1xHYQtLwMIQH9CF5DDaqehqlsJCg9iy3gZlvepyeq2hTNi5dwTQZKRIF5w93J-OonUgD68Wsy8LoDODvdh7wm_7OFI5N7sjm6TS9s9Sy_EnQxvC1H4CONOm6QLKHx9q0CPBIodnb9Czozc06H7Ma3m1-kGg"/>
+<button class="absolute bottom-4 right-4 bg-white/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-ambient">
+<span class="material-symbols-outlined text-primary">add_shopping_cart</span>
+</button>
+</div>
+<h3 class="text-sm font-headline font-bold text-on-surface mb-1">Raw Denim Trousers</h3>
+<p class="text-sm text-secondary font-headline font-bold">$160.00</p>
+</div>
+<!-- Related Item 3 -->
+<div class="group cursor-pointer">
+<div class="aspect-[4/5] bg-surface-container-low rounded-xl overflow-hidden mb-4 relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Classic black leather boots with a modern sleek silhouette in high-end studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfdKluordM89h-TEY7s9z-B1-heGAUki88xRL2c5HKzNv9wMVpe0C9s_05HUxPIfdem8FmUaZa9yampiHA_-aSWjpDNeUC1GSvaIymaSiFp6HJX1YSCZQ7ohvFmxKJJOfpkm1JlB7lBwLjAXcOjg8hRZwdz4i3N2SM6ZaawjsWTEMG3h5DF6NXazDT0JPEVA_MJl6panKfvoDWcp5ntrjpXInHJnQJObiZi6AwAnl4Hq9becYS9hihpGhIaIghyYvWj48L1KiineU"/>
+<button class="absolute bottom-4 right-4 bg-white/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-ambient">
+<span class="material-symbols-outlined text-primary">add_shopping_cart</span>
+</button>
+</div>
+<h3 class="text-sm font-headline font-bold text-on-surface mb-1">Hand-Crafted Boots</h3>
+<p class="text-sm text-secondary font-headline font-bold">$420.00</p>
+</div>
+<!-- Related Item 4 -->
+<div class="group cursor-pointer">
+<div class="aspect-[4/5] bg-surface-container-low rounded-xl overflow-hidden mb-4 relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Luxury charcoal grey wool scarf draped elegantly on a textured surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgen4oEbt2KVfn58Wc6Jr4xGgzNH6Vg5rDHSFYbdsHPAe7QnDr15gRA933ay1YtuHG48e2KJ7ZUZJLgFbZKiH7gTTQNsTPbkcD-ZATztppIrBFpQJGRo952vvqhZgexBLwUIHRBX6snwt-lBDyztDapNW0tXBj9RyTbJ-6zZnrxcJxCBK0NVQLcAlUgjfvhBIOw5PeO8Rnn9QopiT1Qj6ZbvmK5EC5HRtCKzESBPmgpCvvVtLLg-DnzMMIF921k2GryBzKL3tUsTc"/>
+<button class="absolute bottom-4 right-4 bg-white/90 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-ambient">
+<span class="material-symbols-outlined text-primary">add_shopping_cart</span>
+</button>
+</div>
+<h3 class="text-sm font-headline font-bold text-on-surface mb-1">Fine Merino Scarf</h3>
+<p class="text-sm text-secondary font-headline font-bold">$95.00</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-slate-100 dark:bg-slate-950 w-full py-12 px-6 mt-20 border-t border-slate-200/15">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+<div class="space-y-4">
+<div class="font-headline font-bold text-lg text-primary dark:text-slate-200 uppercase">The Editorial Merchant</div>
+<p class="font-body text-sm text-slate-500 leading-relaxed max-w-xs">Curating intentional pieces for the modern enthusiast. Quality is our only metric.</p>
+</div>
+<div class="space-y-4">
+<div class="font-headline font-bold text-sm text-primary dark:text-slate-200 uppercase tracking-widest">Support</div>
+<ul class="space-y-2">
+<li><a class="font-body text-sm text-slate-500 hover:text-primary transition-opacity opacity-80 hover:opacity-100" href="#">WhatsApp Support</a></li>
+<li><a class="font-body text-sm text-slate-500 hover:text-primary transition-opacity opacity-80 hover:opacity-100" href="#">Shipping Policy</a></li>
+<li><a class="font-body text-sm text-slate-500 hover:text-primary transition-opacity opacity-80 hover:opacity-100" href="#">Returns &amp; Exchanges</a></li>
+</ul>
+</div>
+<div class="space-y-4">
+<div class="font-headline font-bold text-sm text-primary dark:text-slate-200 uppercase tracking-widest">Legal</div>
+<ul class="space-y-2">
+<li><a class="font-body text-sm text-slate-500 hover:text-primary transition-opacity opacity-80 hover:opacity-100" href="#">Privacy Policy</a></li>
+<li><a class="font-body text-sm text-slate-500 hover:text-primary transition-opacity opacity-80 hover:opacity-100" href="#">Terms of Service</a></li>
+</ul>
+</div>
+</div>
+<div class="max-w-7xl mx-auto mt-12 pt-8 border-t border-slate-200/10 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="font-body text-sm text-slate-500">© 2024 The Editorial Merchant. Curated with Intent.</p>
+<div class="flex gap-6">
+<a class="material-symbols-outlined text-slate-500 hover:text-primary transition-colors" href="#">brand_awareness</a>
+<a class="material-symbols-outlined text-slate-500 hover:text-primary transition-colors" href="#">social_distance</a>
+</div>
+</div>
+</footer>
+<!-- Mobile Sticky Cart Bar -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 z-50 p-4 bg-white/90 backdrop-blur-xl shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+<div class="flex items-center justify-between gap-4">
+<div class="flex flex-col">
+<span class="text-[10px] font-label uppercase font-bold text-on-surface-variant">Linen Field Jacket</span>
+<span class="text-lg font-headline font-extrabold text-primary">$285.00</span>
+</div>
+<button class="flex-1 py-4 rounded-full bg-secondary text-white font-headline font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2">
+                Order via WhatsApp
+            </button>
+</div>
+</div>
+</body></html>
