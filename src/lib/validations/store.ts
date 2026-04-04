@@ -64,6 +64,8 @@ export const storeThemeSchema = z
     button_style: z.enum(['rounded', 'square', 'pill']),
     grid_columns: z.number().int().min(2).max(4),
     image_ratio: z.enum(['1:1', '4:5', '3:4', '16:9']),
+    background_color_2: colorSchema.nullable().optional(),
+    background_direction: z.enum(['vertical', 'diagonal']).optional(),
   })
   .superRefine((value, ctx) => {
     if (getContrastRatio(value.text_color, value.background_color) < 4.5) {

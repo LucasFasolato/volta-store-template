@@ -36,14 +36,6 @@ type VisualOption = {
   label: string
 }
 
-const COLOR_FIELDS = [
-  { name: 'primary_color' as const, label: 'Primary' },
-  { name: 'secondary_color' as const, label: 'Secondary' },
-  { name: 'accent_color' as const, label: 'Accent' },
-  { name: 'background_color' as const, label: 'Background' },
-  { name: 'surface_color' as const, label: 'Surface' },
-  { name: 'text_color' as const, label: 'Text' },
-]
 
 const SCALE_OPTIONS: VisualOption[] = [
   { value: 'compact', label: 'Compacta' },
@@ -148,6 +140,8 @@ export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
       button_style: theme.button_style as StoreThemeInput['button_style'],
       grid_columns: theme.grid_columns,
       image_ratio: theme.image_ratio as StoreThemeInput['image_ratio'],
+      background_color_2: theme.background_color_2 ?? null,
+      background_direction: (theme.background_direction ?? 'diagonal') as StoreThemeInput['background_direction'],
     },
   })
 
@@ -509,6 +503,59 @@ function FontsControls({
   )
 }
 
+function ColorSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="admin-surface-muted rounded-[18px] px-4 py-3">
+      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">{title}</p>
+      <div className="divide-y divide-white/[0.06]">{children}</div>
+    </div>
+  )
+}
+
+function ColorRow({
+  label,
+  hint,
+  fieldName,
+  value,
+  register,
+  onColorChange,
+  error,
+}: {
+  label: string
+  hint?: string
+  fieldName: keyof StoreThemeInput
+  value: string
+  register: ReturnType<typeof useForm<StoreThemeInput>>['register']
+  onColorChange: (v: string) => void
+  error?: string
+}) {
+  const lum = colorLuminance(value ?? '#888888')
+  const ring = lum > 0.55 ? 'rgba(0,0,0,0.2)' : lum < 0.28 ? 'rgba(255,255,255,0.18)' : 'rgba(128,128,128,0.2)'
+  return (
+    <div className="flex items-center gap-3 py-2.5">
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-white">{label}</p>
+        {hint ? <p className="text-[11px] text-neutral-500">{hint}</p> : null}
+      </div>
+      <label className="relative shrink-0 cursor-pointer">
+        <input
+          type="color"
+          value={value ?? '#000000'}
+          onChange={(e) => onColorChange(e.target.value)}
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+          tabIndex={-1}
+        />
+        <span className="block size-6 rounded-full" style={{ backgroundColor: value, boxShadow: `0 0 0 1.5px ${ring}` }} />
+      </label>
+      <input
+        {...register(fieldName)}
+        className="w-24 rounded-[10px] border border-white/10 bg-black/10 px-2.5 py-1.5 font-mono text-xs text-white"
+      />
+      {error ? <p className="mt-0.5 text-xs text-red-300">{error}</p> : null}
+    </div>
+  )
+}
+
 function ColorsControls({
   theme,
   setThemeValue,
@@ -526,40 +573,132 @@ function ColorsControls({
   contrastTextOnSurface: string
   contrastPrimary: string
 }) {
-  return (
-    <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2">
-        {COLOR_FIELDS.map((field) => {
-          const value = theme[field.name]
-          const lum = colorLuminance(value)
-          const swatchRing = lum > 0.55 ? 'rgba(0,0,0,0.22)' : lum > 0.28 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.18)'
-          return (
-            <label key={field.name} className="admin-surface-muted rounded-[18px] p-3">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-semibold text-white">{field.label}</span>
-                <span
-                  className="size-5 shrink-0 rounded-full"
-                  style={{ backgroundColor: value, boxShadow: `0 0 0 1.5px ${swatchRing}` }}
-                />
-              </div>
-              <div className="mt-2.5 flex items-center gap-3">
-                <input
-                  type="color"
-                  value={value}
-                  onChange={(event) => setThemeValue(field.name, event.target.value as StoreThemeInput[typeof field.name])}
-                  className="size-10 cursor-pointer rounded-xl border border-white/10 bg-transparent"
-                />
-                <input
-                  {...register(field.name)}
-                  className="h-10 flex-1 rounded-xl border border-white/10 bg-black/10 px-3 font-mono text-sm text-white"
-                />
-              </div>
-              {errors[field.name] ? <p className="mt-1.5 text-xs text-red-300">{errors[field.name]?.message}</p> : null}
-            </label>
-          )
-        })}
-      </div>
+  const isGradient = !!(theme.background_color_2)
 
+  function toggleGradient(on: boolean) {
+    if (on) {
+      setThemeValue('background_color_2', theme.text_color as StoreThemeInput['background_color_2'])
+    } else {
+      setThemeValue('background_color_2', null)
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Fondo */}
+      <ColorSection title="Fondo">
+        <div className="flex gap-1 py-2.5">
+          <button
+            type="button"
+            onClick={() => toggleGradient(false)}
+            className={cn('rounded-[10px] px-3 py-1.5 text-xs font-medium transition duration-150', !isGradient ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white')}
+          >
+            Sólido
+          </button>
+          <button
+            type="button"
+            onClick={() => toggleGradient(true)}
+            className={cn('rounded-[10px] px-3 py-1.5 text-xs font-medium transition duration-150', isGradient ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white')}
+          >
+            Degradado
+          </button>
+        </div>
+        <ColorRow
+          label={isGradient ? 'Color inicio' : 'Color'}
+          fieldName="background_color"
+          value={theme.background_color}
+          register={register}
+          onColorChange={(v) => setThemeValue('background_color', v as StoreThemeInput['background_color'])}
+          error={errors.background_color?.message}
+        />
+        {isGradient ? (
+          <>
+            <ColorRow
+              label="Color final"
+              fieldName="background_color_2"
+              value={theme.background_color_2 ?? '#000000'}
+              register={register}
+              onColorChange={(v) => setThemeValue('background_color_2', v)}
+              error={errors.background_color_2?.message}
+            />
+            <div className="flex gap-1.5 py-2.5">
+              <button
+                type="button"
+                onClick={() => setThemeValue('background_direction', 'diagonal')}
+                className={cn('rounded-[10px] px-3 py-1.5 text-xs font-medium transition duration-150', (theme.background_direction ?? 'diagonal') === 'diagonal' ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white')}
+              >
+                ↗ Diagonal
+              </button>
+              <button
+                type="button"
+                onClick={() => setThemeValue('background_direction', 'vertical')}
+                className={cn('rounded-[10px] px-3 py-1.5 text-xs font-medium transition duration-150', theme.background_direction === 'vertical' ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white')}
+              >
+                ↕ Vertical
+              </button>
+            </div>
+          </>
+        ) : null}
+      </ColorSection>
+
+      {/* Texto */}
+      <ColorSection title="Texto">
+        <ColorRow
+          label="Principal"
+          hint="Titulos y etiquetas"
+          fieldName="text_color"
+          value={theme.text_color}
+          register={register}
+          onColorChange={(v) => setThemeValue('text_color', v as StoreThemeInput['text_color'])}
+          error={errors.text_color?.message}
+        />
+        <ColorRow
+          label="Secundario"
+          hint="Subtitulos y links"
+          fieldName="secondary_color"
+          value={theme.secondary_color}
+          register={register}
+          onColorChange={(v) => setThemeValue('secondary_color', v as StoreThemeInput['secondary_color'])}
+          error={errors.secondary_color?.message}
+        />
+      </ColorSection>
+
+      {/* Tarjetas */}
+      <ColorSection title="Tarjetas">
+        <ColorRow
+          label="Fondo de tarjetas"
+          hint="Superficie de productos"
+          fieldName="surface_color"
+          value={theme.surface_color}
+          register={register}
+          onColorChange={(v) => setThemeValue('surface_color', v as StoreThemeInput['surface_color'])}
+          error={errors.surface_color?.message}
+        />
+      </ColorSection>
+
+      {/* Acciones */}
+      <ColorSection title="Acciones">
+        <ColorRow
+          label="Botones / CTA"
+          hint="Color principal de accion"
+          fieldName="primary_color"
+          value={theme.primary_color}
+          register={register}
+          onColorChange={(v) => setThemeValue('primary_color', v as StoreThemeInput['primary_color'])}
+          error={errors.primary_color?.message}
+        />
+        <ColorRow
+          label="Precio / Destaque"
+          hint="Precio de producto y badges"
+          fieldName="accent_color"
+          value={theme.accent_color}
+          register={register}
+          onColorChange={(v) => setThemeValue('accent_color', v as StoreThemeInput['accent_color'])}
+          error={errors.accent_color?.message}
+        />
+      </ColorSection>
+
+      {/* Modo visual */}
       <PillGroup
         title="Modo visual"
         options={VISUAL_MODE_OPTIONS.map((item) => ({ value: item.value, label: item.label }))}
@@ -567,9 +706,10 @@ function ColorsControls({
         onChange={(value) => setThemeValue('visual_mode', value as StoreThemeInput['visual_mode'])}
       />
 
+      {/* Contraste */}
       <div className="grid gap-2.5 sm:grid-cols-3">
         <ContrastStat label="Texto / fondo" value={contrastTextOnBg} />
-        <ContrastStat label="Texto / surface" value={contrastTextOnSurface} />
+        <ContrastStat label="Texto / tarjeta" value={contrastTextOnSurface} />
         <ContrastStat label="CTA" value={contrastPrimary} />
       </div>
     </div>
@@ -660,12 +800,12 @@ function TypographyLivePreview({ previewThemeVars }: { previewThemeVars: React.C
 
       {/* Side-by-side font specimens */}
       <div className="grid grid-cols-2 gap-px border-b" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-border)' }}>
-        <div className="px-4 py-4" style={{ background: 'var(--store-bg)' }}>
+        <div className="px-4 py-4" style={{ background: 'var(--store-bg-gradient)' }}>
           <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Titulos</p>
           <p className="store-heading text-5xl leading-none" style={{ color: 'var(--store-text)' }}>Aa</p>
           <p className="store-heading mt-1.5 text-sm tracking-normal" style={{ color: 'var(--store-muted-text)' }}>Bb Cc 123</p>
         </div>
-        <div className="px-4 py-4" style={{ background: 'var(--store-bg)' }}>
+        <div className="px-4 py-4" style={{ background: 'var(--store-bg-gradient)' }}>
           <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Texto</p>
           <p className="store-body text-5xl leading-none" style={{ color: 'var(--store-text)' }}>Aa</p>
           <p className="store-body mt-1.5 text-sm" style={{ color: 'var(--store-muted-text)' }}>Bb Cc 123</p>
@@ -692,7 +832,7 @@ function TypographyLivePreview({ previewThemeVars }: { previewThemeVars: React.C
 
 function ColorStoreMockup({ previewThemeVars }: { previewThemeVars: React.CSSProperties }) {
   return (
-    <div className="admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
+    <div className="overflow-hidden rounded-[24px] border border-white/[0.06]" style={{ ...previewThemeVars, background: 'var(--store-bg-gradient)' }}>
       <div className="flex items-center justify-between border-b px-5 py-3.5" style={{ borderColor: 'var(--store-card-border)' }}>
         <div>
           <p className="store-heading text-base" style={{ color: 'var(--store-text)' }}>Navbar</p>

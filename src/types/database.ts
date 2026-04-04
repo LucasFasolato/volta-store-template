@@ -98,6 +98,8 @@ export interface Database {
           button_style: string
           grid_columns: number
           image_ratio: string
+          background_color_2: string | null
+          background_direction: string
           created_at: string
           updated_at: string
         }
@@ -127,6 +129,8 @@ export interface Database {
           button_style?: string
           grid_columns?: number
           image_ratio?: string
+          background_color_2?: string | null
+          background_direction?: string
           created_at?: string
           updated_at?: string
         }
@@ -154,6 +158,8 @@ export interface Database {
           button_style?: string
           grid_columns?: number
           image_ratio?: string
+          background_color_2?: string | null
+          background_direction?: string
           updated_at?: string
         }
         Relationships: []

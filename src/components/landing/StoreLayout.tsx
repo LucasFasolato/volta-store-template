@@ -70,7 +70,7 @@ export function StoreLayout({
       data-store-mode={theme.visual_mode}
       style={{
         ...themeVars,
-        backgroundColor: 'var(--store-bg)',
+        background: 'var(--store-bg-gradient)',
         color: 'var(--store-text)',
         fontFamily: 'var(--store-font-body)',
       }}

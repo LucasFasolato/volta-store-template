@@ -36,7 +36,16 @@ export function buildThemeVars(
         ? `calc(${borderRadius} * 1.08)`
         : borderRadius
 
+  const bgColor2 = theme.background_color_2
+    ? (isDark ? mixHexColors(theme.background_color_2, '#020617', 0.78) : theme.background_color_2)
+    : null
+  const gradientAngle = (theme.background_direction ?? 'diagonal') === 'vertical' ? '180deg' : '135deg'
+  const bgGradient = bgColor2
+    ? `linear-gradient(${gradientAngle}, ${background}, ${bgColor2})`
+    : background
+
   return {
+    '--store-bg-gradient': bgGradient,
     '--store-primary': primary,
     '--store-primary-contrast': getAccessibleTextColor(primary),
     '--store-secondary': secondary,
