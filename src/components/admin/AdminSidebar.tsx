@@ -61,7 +61,7 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
         </div>
 
         {/* Nav */}
-        <nav className="mt-4 flex-1 space-y-0.5">
+        <nav className="mt-4 flex-1 space-y-1">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon
             const active = isActive(item)
@@ -71,10 +71,10 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-2.5 rounded-[16px] px-3 py-2.5 text-sm transition',
+                  'flex items-center gap-2.5 rounded-[16px] px-3 py-2.5 text-sm transition duration-150',
                   active
                     ? 'admin-surface-selected font-medium text-white'
-                    : 'text-neutral-400 hover:bg-white/[0.045] hover:text-white',
+                    : 'text-neutral-400 hover:bg-white/[0.06] hover:text-white',
                 )}
               >
                 <Icon
@@ -97,7 +97,7 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
           <Link
             href={`/tienda/${storeSlug}`}
             target="_blank"
-            className="admin-surface-elevated flex items-center gap-2.5 rounded-[16px] px-3 py-2.5 text-sm font-medium text-white transition hover:brightness-105"
+            className="admin-surface-elevated flex items-center gap-2.5 rounded-[16px] px-3 py-2.5 text-sm font-medium text-white transition duration-150 hover:brightness-110"
           >
             <Store className="size-4 shrink-0" />
             <span className="flex-1">Ver tienda</span>

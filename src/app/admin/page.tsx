@@ -61,14 +61,14 @@ export default async function AdminPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="admin-label">{storeData.store.name}</p>
-          <h1 className="mt-1.5 font-heading text-[1.55rem] font-semibold tracking-[-0.05em] text-white">
+          <h1 className="mt-2 font-heading text-[1.75rem] font-semibold tracking-[-0.055em] text-white">
             Resumen
           </h1>
         </div>
         <Link
           href={`/tienda/${storeData.store.slug}`}
           target="_blank"
-          className="flex shrink-0 items-center gap-2 rounded-[18px] border border-emerald-300/20 bg-emerald-400/8 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-400/14"
+          className="flex shrink-0 items-center gap-2 rounded-[18px] border border-emerald-300/30 bg-[linear-gradient(135deg,rgba(46,230,166,0.16),rgba(111,243,223,0.08))] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_0_22px_rgba(16,185,129,0.12),inset_0_1px_0_rgba(255,255,255,0.06)] transition duration-150 hover:bg-[linear-gradient(135deg,rgba(46,230,166,0.22),rgba(111,243,223,0.12))] hover:shadow-[0_0_28px_rgba(16,185,129,0.2)]"
         >
           Ver tienda
           <ExternalLink className="size-3.5" />
@@ -137,16 +137,16 @@ export default async function AdminPage() {
                 <Link
                   key={action.href}
                   href={action.href}
-                  className="admin-button-soft flex items-center gap-3 rounded-[18px] px-4 py-3"
+                  className="group admin-button-soft flex items-center gap-3 rounded-[18px] px-4 py-3 transition duration-150"
                 >
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-white/6 text-emerald-200">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-white/6 text-emerald-200 transition-colors duration-150 group-hover:bg-emerald-400/12">
                     <Icon className="size-4" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-white">{action.label}</p>
                     <p className="text-xs text-neutral-500">{action.description}</p>
                   </div>
-                  <ArrowRight className="size-4 shrink-0 text-neutral-600" />
+                  <ArrowRight className="size-4 shrink-0 text-white/16 transition-all duration-150 group-hover:translate-x-0.5 group-hover:text-white/50" />
                 </Link>
               )
             })}
@@ -237,16 +237,16 @@ function StatCard({
   return (
     <Link
       href={href}
-      className="admin-surface rounded-[20px] p-4 transition hover:-translate-y-0.5"
+      className="group admin-surface rounded-[20px] p-4 transition duration-150 hover:-translate-y-0.5 hover:border-white/12 hover:shadow-[0_22px_52px_rgba(2,6,23,0.34)]"
     >
       <div className="mb-3 flex items-center justify-between">
-        <div className="flex size-8 items-center justify-center rounded-xl bg-white/6 text-neutral-400">
+        <div className="flex size-8 items-center justify-center rounded-xl bg-white/6 text-neutral-400 transition-colors duration-150 group-hover:bg-white/8">
           <Icon className="size-4" />
         </div>
-        <ArrowRight className="size-3.5 text-neutral-600" />
+        <ArrowRight className="size-3.5 text-white/16 transition-all duration-150 group-hover:translate-x-0.5 group-hover:text-white/45" />
       </div>
-      <p className="text-2xl font-semibold tracking-tight text-white">{value}</p>
-      <p className="mt-0.5 text-xs text-neutral-400">{label}</p>
+      <p className="text-[1.65rem] font-semibold tracking-tight text-white">{value}</p>
+      <p className="mt-0.5 text-xs text-neutral-500">{label}</p>
     </Link>
   )
 }
@@ -268,13 +268,13 @@ function InfoRow({
 }) {
   return (
     <div className="flex items-center gap-3 py-2.5">
-      <p className="w-[4.5rem] shrink-0 text-xs font-medium text-neutral-500">{label}</p>
+      <p className="w-[4.5rem] shrink-0 text-[11px] font-medium text-neutral-600">{label}</p>
       <div className="min-w-0 flex-1">
         {children ?? (
           <p
             className={cn(
               'truncate text-sm',
-              empty ? 'text-neutral-600' : 'font-medium text-neutral-200',
+              empty ? 'text-neutral-600' : 'font-medium text-neutral-100',
             )}
           >
             {value}
@@ -284,7 +284,7 @@ function InfoRow({
       {href && action ? (
         <Link
           href={href}
-          className="shrink-0 text-xs font-medium text-emerald-300 transition hover:text-white"
+          className="shrink-0 text-xs text-neutral-500 transition duration-150 hover:text-emerald-300"
         >
           {action}
         </Link>
