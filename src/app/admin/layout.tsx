@@ -19,10 +19,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!storeData) redirect('/login')
 
   return (
-    <div className="admin-gradient min-h-screen">
+    <div className="admin-gradient admin-shell min-h-screen">
       <AdminSidebar storeName={storeData.store.name} storeSlug={storeData.store.slug} />
 
-      <div className="lg:pl-72">
+      <div className="relative z-10 lg:pl-[19rem]">
         <main className="min-h-screen pb-28 lg:pb-10">{children}</main>
       </div>
 

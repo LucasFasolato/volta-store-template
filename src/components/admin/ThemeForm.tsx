@@ -3,32 +3,22 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { FieldErrors } from 'react-hook-form'
-import { ChevronDown, ChevronUp, Contrast, Layers3, Palette, Type } from 'lucide-react'
+import { Contrast, Layers3, Palette, Type } from 'lucide-react'
 import { toast } from 'sonner'
 import { FormFeedback } from '@/components/common/FormFeedback'
 import { SaveButton } from '@/components/common/SaveButton'
-import { Label } from '@/components/ui/label'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  FONT_FAMILY_MAP,
   BORDER_RADIUS_OPTIONS,
+  FONT_FAMILY_MAP,
   FONT_OPTIONS,
   FONT_PRESETS,
-  GRID_COLUMNS_OPTIONS,
   HEADING_WEIGHT_OPTIONS,
   IMAGE_RATIO_OPTIONS,
   VISUAL_MODE_OPTIONS,
 } from '@/data/defaults'
 import { COPY } from '@/data/system-copy'
 import { updateStoreTheme } from '@/lib/actions/store'
-import { getAccessibleTextColor, getContrastRatio, mixHexColors, withAlpha } from '@/lib/utils/color'
+import { getAccessibleTextColor, getContrastRatio, withAlpha } from '@/lib/utils/color'
 import { buildThemeVars } from '@/lib/utils/theme'
 import { cn } from '@/lib/utils'
 import { storeThemeSchema, type StoreThemeInput } from '@/lib/validations/store'
@@ -41,52 +31,71 @@ type ThemeFormProps = {
   activeSection: ThemeSection
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type SV = (name: any, val: any) => void
-type Get = <K extends keyof StoreThemeInput>(name: K) => StoreThemeInput[K]
-
-const COLOR_FIELDS: Array<{
-  name: keyof Pick<
-    StoreThemeInput,
-    | 'primary_color'
-    | 'secondary_color'
-    | 'accent_color'
-    | 'background_color'
-    | 'surface_color'
-    | 'text_color'
-  >
+type VisualOption = {
+  value: string
   label: string
-  hint: string
-}> = [
-  { name: 'primary_color', label: 'Principal', hint: 'Botones y foco visual' },
-  { name: 'secondary_color', label: 'Secundario', hint: 'Badges y señalización' },
-  { name: 'accent_color', label: 'Acento', hint: 'Highlights y detalles' },
-  { name: 'background_color', label: 'Fondo', hint: 'Base de la tienda' },
-  { name: 'surface_color', label: 'Superficie', hint: 'Cards y paneles' },
-  { name: 'text_color', label: 'Texto', hint: 'Lectura principal' },
+}
+
+const COLOR_FIELDS = [
+  { name: 'primary_color' as const, label: 'Primary' },
+  { name: 'secondary_color' as const, label: 'Secondary' },
+  { name: 'accent_color' as const, label: 'Accent' },
+  { name: 'background_color' as const, label: 'Background' },
+  { name: 'surface_color' as const, label: 'Surface' },
+  { name: 'text_color' as const, label: 'Text' },
 ]
 
-const CARD_STYLES = [
-  { value: 'soft', label: 'Suaves', hint: 'Profundidad sutil' },
-  { value: 'sharp', label: 'Firmes', hint: 'Borde limpio' },
-  { value: 'glass', label: 'Cristal', hint: 'Brillo y transparencia' },
-] as const
+const SCALE_OPTIONS: VisualOption[] = [
+  { value: 'compact', label: 'Compacta' },
+  { value: 'default', label: 'Balanceada' },
+  { value: 'large', label: 'Amplia' },
+]
 
-const BUTTON_STYLES = [
-  { value: 'rounded', label: 'Redondeados', hint: 'Suaves y amigables' },
-  { value: 'pill', label: 'Cápsula', hint: 'Más expresivos' },
-  { value: 'square', label: 'Rectos', hint: 'Más sobrios' },
-] as const
+const BODY_SCALE_OPTIONS: VisualOption[] = [
+  { value: 'sm', label: 'Compacta' },
+  { value: 'base', label: 'Media' },
+  { value: 'lg', label: 'Amplia' },
+]
 
-const DENSITY_OPTIONS = [
-  { value: 'compact', label: 'Compacto', hint: 'Más info por pantalla' },
-  { value: 'comfortable', label: 'Balanceado', hint: 'Equilibrado' },
-  { value: 'spacious', label: 'Con aire', hint: 'Más espacio' },
-] as const
+const CARD_OPTIONS: VisualOption[] = [
+  { value: 'soft', label: 'Suaves' },
+  { value: 'sharp', label: 'Firmes' },
+  { value: 'glass', label: 'Cristal' },
+]
+
+const BUTTON_OPTIONS: VisualOption[] = [
+  { value: 'rounded', label: 'Redondeados' },
+  { value: 'square', label: 'Rectos' },
+  { value: 'pill', label: 'Capsula' },
+]
+
+const DENSITY_OPTIONS: VisualOption[] = [
+  { value: 'compact', label: 'Compacto' },
+  { value: 'comfortable', label: 'Balanceado' },
+  { value: 'spacious', label: 'Con aire' },
+]
+
+const SPACING_OPTIONS: VisualOption[] = [
+  { value: 'tight', label: 'Corto' },
+  { value: 'balanced', label: 'Balanceado' },
+  { value: 'airy', label: 'Amplio' },
+]
+
+const WIDTH_OPTIONS: VisualOption[] = [
+  { value: 'sm', label: 'Contenido' },
+  { value: 'md', label: 'Medio' },
+  { value: 'lg', label: 'Amplio' },
+  { value: 'xl', label: 'Grande' },
+  { value: 'full', label: 'Completo' },
+]
+
+const GRID_OPTIONS: Array<{ value: number; label: string }> = [
+  { value: 2, label: '2 col' },
+  { value: 3, label: '3 col' },
+  { value: 4, label: '4 col' },
+]
 
 export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
-  const [showFontAdvanced, setShowFontAdvanced] = useState(false)
-  const [showLayoutAdvanced, setShowLayoutAdvanced] = useState(false)
   const [saved, setSaved] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [systemMode, setSystemMode] = useState<'light' | 'dark'>('light')
@@ -137,30 +146,6 @@ export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
     return () => media.removeEventListener('change', sync)
   }, [])
 
-  function applyTypographyPreset(presetValue: StoreThemeInput['font_preset']) {
-    const preset = FONT_PRESETS.find((item) => item.value === presetValue)
-    if (!preset) return
-    setValue('font_preset', presetValue, { shouldDirty: true })
-    setValue('heading_font', preset.heading_font, { shouldDirty: true })
-    setValue('body_font', preset.body_font, { shouldDirty: true })
-    setValue('font_family', preset.body_font, { shouldDirty: true })
-    setValue('heading_weight', preset.heading_weight, { shouldDirty: true })
-  }
-
-  async function onSubmit(data: StoreThemeInput) {
-    setSubmitError(null)
-    const result = await updateStoreTheme({ ...data, font_family: data.body_font })
-    if (result?.error) {
-      const message = result.error.formErrors?.[0] ?? COPY.admin.loadError
-      setSubmitError(message)
-      toast.error(message)
-      return
-    }
-    setSaved(true)
-    toast.success('Apariencia guardada.')
-    setTimeout(() => setSaved(false), 2500)
-  }
-
   const previewTheme = useMemo(
     () =>
       ({
@@ -171,74 +156,111 @@ export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
       }) as StoreTheme,
     [theme, values],
   )
+
   const resolvedMode =
     previewTheme.visual_mode === 'auto'
       ? systemMode
       : previewTheme.visual_mode === 'dark'
         ? 'dark'
         : 'light'
+
   const previewThemeVars = useMemo(
     () => buildThemeVars(previewTheme, resolvedMode),
     [previewTheme, resolvedMode],
   )
 
-  const bg = values?.background_color ?? theme.background_color
-  const surface = values?.surface_color ?? theme.surface_color
-  const text = values?.text_color ?? theme.text_color
-  const primary = values?.primary_color ?? theme.primary_color
-  const contrastBg = getContrastRatio(text, bg).toFixed(1)
-  const contrastSurface = getContrastRatio(text, surface).toFixed(1)
-  const contrastPrimary = getContrastRatio(getAccessibleTextColor(primary), primary).toFixed(1)
+  const contrastTextOnBg = getContrastRatio(previewTheme.text_color, previewTheme.background_color).toFixed(1)
+  const contrastTextOnSurface = getContrastRatio(previewTheme.text_color, previewTheme.surface_color).toFixed(1)
+  const contrastPrimary = getContrastRatio(getAccessibleTextColor(previewTheme.primary_color), previewTheme.primary_color).toFixed(1)
 
-  const sv: SV = (name, val) => setValue(name, val, { shouldDirty: true })
+  async function onSubmit(data: StoreThemeInput) {
+    setSubmitError(null)
+    const result = await updateStoreTheme({
+      ...data,
+      font_family: data.body_font,
+    })
 
-  function get<K extends keyof StoreThemeInput>(name: K): StoreThemeInput[K] {
-    return (values?.[name] ?? theme[name]) as StoreThemeInput[K]
+    if (result?.error) {
+      const message = result.error.formErrors?.[0] ?? COPY.admin.loadError
+      setSubmitError(message)
+      toast.error(message)
+      return
+    }
+
+    setSaved(true)
+    toast.success('Apariencia guardada.')
+    setTimeout(() => setSaved(false), 2500)
+  }
+
+  function setThemeValue<K extends keyof StoreThemeInput>(name: K, value: StoreThemeInput[K]) {
+    setValue(name as never, value as never, { shouldDirty: true })
+  }
+
+  function applyPreset(value: StoreThemeInput['font_preset']) {
+    const preset = FONT_PRESETS.find((item) => item.value === value)
+    if (!preset) return
+    setThemeValue('font_preset', value)
+    setThemeValue('heading_font', preset.heading_font)
+    setThemeValue('body_font', preset.body_font)
+    setThemeValue('font_family', preset.body_font)
+    setThemeValue('heading_weight', preset.heading_weight)
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      {activeSection === 'fuentes' && (
-        <FontsSection
-          get={get}
-          sv={sv}
-          applyPreset={applyTypographyPreset}
-          showAdvanced={showFontAdvanced}
-          onToggleAdvanced={() => setShowFontAdvanced((v) => !v)}
-          previewThemeVars={previewThemeVars}
-        />
-      )}
-
-      {activeSection === 'colores' && (
-        <ColorsSection
-          get={get}
-          sv={sv}
-          register={register}
-          errors={errors}
-          previewThemeVars={previewThemeVars}
-          contrasts={{ bg: contrastBg, surface: contrastSurface, primary: contrastPrimary }}
-        />
-      )}
-
-      {activeSection === 'layout' && (
-        <LayoutSection
-          get={get}
-          sv={sv}
-          showAdvanced={showLayoutAdvanced}
-          onToggleAdvanced={() => setShowLayoutAdvanced((v) => !v)}
-        />
-      )}
-
-      {submitError ? (
-        <FormFeedback kind="error" title="No pudimos guardar" message={submitError} />
-      ) : null}
-      {!submitError && saved ? (
-        <FormFeedback
-          kind="success"
-          title="Apariencia guardada"
-          message="La tienda ya refleja los cambios."
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {activeSection === 'fuentes' ? (
+        <EditorShell
+          icon={Type}
+          title="Fuentes"
+          hint="Controles a la izquierda. Preview tipografico fijo a la derecha."
+          controls={
+            <FontsControls
+              theme={previewTheme}
+              applyPreset={applyPreset}
+              setThemeValue={setThemeValue}
+            />
+          }
+          preview={<TypographyLivePreview previewThemeVars={previewThemeVars} />}
         />
       ) : null}
+
+      {activeSection === 'colores' ? (
+        <EditorShell
+          icon={Palette}
+          title="Colores"
+          hint="Mockup compacto de tienda con navbar, hero, card, badge, CTA y footer."
+          controls={
+            <ColorsControls
+              theme={previewTheme}
+              setThemeValue={setThemeValue}
+              register={register}
+              errors={errors}
+              contrastTextOnBg={contrastTextOnBg}
+              contrastTextOnSurface={contrastTextOnSurface}
+              contrastPrimary={contrastPrimary}
+            />
+          }
+          preview={<ColorStoreMockup previewThemeVars={previewThemeVars} />}
+        />
+      ) : null}
+
+      {activeSection === 'layout' ? (
+        <EditorShell
+          icon={Layers3}
+          title="Diseno"
+          hint="Opciones visuales para cards, botones, densidad y catalogo."
+          controls={
+            <LayoutControls
+              theme={previewTheme}
+              setThemeValue={setThemeValue}
+            />
+          }
+          preview={<DesignLivePreview previewThemeVars={previewThemeVars} columns={previewTheme.grid_columns} imageRatio={previewTheme.image_ratio} />}
+        />
+      ) : null}
+
+      {submitError ? <FormFeedback kind="error" title="No pudimos guardar" message={submitError} /> : null}
+      {!submitError && saved ? <FormFeedback kind="success" title="Apariencia guardada" message="La tienda ya refleja los cambios." /> : null}
 
       <div className="flex justify-end">
         <SaveButton isLoading={isSubmitting} isSaved={saved} label="Guardar apariencia" />
@@ -247,677 +269,436 @@ export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
   )
 }
 
-// ─── Sections ────────────────────────────────────────────────────────────────
-
-function FontsSection({
-  get,
-  sv,
-  applyPreset,
-  showAdvanced,
-  onToggleAdvanced,
-  previewThemeVars,
-}: {
-  get: Get
-  sv: SV
-  applyPreset: (preset: StoreThemeInput['font_preset']) => void
-  showAdvanced: boolean
-  onToggleAdvanced: () => void
-  previewThemeVars: React.CSSProperties
-}) {
-  return (
-    <div className="surface-panel premium-ring space-y-6 rounded-[30px] px-5 py-6 sm:px-6">
-      <SectionHeader icon={Type} title="Tipografía" hint="Elige un estilo de letra para tu tienda." />
-
-      {/* Presets */}
-      <div>
-        <p className="mb-3 text-sm font-medium text-neutral-200">Estilo general</p>
-        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-          {FONT_PRESETS.map((preset) => {
-            const active = get('font_preset') === preset.value
-            return (
-              <button
-                key={preset.value}
-                type="button"
-                onClick={() => applyPreset(preset.value)}
-                className={cn(
-                  'rounded-[22px] border p-4 text-left transition',
-                  active
-                    ? 'border-emerald-300/30 bg-emerald-400/10'
-                    : 'border-white/8 bg-white/4 hover:bg-white/6',
-                )}
-              >
-                <p className="text-sm font-semibold text-white">{preset.label}</p>
-                <p className="mt-1 text-xs leading-5 text-neutral-400">{preset.description}</p>
-                <p className="mt-3 text-[11px] text-neutral-500">
-                  {FONT_OPTIONS.find((f) => f.value === preset.heading_font)?.label} +{' '}
-                  {FONT_OPTIONS.find((f) => f.value === preset.body_font)?.label}
-                </p>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Font selects */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <FormField label="Fuente de títulos" hint="Para el hero y secciones clave.">
-          <Select
-            value={get('heading_font')}
-            onValueChange={(val) => sv('heading_font', val)}
-          >
-            <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="border-white/10 bg-neutral-950 text-white">
-              {FONT_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  <div className="py-1">
-                    <p className="text-sm font-semibold">{opt.label}</p>
-                    <p
-                      className="mt-0.5 text-[12px] text-neutral-400"
-                      style={{ fontFamily: FONT_FAMILY_MAP[opt.value] }}
-                    >
-                      Tu tienda vende mejor cuando se ve premium
-                    </p>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </FormField>
-
-        <FormField label="Fuente de texto" hint="Para descripciones y fichas de producto.">
-          <Select
-            value={get('body_font')}
-            onValueChange={(val) => {
-              sv('body_font', val)
-              sv('font_family', val)
-            }}
-          >
-            <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="border-white/10 bg-neutral-950 text-white">
-              {FONT_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  <div className="py-1">
-                    <p className="text-sm font-semibold">{opt.label}</p>
-                    <p
-                      className="mt-0.5 text-[12px] text-neutral-400"
-                      style={{ fontFamily: FONT_FAMILY_MAP[opt.value] }}
-                    >
-                      La lectura fluida convierte visitas en pedidos
-                    </p>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </FormField>
-      </div>
-
-      {/* Advanced toggle */}
-      <button
-        type="button"
-        onClick={onToggleAdvanced}
-        className="flex items-center gap-2 text-sm text-neutral-400 transition hover:text-white"
-      >
-        {showAdvanced ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-        {showAdvanced ? 'Ocultar ajustes finos' : 'Ajustes finos de escala y peso'}
-      </button>
-
-      {showAdvanced && (
-        <div className="grid gap-4 sm:grid-cols-3">
-          <FormField label="Escala de títulos" hint="Cuánta presencia tiene el titular.">
-            <Select
-              value={get('heading_scale')}
-              onValueChange={(val) => sv('heading_scale', val)}
-            >
-              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                <SelectItem value="compact">Compacta</SelectItem>
-                <SelectItem value="default">Balanceada</SelectItem>
-                <SelectItem value="large">Expansiva</SelectItem>
-              </SelectContent>
-            </Select>
-          </FormField>
-
-          <FormField label="Peso de los títulos" hint="Más delicado o más firme.">
-            <Select
-              value={get('heading_weight')}
-              onValueChange={(val) => sv('heading_weight', val)}
-            >
-              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                {HEADING_WEIGHT_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormField>
-
-          <FormField label="Escala de texto" hint="Qué tan descansada se siente la lectura.">
-            <Select
-              value={get('body_scale')}
-              onValueChange={(val) => sv('body_scale', val)}
-            >
-              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                <SelectItem value="sm">Compacta</SelectItem>
-                <SelectItem value="base">Balanceada</SelectItem>
-                <SelectItem value="lg">Amplia</SelectItem>
-              </SelectContent>
-            </Select>
-          </FormField>
-        </div>
-      )}
-
-      <TypographyPreviewPanel previewThemeVars={previewThemeVars} />
-    </div>
-  )
-}
-
-function ColorsSection({
-  get,
-  sv,
-  register,
-  errors,
-  previewThemeVars,
-  contrasts,
-}: {
-  get: Get
-  sv: SV
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  register: any
-  errors: FieldErrors<StoreThemeInput>
-  previewThemeVars: React.CSSProperties
-  contrasts: { bg: string; surface: string; primary: string }
-}) {
-  return (
-    <div className="surface-panel premium-ring space-y-6 rounded-[30px] px-5 py-6 sm:px-6">
-      <SectionHeader icon={Palette} title="Colores" hint="Define la paleta visual de tu tienda." />
-
-      {/* 6 color pickers */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {COLOR_FIELDS.map((field) => {
-          const value = get(field.name) as string
-          return (
-            <div
-              key={field.name}
-              className="rounded-[22px] border border-white/8 bg-white/4 p-4"
-            >
-              <Label className="text-sm font-medium text-white">{field.label}</Label>
-              <p className="mt-0.5 text-xs text-neutral-500">{field.hint}</p>
-              <div className="mt-3 flex items-center gap-3">
-                <label
-                  className="relative size-11 shrink-0 overflow-hidden rounded-xl border border-white/10"
-                  style={{ backgroundColor: value }}
-                >
-                  <input
-                    type="color"
-                    value={value}
-                    onChange={(e) => sv(field.name, e.target.value)}
-                    className="absolute inset-0 cursor-pointer opacity-0"
-                  />
-                </label>
-                <input
-                  {...register(field.name)}
-                  className="h-10 flex-1 rounded-xl border border-white/10 bg-black/10 px-3 font-mono text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/30"
-                />
-              </div>
-              {errors[field.name] ? (
-                <p className="mt-1.5 text-xs text-red-300">{errors[field.name]?.message}</p>
-              ) : null}
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Visual mode */}
-      <div>
-        <p className="mb-3 text-sm font-medium text-neutral-200">Modo visual</p>
-        <div className="grid grid-cols-3 gap-2">
-          {VISUAL_MODE_OPTIONS.map((opt) => {
-            const active = get('visual_mode') === opt.value
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => sv('visual_mode', opt.value)}
-                className={cn(
-                  'rounded-[20px] border p-3 text-left transition',
-                  active
-                    ? 'border-emerald-300/30 bg-emerald-400/10'
-                    : 'border-white/8 bg-black/10 hover:bg-white/6',
-                )}
-              >
-                <p className="text-sm font-semibold text-white">{opt.label}</p>
-                <p className="mt-0.5 text-xs text-neutral-500">{opt.description}</p>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Contrast */}
-      <div>
-        <p className="mb-3 text-sm font-medium text-neutral-200">Contraste</p>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <ContrastCard
-            label="Texto sobre fondo"
-            value={`${contrasts.bg}:1`}
-            description="Legibilidad general de la tienda."
-            tone={Number(contrasts.bg) >= 4.5 ? 'good' : 'warning'}
-          />
-          <ContrastCard
-            label="Texto sobre card"
-            value={`${contrasts.surface}:1`}
-            description="Cards, paneles y overlays."
-            tone={Number(contrasts.surface) >= 4.5 ? 'good' : 'warning'}
-          />
-          <ContrastCard
-            label="Texto del botón CTA"
-            value={`${contrasts.primary}:1`}
-            description="Botones de acción principal."
-            tone={Number(contrasts.primary) >= 4.5 ? 'good' : 'warning'}
-          />
-        </div>
-      </div>
-
-      <LandingColorPreview previewThemeVars={previewThemeVars} />
-    </div>
-  )
-}
-
-function LayoutSection({
-  get,
-  sv,
-  showAdvanced,
-  onToggleAdvanced,
-}: {
-  get: Get
-  sv: SV
-  showAdvanced: boolean
-  onToggleAdvanced: () => void
-}) {
-  return (
-    <div className="surface-panel premium-ring space-y-6 rounded-[30px] px-5 py-6 sm:px-6">
-      <SectionHeader
-        icon={Layers3}
-        title="Diseño"
-        hint="Personaliza cómo se ven las tarjetas, botones y el espacio entre elementos."
-      />
-
-      <OptionGroup label="Tarjetas" hint="El estilo visual de cada producto.">
-        {CARD_STYLES.map((opt) => (
-          <OptionButton
-            key={opt.value}
-            label={opt.label}
-            hint={opt.hint}
-            active={get('card_style') === opt.value}
-            onClick={() => sv('card_style', opt.value)}
-          />
-        ))}
-      </OptionGroup>
-
-      <OptionGroup label="Botones" hint="La forma del botón de acción principal.">
-        {BUTTON_STYLES.map((opt) => (
-          <OptionButton
-            key={opt.value}
-            label={opt.label}
-            hint={opt.hint}
-            active={get('button_style') === opt.value}
-            onClick={() => sv('button_style', opt.value)}
-          />
-        ))}
-      </OptionGroup>
-
-      <OptionGroup label="Espacio entre elementos" hint="Cuánto aire hay en la tienda.">
-        {DENSITY_OPTIONS.map((opt) => (
-          <OptionButton
-            key={opt.value}
-            label={opt.label}
-            hint={opt.hint}
-            active={get('ui_density') === opt.value}
-            onClick={() => sv('ui_density', opt.value)}
-          />
-        ))}
-      </OptionGroup>
-
-      {/* Catalog */}
-      <div>
-        <p className="mb-1 text-sm font-medium text-neutral-200">Catálogo</p>
-        <p className="mb-4 text-xs text-neutral-500">
-          Cómo se presenta la grilla de productos.
-        </p>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <FormField label="Columnas">
-            <Select
-              value={String(get('grid_columns'))}
-              onValueChange={(val) => sv('grid_columns', Number(val))}
-            >
-              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                {GRID_COLUMNS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={String(opt.value)}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormField>
-
-          <FormField label="Ancho del contenido">
-            <Select
-              value={get('container_width')}
-              onValueChange={(val) => sv('container_width', val)}
-            >
-              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                <SelectItem value="sm">Contenido</SelectItem>
-                <SelectItem value="md">Medio</SelectItem>
-                <SelectItem value="lg">Amplio</SelectItem>
-                <SelectItem value="xl">Grande</SelectItem>
-                <SelectItem value="full">Completo</SelectItem>
-              </SelectContent>
-            </Select>
-          </FormField>
-
-          <FormField label="Forma de la imagen">
-            <Select
-              value={get('image_ratio')}
-              onValueChange={(val) => sv('image_ratio', val)}
-            >
-              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                {IMAGE_RATIO_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormField>
-        </div>
-      </div>
-
-      {/* Advanced */}
-      <button
-        type="button"
-        onClick={onToggleAdvanced}
-        className="flex items-center gap-2 text-sm text-neutral-400 transition hover:text-white"
-      >
-        {showAdvanced ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-        {showAdvanced ? 'Ocultar ajustes avanzados' : 'Ver ajustes avanzados'}
-      </button>
-
-      {showAdvanced && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField label="Espaciado entre bloques" hint="Cuánto respiro hay entre secciones.">
-            <Select
-              value={get('spacing_scale')}
-              onValueChange={(val) => sv('spacing_scale', val)}
-            >
-              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                <SelectItem value="tight">Aire contenido</SelectItem>
-                <SelectItem value="balanced">Aire balanceado</SelectItem>
-                <SelectItem value="airy">Aire amplio</SelectItem>
-              </SelectContent>
-            </Select>
-          </FormField>
-
-          <FormField label="Redondeo de esquinas" hint="Qué tan suave se siente la interfaz.">
-            <Select
-              value={get('border_radius')}
-              onValueChange={(val) => sv('border_radius', val)}
-            >
-              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                {BORDER_RADIUS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormField>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function SectionHeader({
+function EditorShell({
   icon: Icon,
   title,
   hint,
+  controls,
+  preview,
 }: {
   icon: React.ElementType
   title: string
   hint: string
+  controls: React.ReactNode
+  preview: React.ReactNode
 }) {
   return (
-    <div className="flex items-start gap-3">
-      <div className="mt-0.5 flex size-10 items-center justify-center rounded-2xl bg-white/6">
-        <Icon className="size-4 text-emerald-300" />
+    <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+      <div className="admin-surface rounded-[30px] p-6">
+        <div className="mb-6 flex items-start gap-3">
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-white/[0.05]">
+            <Icon className="size-4 text-emerald-200" />
+          </div>
+          <div>
+            <h3 className="text-[1.35rem] font-semibold tracking-[-0.04em] text-white">{title}</h3>
+            <p className="mt-1 text-sm text-neutral-400">{hint}</p>
+          </div>
+        </div>
+        {controls}
       </div>
-      <div>
-        <h3 className="font-heading text-xl font-semibold tracking-[-0.04em] text-white">
-          {title}
-        </h3>
-        <p className="mt-1 text-sm text-neutral-400">{hint}</p>
-      </div>
+
+      <div className="xl:sticky xl:top-6 xl:self-start">{preview}</div>
+    </section>
+  )
+}
+
+function VisualGrid({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="mb-3 text-sm font-semibold text-white">{title}</p>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{children}</div>
     </div>
   )
 }
 
-function FormField({
-  label,
-  hint,
-  children,
+function SegmentGroup({
+  title,
+  options,
+  selected,
+  onChange,
 }: {
-  label: string
-  hint?: string
-  children: React.ReactNode
+  title: string
+  options: VisualOption[]
+  selected: string
+  onChange: (value: string) => void
 }) {
   return (
     <div>
-      <Label className="mb-2 block text-sm font-medium text-neutral-200">{label}</Label>
-      {hint ? <p className="mb-2 text-xs text-neutral-500">{hint}</p> : null}
-      {children}
+      <p className="mb-3 text-sm font-semibold text-white">{title}</p>
+      <div className="grid grid-cols-3 gap-2">
+        {options.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onChange(option.value)}
+            className={cn(
+              'rounded-[18px] px-3 py-3 text-sm transition',
+              selected === option.value ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-300',
+            )}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
 
-function OptionGroup({
-  label,
-  hint,
-  children,
-}: {
-  label: string
-  hint?: string
-  children: React.ReactNode
-}) {
+function ContrastStat({ label, value }: { label: string; value: string }) {
+  const numeric = Number(value)
   return (
-    <div>
-      <p className="mb-1 text-sm font-medium text-neutral-200">{label}</p>
-      {hint ? <p className="mb-3 text-xs text-neutral-500">{hint}</p> : null}
-      <div className="grid grid-cols-3 gap-2">{children}</div>
-    </div>
-  )
-}
-
-function OptionButton({
-  label,
-  hint,
-  active,
-  onClick,
-}: {
-  label: string
-  hint?: string
-  active: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'rounded-[20px] border px-4 py-3 text-left transition',
-        active
-          ? 'border-emerald-300/30 bg-emerald-400/10'
-          : 'border-white/8 bg-white/4 hover:bg-white/6',
-      )}
-    >
-      <p className="text-sm font-medium text-white">{label}</p>
-      {hint ? <p className="mt-0.5 text-[11px] text-neutral-500">{hint}</p> : null}
-    </button>
-  )
-}
-
-function ContrastCard({
-  label,
-  value,
-  description,
-  tone,
-}: {
-  label: string
-  value: string
-  description: string
-  tone: 'good' | 'warning'
-}) {
-  return (
-    <div className="rounded-[22px] border border-white/8 bg-black/10 p-4">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-neutral-300">{label}</p>
-        <span
-          className={cn(
-            'shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]',
-            tone === 'good'
-              ? 'border border-emerald-300/20 bg-emerald-400/10 text-emerald-200'
-              : 'border border-amber-300/20 bg-amber-400/10 text-amber-200',
-          )}
-        >
-          {tone === 'good' ? 'OK' : 'Revisar'}
+    <div className="admin-surface-muted rounded-[20px] p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">{label}</p>
+        <span className={cn('rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]', numeric >= 4.5 ? 'bg-emerald-400/12 text-emerald-200' : 'bg-amber-400/12 text-amber-200')}>
+          {numeric >= 4.5 ? 'OK' : 'Revisar'}
         </span>
       </div>
       <div className="mt-3 flex items-center gap-2">
-        <Contrast className="size-4 shrink-0 text-emerald-300" />
-        <p className="text-lg font-semibold tracking-tight text-white">{value}</p>
+        <Contrast className="size-4 text-emerald-200" />
+        <p className="text-lg font-semibold text-white">{value}:1</p>
       </div>
-      <p className="mt-1 text-xs text-neutral-500">{description}</p>
     </div>
   )
 }
 
-// ─── Previews ─────────────────────────────────────────────────────────────────
-
-function TypographyPreviewPanel({ previewThemeVars }: { previewThemeVars: React.CSSProperties }) {
+function FontsControls({
+  theme,
+  applyPreset,
+  setThemeValue,
+}: {
+  theme: StoreTheme
+  applyPreset: (value: StoreThemeInput['font_preset']) => void
+  setThemeValue: <K extends keyof StoreThemeInput>(name: K, value: StoreThemeInput[K]) => void
+}) {
   return (
-    <div
-      className="overflow-hidden rounded-[26px] border border-white/8"
-      style={{
-        ...previewThemeVars,
-        background:
-          'linear-gradient(180deg, color-mix(in srgb, var(--store-bg) 94%, white 6%), var(--store-surface))',
-      }}
-    >
-      <div className="border-b border-white/8 px-5 py-3">
-        <p
-          className="text-[11px] font-semibold uppercase tracking-[0.2em]"
-          style={{ color: 'var(--store-muted-text)' }}
-        >
-          Vista previa tipográfica
-        </p>
+    <div className="space-y-6">
+      <VisualGrid title="Preset tipografico">
+        {FONT_PRESETS.map((preset) => (
+          <button
+            key={preset.value}
+            type="button"
+            onClick={() => applyPreset(preset.value)}
+            className={cn(
+              'rounded-[22px] border p-4 text-left transition',
+              theme.font_preset === preset.value ? 'admin-surface-selected' : 'admin-button-soft',
+            )}
+          >
+            <p className="text-sm font-semibold text-white">{preset.label}</p>
+            <p className="mt-3 text-[1.05rem] font-semibold text-white" style={{ fontFamily: FONT_FAMILY_MAP[preset.heading_font] }}>
+              Premium store
+            </p>
+            <p className="text-xs text-neutral-400" style={{ fontFamily: FONT_FAMILY_MAP[preset.body_font] }}>
+              Clear hierarchy
+            </p>
+          </button>
+        ))}
+      </VisualGrid>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <VisualGrid title="Fuente principal">
+          {FONT_OPTIONS.map((option) => (
+            <button
+              key={`heading-${option.value}`}
+              type="button"
+              onClick={() => setThemeValue('heading_font', option.value)}
+              className={cn(
+                'rounded-[22px] border p-4 text-left transition',
+                theme.heading_font === option.value ? 'admin-surface-selected' : 'admin-button-soft',
+              )}
+            >
+              <p className="text-sm font-semibold text-white">{option.label}</p>
+              <p className="mt-3 text-[1.25rem] font-semibold leading-tight text-white" style={{ fontFamily: FONT_FAMILY_MAP[option.value] }}>
+                Tu tienda vende mejor cuando se ve premium
+              </p>
+            </button>
+          ))}
+        </VisualGrid>
+
+        <VisualGrid title="Fuente secundaria">
+          {FONT_OPTIONS.map((option) => (
+            <button
+              key={`body-${option.value}`}
+              type="button"
+              onClick={() => {
+                setThemeValue('body_font', option.value)
+                setThemeValue('font_family', option.value)
+              }}
+              className={cn(
+                'rounded-[22px] border p-4 text-left transition',
+                theme.body_font === option.value ? 'admin-surface-selected' : 'admin-button-soft',
+              )}
+            >
+              <p className="text-sm font-semibold text-white">{option.label}</p>
+              <p className="mt-3 text-sm leading-6 text-neutral-300" style={{ fontFamily: FONT_FAMILY_MAP[option.value] }}>
+                Vista previa de jerarquia, lectura y personalidad visual.
+              </p>
+            </button>
+          ))}
+        </VisualGrid>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-3">
+        <SegmentGroup
+          title="Escala de titulos"
+          options={SCALE_OPTIONS}
+          selected={theme.heading_scale}
+          onChange={(value) => setThemeValue('heading_scale', value as StoreThemeInput['heading_scale'])}
+        />
+        <SegmentGroup
+          title="Peso"
+          options={HEADING_WEIGHT_OPTIONS.map((item) => ({ value: item.value, label: item.label }))}
+          selected={theme.heading_weight}
+          onChange={(value) => setThemeValue('heading_weight', value as StoreThemeInput['heading_weight'])}
+        />
+        <SegmentGroup
+          title="Escala de texto"
+          options={BODY_SCALE_OPTIONS}
+          selected={theme.body_scale}
+          onChange={(value) => setThemeValue('body_scale', value as StoreThemeInput['body_scale'])}
+        />
+      </div>
+    </div>
+  )
+}
+
+function ColorsControls({
+  theme,
+  setThemeValue,
+  register,
+  errors,
+  contrastTextOnBg,
+  contrastTextOnSurface,
+  contrastPrimary,
+}: {
+  theme: StoreTheme
+  setThemeValue: <K extends keyof StoreThemeInput>(name: K, value: StoreThemeInput[K]) => void
+  register: ReturnType<typeof useForm<StoreThemeInput>>['register']
+  errors: ReturnType<typeof useForm<StoreThemeInput>>['formState']['errors']
+  contrastTextOnBg: string
+  contrastTextOnSurface: string
+  contrastPrimary: string
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2">
+        {COLOR_FIELDS.map((field) => {
+          const value = theme[field.name]
+          return (
+            <label key={field.name} className="admin-surface-muted rounded-[22px] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold text-white">{field.label}</span>
+                <span className="size-8 rounded-xl border border-white/10" style={{ backgroundColor: value }} />
+              </div>
+              <div className="mt-3 flex items-center gap-3">
+                <input
+                  type="color"
+                  value={value}
+                  onChange={(event) => setThemeValue(field.name, event.target.value as StoreThemeInput[typeof field.name])}
+                  className="size-11 cursor-pointer rounded-xl border border-white/10 bg-transparent"
+                />
+                <input
+                  {...register(field.name)}
+                  className="h-11 flex-1 rounded-xl border border-white/10 bg-black/10 px-3 font-mono text-sm text-white"
+                />
+              </div>
+              {errors[field.name] ? <p className="mt-2 text-xs text-red-300">{errors[field.name]?.message}</p> : null}
+            </label>
+          )
+        })}
+      </div>
+
+      <SegmentGroup
+        title="Modo visual"
+        options={VISUAL_MODE_OPTIONS.map((item) => ({ value: item.value, label: item.label }))}
+        selected={theme.visual_mode}
+        onChange={(value) => setThemeValue('visual_mode', value as StoreThemeInput['visual_mode'])}
+      />
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <ContrastStat label="Texto / fondo" value={contrastTextOnBg} />
+        <ContrastStat label="Texto / surface" value={contrastTextOnSurface} />
+        <ContrastStat label="CTA" value={contrastPrimary} />
+      </div>
+    </div>
+  )
+}
+
+function LayoutControls({
+  theme,
+  setThemeValue,
+}: {
+  theme: StoreTheme
+  setThemeValue: <K extends keyof StoreThemeInput>(name: K, value: StoreThemeInput[K]) => void
+}) {
+  return (
+    <div className="space-y-6">
+      <VisualGrid title="Tarjetas">
+        {CARD_OPTIONS.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => setThemeValue('card_style', option.value as StoreThemeInput['card_style'])}
+            className={cn(
+              'rounded-[22px] border p-4 text-left transition',
+              theme.card_style === option.value ? 'admin-surface-selected' : 'admin-button-soft',
+            )}
+          >
+            <CardStylePreview variant={option.value} />
+            <p className="mt-3 text-sm font-semibold text-white">{option.label}</p>
+          </button>
+        ))}
+      </VisualGrid>
+
+      <VisualGrid title="Botones">
+        {BUTTON_OPTIONS.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => setThemeValue('button_style', option.value as StoreThemeInput['button_style'])}
+            className={cn(
+              'rounded-[22px] border p-4 text-left transition',
+              theme.button_style === option.value ? 'admin-surface-selected' : 'admin-button-soft',
+            )}
+          >
+            <ButtonStylePreview variant={option.value} />
+            <p className="mt-3 text-sm font-semibold text-white">{option.label}</p>
+          </button>
+        ))}
+      </VisualGrid>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <VisualGrid title="Densidad">
+          {DENSITY_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setThemeValue('ui_density', option.value as StoreThemeInput['ui_density'])}
+              className={cn(
+                'rounded-[22px] border p-4 text-left transition',
+                theme.ui_density === option.value ? 'admin-surface-selected' : 'admin-button-soft',
+              )}
+            >
+              <DensityPreview variant={option.value} />
+              <p className="mt-3 text-sm font-semibold text-white">{option.label}</p>
+            </button>
+          ))}
+        </VisualGrid>
+
+        <VisualGrid title="Spacing">
+          {SPACING_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setThemeValue('spacing_scale', option.value as StoreThemeInput['spacing_scale'])}
+              className={cn(
+                'rounded-[22px] border p-4 text-left transition',
+                theme.spacing_scale === option.value ? 'admin-surface-selected' : 'admin-button-soft',
+              )}
+            >
+              <SpacingPreview variant={option.value} />
+              <p className="mt-3 text-sm font-semibold text-white">{option.label}</p>
+            </button>
+          ))}
+        </VisualGrid>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <VisualGrid title="Ancho">
+          {WIDTH_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setThemeValue('container_width', option.value as StoreThemeInput['container_width'])}
+              className={cn(
+                'rounded-[22px] border p-4 text-left transition',
+                theme.container_width === option.value ? 'admin-surface-selected' : 'admin-button-soft',
+              )}
+            >
+              <WidthPreview variant={option.value} />
+              <p className="mt-3 text-sm font-semibold text-white">{option.label}</p>
+            </button>
+          ))}
+        </VisualGrid>
+
+        <VisualGrid title="Columnas">
+          {GRID_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setThemeValue('grid_columns', option.value as 2 | 3 | 4)}
+              className={cn(
+                'rounded-[22px] border p-4 text-left transition',
+                theme.grid_columns === option.value ? 'admin-surface-selected' : 'admin-button-soft',
+              )}
+            >
+              <GridPreview columns={option.value} />
+              <p className="mt-3 text-sm font-semibold text-white">{option.label}</p>
+            </button>
+          ))}
+        </VisualGrid>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <VisualGrid title="Ratio de imagen">
+          {IMAGE_RATIO_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setThemeValue('image_ratio', option.value as StoreThemeInput['image_ratio'])}
+              className={cn(
+                'rounded-[22px] border p-4 text-left transition',
+                theme.image_ratio === option.value ? 'admin-surface-selected' : 'admin-button-soft',
+              )}
+            >
+              <ImageRatioPreview ratio={option.value} />
+              <p className="mt-3 text-sm font-semibold text-white">{option.label}</p>
+            </button>
+          ))}
+        </VisualGrid>
+
+        <VisualGrid title="Redondeo">
+          {BORDER_RADIUS_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setThemeValue('border_radius', option.value as StoreThemeInput['border_radius'])}
+              className={cn(
+                'rounded-[22px] border p-4 text-left transition',
+                theme.border_radius === option.value ? 'admin-surface-selected' : 'admin-button-soft',
+              )}
+            >
+              <RadiusPreview radius={option.value} />
+              <p className="mt-3 text-sm font-semibold text-white">{option.label}</p>
+            </button>
+          ))}
+        </VisualGrid>
+      </div>
+    </div>
+  )
+}
+
+function TypographyLivePreview({ previewThemeVars }: { previewThemeVars: React.CSSProperties }) {
+  return (
+    <div className="admin-surface-elevated overflow-hidden rounded-[28px]" style={previewThemeVars}>
+      <div className="border-b border-white/8 px-5 py-4">
+        <p className="admin-label" style={{ color: 'var(--store-muted-text)' }}>Preview tipografico</p>
       </div>
       <div className="space-y-5 px-5 py-5">
-        <div>
-          <p
-            className="store-heading text-3xl leading-tight"
-            style={{
-              color: 'var(--store-text)',
-              transform: 'scale(var(--store-heading-scale))',
-              transformOrigin: 'left top',
-            }}
-          >
-            Tu tienda vende mejor cuando se ve premium
-          </p>
-          <p
-            className="mt-3 text-sm leading-6"
-            style={{
-              color: 'var(--store-soft-text)',
-              fontSize: 'calc(0.95rem * var(--store-body-scale))',
-            }}
-          >
-            Cada decisión tipográfica se ve aquí antes de guardar.
-          </p>
-          <button
-            type="button"
-            className="mt-4 rounded-[var(--store-button-radius)] px-5 py-2.5 text-sm font-semibold"
-            style={{
-              background:
-                'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
-              color: 'var(--store-primary-contrast)',
-            }}
-          >
-            Comprar ahora
-          </button>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div
-            className="rounded-[calc(var(--store-card-radius)*0.88)] border p-4"
-            style={{
-              borderColor: 'var(--store-card-border)',
-              background: 'var(--store-card-background)',
-            }}
-          >
-            <p
-              className="text-[10px] font-semibold uppercase tracking-[0.2em]"
-              style={{ color: 'var(--store-muted-text)' }}
-            >
-              Fuente de títulos
-            </p>
-            <p className="store-heading mt-2 text-lg" style={{ color: 'var(--store-text)' }}>
-              Título con claridad
-            </p>
+        <h4 className="store-heading text-[2rem] leading-[0.95]" style={{ color: 'var(--store-text)', transform: 'scale(var(--store-heading-scale))', transformOrigin: 'left top' }}>
+          Tu tienda vende mejor cuando se ve premium
+        </h4>
+        <p className="text-sm leading-7" style={{ color: 'var(--store-soft-text)', fontSize: 'calc(0.96rem * var(--store-body-scale))' }}>
+          Vista previa de jerarquia, lectura y personalidad visual.
+        </p>
+        <div className="grid gap-3">
+          <div className="rounded-[var(--store-card-radius)] border p-4" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Hero title</p>
+            <p className="store-heading mt-2 text-xl" style={{ color: 'var(--store-text)' }}>Titulos con presencia</p>
           </div>
-          <div
-            className="rounded-[calc(var(--store-card-radius)*0.88)] border p-4"
-            style={{
-              borderColor: 'var(--store-card-border)',
-              background: 'var(--store-card-background)',
-            }}
-          >
-            <p
-              className="text-[10px] font-semibold uppercase tracking-[0.2em]"
-              style={{ color: 'var(--store-muted-text)' }}
-            >
-              Fuente de texto
-            </p>
-            <p className="mt-2 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
-              Texto más claro y más fácil de leer.
-            </p>
+          <div className="rounded-[var(--store-card-radius)] border p-4" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Body copy</p>
+            <p className="mt-2 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>Textos faciles de leer, precios claros y menos esfuerzo para decidir.</p>
           </div>
         </div>
       </div>
@@ -925,139 +706,173 @@ function TypographyPreviewPanel({ previewThemeVars }: { previewThemeVars: React.
   )
 }
 
-function LandingColorPreview({ previewThemeVars }: { previewThemeVars: React.CSSProperties }) {
+function ColorStoreMockup({ previewThemeVars }: { previewThemeVars: React.CSSProperties }) {
   return (
-    <div
-      className="overflow-hidden rounded-[26px] border border-white/8"
-      style={{ ...previewThemeVars, backgroundColor: 'var(--store-bg)' }}
-    >
-      <div
-        className="flex items-center justify-between gap-3 border-b px-5 py-3"
-        style={{
-          borderColor: 'var(--store-card-border)',
-          backgroundColor: withAlpha('#ffffff', 0.03),
-        }}
-      >
+    <div className="admin-surface-elevated overflow-hidden rounded-[28px]" style={previewThemeVars}>
+      <div className="flex items-center justify-between border-b px-5 py-4" style={{ borderColor: 'var(--store-card-border)' }}>
         <div>
-          <p className="store-heading text-sm" style={{ color: 'var(--store-text)' }}>
-            Navbar
-          </p>
-          <p className="text-xs" style={{ color: 'var(--store-muted-text)' }}>
-            Marca, CTA y contraste
-          </p>
+          <p className="store-heading text-base" style={{ color: 'var(--store-text)' }}>Navbar</p>
+          <p className="text-xs" style={{ color: 'var(--store-muted-text)' }}>Marca y CTA</p>
         </div>
-        <button
-          type="button"
-          className="rounded-[var(--store-button-radius)] px-4 py-2 text-sm font-semibold"
-          style={{
-            background:
-              'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
-            color: 'var(--store-primary-contrast)',
-          }}
-        >
-          CTA
+        <button type="button" className="rounded-[var(--store-button-radius)] px-4 py-2 text-sm font-semibold" style={{ background: 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))', color: 'var(--store-primary-contrast)' }}>
+          Comprar
         </button>
       </div>
-
       <div className="space-y-4 px-5 py-5">
-        <div
-          className="rounded-[calc(var(--store-card-radius)*1.05)] p-5"
-          style={{
-            background:
-              'linear-gradient(145deg, color-mix(in srgb, var(--store-surface) 88%, transparent), color-mix(in srgb, var(--store-bg) 88%, var(--store-text) 12%))',
-            border: '1px solid var(--store-card-border)',
-          }}
-        >
-          <span
-            className="inline-flex rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em]"
-            style={{
-              backgroundColor: withAlpha(mixHexColors('#ffffff', '#000000', 0.1), 0.05),
-              color: 'var(--store-secondary)',
-              border: '1px solid color-mix(in srgb, var(--store-secondary) 18%, transparent)',
-            }}
-          >
+        <div className="rounded-[calc(var(--store-card-radius)*1.05)] border p-5" style={{ borderColor: 'var(--store-card-border)', background: 'linear-gradient(145deg, color-mix(in srgb, var(--store-surface) 88%, transparent), color-mix(in srgb, var(--store-bg) 88%, var(--store-text) 12%))' }}>
+          <span className="inline-flex rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ backgroundColor: withAlpha('#ffffff', 0.06), color: 'var(--store-secondary)', border: '1px solid color-mix(in srgb, var(--store-secondary) 18%, transparent)' }}>
             Badge
           </span>
-          <h3
-            className="store-heading mt-4 text-2xl leading-tight"
-            style={{ color: 'var(--store-text)' }}
-          >
-            Hero
-          </h3>
-          <p className="mt-2 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
-            Así se ve la paleta en acción antes de guardar.
-          </p>
-          <div className="mt-4 flex gap-3">
-            <button
-              type="button"
-              className="rounded-[var(--store-button-radius)] px-4 py-2 text-sm font-semibold"
-              style={{
-                background:
-                  'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
-                color: 'var(--store-primary-contrast)',
-              }}
-            >
-              Comprar
-            </button>
-            <button
-              type="button"
-              className="rounded-[var(--store-button-radius)] border px-4 py-2 text-sm"
-              style={{
-                borderColor: 'var(--store-card-border)',
-                backgroundColor: 'color-mix(in srgb, var(--store-surface) 82%, transparent)',
-                color: 'var(--store-text)',
-              }}
-            >
-              Ver catálogo
-            </button>
+          <h4 className="store-heading mt-4 text-2xl" style={{ color: 'var(--store-text)' }}>Hero</h4>
+          <p className="mt-2 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>Mini mockup real para validar contraste y personalidad.</p>
+        </div>
+        <div className="rounded-[var(--store-card-radius)] border p-4" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
+          <div className="aspect-[4/3] rounded-[calc(var(--store-card-radius)*0.72)]" style={{ background: 'linear-gradient(145deg, color-mix(in srgb, var(--store-accent) 18%, transparent), color-mix(in srgb, var(--store-secondary) 14%, transparent))' }} />
+          <div className="mt-4 flex items-start justify-between gap-3">
+            <div>
+              <p className="store-heading text-lg" style={{ color: 'var(--store-text)' }}>Card</p>
+              <p className="mt-1 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>Precio legible y CTA claro.</p>
+            </div>
+            <p className="text-lg font-semibold" style={{ color: 'var(--store-primary)' }}>$42.000</p>
           </div>
         </div>
+        <div className="rounded-[calc(var(--store-card-radius)*0.82)] border-t pt-4" style={{ borderColor: 'var(--store-card-border)' }}>
+          <div className="flex items-center justify-between rounded-[calc(var(--store-card-radius)*0.72)] px-4 py-3" style={{ backgroundColor: withAlpha('#000000', 0.08) }}>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>Footer</p>
+            <span className="size-2.5 rounded-full" style={{ backgroundColor: 'var(--store-accent)' }} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
-        <div
-          className="rounded-[var(--store-card-radius)] border p-4"
-          style={{
-            borderColor: 'var(--store-card-border)',
-            background: 'var(--store-card-background)',
-            boxShadow: 'var(--store-card-shadow)',
-          }}
-        >
-          <div
-            className="aspect-[4/3] rounded-[calc(var(--store-card-radius)*0.75)]"
-            style={{
-              background:
-                'linear-gradient(145deg, color-mix(in srgb, var(--store-accent) 18%, transparent), color-mix(in srgb, var(--store-secondary) 14%, transparent))',
-            }}
-          />
-          <div className="mt-3 flex items-start justify-between gap-3">
-            <p className="store-heading text-base" style={{ color: 'var(--store-text)' }}>
-              Producto
-            </p>
-            <p className="text-base font-semibold" style={{ color: 'var(--store-primary)' }}>
-              $42.000
-            </p>
-          </div>
-        </div>
+function DesignLivePreview({
+  previewThemeVars,
+  columns,
+  imageRatio,
+}: {
+  previewThemeVars: React.CSSProperties
+  columns: number
+  imageRatio: string
+}) {
+  const previewCount = columns === 4 ? 4 : columns === 3 ? 3 : 2
+  const imageClass = imageRatio === '1:1' ? 'aspect-square' : imageRatio === '16:9' ? 'aspect-video' : imageRatio === '3:4' ? 'aspect-[3/4]' : 'aspect-[4/5]'
 
-        <div
-          className="rounded-[calc(var(--store-card-radius)*0.86)] border-t px-1 pt-4"
-          style={{ borderColor: 'var(--store-card-border)' }}
-        >
-          <div
-            className="flex items-center justify-between rounded-[calc(var(--store-card-radius)*0.8)] px-4 py-3"
-            style={{ backgroundColor: withAlpha('#000000', 0.08) }}
-          >
-            <p
-              className="text-[11px] font-semibold uppercase tracking-[0.2em]"
-              style={{ color: 'var(--store-muted-text)' }}
-            >
-              Footer
-            </p>
-            <span
-              className="size-2 rounded-full"
-              style={{ backgroundColor: 'var(--store-accent)' }}
-            />
+  return (
+    <div className="admin-surface-elevated overflow-hidden rounded-[28px]" style={previewThemeVars}>
+      <div className="border-b border-white/8 px-5 py-4">
+        <p className="admin-label" style={{ color: 'var(--store-muted-text)' }}>Preview de layout</p>
+      </div>
+      <div className="space-y-4 px-5 py-5">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-[var(--store-card-radius)] border p-4" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
+            <div className="space-y-[var(--store-space-cluster)]">
+              <div className="h-4 w-24 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.08) }} />
+              <div className="h-11 rounded-[calc(var(--store-card-radius)*0.7)]" style={{ backgroundColor: withAlpha('#ffffff', 0.06) }} />
+              <div className="h-11 rounded-[calc(var(--store-card-radius)*0.7)]" style={{ backgroundColor: withAlpha('#ffffff', 0.06) }} />
+            </div>
+          </div>
+          <div className="rounded-[var(--store-card-radius)] border p-4" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
+            <div className="flex flex-wrap gap-3">
+              <button type="button" className="rounded-[var(--store-button-radius)] px-4 py-2 text-sm font-semibold" style={{ background: 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))', color: 'var(--store-primary-contrast)' }}>Principal</button>
+              <button type="button" className="rounded-[var(--store-button-radius)] border px-4 py-2 text-sm" style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)' }}>Secundario</button>
+            </div>
           </div>
         </div>
+        <div className={`grid gap-3 ${previewCount === 4 ? 'grid-cols-4' : previewCount === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          {Array.from({ length: previewCount }).map((_, index) => (
+            <div key={index} className="space-y-2">
+              <div className={`${imageClass} rounded-[calc(var(--store-card-radius)*0.72)]`} style={{ background: 'linear-gradient(145deg, color-mix(in srgb, var(--store-accent) 18%, transparent), color-mix(in srgb, var(--store-secondary) 14%, transparent))' }} />
+              <div className="h-3 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.08) }} />
+              <div className="h-2.5 w-2/3 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.05) }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CardStylePreview({ variant }: { variant: string }) {
+  return (
+    <div className={cn('rounded-[18px] border p-3', variant === 'glass' ? 'bg-white/10 backdrop-blur-md' : variant === 'sharp' ? 'bg-white/[0.02]' : 'bg-white/[0.05]')} style={{ borderColor: variant === 'sharp' ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.08)', boxShadow: variant === 'soft' ? '0 14px 28px rgba(2,6,23,0.16)' : variant === 'glass' ? '0 18px 34px rgba(2,6,23,0.22)' : 'none' }}>
+      <div className="h-16 rounded-[14px] bg-white/10" />
+      <div className="mt-3 h-3 rounded-full bg-white/12" />
+      <div className="mt-2 h-3 w-2/3 rounded-full bg-white/8" />
+    </div>
+  )
+}
+
+function ButtonStylePreview({ variant }: { variant: string }) {
+  const radius = variant === 'pill' ? '9999px' : variant === 'square' ? '10px' : '18px'
+  return (
+    <div className="rounded-[18px] border border-white/8 bg-black/10 p-4">
+      <div className="inline-flex px-4 py-2 text-sm font-semibold" style={{ borderRadius: radius, background: 'linear-gradient(145deg,#2ee6a6,#6ff3df)', color: '#03110c' }}>
+        Comprar
+      </div>
+    </div>
+  )
+}
+
+function DensityPreview({ variant }: { variant: string }) {
+  const gap = variant === 'spacious' ? '0.9rem' : variant === 'comfortable' ? '0.65rem' : '0.4rem'
+  return (
+    <div className="rounded-[18px] border border-white/8 bg-black/10 p-4">
+      <div className="flex flex-col" style={{ gap }}>
+        <div className="h-3 rounded-full bg-white/14" />
+        <div className="h-8 rounded-[12px] bg-white/10" />
+        <div className="h-8 rounded-[12px] bg-white/10" />
+      </div>
+    </div>
+  )
+}
+
+function SpacingPreview({ variant }: { variant: string }) {
+  const padding = variant === 'airy' ? '1rem' : variant === 'balanced' ? '0.75rem' : '0.5rem'
+  return (
+    <div className="rounded-[18px] border border-white/8 bg-black/10" style={{ padding }}>
+      <div className="h-3 rounded-full bg-white/14" />
+      <div className="mt-3 h-10 rounded-[12px] bg-white/10" />
+    </div>
+  )
+}
+
+function WidthPreview({ variant }: { variant: string }) {
+  const width = variant === 'full' ? '100%' : variant === 'xl' ? '90%' : variant === 'lg' ? '78%' : variant === 'md' ? '66%' : '52%'
+  return (
+    <div className="rounded-[18px] border border-white/8 bg-black/10 p-4">
+      <div className="mx-auto h-16 rounded-[14px] bg-white/10" style={{ width }} />
+    </div>
+  )
+}
+
+function GridPreview({ columns }: { columns: number }) {
+  return (
+    <div className={`grid gap-2 rounded-[18px] border border-white/8 bg-black/10 p-4 ${columns === 4 ? 'grid-cols-4' : columns === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+      {Array.from({ length: columns }).map((_, index) => (
+        <div key={index} className="h-12 rounded-[12px] bg-white/10" />
+      ))}
+    </div>
+  )
+}
+
+function ImageRatioPreview({ ratio }: { ratio: string }) {
+  const cls = ratio === '1:1' ? 'aspect-square' : ratio === '16:9' ? 'aspect-video' : ratio === '3:4' ? 'aspect-[3/4]' : 'aspect-[4/5]'
+  return (
+    <div className="rounded-[18px] border border-white/8 bg-black/10 p-4">
+      <div className={`${cls} rounded-[14px] bg-white/10`} />
+    </div>
+  )
+}
+
+function RadiusPreview({ radius }: { radius: string }) {
+  const value = radius === 'full' ? '9999px' : radius === 'lg' ? '22px' : radius === 'md' ? '14px' : radius === 'sm' ? '8px' : '0px'
+  return (
+    <div className="rounded-[18px] border border-white/8 bg-black/10 p-4">
+      <div className="h-16 bg-white/10" style={{ borderRadius: value }} />
+      <div className="mt-3 inline-flex bg-white/12 px-4 py-2 text-xs" style={{ borderRadius: value }}>
+        CTA
       </div>
     </div>
   )

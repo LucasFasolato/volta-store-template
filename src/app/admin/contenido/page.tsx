@@ -15,7 +15,7 @@ export default async function ContenidoPage() {
   if (!storeData) redirect('/login')
 
   return (
-    <div className="p-4 sm:p-6 lg:p-10">
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       <AdminPageHeader
         title="Contenido"
         description="Ajusta el mensaje comercial y la imagen principal para que la tienda convierta mejor."

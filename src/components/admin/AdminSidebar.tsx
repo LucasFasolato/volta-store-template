@@ -45,29 +45,22 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
   }
 
   return (
-    <aside className="admin-gradient fixed inset-y-0 left-0 hidden w-72 px-4 py-4 lg:block">
-      <div className="surface-panel premium-ring flex h-full flex-col rounded-[34px] border border-white/8 p-4">
-        <div className="rounded-[26px] border border-white/8 bg-white/[0.035] p-4">
+    <aside className="fixed inset-y-0 left-0 z-20 hidden w-[19rem] px-4 py-4 lg:block">
+      <div className="admin-surface flex h-full flex-col rounded-[30px] p-4">
+        <div className="admin-surface-muted rounded-[24px] p-4">
           <div className="flex items-center gap-3">
-            <div
-              className="flex size-12 items-center justify-center rounded-2xl text-base font-black"
-              style={{
-                background: 'linear-gradient(145deg, #34d399, #5eead4)',
-                color: '#04130e',
-                boxShadow: '0 18px 36px rgba(52, 211, 153, 0.24)',
-              }}
-            >
+            <div className="admin-button-primary flex size-11 items-center justify-center rounded-2xl text-sm font-black">
               V
             </div>
             <div className="min-w-0">
-              <p className="truncate font-heading text-[15px] font-semibold tracking-[-0.03em] text-white">{storeName}</p>
-              <p className="mt-1 text-xs uppercase tracking-[0.18em] text-neutral-500">Control premium</p>
+              <p className="truncate font-heading text-base font-semibold tracking-[-0.03em] text-white">{storeName}</p>
+              <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-neutral-500">Admin workspace</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-6">
-          <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">Workspace</p>
+        <div className="mt-6 px-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">Workspace</p>
         </div>
 
         <nav className="mt-3 flex-1 space-y-1.5">
@@ -80,22 +73,20 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'group flex items-center gap-3 rounded-[20px] px-4 py-3 text-sm font-medium transition',
-                  active
-                    ? 'border border-emerald-300/20 bg-emerald-400/10 text-white shadow-[0_18px_40px_rgba(16,185,129,0.08)]'
-                    : 'border border-transparent text-neutral-400 hover:border-white/8 hover:bg-white/[0.045] hover:text-white',
+                  'group flex items-center gap-3 rounded-[20px] px-3 py-3 text-sm transition',
+                  active ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white',
                 )}
               >
                 <div
                   className={cn(
                     'flex size-9 items-center justify-center rounded-2xl transition',
-                    active ? 'bg-emerald-400/14 text-emerald-200' : 'bg-white/[0.035] text-neutral-500 group-hover:text-white',
+                    active ? 'bg-black/15 text-emerald-100' : 'bg-white/[0.04] text-neutral-500 group-hover:text-white',
                   )}
                 >
                   <Icon className="size-4 shrink-0" />
                 </div>
-                <span className="flex-1">{item.label}</span>
-                {active ? <span className="size-1.5 rounded-full bg-emerald-300" /> : null}
+                <span className="flex-1 font-medium">{item.label}</span>
+                {active ? <span className="size-1.5 rounded-full bg-emerald-200" /> : null}
               </Link>
             )
           })}
@@ -105,14 +96,14 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
           <Link
             href={`/tienda/${storeSlug}`}
             target="_blank"
-            className="flex items-center gap-3 rounded-[22px] border border-emerald-300/18 bg-[linear-gradient(135deg,rgba(46,230,166,0.2),rgba(111,243,223,0.12))] px-4 py-3.5 text-sm text-white shadow-[0_18px_40px_rgba(16,185,129,0.14)] transition hover:brightness-105"
+            className="admin-surface-elevated flex items-center gap-3 rounded-[22px] px-4 py-3.5 text-sm text-white"
           >
             <div className="flex size-9 items-center justify-center rounded-2xl bg-black/15">
               <Store className="size-4 shrink-0" />
             </div>
             <div className="min-w-0">
               <p className="font-semibold">Ver tienda</p>
-              <p className="text-xs text-white/72">Abre la landing publica en produccion</p>
+              <p className="text-xs text-white/68">Landing publica en produccion</p>
             </div>
             <ExternalLink className="ml-auto size-3.5" />
           </Link>
@@ -120,7 +111,7 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
           <form action={signOut}>
             <button
               type="submit"
-              className="flex w-full items-center gap-3 rounded-[20px] border border-transparent px-4 py-3 text-sm text-neutral-400 transition hover:border-red-400/10 hover:bg-red-400/10 hover:text-red-200"
+              className="admin-button-soft flex w-full items-center gap-3 rounded-[20px] px-4 py-3 text-sm text-neutral-400 hover:border-red-400/14 hover:bg-red-400/10 hover:text-red-100"
             >
               <LogOut className="size-4 shrink-0" />
               Salir

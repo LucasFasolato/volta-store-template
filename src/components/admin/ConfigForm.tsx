@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CheckCircle2, Link2, Loader2, TriangleAlert } from 'lucide-react'
+import { CheckCircle2, Copy, Link2, Loader2, TriangleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import { SaveButton } from '@/components/common/SaveButton'
 import { FormFeedback } from '@/components/common/FormFeedback'
@@ -35,6 +35,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
   const [saved, setSaved] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [currentSlug, setCurrentSlug] = useState(store.slug)
+  const [copied, setCopied] = useState(false)
   const [slugAvailability, setSlugAvailability] = useState<{
     slug: string
     available: boolean
@@ -96,6 +97,17 @@ export function ConfigForm({ store }: ConfigFormProps) {
             }
           : { tone: 'checking', message: 'Validando disponibilidad del enlace...' }
 
+  async function copyUrl() {
+    try {
+      await navigator.clipboard.writeText(publicUrl)
+      setCopied(true)
+      toast.success('URL copiada.')
+      window.setTimeout(() => setCopied(false), 1800)
+    } catch {
+      toast.error('No pudimos copiar la URL.')
+    }
+  }
+
   async function onSubmit(data: StoreConfigInput) {
     setSubmitError(null)
 
@@ -133,7 +145,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
 
   return (
     <div className="space-y-8">
-      <section className="surface-panel premium-ring rounded-[32px] px-5 py-6 sm:px-6">
+      <section className="admin-surface rounded-[32px] px-5 py-6 sm:px-6">
         <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
           <div>
             <h3 className="text-lg font-semibold text-white">Logo del negocio</h3>
@@ -152,7 +164,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-white/8 bg-black/10 p-5">
+          <div className="admin-surface-muted rounded-[28px] p-5">
             <p className="admin-label">Lo que ve tu cliente</p>
             <h4 className="mt-3 text-xl font-semibold text-white">{store.name}</h4>
             <p className="mt-2 text-sm leading-6 text-neutral-400">
@@ -169,7 +181,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
       </section>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <section id="section-identidad" className="surface-panel premium-ring rounded-[32px] px-5 py-6 sm:px-6">
+        <section id="section-identidad" className="admin-surface rounded-[32px] px-5 py-6 sm:px-6">
           <div className="mb-5">
             <p className="admin-label">Identidad y enlace publico</p>
             <h3 className="mt-3 text-xl font-semibold text-white">Lo esencial para que la tienda se entienda rapido</h3>
@@ -209,18 +221,30 @@ export function ConfigForm({ store }: ConfigFormProps) {
 
           <div className="mt-5 rounded-[28px] border border-white/8 bg-black/10 p-5">
             <div className="flex items-start justify-between gap-4">
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="admin-label">Preview de URL final</p>
-                <p className="mt-3 break-all text-base font-semibold text-emerald-300">{publicUrl}</p>
+                <p className="mt-3 overflow-hidden text-ellipsis whitespace-nowrap break-all text-base font-semibold text-emerald-300 sm:whitespace-normal sm:[word-break:break-word]">
+                  {publicUrl}
+                </p>
               </div>
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-white/6">
-                {slugStatus.tone === 'checking' ? (
-                  <Loader2 className="size-4 animate-spin text-emerald-200" />
-                ) : slugStatus.tone === 'error' ? (
-                  <TriangleAlert className="size-4 text-amber-200" />
-                ) : (
-                  <CheckCircle2 className="size-4 text-emerald-200" />
-                )}
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={copyUrl}
+                  className="admin-button-soft inline-flex h-11 items-center gap-2 rounded-2xl px-4 text-sm text-white"
+                >
+                  <Copy className="size-4" />
+                  {copied ? 'Copiada' : 'Copiar'}
+                </button>
+                <div className="flex size-11 items-center justify-center rounded-2xl bg-white/6">
+                  {slugStatus.tone === 'checking' ? (
+                    <Loader2 className="size-4 animate-spin text-emerald-200" />
+                  ) : slugStatus.tone === 'error' ? (
+                    <TriangleAlert className="size-4 text-amber-200" />
+                  ) : (
+                    <CheckCircle2 className="size-4 text-emerald-200" />
+                  )}
+                </div>
               </div>
             </div>
 
@@ -238,7 +262,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
           </div>
         </section>
 
-        <section id="section-contacto" className="surface-panel premium-ring rounded-[32px] px-5 py-6 sm:px-6">
+        <section id="section-contacto" className="admin-surface rounded-[32px] px-5 py-6 sm:px-6">
           <div className="mb-5">
             <p className="admin-label">Canales de contacto</p>
             <h3 className="mt-3 text-xl font-semibold text-white">Como te encuentra y te escribe tu cliente</h3>
@@ -277,7 +301,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
           </div>
         </section>
 
-        <section id="section-contexto" className="surface-panel premium-ring rounded-[32px] px-5 py-6 sm:px-6">
+        <section id="section-contexto" className="admin-surface rounded-[32px] px-5 py-6 sm:px-6">
           <div className="mb-5">
             <p className="admin-label">Contexto y confianza</p>
             <h3 className="mt-3 text-xl font-semibold text-white">Informacion que ayuda a comprar con menos dudas</h3>
@@ -325,7 +349,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
 
 function InfoTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[22px] border border-white/8 bg-white/4 px-4 py-3">
+    <div className="admin-surface-muted rounded-[22px] px-4 py-3">
       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">{label}</p>
       <p className="mt-2 text-sm font-medium text-neutral-100">{value}</p>
     </div>

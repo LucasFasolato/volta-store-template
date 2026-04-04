@@ -57,7 +57,7 @@ export default async function AdminPage() {
   ]
 
   return (
-    <div className="p-4 sm:p-6 lg:p-10">
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       <AdminPageHeader
         title={`Hola, ${storeData.store.name}`}
         description="Una vista clara del estado de tu tienda para operar rapido y sin ruido."
@@ -79,7 +79,7 @@ export default async function AdminPage() {
       {!isConfigured ? (
         <Link
           href="/admin/configuracion"
-          className="surface-panel premium-ring mb-6 flex items-start gap-3 rounded-[28px] px-5 py-5 transition hover:bg-white/6"
+          className="admin-surface-elevated flex items-start gap-3 rounded-[28px] px-5 py-5 transition hover:brightness-105"
         >
           <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-300/12 text-amber-200">
             <MessageCircle className="size-4" />
@@ -94,15 +94,15 @@ export default async function AdminPage() {
         </Link>
       ) : null}
 
-      <section className="mb-8 grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         <StatCard label="Productos activos" value={activeProducts.length} icon={Package} href="/admin/productos" />
         <StatCard label="Destacados" value={featuredProducts.length} icon={TrendingUp} href="/admin/productos" />
         <StatCard label="Categorias" value={categories.length} icon={Tag} href="/admin/categorias" />
         <StatCard label="Total de productos" value={products.length} icon={Package} href="/admin/productos" />
       </section>
 
-      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-        <section className="surface-panel premium-ring rounded-[32px] px-5 py-6 sm:px-6">
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+        <section className="admin-surface rounded-[32px] px-5 py-6 sm:px-6">
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">Accesos rapidos</p>
@@ -118,7 +118,7 @@ export default async function AdminPage() {
                 <Link
                   key={action.href}
                   href={action.href}
-                  className="rounded-[26px] border border-white/8 bg-white/4 p-5 transition hover:bg-white/7"
+                  className="admin-button-soft rounded-[24px] p-5"
                 >
                   <div className="mb-4 flex size-11 items-center justify-center rounded-2xl bg-white/8 text-emerald-200">
                     <Icon className="size-5" />
@@ -131,7 +131,7 @@ export default async function AdminPage() {
           </div>
         </section>
 
-        <section className="surface-panel premium-ring rounded-[32px] px-5 py-6 sm:px-6">
+        <section className="admin-surface rounded-[32px] px-5 py-6 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">Tu tienda</p>
           <div className="mt-3 flex items-start justify-between gap-4">
             <div>
@@ -148,7 +148,7 @@ export default async function AdminPage() {
             </Link>
           </div>
 
-          <div className="mt-6 grid gap-4 text-sm">
+          <div className="mt-6 grid gap-3 text-sm">
             <InfoRow label="Nombre" value={storeData.store.name} href="/admin/configuracion#section-identidad" action="Editar nombre" />
             <InfoRow label="URL publica" value={publicUrl} href="/admin/configuracion#section-identidad" action="Editar slug" />
             <InfoRow label="WhatsApp" value={storeData.store.whatsapp || 'Pendiente'} empty={!storeData.store.whatsapp} href="/admin/configuracion#section-contacto" action="Editar WhatsApp" />
@@ -187,7 +187,7 @@ function StatCard({
   return (
     <Link
       href={href}
-      className="surface-panel premium-ring rounded-[28px] p-5 transition hover:bg-white/6"
+      className="admin-surface rounded-[28px] p-5 transition hover:-translate-y-0.5"
     >
       <div className="mb-8 flex items-center justify-between">
         <div className="flex size-10 items-center justify-center rounded-2xl bg-white/8 text-neutral-300">
@@ -217,7 +217,7 @@ function InfoRow({
   children?: React.ReactNode
 }) {
   return (
-    <div className="rounded-[22px] border border-white/8 bg-white/4 px-4 py-4">
+    <div className="admin-surface-muted rounded-[22px] px-4 py-4">
       <div className="flex items-start justify-between gap-4">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">{label}</p>
         {href && action ? (
