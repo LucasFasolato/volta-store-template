@@ -8,38 +8,49 @@ export async function GET(request: Request) {
   const error = searchParams.get('error')
   const errorDescription = searchParams.get('error_description')
 
+  // OAuth error from provider
   if (error) {
-    const message = errorDescription ? `?error=${encodeURIComponent(errorDescription)}` : '?error=auth'
+    const message = errorDescription
+      ? `?error=${encodeURIComponent(errorDescription)}`
+      : '?error=auth'
     return NextResponse.redirect(`${origin}/login${message}`)
   }
 
-  const supabase = await createClient()
+  if (!code) {
+    // No code — check if already has a session (e.g. magic link already set cookies)
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-  if (code) {
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-
-    if (!error && data.user) {
+    if (user) {
       try {
-        await ensureOnboarding(data.user)
+        await ensureOnboarding(user)
       } catch {
-        // Non-blocking — log in production
+        // Non-blocking
       }
       return NextResponse.redirect(`${origin}/admin`)
     }
+
+    return NextResponse.redirect(`${origin}/login?error=auth`)
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const supabase = await createClient()
+  const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
 
-  if (user) {
-    try {
-      await ensureOnboarding(user)
-    } catch {
-      // Non-blocking — log in production
-    }
-    return NextResponse.redirect(`${origin}/admin`)
+  if (exchangeError || !data.user) {
+    return NextResponse.redirect(`${origin}/login?error=auth`)
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth`)
+  try {
+    await ensureOnboarding(data.user)
+  } catch {
+    // Non-blocking — profile/store creation failure shouldn't block login
+  }
+
+  // Honour ?next= if it's a safe internal path
+  const next = searchParams.get('next') ?? ''
+  const destination = next.startsWith('/') && !next.startsWith('//') ? next : '/admin'
+
+  return NextResponse.redirect(`${origin}${destination}`)
 }
