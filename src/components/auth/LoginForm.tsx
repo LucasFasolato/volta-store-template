@@ -16,6 +16,7 @@ import { signInWithMagicLink } from '@/lib/actions/auth'
 import { FormFeedback } from '@/components/common/FormFeedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { createClient } from '@/lib/supabase/client'
 
 const schema = z.object({
   email: z.string().email('Ingresa un email valido'),
@@ -27,6 +28,7 @@ export function LoginForm() {
   const [deliveryState, setDeliveryState] = useState<'idle' | 'sent' | 'rate_limited'>('idle')
   const [submittedEmail, setSubmittedEmail] = useState('')
   const [serverError, setServerError] = useState<string | null>(null)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
   const {
     register,
@@ -35,6 +37,26 @@ export function LoginForm() {
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+
+  async function handleGoogleSignIn() {
+    setServerError(null)
+    setIsGoogleLoading(true)
+
+    const supabase = createClient()
+    const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin}/auth/callback`
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo,
+      },
+    })
+
+    if (error) {
+      setServerError('No pudimos iniciar sesion con Google. Intenta nuevamente.')
+      setIsGoogleLoading(false)
+    }
+  }
 
   async function onSubmit(data: FormData) {
     setServerError(null)
@@ -113,59 +135,88 @@ export function LoginForm() {
         </div>
         <h1 className="text-2xl font-semibold text-white">Ingresar al panel</h1>
         <p className="mt-2 text-sm leading-6 text-neutral-300">
-          Te enviamos un enlace de acceso seguro. Sin contrasena, con menos friccion y con feedback claro en cada paso.
+          Entra con Google en un click o usa magic link si prefieres seguir por email.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <LabelBlock label="Email de acceso" hint="Usa el correo con el que administras tu tienda.">
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />
-              <Input
-                {...register('email')}
-                type="email"
-                autoComplete="email"
-                placeholder="tu@email.com"
-                aria-invalid={!!errors.email}
-                className="h-12 rounded-2xl border-white/10 bg-white/5 pl-11 text-white placeholder:text-neutral-500"
-              />
-            </div>
-          </LabelBlock>
-          {errors.email ? <p className="mt-1.5 text-xs text-red-300">{errors.email.message}</p> : null}
-        </div>
-
-        {serverError ? (
-          <FormFeedback
-            kind="error"
-            title="No pudimos enviarte el link"
-            message={serverError}
-          />
-        ) : null}
-
+      <div className="space-y-4">
         <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="h-12 w-full rounded-full bg-[linear-gradient(135deg,#2ee6a6,#6ff3df)] text-black shadow-[0_18px_36px_rgba(16,185,129,0.18)] hover:brightness-105"
+          type="button"
+          disabled={isGoogleLoading || isSubmitting}
+          onClick={handleGoogleSignIn}
+          className="h-12 w-full rounded-full border border-white/10 bg-white text-black shadow-[0_18px_36px_rgba(255,255,255,0.08)] hover:bg-white/90"
         >
-          {isSubmitting ? (
+          {isGoogleLoading ? (
             <>
               <Loader2 className="mr-2 size-4 animate-spin" />
-              Enviando link...
+              Redirigiendo a Google...
             </>
           ) : (
             <>
-              Continuar
-              <ArrowRight className="ml-2 size-4" />
+              <GoogleIcon className="mr-2 size-4" />
+              Continuar con Google
             </>
           )}
         </Button>
-      </form>
+
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-white/8" />
+          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+            o usa email
+          </span>
+          <div className="h-px flex-1 bg-white/8" />
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <LabelBlock label="Email de acceso" hint="Usa el correo con el que administras tu tienda.">
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />
+                <Input
+                  {...register('email')}
+                  type="email"
+                  autoComplete="email"
+                  placeholder="tu@email.com"
+                  aria-invalid={!!errors.email}
+                  className="h-12 rounded-2xl border-white/10 bg-white/5 pl-11 text-white placeholder:text-neutral-500"
+                />
+              </div>
+            </LabelBlock>
+            {errors.email ? <p className="mt-1.5 text-xs text-red-300">{errors.email.message}</p> : null}
+          </div>
+
+          {serverError ? (
+            <FormFeedback
+              kind="error"
+              title="No pudimos iniciar sesion"
+              message={serverError}
+            />
+          ) : null}
+
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="h-12 w-full rounded-full bg-[linear-gradient(135deg,#2ee6a6,#6ff3df)] text-black shadow-[0_18px_36px_rgba(16,185,129,0.18)] hover:brightness-105"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 size-4 animate-spin" />
+                Enviando link...
+              </>
+            ) : (
+              <>
+                Continuar
+                <ArrowRight className="ml-2 size-4" />
+              </>
+            )}
+          </Button>
+        </form>
+      </div>
 
       <div className="mt-6 rounded-[24px] border border-white/8 bg-black/10 p-4">
         <p className="text-sm font-medium text-white">Que va a pasar despues</p>
         <p className="mt-2 text-sm leading-6 text-neutral-400">
-          Revisas tu correo, abres el link y entras directo al panel. Si ya pediste uno recien, te lo avisamos antes de insistir.
+          Google te lleva directo al callback seguro. Si eliges email, revisas tu bandeja y entras desde el link.
         </p>
       </div>
     </div>
@@ -187,5 +238,28 @@ function LabelBlock({
       <p className="mb-2 text-xs text-neutral-500">{hint}</p>
       {children}
     </div>
+  )
+}
+
+function GoogleIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path
+        d="M21.8 12.23c0-.72-.06-1.25-.2-1.8H12v3.79h5.64c-.11.94-.69 2.36-1.98 3.31l-.02.13 3.03 2.3.21.02c1.95-1.77 3.07-4.38 3.07-7.75Z"
+        fill="#4285F4"
+      />
+      <path
+        d="M12 22c2.76 0 5.08-.89 6.78-2.42l-3.22-2.45c-.86.59-2.01 1-3.56 1-2.71 0-5.01-1.77-5.83-4.21l-.12.01-3.16 2.39-.04.11C4.54 19.72 8.02 22 12 22Z"
+        fill="#34A853"
+      />
+      <path
+        d="M6.17 13.92A5.9 5.9 0 0 1 5.83 12c0-.67.12-1.32.32-1.92l-.01-.13-3.2-2.42-.1.04A9.86 9.86 0 0 0 2 12c0 1.58.38 3.07 1.05 4.43l3.12-2.51Z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M12 5.87c1.96 0 3.29.83 4.05 1.53l2.95-2.82C17.07 2.82 14.76 2 12 2 8.02 2 4.54 4.28 2.85 7.57l3.31 2.51c.84-2.44 3.14-4.21 5.84-4.21Z"
+        fill="#EA4335"
+      />
+    </svg>
   )
 }
