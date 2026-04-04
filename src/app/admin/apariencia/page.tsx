@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getAdminStore } from '@/lib/queries/store'
 import { createClient } from '@/lib/supabase/server'
-import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 import { AppearanceEditor } from '@/components/admin/AppearanceEditor'
 
 export default async function AparienciaPage() {
@@ -15,11 +14,7 @@ export default async function AparienciaPage() {
   if (!storeData) redirect('/login')
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
-      <AdminPageHeader
-        title="Apariencia"
-        description="Fuentes, colores, diseño y secciones visibles de tu tienda."
-      />
+    <div className="p-4 sm:p-5 lg:p-6">
       <AppearanceEditor theme={storeData.theme} layout={storeData.layout} />
     </div>
   )

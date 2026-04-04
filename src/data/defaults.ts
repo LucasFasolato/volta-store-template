@@ -47,44 +47,57 @@ export const DEFAULT_CONTENT: Omit<ContentInsert, 'store_id'> = {
 }
 
 export const FONT_OPTIONS = [
-  { value: 'geist', label: 'Geist', description: 'Precisa y tecnológica' },
-  { value: 'inter', label: 'Inter', description: 'Neutral y ultra legible' },
-  { value: 'manrope', label: 'Manrope', description: 'Editorial y sofisticada' },
-  { value: 'plus-jakarta', label: 'Plus Jakarta Sans', description: 'Expresiva y premium' },
+  { value: 'inter', label: 'Inter', style: 'Moderna' },
+  { value: 'plus-jakarta', label: 'Plus Jakarta Sans', style: 'Premium' },
+  { value: 'manrope', label: 'Manrope', style: 'Minimal' },
+  { value: 'playfair', label: 'Playfair Display', style: 'Editorial' },
+  { value: 'poppins', label: 'Poppins', style: 'Bold' },
+  { value: 'space-grotesk', label: 'Space Grotesk', style: 'Tech' },
+  { value: 'geist', label: 'Geist', style: 'Precisa' },
 ] as const
 
 export const FONT_PRESETS = [
   {
-    value: 'elegant',
-    label: 'Elegante',
-    description: 'Más editorial y refinada',
-    heading_font: 'manrope',
-    body_font: 'inter',
-    heading_weight: 'semibold',
-  },
-  {
     value: 'modern',
     label: 'Moderna',
-    description: 'Nítida, rápida y de producto',
     heading_font: 'plus-jakarta',
-    body_font: 'geist',
+    body_font: 'inter',
     heading_weight: 'semibold',
   },
   {
     value: 'minimal',
     label: 'Minimal',
-    description: 'Limpia y silenciosa',
     heading_font: 'inter',
     body_font: 'inter',
     heading_weight: 'medium',
   },
   {
+    value: 'elegant',
+    label: 'Elegante',
+    heading_font: 'manrope',
+    body_font: 'inter',
+    heading_weight: 'semibold',
+  },
+  {
     value: 'bold',
     label: 'Bold',
-    description: 'Más presencia y contraste',
-    heading_font: 'plus-jakarta',
+    heading_font: 'poppins',
     body_font: 'geist',
     heading_weight: 'bold',
+  },
+  {
+    value: 'editorial',
+    label: 'Editorial',
+    heading_font: 'playfair',
+    body_font: 'inter',
+    heading_weight: 'semibold',
+  },
+  {
+    value: 'tech',
+    label: 'Tech',
+    heading_font: 'space-grotesk',
+    body_font: 'geist',
+    heading_weight: 'semibold',
   },
 ] as const
 
@@ -168,6 +181,9 @@ export const FONT_FAMILY_MAP: Record<string, string> = {
   inter: 'var(--font-inter), sans-serif',
   manrope: 'var(--font-manrope), sans-serif',
   'plus-jakarta': 'var(--font-plus-jakarta), sans-serif',
+  playfair: 'var(--font-playfair), serif',
+  poppins: 'var(--font-poppins), sans-serif',
+  'space-grotesk': 'var(--font-space-grotesk), sans-serif',
 }
 
 export const CONTAINER_WIDTH_MAP: Record<string, string> = {
