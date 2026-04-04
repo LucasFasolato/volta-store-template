@@ -116,9 +116,9 @@ export function StoreLayout({
             onSelectProduct={setSelectedProduct}
           />
         ) : null}
-
-        {layout.show_footer ? <StoreFooter store={store} containerClass={containerClass} /> : null}
       </main>
+
+      {layout.show_footer ? <StoreFooter store={store} containerClass={containerClass} /> : null}
 
       {selectedProduct ? (
         <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />

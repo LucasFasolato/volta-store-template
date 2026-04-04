@@ -14,7 +14,7 @@ export function StoreFooter({ store, containerClass }: StoreFooterProps) {
 
   return (
     <footer
-      className="mt-12 border-t"
+      className="border-t"
       style={{
         borderColor: 'var(--store-card-border)',
         background:

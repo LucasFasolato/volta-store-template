@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Contrast, Layers3, Palette, Sparkles, Type } from 'lucide-react'
+import type { FieldErrors } from 'react-hook-form'
+import { ChevronDown, ChevronUp, Contrast, Layers3, Palette, Type } from 'lucide-react'
 import { toast } from 'sonner'
 import { FormFeedback } from '@/components/common/FormFeedback'
 import { SaveButton } from '@/components/common/SaveButton'
@@ -15,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
 import {
   FONT_FAMILY_MAP,
   BORDER_RADIUS_OPTIONS,
@@ -28,33 +28,65 @@ import {
 } from '@/data/defaults'
 import { COPY } from '@/data/system-copy'
 import { updateStoreTheme } from '@/lib/actions/store'
-import {
-  getAccessibleTextColor,
-  getContrastRatio,
-  mixHexColors,
-  withAlpha,
-} from '@/lib/utils/color'
+import { getAccessibleTextColor, getContrastRatio, mixHexColors, withAlpha } from '@/lib/utils/color'
 import { buildThemeVars } from '@/lib/utils/theme'
+import { cn } from '@/lib/utils'
 import { storeThemeSchema, type StoreThemeInput } from '@/lib/validations/store'
 import type { StoreTheme } from '@/types/store'
 
+export type ThemeSection = 'fuentes' | 'colores' | 'layout'
+
 type ThemeFormProps = {
   theme: StoreTheme
+  activeSection: ThemeSection
 }
 
-const COLOR_FIELDS = [
-  { name: 'primary_color' as const, label: 'Primary', description: 'Botones principales y foco visual' },
-  { name: 'secondary_color' as const, label: 'Secondary', description: 'Apoyo, badges y senalizacion suave' },
-  { name: 'accent_color' as const, label: 'Accent', description: 'Destellos de alto valor o highlights' },
-  { name: 'background_color' as const, label: 'Background', description: 'Base general de la tienda' },
-  { name: 'surface_color' as const, label: 'Surface', description: 'Cards, paneles y overlays' },
-  { name: 'text_color' as const, label: 'Text', description: 'Jerarquia principal de lectura' },
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SV = (name: any, val: any) => void
+type Get = <K extends keyof StoreThemeInput>(name: K) => StoreThemeInput[K]
+
+const COLOR_FIELDS: Array<{
+  name: keyof Pick<
+    StoreThemeInput,
+    | 'primary_color'
+    | 'secondary_color'
+    | 'accent_color'
+    | 'background_color'
+    | 'surface_color'
+    | 'text_color'
+  >
+  label: string
+  hint: string
+}> = [
+  { name: 'primary_color', label: 'Principal', hint: 'Botones y foco visual' },
+  { name: 'secondary_color', label: 'Secundario', hint: 'Badges y señalización' },
+  { name: 'accent_color', label: 'Acento', hint: 'Highlights y detalles' },
+  { name: 'background_color', label: 'Fondo', hint: 'Base de la tienda' },
+  { name: 'surface_color', label: 'Superficie', hint: 'Cards y paneles' },
+  { name: 'text_color', label: 'Texto', hint: 'Lectura principal' },
 ]
 
-const TYPOGRAPHY_TITLE = 'Tu tienda vende mejor cuando se ve premium'
-const TYPOGRAPHY_BODY = 'Vista previa de jerarquia, lectura y personalidad visual'
+const CARD_STYLES = [
+  { value: 'soft', label: 'Suaves', hint: 'Profundidad sutil' },
+  { value: 'sharp', label: 'Firmes', hint: 'Borde limpio' },
+  { value: 'glass', label: 'Cristal', hint: 'Brillo y transparencia' },
+] as const
 
-export function ThemeForm({ theme }: ThemeFormProps) {
+const BUTTON_STYLES = [
+  { value: 'rounded', label: 'Redondeados', hint: 'Suaves y amigables' },
+  { value: 'pill', label: 'Cápsula', hint: 'Más expresivos' },
+  { value: 'square', label: 'Rectos', hint: 'Más sobrios' },
+] as const
+
+const DENSITY_OPTIONS = [
+  { value: 'compact', label: 'Compacto', hint: 'Más info por pantalla' },
+  { value: 'comfortable', label: 'Balanceado', hint: 'Equilibrado' },
+  { value: 'spacious', label: 'Con aire', hint: 'Más espacio' },
+] as const
+
+export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
+  const [showFontAdvanced, setShowFontAdvanced] = useState(false)
+  const [showLayoutAdvanced, setShowLayoutAdvanced] = useState(false)
   const [saved, setSaved] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [systemMode, setSystemMode] = useState<'light' | 'dark'>('light')
@@ -98,7 +130,6 @@ export function ThemeForm({ theme }: ThemeFormProps) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-
     const media = window.matchMedia('(prefers-color-scheme: dark)')
     const sync = () => setSystemMode(media.matches ? 'dark' : 'light')
     sync()
@@ -109,7 +140,6 @@ export function ThemeForm({ theme }: ThemeFormProps) {
   function applyTypographyPreset(presetValue: StoreThemeInput['font_preset']) {
     const preset = FONT_PRESETS.find((item) => item.value === presetValue)
     if (!preset) return
-
     setValue('font_preset', presetValue, { shouldDirty: true })
     setValue('heading_font', preset.heading_font, { shouldDirty: true })
     setValue('body_font', preset.body_font, { shouldDirty: true })
@@ -119,27 +149,18 @@ export function ThemeForm({ theme }: ThemeFormProps) {
 
   async function onSubmit(data: StoreThemeInput) {
     setSubmitError(null)
-    const result = await updateStoreTheme({
-      ...data,
-      font_family: data.body_font,
-    })
-
+    const result = await updateStoreTheme({ ...data, font_family: data.body_font })
     if (result?.error) {
       const message = result.error.formErrors?.[0] ?? COPY.admin.loadError
       setSubmitError(message)
       toast.error(message)
       return
     }
-
     setSaved(true)
-    toast.success('La apariencia se actualizo y el preview ya refleja el cambio.')
+    toast.success('Apariencia guardada.')
     setTimeout(() => setSaved(false), 2500)
   }
 
-  const background = values?.background_color ?? theme.background_color
-  const surface = values?.surface_color ?? theme.surface_color
-  const text = values?.text_color ?? theme.text_color
-  const primary = values?.primary_color ?? theme.primary_color
   const previewTheme = useMemo(
     () =>
       ({
@@ -156,490 +177,558 @@ export function ThemeForm({ theme }: ThemeFormProps) {
       : previewTheme.visual_mode === 'dark'
         ? 'dark'
         : 'light'
-  const previewThemeVars = useMemo(() => buildThemeVars(previewTheme, resolvedMode), [previewTheme, resolvedMode])
-  const contrastOnBackground = getContrastRatio(text, background).toFixed(1)
-  const contrastOnSurface = getContrastRatio(text, surface).toFixed(1)
-  const contrastOnPrimary = getContrastRatio(getAccessibleTextColor(primary), primary).toFixed(1)
+  const previewThemeVars = useMemo(
+    () => buildThemeVars(previewTheme, resolvedMode),
+    [previewTheme, resolvedMode],
+  )
+
+  const bg = values?.background_color ?? theme.background_color
+  const surface = values?.surface_color ?? theme.surface_color
+  const text = values?.text_color ?? theme.text_color
+  const primary = values?.primary_color ?? theme.primary_color
+  const contrastBg = getContrastRatio(text, bg).toFixed(1)
+  const contrastSurface = getContrastRatio(text, surface).toFixed(1)
+  const contrastPrimary = getContrastRatio(getAccessibleTextColor(primary), primary).toFixed(1)
+
+  const sv: SV = (name, val) => setValue(name, val, { shouldDirty: true })
+
+  function get<K extends keyof StoreThemeInput>(name: K): StoreThemeInput[K] {
+    return (values?.[name] ?? theme[name]) as StoreThemeInput[K]
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <Section
-        icon={Type}
-        title="Tipografia"
-        description="Cada decision tipografica ahora se entiende antes de guardar: preset, fuente principal, fuente secundaria, peso y escalas muestran su efecto en una vista real."
-      >
-        <div className="grid gap-6 xl:grid-cols-[1.02fr_0.98fr]">
-          <div className="space-y-5">
-            <div className="grid gap-3 xl:grid-cols-2">
-              {FONT_PRESETS.map((preset) => {
-                const active = (values?.font_preset ?? theme.font_preset) === preset.value
-                return (
-                  <button
-                    key={preset.value}
-                    type="button"
-                    onClick={() => applyTypographyPreset(preset.value)}
-                    className={
-                      active
-                        ? 'rounded-[24px] border border-emerald-300/30 bg-emerald-400/10 p-4 text-left'
-                        : 'rounded-[24px] border border-white/8 bg-white/4 p-4 text-left transition hover:bg-white/6'
-                    }
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-white">{preset.label}</p>
-                      <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
-                        preset
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-neutral-300">{preset.description}</p>
-                    <p className="mt-3 text-xs text-neutral-500">
-                      Principal {FONT_OPTIONS.find((item) => item.value === preset.heading_font)?.label} + secundaria{' '}
-                      {FONT_OPTIONS.find((item) => item.value === preset.body_font)?.label}
-                    </p>
-                  </button>
-                )
-              })}
-            </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {activeSection === 'fuentes' && (
+        <FontsSection
+          get={get}
+          sv={sv}
+          applyPreset={applyTypographyPreset}
+          showAdvanced={showFontAdvanced}
+          onToggleAdvanced={() => setShowFontAdvanced((v) => !v)}
+          previewThemeVars={previewThemeVars}
+        />
+      )}
 
-            <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-5">
-              <FormField
-                label="Fuente principal"
-                hint="Titulos y mensajes de mayor impacto."
-              >
-                <Select
-                  value={values?.heading_font ?? theme.heading_font}
-                  onValueChange={(value) =>
-                    setValue('heading_font', value as StoreThemeInput['heading_font'], { shouldDirty: true })
-                  }
-                >
-                  <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                    {FONT_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="py-1">
-                          <p className="text-sm font-semibold">{option.label}</p>
-                          <p className="mt-1 text-[13px]" style={{ fontFamily: FONT_FAMILY_MAP[option.value] }}>
-                            {TYPOGRAPHY_TITLE}
-                          </p>
-                          <p className="text-xs text-neutral-500" style={{ fontFamily: FONT_FAMILY_MAP[option.value] }}>
-                            {TYPOGRAPHY_BODY}
-                          </p>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormField>
+      {activeSection === 'colores' && (
+        <ColorsSection
+          get={get}
+          sv={sv}
+          register={register}
+          errors={errors}
+          previewThemeVars={previewThemeVars}
+          contrasts={{ bg: contrastBg, surface: contrastSurface, primary: contrastPrimary }}
+        />
+      )}
 
-              <FormField
-                label="Fuente secundaria"
-                hint="Textos, fichas y detalles de producto."
-              >
-                <Select
-                  value={values?.body_font ?? theme.body_font}
-                  onValueChange={(value) => {
-                    setValue('body_font', value as StoreThemeInput['body_font'], { shouldDirty: true })
-                    setValue('font_family', value as StoreThemeInput['font_family'], { shouldDirty: true })
-                  }}
-                >
-                  <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                    {FONT_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="py-1">
-                          <p className="text-sm font-semibold">{option.label}</p>
-                          <p className="mt-1 text-[13px]" style={{ fontFamily: FONT_FAMILY_MAP[option.value] }}>
-                            La lectura correcta hace que comprar sea mas facil.
-                          </p>
-                          <p className="text-xs text-neutral-500" style={{ fontFamily: FONT_FAMILY_MAP[option.value] }}>
-                            Vista previa de claridad, ritmo y personalidad visual.
-                          </p>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormField>
-
-              <FormField label="Escala de titulos" hint="Cuanta presencia tiene el titular.">
-                <Select
-                  value={values?.heading_scale ?? theme.heading_scale}
-                  onValueChange={(value) =>
-                    setValue('heading_scale', value as StoreThemeInput['heading_scale'], { shouldDirty: true })
-                  }
-                >
-                  <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                    <SelectItem value="compact">Compacta</SelectItem>
-                    <SelectItem value="default">Balanceada</SelectItem>
-                    <SelectItem value="large">Expansiva</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormField>
-
-              <FormField label="Escala de texto" hint="Que tan descansada se siente la lectura.">
-                <Select
-                  value={values?.body_scale ?? theme.body_scale}
-                  onValueChange={(value) =>
-                    setValue('body_scale', value as StoreThemeInput['body_scale'], { shouldDirty: true })
-                  }
-                >
-                  <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                    <SelectItem value="sm">Compacta</SelectItem>
-                    <SelectItem value="base">Balanceada</SelectItem>
-                    <SelectItem value="lg">Amplia</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormField>
-
-              <FormField label="Peso tipografico" hint="Mas delicado o mas firme.">
-                <Select
-                  value={values?.heading_weight ?? theme.heading_weight}
-                  onValueChange={(value) =>
-                    setValue('heading_weight', value as StoreThemeInput['heading_weight'], { shouldDirty: true })
-                  }
-                >
-                  <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                    {HEADING_WEIGHT_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormField>
-            </div>
-          </div>
-
-          <TypographyPreviewPanel previewThemeVars={previewThemeVars} />
-        </div>
-      </Section>
-
-      <Section
-        icon={Palette}
-        title="Color y contraste"
-        description="No ves solo swatches: ves una mini landing con navbar, hero, card, badge, CTA y footer para entender el resultado antes de guardar."
-      >
-        <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
-          {COLOR_FIELDS.map((field) => {
-            const value = values?.[field.name] ?? theme[field.name]
-            return (
-              <div key={field.name} className="rounded-[24px] border border-white/8 bg-white/4 p-4">
-                <Label className="text-sm font-medium text-white">{field.label}</Label>
-                <p className="mt-1 text-xs leading-5 text-neutral-500">{field.description}</p>
-                <div className="mt-3 flex items-center gap-3">
-                  <label
-                    className="relative size-12 shrink-0 overflow-hidden rounded-2xl border border-white/10"
-                    style={{ backgroundColor: value }}
-                  >
-                    <input
-                      type="color"
-                      value={value}
-                      onChange={(event) =>
-                        setValue(field.name, event.target.value as StoreThemeInput[typeof field.name], {
-                          shouldDirty: true,
-                        })
-                      }
-                      className="absolute inset-0 cursor-pointer opacity-0"
-                    />
-                  </label>
-                  <input
-                    {...register(field.name)}
-                    className="h-11 flex-1 rounded-2xl border border-white/10 bg-black/10 px-3 font-mono text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/30"
-                  />
-                </div>
-                {errors[field.name] ? <p className="mt-2 text-xs text-red-300">{errors[field.name]?.message}</p> : null}
-              </div>
-            )
-          })}
-        </div>
-
-        <div className="mt-5 grid gap-4 lg:grid-cols-[0.88fr_1.12fr]">
-          <div className="rounded-[24px] border border-white/8 bg-white/4 p-4">
-            <p className="admin-label">Modo visual</p>
-            <div className="mt-3 grid gap-2">
-              {VISUAL_MODE_OPTIONS.map((option) => {
-                const active = (values?.visual_mode ?? theme.visual_mode) === option.value
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() =>
-                      setValue('visual_mode', option.value as StoreThemeInput['visual_mode'], { shouldDirty: true })
-                    }
-                    className={
-                      active
-                        ? 'rounded-[20px] border border-emerald-300/30 bg-emerald-400/10 px-4 py-3 text-left'
-                        : 'rounded-[20px] border border-white/8 bg-black/10 px-4 py-3 text-left transition hover:bg-white/6'
-                    }
-                  >
-                    <p className="text-sm font-medium text-white">{option.label}</p>
-                    <p className="mt-1 text-xs text-neutral-500">{option.description}</p>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          <LandingColorPreview previewThemeVars={previewThemeVars} />
-        </div>
-
-        <div className="mt-4 grid gap-3 lg:grid-cols-3">
-          <ContrastCard
-            label="Texto sobre fondo"
-            value={`${contrastOnBackground}:1`}
-            description="Ayuda a que toda la tienda se lea sin esfuerzo."
-            tone={Number(contrastOnBackground) >= 4.5 ? 'good' : 'warning'}
-          />
-          <ContrastCard
-            label="Texto sobre superficie"
-            value={`${contrastOnSurface}:1`}
-            description="Clave para cards, paneles y overlays."
-            tone={Number(contrastOnSurface) >= 4.5 ? 'good' : 'warning'}
-          />
-          <ContrastCard
-            label="CTA principal"
-            value={`${contrastOnPrimary}:1`}
-            description="Sirve para detectar botones ilegibles antes de guardar."
-            tone={Number(contrastOnPrimary) >= 4.5 ? 'good' : 'warning'}
-          />
-        </div>
-      </Section>
-
-      <Section
-        icon={Sparkles}
-        title="Apariencia avanzada"
-        description="Mas aire entre bloques, tarjetas mas suaves o mas firmes y botones con mejor gesto visual. Todo con un preview simple para entender el cambio."
-      >
-        <div className="mb-5 grid gap-3 md:grid-cols-3">
-          <ExplainerCard title="Mas aire entre bloques" description="Cambia la velocidad de lectura y la sensacion premium." />
-          <ExplainerCard title="Tarjetas mas suaves o mas firmes" description="Define personalidad sin volver tecnico el control." />
-          <ExplainerCard title="Botones mas claros" description="El preview muestra si el gesto se siente elegante o agresivo." />
-        </div>
-
-        <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-          <div className="grid gap-5 lg:grid-cols-2">
-            <FormField label="Densidad" hint="Mas informacion por pantalla o una vista mas relajada.">
-              <Select
-                value={values?.ui_density ?? theme.ui_density}
-                onValueChange={(value) =>
-                  setValue('ui_density', value as StoreThemeInput['ui_density'], { shouldDirty: true })
-                }
-              >
-                <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                  <SelectItem value="compact">Mas compacto</SelectItem>
-                  <SelectItem value="comfortable">Balanceado</SelectItem>
-                  <SelectItem value="spacious">Mas aire</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormField>
-
-            <FormField label="Spacing" hint="Cuanto respiro hay entre bloques.">
-              <Select
-                value={values?.spacing_scale ?? theme.spacing_scale}
-                onValueChange={(value) =>
-                  setValue('spacing_scale', value as StoreThemeInput['spacing_scale'], { shouldDirty: true })
-                }
-              >
-                <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                  <SelectItem value="tight">Aire contenido</SelectItem>
-                  <SelectItem value="balanced">Aire balanceado</SelectItem>
-                  <SelectItem value="airy">Aire amplio</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormField>
-
-            <FormField label="Tarjetas" hint="Mas suaves, mas firmes o mas expresivas.">
-              <Select
-                value={values?.card_style ?? theme.card_style}
-                onValueChange={(value) =>
-                  setValue('card_style', value as StoreThemeInput['card_style'], { shouldDirty: true })
-                }
-              >
-                <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                  <SelectItem value="soft">Suaves</SelectItem>
-                  <SelectItem value="sharp">Firmes</SelectItem>
-                  <SelectItem value="glass">Cristal</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormField>
-
-            <FormField label="Botones" hint="El gesto visual de la accion principal.">
-              <Select
-                value={values?.button_style ?? theme.button_style}
-                onValueChange={(value) =>
-                  setValue('button_style', value as StoreThemeInput['button_style'], { shouldDirty: true })
-                }
-              >
-                <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                  <SelectItem value="rounded">Redondeados</SelectItem>
-                  <SelectItem value="square">Firmes</SelectItem>
-                  <SelectItem value="pill">Capsula</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormField>
-          </div>
-
-          <AdvancedRhythmPreviewPanel previewThemeVars={previewThemeVars} />
-        </div>
-      </Section>
-
-      <Section
-        icon={Layers3}
-        title="Catalogo y layout"
-        description="Controla si la tienda se siente mas boutique o mas compacta. El preview te ayuda a entender ancho, grilla, imagen y redondeo."
-      >
-        <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-          <div className="grid gap-5 lg:grid-cols-2">
-            <FormField label="Ancho" hint="Mas contenido dentro del viewport o una experiencia mas enfocada.">
-              <Select
-                value={values?.container_width ?? theme.container_width}
-                onValueChange={(value) =>
-                  setValue('container_width', value as StoreThemeInput['container_width'], { shouldDirty: true })
-                }
-              >
-                <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                  <SelectItem value="sm">Contenido</SelectItem>
-                  <SelectItem value="md">Medio</SelectItem>
-                  <SelectItem value="lg">Amplio</SelectItem>
-                  <SelectItem value="xl">Grande</SelectItem>
-                  <SelectItem value="full">Completo</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormField>
-
-            <FormField label="Columnas" hint="Mas visual o mas compacto.">
-              <Select
-                value={String(values?.grid_columns ?? theme.grid_columns)}
-                onValueChange={(value) => setValue('grid_columns', Number(value) as 2 | 3 | 4, { shouldDirty: true })}
-              >
-                <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                  {GRID_COLUMNS_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={String(option.value)}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormField>
-
-            <FormField label="Ratio de imagen" hint="La forma con la que el producto se presenta.">
-              <Select
-                value={values?.image_ratio ?? theme.image_ratio}
-                onValueChange={(value) =>
-                  setValue('image_ratio', value as StoreThemeInput['image_ratio'], { shouldDirty: true })
-                }
-              >
-                <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                  {IMAGE_RATIO_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormField>
-
-            <FormField label="Redondeo global" hint="Que tan suave se siente la interfaz.">
-              <Select
-                value={values?.border_radius ?? theme.border_radius}
-                onValueChange={(value) =>
-                  setValue('border_radius', value as StoreThemeInput['border_radius'], { shouldDirty: true })
-                }
-              >
-                <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="border-white/10 bg-neutral-950 text-white">
-                  {BORDER_RADIUS_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormField>
-          </div>
-
-          <CatalogLayoutPreviewPanel previewThemeVars={previewThemeVars} columns={values?.grid_columns ?? theme.grid_columns} />
-        </div>
-      </Section>
+      {activeSection === 'layout' && (
+        <LayoutSection
+          get={get}
+          sv={sv}
+          showAdvanced={showLayoutAdvanced}
+          onToggleAdvanced={() => setShowLayoutAdvanced((v) => !v)}
+        />
+      )}
 
       {submitError ? (
-        <FormFeedback kind="error" title="No pudimos guardar la apariencia" message={submitError} />
+        <FormFeedback kind="error" title="No pudimos guardar" message={submitError} />
       ) : null}
       {!submitError && saved ? (
         <FormFeedback
           kind="success"
           title="Apariencia guardada"
-          message="La tienda publica ya puede reflejar esta nueva version visual."
+          message="La tienda ya refleja los cambios."
         />
       ) : null}
 
       <div className="flex justify-end">
-        <SaveButton isLoading={isSubmitting} isSaved={saved} label="Guardar sistema visual" />
+        <SaveButton isLoading={isSubmitting} isSaved={saved} label="Guardar apariencia" />
       </div>
     </form>
   )
 }
 
-function Section({
+// ─── Sections ────────────────────────────────────────────────────────────────
+
+function FontsSection({
+  get,
+  sv,
+  applyPreset,
+  showAdvanced,
+  onToggleAdvanced,
+  previewThemeVars,
+}: {
+  get: Get
+  sv: SV
+  applyPreset: (preset: StoreThemeInput['font_preset']) => void
+  showAdvanced: boolean
+  onToggleAdvanced: () => void
+  previewThemeVars: React.CSSProperties
+}) {
+  return (
+    <div className="surface-panel premium-ring space-y-6 rounded-[30px] px-5 py-6 sm:px-6">
+      <SectionHeader icon={Type} title="Tipografía" hint="Elige un estilo de letra para tu tienda." />
+
+      {/* Presets */}
+      <div>
+        <p className="mb-3 text-sm font-medium text-neutral-200">Estilo general</p>
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          {FONT_PRESETS.map((preset) => {
+            const active = get('font_preset') === preset.value
+            return (
+              <button
+                key={preset.value}
+                type="button"
+                onClick={() => applyPreset(preset.value)}
+                className={cn(
+                  'rounded-[22px] border p-4 text-left transition',
+                  active
+                    ? 'border-emerald-300/30 bg-emerald-400/10'
+                    : 'border-white/8 bg-white/4 hover:bg-white/6',
+                )}
+              >
+                <p className="text-sm font-semibold text-white">{preset.label}</p>
+                <p className="mt-1 text-xs leading-5 text-neutral-400">{preset.description}</p>
+                <p className="mt-3 text-[11px] text-neutral-500">
+                  {FONT_OPTIONS.find((f) => f.value === preset.heading_font)?.label} +{' '}
+                  {FONT_OPTIONS.find((f) => f.value === preset.body_font)?.label}
+                </p>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Font selects */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <FormField label="Fuente de títulos" hint="Para el hero y secciones clave.">
+          <Select
+            value={get('heading_font')}
+            onValueChange={(val) => sv('heading_font', val)}
+          >
+            <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="border-white/10 bg-neutral-950 text-white">
+              {FONT_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  <div className="py-1">
+                    <p className="text-sm font-semibold">{opt.label}</p>
+                    <p
+                      className="mt-0.5 text-[12px] text-neutral-400"
+                      style={{ fontFamily: FONT_FAMILY_MAP[opt.value] }}
+                    >
+                      Tu tienda vende mejor cuando se ve premium
+                    </p>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormField>
+
+        <FormField label="Fuente de texto" hint="Para descripciones y fichas de producto.">
+          <Select
+            value={get('body_font')}
+            onValueChange={(val) => {
+              sv('body_font', val)
+              sv('font_family', val)
+            }}
+          >
+            <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="border-white/10 bg-neutral-950 text-white">
+              {FONT_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  <div className="py-1">
+                    <p className="text-sm font-semibold">{opt.label}</p>
+                    <p
+                      className="mt-0.5 text-[12px] text-neutral-400"
+                      style={{ fontFamily: FONT_FAMILY_MAP[opt.value] }}
+                    >
+                      La lectura fluida convierte visitas en pedidos
+                    </p>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormField>
+      </div>
+
+      {/* Advanced toggle */}
+      <button
+        type="button"
+        onClick={onToggleAdvanced}
+        className="flex items-center gap-2 text-sm text-neutral-400 transition hover:text-white"
+      >
+        {showAdvanced ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+        {showAdvanced ? 'Ocultar ajustes finos' : 'Ajustes finos de escala y peso'}
+      </button>
+
+      {showAdvanced && (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField label="Escala de títulos" hint="Cuánta presencia tiene el titular.">
+            <Select
+              value={get('heading_scale')}
+              onValueChange={(val) => sv('heading_scale', val)}
+            >
+              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-white/10 bg-neutral-950 text-white">
+                <SelectItem value="compact">Compacta</SelectItem>
+                <SelectItem value="default">Balanceada</SelectItem>
+                <SelectItem value="large">Expansiva</SelectItem>
+              </SelectContent>
+            </Select>
+          </FormField>
+
+          <FormField label="Peso de los títulos" hint="Más delicado o más firme.">
+            <Select
+              value={get('heading_weight')}
+              onValueChange={(val) => sv('heading_weight', val)}
+            >
+              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-white/10 bg-neutral-950 text-white">
+                {HEADING_WEIGHT_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+
+          <FormField label="Escala de texto" hint="Qué tan descansada se siente la lectura.">
+            <Select
+              value={get('body_scale')}
+              onValueChange={(val) => sv('body_scale', val)}
+            >
+              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-white/10 bg-neutral-950 text-white">
+                <SelectItem value="sm">Compacta</SelectItem>
+                <SelectItem value="base">Balanceada</SelectItem>
+                <SelectItem value="lg">Amplia</SelectItem>
+              </SelectContent>
+            </Select>
+          </FormField>
+        </div>
+      )}
+
+      <TypographyPreviewPanel previewThemeVars={previewThemeVars} />
+    </div>
+  )
+}
+
+function ColorsSection({
+  get,
+  sv,
+  register,
+  errors,
+  previewThemeVars,
+  contrasts,
+}: {
+  get: Get
+  sv: SV
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  register: any
+  errors: FieldErrors<StoreThemeInput>
+  previewThemeVars: React.CSSProperties
+  contrasts: { bg: string; surface: string; primary: string }
+}) {
+  return (
+    <div className="surface-panel premium-ring space-y-6 rounded-[30px] px-5 py-6 sm:px-6">
+      <SectionHeader icon={Palette} title="Colores" hint="Define la paleta visual de tu tienda." />
+
+      {/* 6 color pickers */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {COLOR_FIELDS.map((field) => {
+          const value = get(field.name) as string
+          return (
+            <div
+              key={field.name}
+              className="rounded-[22px] border border-white/8 bg-white/4 p-4"
+            >
+              <Label className="text-sm font-medium text-white">{field.label}</Label>
+              <p className="mt-0.5 text-xs text-neutral-500">{field.hint}</p>
+              <div className="mt-3 flex items-center gap-3">
+                <label
+                  className="relative size-11 shrink-0 overflow-hidden rounded-xl border border-white/10"
+                  style={{ backgroundColor: value }}
+                >
+                  <input
+                    type="color"
+                    value={value}
+                    onChange={(e) => sv(field.name, e.target.value)}
+                    className="absolute inset-0 cursor-pointer opacity-0"
+                  />
+                </label>
+                <input
+                  {...register(field.name)}
+                  className="h-10 flex-1 rounded-xl border border-white/10 bg-black/10 px-3 font-mono text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/30"
+                />
+              </div>
+              {errors[field.name] ? (
+                <p className="mt-1.5 text-xs text-red-300">{errors[field.name]?.message}</p>
+              ) : null}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Visual mode */}
+      <div>
+        <p className="mb-3 text-sm font-medium text-neutral-200">Modo visual</p>
+        <div className="grid grid-cols-3 gap-2">
+          {VISUAL_MODE_OPTIONS.map((opt) => {
+            const active = get('visual_mode') === opt.value
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => sv('visual_mode', opt.value)}
+                className={cn(
+                  'rounded-[20px] border p-3 text-left transition',
+                  active
+                    ? 'border-emerald-300/30 bg-emerald-400/10'
+                    : 'border-white/8 bg-black/10 hover:bg-white/6',
+                )}
+              >
+                <p className="text-sm font-semibold text-white">{opt.label}</p>
+                <p className="mt-0.5 text-xs text-neutral-500">{opt.description}</p>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Contrast */}
+      <div>
+        <p className="mb-3 text-sm font-medium text-neutral-200">Contraste</p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <ContrastCard
+            label="Texto sobre fondo"
+            value={`${contrasts.bg}:1`}
+            description="Legibilidad general de la tienda."
+            tone={Number(contrasts.bg) >= 4.5 ? 'good' : 'warning'}
+          />
+          <ContrastCard
+            label="Texto sobre card"
+            value={`${contrasts.surface}:1`}
+            description="Cards, paneles y overlays."
+            tone={Number(contrasts.surface) >= 4.5 ? 'good' : 'warning'}
+          />
+          <ContrastCard
+            label="Texto del botón CTA"
+            value={`${contrasts.primary}:1`}
+            description="Botones de acción principal."
+            tone={Number(contrasts.primary) >= 4.5 ? 'good' : 'warning'}
+          />
+        </div>
+      </div>
+
+      <LandingColorPreview previewThemeVars={previewThemeVars} />
+    </div>
+  )
+}
+
+function LayoutSection({
+  get,
+  sv,
+  showAdvanced,
+  onToggleAdvanced,
+}: {
+  get: Get
+  sv: SV
+  showAdvanced: boolean
+  onToggleAdvanced: () => void
+}) {
+  return (
+    <div className="surface-panel premium-ring space-y-6 rounded-[30px] px-5 py-6 sm:px-6">
+      <SectionHeader
+        icon={Layers3}
+        title="Diseño"
+        hint="Personaliza cómo se ven las tarjetas, botones y el espacio entre elementos."
+      />
+
+      <OptionGroup label="Tarjetas" hint="El estilo visual de cada producto.">
+        {CARD_STYLES.map((opt) => (
+          <OptionButton
+            key={opt.value}
+            label={opt.label}
+            hint={opt.hint}
+            active={get('card_style') === opt.value}
+            onClick={() => sv('card_style', opt.value)}
+          />
+        ))}
+      </OptionGroup>
+
+      <OptionGroup label="Botones" hint="La forma del botón de acción principal.">
+        {BUTTON_STYLES.map((opt) => (
+          <OptionButton
+            key={opt.value}
+            label={opt.label}
+            hint={opt.hint}
+            active={get('button_style') === opt.value}
+            onClick={() => sv('button_style', opt.value)}
+          />
+        ))}
+      </OptionGroup>
+
+      <OptionGroup label="Espacio entre elementos" hint="Cuánto aire hay en la tienda.">
+        {DENSITY_OPTIONS.map((opt) => (
+          <OptionButton
+            key={opt.value}
+            label={opt.label}
+            hint={opt.hint}
+            active={get('ui_density') === opt.value}
+            onClick={() => sv('ui_density', opt.value)}
+          />
+        ))}
+      </OptionGroup>
+
+      {/* Catalog */}
+      <div>
+        <p className="mb-1 text-sm font-medium text-neutral-200">Catálogo</p>
+        <p className="mb-4 text-xs text-neutral-500">
+          Cómo se presenta la grilla de productos.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FormField label="Columnas">
+            <Select
+              value={String(get('grid_columns'))}
+              onValueChange={(val) => sv('grid_columns', Number(val))}
+            >
+              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-white/10 bg-neutral-950 text-white">
+                {GRID_COLUMNS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={String(opt.value)}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+
+          <FormField label="Ancho del contenido">
+            <Select
+              value={get('container_width')}
+              onValueChange={(val) => sv('container_width', val)}
+            >
+              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-white/10 bg-neutral-950 text-white">
+                <SelectItem value="sm">Contenido</SelectItem>
+                <SelectItem value="md">Medio</SelectItem>
+                <SelectItem value="lg">Amplio</SelectItem>
+                <SelectItem value="xl">Grande</SelectItem>
+                <SelectItem value="full">Completo</SelectItem>
+              </SelectContent>
+            </Select>
+          </FormField>
+
+          <FormField label="Forma de la imagen">
+            <Select
+              value={get('image_ratio')}
+              onValueChange={(val) => sv('image_ratio', val)}
+            >
+              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-white/10 bg-neutral-950 text-white">
+                {IMAGE_RATIO_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+        </div>
+      </div>
+
+      {/* Advanced */}
+      <button
+        type="button"
+        onClick={onToggleAdvanced}
+        className="flex items-center gap-2 text-sm text-neutral-400 transition hover:text-white"
+      >
+        {showAdvanced ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+        {showAdvanced ? 'Ocultar ajustes avanzados' : 'Ver ajustes avanzados'}
+      </button>
+
+      {showAdvanced && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField label="Espaciado entre bloques" hint="Cuánto respiro hay entre secciones.">
+            <Select
+              value={get('spacing_scale')}
+              onValueChange={(val) => sv('spacing_scale', val)}
+            >
+              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-white/10 bg-neutral-950 text-white">
+                <SelectItem value="tight">Aire contenido</SelectItem>
+                <SelectItem value="balanced">Aire balanceado</SelectItem>
+                <SelectItem value="airy">Aire amplio</SelectItem>
+              </SelectContent>
+            </Select>
+          </FormField>
+
+          <FormField label="Redondeo de esquinas" hint="Qué tan suave se siente la interfaz.">
+            <Select
+              value={get('border_radius')}
+              onValueChange={(val) => sv('border_radius', val)}
+            >
+              <SelectTrigger className="h-12 rounded-2xl border-white/10 bg-white/5 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-white/10 bg-neutral-950 text-white">
+                {BORDER_RADIUS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormField>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function SectionHeader({
   icon: Icon,
   title,
-  description,
-  children,
+  hint,
 }: {
   icon: React.ElementType
   title: string
-  description: string
-  children: React.ReactNode
+  hint: string
 }) {
   return (
-    <section className="surface-panel premium-ring rounded-[30px] px-5 py-6 sm:px-6">
-      <div className="mb-5 flex items-start gap-3">
-        <div className="mt-0.5 flex size-10 items-center justify-center rounded-2xl bg-white/6">
-          <Icon className="size-4 text-emerald-300" />
-        </div>
-        <div>
-          <h3 className="font-heading text-xl font-semibold tracking-[-0.04em] text-white">{title}</h3>
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-neutral-400">{description}</p>
-        </div>
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5 flex size-10 items-center justify-center rounded-2xl bg-white/6">
+        <Icon className="size-4 text-emerald-300" />
       </div>
-      <Separator className="mb-5 bg-white/8" />
-      {children}
-    </section>
+      <div>
+        <h3 className="font-heading text-xl font-semibold tracking-[-0.04em] text-white">
+          {title}
+        </h3>
+        <p className="mt-1 text-sm text-neutral-400">{hint}</p>
+      </div>
+    </div>
   )
 }
 
@@ -655,18 +744,55 @@ function FormField({
   return (
     <div>
       <Label className="mb-2 block text-sm font-medium text-neutral-200">{label}</Label>
-      {hint ? <p className="mb-2 text-xs leading-5 text-neutral-500">{hint}</p> : null}
+      {hint ? <p className="mb-2 text-xs text-neutral-500">{hint}</p> : null}
       {children}
     </div>
   )
 }
 
-function ExplainerCard({ title, description }: { title: string; description: string }) {
+function OptionGroup({
+  label,
+  hint,
+  children,
+}: {
+  label: string
+  hint?: string
+  children: React.ReactNode
+}) {
   return (
-    <div className="rounded-[24px] border border-white/8 bg-black/10 p-4">
-      <p className="text-sm font-semibold text-white">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-neutral-400">{description}</p>
+    <div>
+      <p className="mb-1 text-sm font-medium text-neutral-200">{label}</p>
+      {hint ? <p className="mb-3 text-xs text-neutral-500">{hint}</p> : null}
+      <div className="grid grid-cols-3 gap-2">{children}</div>
     </div>
+  )
+}
+
+function OptionButton({
+  label,
+  hint,
+  active,
+  onClick,
+}: {
+  label: string
+  hint?: string
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'rounded-[20px] border px-4 py-3 text-left transition',
+        active
+          ? 'border-emerald-300/30 bg-emerald-400/10'
+          : 'border-white/8 bg-white/4 hover:bg-white/6',
+      )}
+    >
+      <p className="text-sm font-medium text-white">{label}</p>
+      {hint ? <p className="mt-0.5 text-[11px] text-neutral-500">{hint}</p> : null}
+    </button>
   )
 }
 
@@ -682,68 +808,81 @@ function ContrastCard({
   tone: 'good' | 'warning'
 }) {
   return (
-    <div className="rounded-[24px] border border-white/8 bg-black/10 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-white">{label}</p>
+    <div className="rounded-[22px] border border-white/8 bg-black/10 p-4">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-semibold text-neutral-300">{label}</p>
         <span
-          className={
+          className={cn(
+            'shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]',
             tone === 'good'
-              ? 'rounded-full border border-emerald-300/20 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200'
-              : 'rounded-full border border-amber-300/20 bg-amber-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-200'
-          }
+              ? 'border border-emerald-300/20 bg-emerald-400/10 text-emerald-200'
+              : 'border border-amber-300/20 bg-amber-400/10 text-amber-200',
+          )}
         >
           {tone === 'good' ? 'OK' : 'Revisar'}
         </span>
       </div>
-      <div className="mt-4 flex items-center gap-3">
-        <div className="flex size-10 items-center justify-center rounded-2xl bg-white/6">
-          <Contrast className="size-4 text-emerald-300" />
-        </div>
-        <div>
-          <p className="text-lg font-semibold tracking-tight text-white">{value}</p>
-          <p className="text-xs text-neutral-500">{description}</p>
-        </div>
+      <div className="mt-3 flex items-center gap-2">
+        <Contrast className="size-4 shrink-0 text-emerald-300" />
+        <p className="text-lg font-semibold tracking-tight text-white">{value}</p>
       </div>
+      <p className="mt-1 text-xs text-neutral-500">{description}</p>
     </div>
   )
 }
 
+// ─── Previews ─────────────────────────────────────────────────────────────────
+
 function TypographyPreviewPanel({ previewThemeVars }: { previewThemeVars: React.CSSProperties }) {
   return (
     <div
-      className="overflow-hidden rounded-[30px] border border-white/8"
+      className="overflow-hidden rounded-[26px] border border-white/8"
       style={{
         ...previewThemeVars,
         background:
-          'linear-gradient(180deg, color-mix(in srgb, var(--store-bg) 94%, white 6%), color-mix(in srgb, var(--store-surface) 92%, transparent))',
+          'linear-gradient(180deg, color-mix(in srgb, var(--store-bg) 94%, white 6%), var(--store-surface))',
       }}
     >
-      <div className="border-b border-white/8 px-5 py-4">
-        <p className="admin-label" style={{ color: 'var(--store-muted-text)' }}>
-          Preview tipografico
+      <div className="border-b border-white/8 px-5 py-3">
+        <p
+          className="text-[11px] font-semibold uppercase tracking-[0.2em]"
+          style={{ color: 'var(--store-muted-text)' }}
+        >
+          Vista previa tipográfica
         </p>
       </div>
       <div className="space-y-5 px-5 py-5">
         <div>
           <p
-            className="store-heading text-[2rem] leading-[0.95]"
+            className="store-heading text-3xl leading-tight"
             style={{
               color: 'var(--store-text)',
               transform: 'scale(var(--store-heading-scale))',
               transformOrigin: 'left top',
             }}
           >
-            {TYPOGRAPHY_TITLE}
+            Tu tienda vende mejor cuando se ve premium
           </p>
           <p
-            className="mt-3 max-w-xl leading-7"
+            className="mt-3 text-sm leading-6"
             style={{
               color: 'var(--store-soft-text)',
-              fontSize: 'calc(0.98rem * var(--store-body-scale))',
+              fontSize: 'calc(0.95rem * var(--store-body-scale))',
             }}
           >
-            {TYPOGRAPHY_BODY}
+            Cada decisión tipográfica se ve aquí antes de guardar.
           </p>
+          <button
+            type="button"
+            className="mt-4 rounded-[var(--store-button-radius)] px-5 py-2.5 text-sm font-semibold"
+            style={{
+              background:
+                'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
+              color: 'var(--store-primary-contrast)',
+            }}
+          >
+            Comprar ahora
+          </button>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div
@@ -751,14 +890,16 @@ function TypographyPreviewPanel({ previewThemeVars }: { previewThemeVars: React.
             style={{
               borderColor: 'var(--store-card-border)',
               background: 'var(--store-card-background)',
-              boxShadow: 'var(--store-card-shadow)',
             }}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>
-              Fuente principal
+            <p
+              className="text-[10px] font-semibold uppercase tracking-[0.2em]"
+              style={{ color: 'var(--store-muted-text)' }}
+            >
+              Fuente de títulos
             </p>
-            <p className="store-heading mt-3 text-xl" style={{ color: 'var(--store-text)' }}>
-              Titulos con claridad y autoridad
+            <p className="store-heading mt-2 text-lg" style={{ color: 'var(--store-text)' }}>
+              Título con claridad
             </p>
           </div>
           <div
@@ -766,14 +907,16 @@ function TypographyPreviewPanel({ previewThemeVars }: { previewThemeVars: React.
             style={{
               borderColor: 'var(--store-card-border)',
               background: 'var(--store-card-background)',
-              boxShadow: 'var(--store-card-shadow)',
             }}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>
-              Fuente secundaria
+            <p
+              className="text-[10px] font-semibold uppercase tracking-[0.2em]"
+              style={{ color: 'var(--store-muted-text)' }}
+            >
+              Fuente de texto
             </p>
-            <p className="mt-3 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
-              Textos mas claros, fichas mas faciles de leer y menos sensacion tecnica.
+            <p className="mt-2 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+              Texto más claro y más fácil de leer.
             </p>
           </div>
         </div>
@@ -785,25 +928,22 @@ function TypographyPreviewPanel({ previewThemeVars }: { previewThemeVars: React.
 function LandingColorPreview({ previewThemeVars }: { previewThemeVars: React.CSSProperties }) {
   return (
     <div
-      className="overflow-hidden rounded-[30px] border border-white/8"
-      style={{
-        ...previewThemeVars,
-        backgroundColor: 'var(--store-bg)',
-      }}
+      className="overflow-hidden rounded-[26px] border border-white/8"
+      style={{ ...previewThemeVars, backgroundColor: 'var(--store-bg)' }}
     >
       <div
-        className="flex items-center justify-between gap-3 border-b px-5 py-4"
+        className="flex items-center justify-between gap-3 border-b px-5 py-3"
         style={{
           borderColor: 'var(--store-card-border)',
           backgroundColor: withAlpha('#ffffff', 0.03),
         }}
       >
         <div>
-          <p className="store-heading text-base" style={{ color: 'var(--store-text)' }}>
+          <p className="store-heading text-sm" style={{ color: 'var(--store-text)' }}>
             Navbar
           </p>
           <p className="text-xs" style={{ color: 'var(--store-muted-text)' }}>
-            Marca, CTA y contraste general
+            Marca, CTA y contraste
           </p>
         </div>
         <button
@@ -819,7 +959,7 @@ function LandingColorPreview({ previewThemeVars }: { previewThemeVars: React.CSS
         </button>
       </div>
 
-      <div className="space-y-5 px-5 py-5">
+      <div className="space-y-4 px-5 py-5">
         <div
           className="rounded-[calc(var(--store-card-radius)*1.05)] p-5"
           style={{
@@ -838,11 +978,14 @@ function LandingColorPreview({ previewThemeVars }: { previewThemeVars: React.CSS
           >
             Badge
           </span>
-          <h3 className="store-heading mt-4 text-[1.6rem] leading-tight" style={{ color: 'var(--store-text)' }}>
+          <h3
+            className="store-heading mt-4 text-2xl leading-tight"
+            style={{ color: 'var(--store-text)' }}
+          >
             Hero
           </h3>
-          <p className="mt-3 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
-            Mini mockup util para entender como cambian capas, foco visual y legibilidad.
+          <p className="mt-2 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+            Así se ve la paleta en acción antes de guardar.
           </p>
           <div className="mt-4 flex gap-3">
             <button
@@ -854,7 +997,7 @@ function LandingColorPreview({ previewThemeVars }: { previewThemeVars: React.CSS
                 color: 'var(--store-primary-contrast)',
               }}
             >
-              Comprar ahora
+              Comprar
             </button>
             <button
               type="button"
@@ -865,7 +1008,7 @@ function LandingColorPreview({ previewThemeVars }: { previewThemeVars: React.CSS
                 color: 'var(--store-text)',
               }}
             >
-              Ver catalogo
+              Ver catálogo
             </button>
           </div>
         </div>
@@ -879,22 +1022,17 @@ function LandingColorPreview({ previewThemeVars }: { previewThemeVars: React.CSS
           }}
         >
           <div
-            className="aspect-[4/3] rounded-[calc(var(--store-card-radius)*0.8)]"
+            className="aspect-[4/3] rounded-[calc(var(--store-card-radius)*0.75)]"
             style={{
               background:
                 'linear-gradient(145deg, color-mix(in srgb, var(--store-accent) 18%, transparent), color-mix(in srgb, var(--store-secondary) 14%, transparent))',
             }}
           />
-          <div className="mt-4 flex items-start justify-between gap-3">
-            <div>
-              <p className="store-heading text-lg" style={{ color: 'var(--store-text)' }}>
-                Product card
-              </p>
-              <p className="mt-1 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
-                Precio legible, fondo claro y CTA visible.
-              </p>
-            </div>
-            <p className="text-lg font-semibold" style={{ color: 'var(--store-primary)' }}>
+          <div className="mt-3 flex items-start justify-between gap-3">
+            <p className="store-heading text-base" style={{ color: 'var(--store-text)' }}>
+              Producto
+            </p>
+            <p className="text-base font-semibold" style={{ color: 'var(--store-primary)' }}>
               $42.000
             </p>
           </div>
@@ -904,151 +1042,21 @@ function LandingColorPreview({ previewThemeVars }: { previewThemeVars: React.CSS
           className="rounded-[calc(var(--store-card-radius)*0.86)] border-t px-1 pt-4"
           style={{ borderColor: 'var(--store-card-border)' }}
         >
-          <div className="flex items-center justify-between gap-3 rounded-[calc(var(--store-card-radius)*0.8)] px-4 py-3" style={{ backgroundColor: withAlpha('#000000', 0.08) }}>
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>
-                Footer
-              </p>
-              <p className="mt-1 text-sm" style={{ color: 'var(--store-soft-text)' }}>
-                Cierre visual mas firme y con mas marca.
-              </p>
-            </div>
-            <span className="size-2.5 rounded-full" style={{ backgroundColor: 'var(--store-accent)' }} />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function AdvancedRhythmPreviewPanel({ previewThemeVars }: { previewThemeVars: React.CSSProperties }) {
-  return (
-    <div
-      className="overflow-hidden rounded-[30px] border border-white/8"
-      style={{
-        ...previewThemeVars,
-        backgroundColor: 'var(--store-bg)',
-      }}
-    >
-      <div className="border-b px-5 py-4" style={{ borderColor: 'var(--store-card-border)' }}>
-        <p className="admin-label" style={{ color: 'var(--store-muted-text)' }}>
-          Preview de ritmo y componentes
-        </p>
-      </div>
-      <div className="grid gap-4 px-5 py-5 lg:grid-cols-2">
-        <div
-          className="rounded-[var(--store-card-radius)] border p-4"
-          style={{
-            borderColor: 'var(--store-card-border)',
-            background: 'var(--store-card-background)',
-            boxShadow: 'var(--store-card-shadow)',
-          }}
-        >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>
-            Ritmo
-          </p>
-          <div className="mt-4 space-y-[var(--store-space-cluster)]">
-            <div className="h-4 w-24 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.08) }} />
-            <div className="h-12 rounded-[calc(var(--store-card-radius)*0.7)]" style={{ backgroundColor: withAlpha('#ffffff', 0.06) }} />
-            <div className="h-12 rounded-[calc(var(--store-card-radius)*0.7)]" style={{ backgroundColor: withAlpha('#ffffff', 0.06) }} />
-          </div>
-        </div>
-        <div
-          className="rounded-[var(--store-card-radius)] border p-4"
-          style={{
-            borderColor: 'var(--store-card-border)',
-            background: 'var(--store-card-background)',
-            boxShadow: 'var(--store-card-shadow)',
-          }}
-        >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>
-            Componentes
-          </p>
-          <div className="mt-4 space-y-3">
-            <div className="h-20 rounded-[calc(var(--store-card-radius)*0.78)]" style={{ backgroundColor: withAlpha('#ffffff', 0.06) }} />
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                className="rounded-[var(--store-button-radius)] px-4 py-2 text-sm font-semibold"
-                style={{
-                  background:
-                    'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
-                  color: 'var(--store-primary-contrast)',
-                }}
-              >
-                Principal
-              </button>
-              <button
-                type="button"
-                className="rounded-[var(--store-button-radius)] border px-4 py-2 text-sm"
-                style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)' }}
-              >
-                Secundario
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function CatalogLayoutPreviewPanel({
-  previewThemeVars,
-  columns,
-}: {
-  previewThemeVars: React.CSSProperties
-  columns: number
-}) {
-  const previewCount = columns >= 4 ? 4 : columns === 3 ? 3 : 2
-  const imageRatio = String(previewThemeVars['--store-image-ratio' as keyof React.CSSProperties] ?? '4 / 5')
-  const imageClass =
-    imageRatio === '1 / 1' ? 'aspect-square' : imageRatio === '16 / 9' ? 'aspect-video' : imageRatio === '3 / 4' ? 'aspect-[3/4]' : 'aspect-[4/5]'
-
-  return (
-    <div
-      className="overflow-hidden rounded-[30px] border border-white/8"
-      style={{
-        ...previewThemeVars,
-        backgroundColor: 'var(--store-bg)',
-      }}
-    >
-      <div className="border-b px-5 py-4" style={{ borderColor: 'var(--store-card-border)' }}>
-        <p className="admin-label" style={{ color: 'var(--store-muted-text)' }}>
-          Preview de layout
-        </p>
-      </div>
-      <div className="space-y-4 px-5 py-5">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="store-heading text-lg" style={{ color: 'var(--store-text)' }}>
-              Catalogo
-            </p>
-            <p className="text-sm" style={{ color: 'var(--store-soft-text)' }}>
-              Ancho, grilla e imagen cambian la lectura del producto.
-            </p>
-          </div>
-          <span
-            className="rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]"
-            style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-muted-text)' }}
+          <div
+            className="flex items-center justify-between rounded-[calc(var(--store-card-radius)*0.8)] px-4 py-3"
+            style={{ backgroundColor: withAlpha('#000000', 0.08) }}
           >
-            {columns} cols
-          </span>
-        </div>
-        <div className={`grid gap-3 ${previewCount === 4 ? 'grid-cols-4' : previewCount === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
-          {Array.from({ length: previewCount }).map((_, index) => (
-            <div key={index} className="space-y-2">
-              <div
-                className={`${imageClass} rounded-[calc(var(--store-card-radius)*0.75)]`}
-                style={{
-                  background:
-                    'linear-gradient(145deg, color-mix(in srgb, var(--store-accent) 18%, transparent), color-mix(in srgb, var(--store-secondary) 14%, transparent))',
-                }}
-              />
-              <div className="h-3 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.08) }} />
-              <div className="h-2.5 w-2/3 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.05) }} />
-            </div>
-          ))}
+            <p
+              className="text-[11px] font-semibold uppercase tracking-[0.2em]"
+              style={{ color: 'var(--store-muted-text)' }}
+            >
+              Footer
+            </p>
+            <span
+              className="size-2 rounded-full"
+              style={{ backgroundColor: 'var(--store-accent)' }}
+            />
+          </div>
         </div>
       </div>
     </div>
