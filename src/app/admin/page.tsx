@@ -12,8 +12,8 @@ import {
 } from 'lucide-react'
 import { getAdminCategories, getAdminProducts, getAdminStore } from '@/lib/queries/store'
 import { createClient } from '@/lib/supabase/server'
-import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 export default async function AdminPage() {
   const supabase = await createClient()
@@ -30,130 +30,180 @@ export default async function AdminPage() {
     getAdminCategories(storeData.store.id),
   ])
 
-  const activeProducts = products.filter((product) => product.is_active)
-  const featuredProducts = products.filter((product) => product.is_featured)
+  const activeProducts = products.filter((p) => p.is_active)
+  const featuredProducts = products.filter((p) => p.is_featured)
   const isConfigured = Boolean(storeData.store.whatsapp)
-  const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://tu-app.com'}/tienda/${storeData.store.slug}`
 
   const quickActions = [
     {
       href: '/admin/productos/nuevo',
       icon: Package,
       label: 'Agregar producto',
-      description: 'Carga una nueva pieza al catalogo.',
+      description: 'Carga una nueva pieza al catálogo.',
     },
     {
       href: '/admin/apariencia',
       icon: Palette,
-      label: 'Personalizar diseno',
-      description: 'Colores, tipografia y jerarquia.',
+      label: 'Personalizar diseño',
+      description: 'Colores, tipografía y jerarquía.',
     },
     {
       href: '/admin/contenido',
       icon: FileText,
       label: 'Editar contenido',
-      description: 'Hero, textos y tono de conversion.',
+      description: 'Hero, textos y tono de conversión.',
     },
   ]
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
-      <AdminPageHeader
-        title={`Hola, ${storeData.store.name}`}
-        description="Una vista clara del estado de tu tienda para operar rapido y sin ruido."
-        action={
-          <Link
-            href={`/tienda/${storeData.store.slug}`}
-            target="_blank"
-            className="inline-flex h-auto min-h-12 items-center rounded-[22px] border border-emerald-300/18 bg-[linear-gradient(135deg,rgba(46,230,166,0.2),rgba(111,243,223,0.12))] px-5 py-3 text-sm font-medium text-white shadow-[0_18px_40px_rgba(16,185,129,0.14)] transition hover:brightness-105"
-          >
-            <div>
-              <div className="font-semibold">Ver tienda</div>
-              <div className="text-xs text-white/72">Abre la landing publica en produccion</div>
-            </div>
-            <ExternalLink className="ml-3 size-4" />
-          </Link>
-        }
-      />
+    <div className="space-y-4 p-4 sm:p-5 lg:p-6">
+      {/* Compact header */}
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="admin-label">{storeData.store.name}</p>
+          <h1 className="mt-1.5 font-heading text-[1.55rem] font-semibold tracking-[-0.05em] text-white">
+            Resumen
+          </h1>
+        </div>
+        <Link
+          href={`/tienda/${storeData.store.slug}`}
+          target="_blank"
+          className="flex shrink-0 items-center gap-2 rounded-[18px] border border-emerald-300/20 bg-emerald-400/8 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-400/14"
+        >
+          Ver tienda
+          <ExternalLink className="size-3.5" />
+        </Link>
+      </div>
 
+      {/* WhatsApp warning */}
       {!isConfigured ? (
         <Link
           href="/admin/configuracion"
-          className="admin-surface-elevated flex items-start gap-3 rounded-[28px] px-5 py-5 transition hover:brightness-105"
+          className="flex items-center gap-3 rounded-[20px] border border-amber-300/14 bg-amber-400/6 px-4 py-3 transition hover:bg-amber-400/10"
         >
-          <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-300/12 text-amber-200">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-amber-300/10 text-amber-200">
             <MessageCircle className="size-4" />
           </div>
-          <div>
-            <p className="text-sm font-semibold text-amber-100">Falta configurar WhatsApp</p>
-            <p className="mt-1 text-sm leading-6 text-amber-100/70">
-              Sin este dato no puedes convertir visitas en pedidos. Configuralo ahora y deja el checkout listo.
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-amber-100">Falta configurar WhatsApp</p>
+            <p className="text-xs text-amber-100/60">
+              Sin este dato no podés convertir visitas en pedidos.
             </p>
           </div>
-          <ArrowRight className="ml-auto mt-1 size-4 shrink-0 text-amber-200" />
+          <ArrowRight className="size-4 shrink-0 text-amber-200/50" />
         </Link>
       ) : null}
 
-      <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Productos activos" value={activeProducts.length} icon={Package} href="/admin/productos" />
-        <StatCard label="Destacados" value={featuredProducts.length} icon={TrendingUp} href="/admin/productos" />
-        <StatCard label="Categorias" value={categories.length} icon={Tag} href="/admin/categorias" />
-        <StatCard label="Total de productos" value={products.length} icon={Package} href="/admin/productos" />
+      {/* KPIs */}
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <StatCard
+          label="Productos activos"
+          value={activeProducts.length}
+          icon={Package}
+          href="/admin/productos"
+        />
+        <StatCard
+          label="Destacados"
+          value={featuredProducts.length}
+          icon={TrendingUp}
+          href="/admin/productos"
+        />
+        <StatCard
+          label="Categorías"
+          value={categories.length}
+          icon={Tag}
+          href="/admin/categorias"
+        />
+        <StatCard
+          label="Total"
+          value={products.length}
+          icon={Package}
+          href="/admin/productos"
+        />
       </section>
 
-      <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-        <section className="admin-surface rounded-[32px] px-5 py-6 sm:px-6">
-          <div className="mb-5 flex items-end justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">Accesos rapidos</p>
-              <h2 className="mt-3 text-xl font-semibold text-white">Operaciones frecuentes</h2>
-            </div>
+      {/* Main 2-col */}
+      <div className="grid gap-4 xl:grid-cols-2">
+        {/* Quick actions */}
+        <section className="admin-surface rounded-[24px] p-4 sm:p-5">
+          <div className="mb-4">
+            <p className="admin-label">Accesos rápidos</p>
+            <h2 className="mt-1.5 text-base font-semibold text-white">Operaciones frecuentes</h2>
           </div>
-
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="space-y-1.5">
             {quickActions.map((action) => {
               const Icon = action.icon
-
               return (
                 <Link
                   key={action.href}
                   href={action.href}
-                  className="admin-button-soft rounded-[24px] p-5"
+                  className="admin-button-soft flex items-center gap-3 rounded-[18px] px-4 py-3"
                 >
-                  <div className="mb-4 flex size-11 items-center justify-center rounded-2xl bg-white/8 text-emerald-200">
-                    <Icon className="size-5" />
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-white/6 text-emerald-200">
+                    <Icon className="size-4" />
                   </div>
-                  <p className="text-sm font-semibold text-white">{action.label}</p>
-                  <p className="mt-2 text-sm leading-6 text-neutral-400">{action.description}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-white">{action.label}</p>
+                    <p className="text-xs text-neutral-500">{action.description}</p>
+                  </div>
+                  <ArrowRight className="size-4 shrink-0 text-neutral-600" />
                 </Link>
               )
             })}
           </div>
         </section>
 
-        <section className="admin-surface rounded-[32px] px-5 py-6 sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">Tu tienda</p>
-          <div className="mt-3 flex items-start justify-between gap-4">
+        {/* Config */}
+        <section className="admin-surface rounded-[24px] p-4 sm:p-5">
+          <div className="mb-4 flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-xl font-semibold text-white">Configuracion actual</h2>
-              <p className="mt-2 text-sm leading-6 text-neutral-400">
-                Edita rapido los datos que mas impacto tienen en la confianza y en la URL publica.
-              </p>
+              <p className="admin-label">Tu tienda</p>
+              <h2 className="mt-1.5 text-base font-semibold text-white">Configuración actual</h2>
             </div>
             <Link
               href="/admin/configuracion"
-              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+              className="shrink-0 text-xs font-medium text-emerald-300 transition hover:text-white"
             >
-              Editar
+              Editar todo
             </Link>
           </div>
 
-          <div className="mt-6 grid gap-3 text-sm">
-            <InfoRow label="Nombre" value={storeData.store.name} href="/admin/configuracion#section-identidad" action="Editar nombre" />
-            <InfoRow label="URL publica" value={publicUrl} href="/admin/configuracion#section-identidad" action="Editar slug" />
-            <InfoRow label="WhatsApp" value={storeData.store.whatsapp || 'Pendiente'} empty={!storeData.store.whatsapp} href="/admin/configuracion#section-contacto" action="Editar WhatsApp" />
-            <InfoRow label="Instagram" value={storeData.store.instagram ? `@${storeData.store.instagram}` : 'Opcional'} empty={!storeData.store.instagram} href="/admin/configuracion#section-contacto" action="Editar Instagram" />
-            <InfoRow label="Horarios" value={storeData.store.hours || 'Opcional'} empty={!storeData.store.hours} href="/admin/configuracion#section-contexto" action="Editar horarios" />
+          <div className="divide-y divide-white/6">
+            <InfoRow
+              label="Nombre"
+              value={storeData.store.name}
+              href="/admin/configuracion"
+              action="Editar"
+            />
+            <InfoRow
+              label="URL"
+              value={`/tienda/${storeData.store.slug}`}
+              href="/admin/configuracion"
+              action="Editar"
+            />
+            <InfoRow
+              label="WhatsApp"
+              value={storeData.store.whatsapp ?? 'Pendiente'}
+              empty={!storeData.store.whatsapp}
+              href="/admin/configuracion"
+              action="Editar"
+            />
+            <InfoRow
+              label="Instagram"
+              value={
+                storeData.store.instagram ? `@${storeData.store.instagram}` : 'Opcional'
+              }
+              empty={!storeData.store.instagram}
+              href="/admin/configuracion"
+              action="Editar"
+            />
+            <InfoRow
+              label="Horarios"
+              value={storeData.store.hours ?? 'Opcional'}
+              empty={!storeData.store.hours}
+              href="/admin/configuracion"
+              action="Editar"
+            />
             <InfoRow label="Estado">
               <Badge
                 variant={storeData.store.is_active ? 'default' : 'secondary'}
@@ -187,16 +237,16 @@ function StatCard({
   return (
     <Link
       href={href}
-      className="admin-surface rounded-[28px] p-5 transition hover:-translate-y-0.5"
+      className="admin-surface rounded-[20px] p-4 transition hover:-translate-y-0.5"
     >
-      <div className="mb-8 flex items-center justify-between">
-        <div className="flex size-10 items-center justify-center rounded-2xl bg-white/8 text-neutral-300">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex size-8 items-center justify-center rounded-xl bg-white/6 text-neutral-400">
           <Icon className="size-4" />
         </div>
-        <ArrowRight className="size-4 text-neutral-500" />
+        <ArrowRight className="size-3.5 text-neutral-600" />
       </div>
-      <p className="text-3xl font-semibold tracking-tight text-white">{value}</p>
-      <p className="mt-2 text-sm text-neutral-400">{label}</p>
+      <p className="text-2xl font-semibold tracking-tight text-white">{value}</p>
+      <p className="mt-0.5 text-xs text-neutral-400">{label}</p>
     </Link>
   )
 }
@@ -217,20 +267,28 @@ function InfoRow({
   children?: React.ReactNode
 }) {
   return (
-    <div className="admin-surface-muted rounded-[22px] px-4 py-4">
-      <div className="flex items-start justify-between gap-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">{label}</p>
-        {href && action ? (
-          <Link href={href} className="text-xs font-medium text-emerald-200 transition hover:text-white">
-            {action}
-          </Link>
-        ) : null}
+    <div className="flex items-center gap-3 py-2.5">
+      <p className="w-[4.5rem] shrink-0 text-xs font-medium text-neutral-500">{label}</p>
+      <div className="min-w-0 flex-1">
+        {children ?? (
+          <p
+            className={cn(
+              'truncate text-sm',
+              empty ? 'text-neutral-600' : 'font-medium text-neutral-200',
+            )}
+          >
+            {value}
+          </p>
+        )}
       </div>
-      {children ?? (
-        <p className={empty ? 'mt-2 text-sm text-neutral-500' : 'mt-2 break-all text-sm font-medium text-neutral-100'}>
-          {value}
-        </p>
-      )}
+      {href && action ? (
+        <Link
+          href={href}
+          className="shrink-0 text-xs font-medium text-emerald-300 transition hover:text-white"
+        >
+          {action}
+        </Link>
+      ) : null}
     </div>
   )
 }

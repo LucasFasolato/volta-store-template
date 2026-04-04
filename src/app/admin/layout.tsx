@@ -22,7 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="admin-gradient admin-shell min-h-screen">
       <AdminSidebar storeName={storeData.store.name} storeSlug={storeData.store.slug} />
 
-      <div className="relative z-10 lg:pl-[19rem]">
+      <div className="relative z-10 lg:pl-[220px]">
         <main className="min-h-screen pb-28 lg:pb-10">{children}</main>
       </div>
 

@@ -45,25 +45,23 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
   }
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-20 hidden w-[19rem] px-4 py-4 lg:block">
-      <div className="admin-surface flex h-full flex-col rounded-[30px] p-4">
-        <div className="admin-surface-muted rounded-[24px] p-4">
-          <div className="flex items-center gap-3">
-            <div className="admin-button-primary flex size-11 items-center justify-center rounded-2xl text-sm font-black">
+    <aside className="fixed inset-y-0 left-0 z-20 hidden w-[220px] px-3 py-3 lg:block">
+      <div className="admin-surface flex h-full flex-col rounded-[26px] p-3">
+        {/* Brand */}
+        <div className="admin-surface-muted rounded-[20px] px-3 py-3">
+          <div className="flex items-center gap-2.5">
+            <div className="admin-button-primary flex size-8 shrink-0 items-center justify-center rounded-xl text-xs font-black">
               V
             </div>
             <div className="min-w-0">
-              <p className="truncate font-heading text-base font-semibold tracking-[-0.03em] text-white">{storeName}</p>
-              <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-neutral-500">Admin workspace</p>
+              <p className="truncate text-sm font-semibold text-white">{storeName}</p>
+              <p className="text-[10px] uppercase tracking-[0.16em] text-neutral-500">Admin</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-6 px-2">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-500">Workspace</p>
-        </div>
-
-        <nav className="mt-3 flex-1 space-y-1.5">
+        {/* Nav */}
+        <nav className="mt-4 flex-1 space-y-0.5">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon
             const active = isActive(item)
@@ -73,45 +71,43 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'group flex items-center gap-3 rounded-[20px] px-3 py-3 text-sm transition',
-                  active ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white',
+                  'flex items-center gap-2.5 rounded-[16px] px-3 py-2.5 text-sm transition',
+                  active
+                    ? 'admin-surface-selected font-medium text-white'
+                    : 'text-neutral-400 hover:bg-white/[0.045] hover:text-white',
                 )}
               >
-                <div
+                <Icon
                   className={cn(
-                    'flex size-9 items-center justify-center rounded-2xl transition',
-                    active ? 'bg-black/15 text-emerald-100' : 'bg-white/[0.04] text-neutral-500 group-hover:text-white',
+                    'size-4 shrink-0',
+                    active ? 'text-emerald-200' : 'text-neutral-500',
                   )}
-                >
-                  <Icon className="size-4 shrink-0" />
-                </div>
-                <span className="flex-1 font-medium">{item.label}</span>
-                {active ? <span className="size-1.5 rounded-full bg-emerald-200" /> : null}
+                />
+                <span>{item.label}</span>
+                {active ? (
+                  <span className="ml-auto size-1.5 rounded-full bg-emerald-200" />
+                ) : null}
               </Link>
             )
           })}
         </nav>
 
-        <div className="space-y-2 border-t border-white/8 pt-4">
+        {/* Footer */}
+        <div className="space-y-1.5 border-t border-white/8 pt-3">
           <Link
             href={`/tienda/${storeSlug}`}
             target="_blank"
-            className="admin-surface-elevated flex items-center gap-3 rounded-[22px] px-4 py-3.5 text-sm text-white"
+            className="admin-surface-elevated flex items-center gap-2.5 rounded-[16px] px-3 py-2.5 text-sm font-medium text-white transition hover:brightness-105"
           >
-            <div className="flex size-9 items-center justify-center rounded-2xl bg-black/15">
-              <Store className="size-4 shrink-0" />
-            </div>
-            <div className="min-w-0">
-              <p className="font-semibold">Ver tienda</p>
-              <p className="text-xs text-white/68">Landing publica en produccion</p>
-            </div>
-            <ExternalLink className="ml-auto size-3.5" />
+            <Store className="size-4 shrink-0" />
+            <span className="flex-1">Ver tienda</span>
+            <ExternalLink className="size-3.5 text-white/50" />
           </Link>
 
           <form action={signOut}>
             <button
               type="submit"
-              className="admin-button-soft flex w-full items-center gap-3 rounded-[20px] px-4 py-3 text-sm text-neutral-400 hover:border-red-400/14 hover:bg-red-400/10 hover:text-red-100"
+              className="flex w-full items-center gap-2.5 rounded-[16px] px-3 py-2.5 text-sm text-neutral-500 transition hover:bg-red-400/8 hover:text-red-300"
             >
               <LogOut className="size-4 shrink-0" />
               Salir
