@@ -283,7 +283,7 @@ function EditorShell({
   preview: React.ReactNode
 }) {
   return (
-    <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+    <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
       <div className="admin-surface rounded-[30px] p-6">
         <div className="mb-6 flex items-start gap-3">
           <div className="flex size-11 items-center justify-center rounded-2xl bg-white/[0.05]">
