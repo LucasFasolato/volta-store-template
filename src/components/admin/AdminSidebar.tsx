@@ -105,10 +105,15 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
           <Link
             href={`/tienda/${storeSlug}`}
             target="_blank"
-            className="flex items-center gap-3 rounded-[20px] border border-transparent px-4 py-3 text-sm text-neutral-300 transition hover:border-white/8 hover:bg-white/[0.045] hover:text-white"
+            className="flex items-center gap-3 rounded-[22px] border border-emerald-300/18 bg-[linear-gradient(135deg,rgba(46,230,166,0.2),rgba(111,243,223,0.12))] px-4 py-3.5 text-sm text-white shadow-[0_18px_40px_rgba(16,185,129,0.14)] transition hover:brightness-105"
           >
-            <Store className="size-4 shrink-0" />
-            Ver tienda
+            <div className="flex size-9 items-center justify-center rounded-2xl bg-black/15">
+              <Store className="size-4 shrink-0" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-semibold">Ver tienda</p>
+              <p className="text-xs text-white/72">Abre la landing publica en produccion</p>
+            </div>
             <ExternalLink className="ml-auto size-3.5" />
           </Link>
 

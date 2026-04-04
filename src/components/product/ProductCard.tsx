@@ -146,7 +146,7 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
               style={{
                 background:
                   'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 72%, black 28%))',
-                color: 'var(--store-bg)',
+                color: 'var(--store-primary-contrast)',
                 boxShadow: '0 14px 28px color-mix(in srgb, var(--store-primary) 18%, transparent)',
               }}
               aria-label={COPY.cart.addToCart}

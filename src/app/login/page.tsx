@@ -10,6 +10,7 @@ export default function LoginPage() {
   return (
     <div className="admin-gradient relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="absolute left-1/2 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-emerald-400/10 blur-3xl" />
+      <div className="absolute right-[10%] top-[18%] h-56 w-56 rounded-full bg-cyan-400/8 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-10 text-center">
@@ -17,7 +18,9 @@ export default function LoginPage() {
             V
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-white">Volta Store</h1>
-          <p className="mt-2 text-sm text-neutral-400">Tu panel para vender por WhatsApp con una experiencia premium.</p>
+          <p className="mt-2 text-sm leading-6 text-neutral-300">
+            Tu panel para vender por WhatsApp con una experiencia premium, clara y facil de operar.
+          </p>
         </div>
 
         <LoginForm />

@@ -38,8 +38,11 @@ export function buildThemeVars(
 
   return {
     '--store-primary': primary,
+    '--store-primary-contrast': getAccessibleTextColor(primary),
     '--store-secondary': secondary,
+    '--store-secondary-contrast': getAccessibleTextColor(secondary),
     '--store-accent': accent,
+    '--store-accent-contrast': getAccessibleTextColor(accent),
     '--store-bg': background,
     '--store-surface': surface,
     '--store-text': text,

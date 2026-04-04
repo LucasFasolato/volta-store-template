@@ -151,11 +151,11 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
                       type="button"
                       onClick={closeCart}
                       className="store-button px-5 py-3 text-sm font-semibold transition duration-200 hover:-translate-y-0.5"
-                      style={{
-                        background:
-                          'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
-                        color: 'var(--store-bg)',
-                      }}
+                    style={{
+                      background:
+                        'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
+                      color: 'var(--store-primary-contrast)',
+                    }}
                     >
                       {COPY.cart.continueShopping}
                     </button>

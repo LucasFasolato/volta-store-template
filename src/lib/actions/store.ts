@@ -7,11 +7,13 @@ import {
   storeContentSchema,
   storeThemeSchema,
   storeLayoutSchema,
+  storeSlugSchema,
   type StoreConfigInput,
   type StoreContentInput,
   type StoreThemeInput,
   type StoreLayoutInput,
 } from '@/lib/validations/store'
+import { slugify } from '@/lib/utils/format'
 
 async function getAuthStore() {
   const supabase = await createClient()
@@ -33,10 +35,36 @@ export async function updateStoreConfig(input: StoreConfigInput) {
   if (!validated.success) return { error: validated.error.flatten() }
 
   const { supabase, store } = await getAuthStore()
+  const nextSlug = validated.data.slug
+
+  if (nextSlug !== store.slug) {
+    const { data: existingStore, error: existingStoreError } = await supabase
+      .from('stores')
+      .select('id')
+      .eq('slug', nextSlug)
+      .neq('id', store.id)
+      .maybeSingle()
+
+    if (existingStoreError) {
+      return { error: { formErrors: [existingStoreError.message], fieldErrors: {} } }
+    }
+
+    if (existingStore) {
+      return {
+        error: {
+          formErrors: [],
+          fieldErrors: {
+            slug: ['Ese enlace ya esta en uso. Prueba con otra variante.'],
+          },
+        },
+      }
+    }
+  }
 
   const { error } = await supabase
     .from('stores')
     .update({
+      slug: nextSlug,
       name: validated.data.name,
       whatsapp: validated.data.whatsapp,
       instagram: validated.data.instagram ?? null,
@@ -49,8 +77,62 @@ export async function updateStoreConfig(input: StoreConfigInput) {
 
   revalidatePath('/admin')
   revalidatePath('/admin/configuracion')
+  revalidatePath(`/tienda/${validated.data.slug}`)
   revalidatePath(`/tienda/${store.slug}`)
   return { success: true }
+}
+
+export async function checkStoreSlugAvailability(rawSlug: string) {
+  const normalizedSlug = slugify(rawSlug).slice(0, 48)
+  const validated = storeSlugSchema.safeParse(normalizedSlug)
+
+  if (!validated.success) {
+    return {
+      available: false,
+      normalizedSlug,
+      message: validated.error.flatten().formErrors[0] ?? 'Revisa el formato del enlace publico.',
+    }
+  }
+
+  const { supabase, store } = await getAuthStore()
+
+  if (validated.data === store.slug) {
+    return {
+      available: true,
+      normalizedSlug: validated.data,
+      message: 'Estas usando el enlace actual de tu tienda.',
+      unchanged: true,
+    }
+  }
+
+  const { data: existingStore, error } = await supabase
+    .from('stores')
+    .select('id')
+    .eq('slug', validated.data)
+    .neq('id', store.id)
+    .maybeSingle()
+
+  if (error) {
+    return {
+      available: false,
+      normalizedSlug: validated.data,
+      message: error.message,
+    }
+  }
+
+  if (existingStore) {
+    return {
+      available: false,
+      normalizedSlug: validated.data,
+      message: 'Ese enlace ya esta en uso. Elige otra opcion.',
+    }
+  }
+
+  return {
+    available: true,
+    normalizedSlug: validated.data,
+    message: 'Disponible. Asi se vera la URL de tu tienda.',
+  }
 }
 
 export async function updateStoreContent(input: StoreContentInput) {

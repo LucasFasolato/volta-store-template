@@ -92,7 +92,7 @@ export function CatalogSection({
                   style={{
                     background:
                       'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 72%, black 28%))',
-                    color: 'var(--store-bg)',
+                    color: 'var(--store-primary-contrast)',
                   }}
                 >
                   Ver todos los productos
@@ -145,7 +145,7 @@ function CategoryPill({
               borderRadius: 'var(--store-button-radius)',
               background:
                 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 72%, black 28%))',
-              color: 'var(--store-bg)',
+              color: 'var(--store-primary-contrast)',
               boxShadow: '0 14px 28px color-mix(in srgb, var(--store-primary) 20%, transparent)',
             }
           : {

@@ -83,6 +83,12 @@ export function LayoutForm({ layout }: LayoutFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <section className="surface-panel premium-ring rounded-[28px] px-5 py-6 sm:px-6">
+        <div className="mb-5 rounded-[24px] border border-white/8 bg-black/10 p-4">
+          <p className="text-sm font-semibold text-white">Que se muestra primero y que se puede ocultar</p>
+          <p className="mt-2 text-sm leading-6 text-neutral-400">
+            Estos switches controlan la experiencia publica sin lenguaje tecnico: portada, destacados, filtros, catalogo y cierre final.
+          </p>
+        </div>
         <div className="space-y-3">
           {SECTIONS.map((section) => (
             <div
@@ -115,10 +121,19 @@ export function LayoutForm({ layout }: LayoutFormProps) {
         </div>
       </section>
 
-      {submitError ? <FormFeedback kind="error" message={submitError} /> : null}
+      {submitError ? (
+        <FormFeedback kind="error" title="No pudimos guardar las secciones" message={submitError} />
+      ) : null}
+      {!submitError && saved ? (
+        <FormFeedback
+          kind="success"
+          title="Secciones guardadas"
+          message="La tienda publica ya puede reflejar esta nueva composicion."
+        />
+      ) : null}
 
       <div className="flex justify-end">
-        <SaveButton isLoading={isSubmitting} isSaved={saved} />
+        <SaveButton isLoading={isSubmitting} isSaved={saved} label="Guardar secciones" />
       </div>
     </form>
   )

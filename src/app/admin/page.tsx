@@ -33,6 +33,7 @@ export default async function AdminPage() {
   const activeProducts = products.filter((product) => product.is_active)
   const featuredProducts = products.filter((product) => product.is_featured)
   const isConfigured = Boolean(storeData.store.whatsapp)
+  const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://tu-app.com'}/tienda/${storeData.store.slug}`
 
   const quickActions = [
     {
@@ -64,10 +65,13 @@ export default async function AdminPage() {
           <Link
             href={`/tienda/${storeData.store.slug}`}
             target="_blank"
-            className="inline-flex h-11 items-center rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/10"
+            className="inline-flex h-auto min-h-12 items-center rounded-[22px] border border-emerald-300/18 bg-[linear-gradient(135deg,rgba(46,230,166,0.2),rgba(111,243,223,0.12))] px-5 py-3 text-sm font-medium text-white shadow-[0_18px_40px_rgba(16,185,129,0.14)] transition hover:brightness-105"
           >
-            Ver tienda
-            <ExternalLink className="ml-2 size-4" />
+            <div>
+              <div className="font-semibold">Ver tienda</div>
+              <div className="text-xs text-white/72">Abre la landing publica en produccion</div>
+            </div>
+            <ExternalLink className="ml-3 size-4" />
           </Link>
         }
       />
@@ -129,12 +133,27 @@ export default async function AdminPage() {
 
         <section className="surface-panel premium-ring rounded-[32px] px-5 py-6 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">Tu tienda</p>
-          <h2 className="mt-3 text-xl font-semibold text-white">Configuracion actual</h2>
+          <div className="mt-3 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold text-white">Configuracion actual</h2>
+              <p className="mt-2 text-sm leading-6 text-neutral-400">
+                Edita rapido los datos que mas impacto tienen en la confianza y en la URL publica.
+              </p>
+            </div>
+            <Link
+              href="/admin/configuracion"
+              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+            >
+              Editar
+            </Link>
+          </div>
 
           <div className="mt-6 grid gap-4 text-sm">
-            <InfoRow label="Nombre" value={storeData.store.name} />
-            <InfoRow label="URL publica" value={`/tienda/${storeData.store.slug}`} />
-            <InfoRow label="WhatsApp" value={storeData.store.whatsapp || 'Pendiente'} empty={!storeData.store.whatsapp} />
+            <InfoRow label="Nombre" value={storeData.store.name} href="/admin/configuracion#section-identidad" action="Editar nombre" />
+            <InfoRow label="URL publica" value={publicUrl} href="/admin/configuracion#section-identidad" action="Editar slug" />
+            <InfoRow label="WhatsApp" value={storeData.store.whatsapp || 'Pendiente'} empty={!storeData.store.whatsapp} href="/admin/configuracion#section-contacto" action="Editar WhatsApp" />
+            <InfoRow label="Instagram" value={storeData.store.instagram ? `@${storeData.store.instagram}` : 'Opcional'} empty={!storeData.store.instagram} href="/admin/configuracion#section-contacto" action="Editar Instagram" />
+            <InfoRow label="Horarios" value={storeData.store.hours || 'Opcional'} empty={!storeData.store.hours} href="/admin/configuracion#section-contexto" action="Editar horarios" />
             <InfoRow label="Estado">
               <Badge
                 variant={storeData.store.is_active ? 'default' : 'secondary'}
@@ -186,18 +205,29 @@ function InfoRow({
   label,
   value,
   empty,
+  href,
+  action,
   children,
 }: {
   label: string
   value?: string
   empty?: boolean
+  href?: string
+  action?: string
   children?: React.ReactNode
 }) {
   return (
     <div className="rounded-[22px] border border-white/8 bg-white/4 px-4 py-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">{label}</p>
+      <div className="flex items-start justify-between gap-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">{label}</p>
+        {href && action ? (
+          <Link href={href} className="text-xs font-medium text-emerald-200 transition hover:text-white">
+            {action}
+          </Link>
+        ) : null}
+      </div>
       {children ?? (
-        <p className={empty ? 'mt-2 text-sm text-neutral-500' : 'mt-2 text-sm font-medium text-neutral-100'}>
+        <p className={empty ? 'mt-2 text-sm text-neutral-500' : 'mt-2 break-all text-sm font-medium text-neutral-100'}>
           {value}
         </p>
       )}

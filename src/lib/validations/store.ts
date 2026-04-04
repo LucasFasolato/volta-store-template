@@ -3,12 +3,19 @@ import { CONTENT_LIMITS } from '@/data/defaults'
 import { getContrastRatio } from '@/lib/utils/color'
 
 const colorSchema = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Color invalido')
+export const storeSlugSchema = z
+  .string()
+  .trim()
+  .min(3, 'Usa al menos 3 caracteres')
+  .max(48, 'Usa hasta 48 caracteres')
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Usa minusculas, numeros y guiones simples')
 
 export const storeConfigSchema = z.object({
   name: z
     .string()
     .min(2, 'El nombre debe tener al menos 2 caracteres')
     .max(CONTENT_LIMITS.store_name, `Maximo ${CONTENT_LIMITS.store_name} caracteres`),
+  slug: storeSlugSchema,
   whatsapp: z
     .string()
     .min(8, 'Ingresa un numero de WhatsApp valido')

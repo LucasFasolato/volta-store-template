@@ -26,10 +26,10 @@ export default async function AparienciaPage() {
       <Tabs defaultValue="tema" className="space-y-6">
         <TabsList className="h-auto rounded-full border border-white/8 bg-white/5 p-1">
           <TabsTrigger value="tema" className="rounded-full data-[state=active]:bg-white/10 data-[state=active]:text-white">
-            Tema
+            Sistema visual
           </TabsTrigger>
           <TabsTrigger value="layout" className="rounded-full data-[state=active]:bg-white/10 data-[state=active]:text-white">
-            Layout
+            Secciones
           </TabsTrigger>
         </TabsList>
 

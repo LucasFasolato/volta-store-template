@@ -99,7 +99,7 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
                   style={{
                     background:
                       'linear-gradient(135deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 78%, black 22%))',
-                    color: 'var(--store-bg)',
+                    color: 'var(--store-primary-contrast)',
                     boxShadow: '0 16px 36px color-mix(in srgb, var(--store-primary) 20%, transparent)',
                   }}
                 >

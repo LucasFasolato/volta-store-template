@@ -23,10 +23,10 @@ export function SaveButton({
       disabled={isLoading}
       aria-busy={isLoading}
       className={cn(
-        'min-w-[152px] rounded-full px-5 font-medium transition-all',
+        'min-w-[172px] rounded-full px-5 font-medium shadow-[0_18px_36px_rgba(2,6,23,0.22)] transition-all',
         isSaved
-          ? 'border border-emerald-400/25 bg-emerald-400/10 text-emerald-100 hover:bg-emerald-400/10'
-          : 'bg-emerald-400 text-black hover:bg-emerald-300',
+          ? 'border border-emerald-400/20 bg-[linear-gradient(180deg,rgba(52,211,153,0.16),rgba(6,95,70,0.18))] text-emerald-50 hover:bg-[linear-gradient(180deg,rgba(52,211,153,0.16),rgba(6,95,70,0.18))]'
+          : 'bg-[linear-gradient(135deg,#2ee6a6,#6ff3df)] text-black hover:brightness-105',
         className,
       )}
     >

@@ -268,7 +268,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                   style={{
                     background:
                       'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
-                    color: 'var(--store-bg)',
+                    color: 'var(--store-primary-contrast)',
                     boxShadow: '0 18px 40px color-mix(in srgb, var(--store-primary) 24%, transparent)',
                   }}
                 >
