@@ -81,26 +81,24 @@ export function LayoutForm({ layout }: LayoutFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <section className="admin-surface rounded-[28px] px-5 py-6 sm:px-6">
-        <div className="admin-surface-muted mb-5 rounded-[24px] p-4">
-          <p className="text-sm font-semibold text-white">Que se muestra primero y que se puede ocultar</p>
-          <p className="mt-2 text-sm leading-6 text-neutral-400">
-            Estos switches controlan la experiencia publica sin lenguaje tecnico: portada, destacados, filtros, catalogo y cierre final.
-          </p>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <section className="admin-surface rounded-[24px] p-4 sm:p-5">
+        <div className="mb-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Secciones visibles</p>
+          <p className="mt-1 text-sm text-neutral-400">Controla que ve el cliente al visitar tu tienda.</p>
         </div>
-        <div className="space-y-3">
+        <div className="grid gap-2.5 sm:grid-cols-2">
           {SECTIONS.map((section) => (
             <div
               key={section.name}
-              className="admin-button-soft rounded-[24px] px-4 py-4"
+              className="admin-button-soft rounded-[18px] px-4 py-3 transition duration-150 hover:border-white/[0.12] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.06)]"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
                   <Label htmlFor={section.name} className="cursor-pointer text-sm font-medium text-white">
                     {section.label}
                   </Label>
-                  <p className="mt-1 text-xs leading-5 text-neutral-400">{section.description}</p>
+                  <p className="mt-0.5 text-[11px] leading-5 text-neutral-500">{section.description}</p>
                 </div>
 
                 <Controller
@@ -111,7 +109,7 @@ export function LayoutForm({ layout }: LayoutFormProps) {
                       id={section.name}
                       checked={field.value}
                       onCheckedChange={field.onChange}
-                      className="data-[state=checked]:bg-emerald-400"
+                      className="shrink-0 data-[state=checked]:bg-emerald-400"
                     />
                   )}
                 />

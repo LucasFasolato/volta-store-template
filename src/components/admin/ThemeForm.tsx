@@ -95,6 +95,22 @@ const GRID_OPTIONS: Array<{ value: number; label: string }> = [
   { value: 4, label: '4 col' },
 ]
 
+const WIDTH_VISUAL: Record<string, string> = {
+  sm: '52%',
+  md: '66%',
+  lg: '80%',
+  xl: '92%',
+  full: '100%',
+}
+
+function colorLuminance(hex: string): number {
+  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return 0.5
+  const r = parseInt(hex.slice(1, 3), 16) / 255
+  const g = parseInt(hex.slice(3, 5), 16) / 255
+  const b = parseInt(hex.slice(5, 7), 16) / 255
+  return 0.299 * r + 0.587 * g + 0.114 * b
+}
+
 export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
   const [saved, setSaved] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -246,7 +262,7 @@ export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
               setThemeValue={setThemeValue}
             />
           }
-          preview={<DesignLivePreview previewThemeVars={previewThemeVars} columns={previewTheme.grid_columns} imageRatio={previewTheme.image_ratio} />}
+          preview={<DesignLivePreview previewThemeVars={previewThemeVars} columns={previewTheme.grid_columns} imageRatio={previewTheme.image_ratio} containerWidth={previewTheme.container_width} />}
         />
       ) : null}
 
@@ -515,11 +531,16 @@ function ColorsControls({
       <div className="grid gap-3 sm:grid-cols-2">
         {COLOR_FIELDS.map((field) => {
           const value = theme[field.name]
+          const lum = colorLuminance(value)
+          const swatchRing = lum > 0.55 ? 'rgba(0,0,0,0.22)' : lum > 0.28 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.18)'
           return (
             <label key={field.name} className="admin-surface-muted rounded-[18px] p-3">
               <div className="flex items-center justify-between gap-3">
                 <span className="text-sm font-semibold text-white">{field.label}</span>
-                <span className="size-7 rounded-lg border border-white/10" style={{ backgroundColor: value }} />
+                <span
+                  className="size-5 shrink-0 rounded-full"
+                  style={{ backgroundColor: value, boxShadow: `0 0 0 1.5px ${swatchRing}` }}
+                />
               </div>
               <div className="mt-2.5 flex items-center gap-3">
                 <input
@@ -633,25 +654,36 @@ function LayoutControls({
 function TypographyLivePreview({ previewThemeVars }: { previewThemeVars: React.CSSProperties }) {
   return (
     <div className="admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
-      <div className="border-b border-white/8 px-5 py-3.5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Preview tipografico</p>
+      <div className="border-b px-5 py-3" style={{ borderColor: 'var(--store-card-border)' }}>
+        <p className="text-[9px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>Preview tipografico</p>
       </div>
-      <div className="space-y-4 px-5 py-5">
-        <h4 className="store-heading text-[1.85rem] leading-[1]" style={{ color: 'var(--store-text)', transform: 'scale(var(--store-heading-scale))', transformOrigin: 'left top' }}>
-          Tu tienda vende mejor cuando se ve premium
+
+      {/* Side-by-side font specimens */}
+      <div className="grid grid-cols-2 gap-px border-b" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-border)' }}>
+        <div className="px-4 py-4" style={{ background: 'var(--store-bg)' }}>
+          <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Titulos</p>
+          <p className="store-heading text-5xl leading-none" style={{ color: 'var(--store-text)' }}>Aa</p>
+          <p className="store-heading mt-1.5 text-sm tracking-normal" style={{ color: 'var(--store-muted-text)' }}>Bb Cc 123</p>
+        </div>
+        <div className="px-4 py-4" style={{ background: 'var(--store-bg)' }}>
+          <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Texto</p>
+          <p className="store-body text-5xl leading-none" style={{ color: 'var(--store-text)' }}>Aa</p>
+          <p className="store-body mt-1.5 text-sm" style={{ color: 'var(--store-muted-text)' }}>Bb Cc 123</p>
+        </div>
+      </div>
+
+      {/* Content sample */}
+      <div className="space-y-3 px-5 py-5">
+        <h4 className="store-heading text-4xl leading-tight" style={{ color: 'var(--store-text)' }}>
+          Tu tienda, premium
         </h4>
-        <p className="text-sm leading-7" style={{ color: 'var(--store-soft-text)', fontSize: 'calc(0.96rem * var(--store-body-scale))' }}>
-          Vista previa de jerarquia, lectura y personalidad.
+        <p className="store-body text-sm leading-6" style={{ color: 'var(--store-soft-text)', fontSize: 'calc(0.875rem * var(--store-body-scale))' }}>
+          Productos con estilo, precio claro y entrega rapida.
         </p>
-        <div className="grid gap-2.5">
-          <div className="rounded-[var(--store-card-radius)] border p-3.5" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Hero title</p>
-            <p className="store-heading mt-1.5 text-xl" style={{ color: 'var(--store-text)' }}>Titulos con presencia</p>
-          </div>
-          <div className="rounded-[var(--store-card-radius)] border p-3.5" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Body copy</p>
-            <p className="mt-1.5 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>Textos faciles de leer, precios claros y menos esfuerzo para decidir.</p>
-          </div>
+        <div className="rounded-[var(--store-card-radius)] border px-4 py-3" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
+          <p className="store-heading text-lg" style={{ color: 'var(--store-text)' }}>Titulo de producto</p>
+          <p className="store-body mt-1 text-xs leading-5" style={{ color: 'var(--store-soft-text)' }}>Descripcion breve del articulo en esta fuente.</p>
+          <p className="store-heading mt-2 text-base font-semibold" style={{ color: 'var(--store-primary)' }}>$12.900</p>
         </div>
       </div>
     </div>
@@ -703,43 +735,54 @@ function DesignLivePreview({
   previewThemeVars,
   columns,
   imageRatio,
+  containerWidth,
 }: {
   previewThemeVars: React.CSSProperties
   columns: number
   imageRatio: string
+  containerWidth: string
 }) {
   const previewCount = columns === 4 ? 4 : columns === 3 ? 3 : 2
   const imageClass = imageRatio === '1:1' ? 'aspect-square' : imageRatio === '16:9' ? 'aspect-video' : imageRatio === '3:4' ? 'aspect-[3/4]' : 'aspect-[4/5]'
+  const widthPercent = WIDTH_VISUAL[containerWidth] ?? '80%'
 
   return (
     <div className="admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
-      <div className="border-b border-white/8 px-5 py-3.5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Preview de layout</p>
-      </div>
-      <div className="space-y-3.5 px-5 py-5">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-[var(--store-card-radius)] border p-3.5" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
-            <div className="space-y-[var(--store-space-cluster)]">
-              <div className="h-3.5 w-20 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.08) }} />
-              <div className="h-9 rounded-[calc(var(--store-card-radius)*0.7)]" style={{ backgroundColor: withAlpha('#ffffff', 0.06) }} />
-              <div className="h-9 rounded-[calc(var(--store-card-radius)*0.7)]" style={{ backgroundColor: withAlpha('#ffffff', 0.06) }} />
-            </div>
+      {/* Header + width indicator */}
+      <div className="flex items-center gap-3 border-b px-5 py-3" style={{ borderColor: 'var(--store-card-border)' }}>
+        <p className="text-[9px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>Layout</p>
+        <div className="flex flex-1 items-center gap-2">
+          <div className="h-1 flex-1 overflow-hidden rounded-full" style={{ background: withAlpha('#ffffff', 0.08) }}>
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{ width: widthPercent, background: 'var(--store-primary)' }}
+            />
           </div>
-          <div className="rounded-[var(--store-card-radius)] border p-3.5" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
-            <div className="flex flex-wrap gap-2.5">
-              <button type="button" className="rounded-[var(--store-button-radius)] px-4 py-2 text-sm font-semibold" style={{ background: 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))', color: 'var(--store-primary-contrast)' }}>Principal</button>
-              <button type="button" className="rounded-[var(--store-button-radius)] border px-4 py-2 text-sm" style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)' }}>Secundario</button>
-            </div>
-          </div>
+          <p className="shrink-0 text-[9px] font-semibold uppercase" style={{ color: 'var(--store-muted-text)' }}>{containerWidth}</p>
         </div>
-        <div className={`grid gap-2.5 ${previewCount === 4 ? 'grid-cols-4' : previewCount === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
-          {Array.from({ length: previewCount }).map((_, index) => (
-            <div key={index} className="space-y-1.5">
-              <div className={`${imageClass} rounded-[calc(var(--store-card-radius)*0.72)]`} style={{ background: 'linear-gradient(145deg, color-mix(in srgb, var(--store-accent) 18%, transparent), color-mix(in srgb, var(--store-secondary) 14%, transparent))' }} />
-              <div className="h-2.5 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.08) }} />
-              <div className="h-2 w-2/3 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.05) }} />
-            </div>
-          ))}
+      </div>
+
+      <div className="space-y-3.5 px-5 py-5">
+        {/* Buttons */}
+        <div className="flex flex-wrap gap-2">
+          <button type="button" className="rounded-[var(--store-button-radius)] px-4 py-2 text-sm font-semibold" style={{ background: 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))', color: 'var(--store-primary-contrast)' }}>Principal</button>
+          <button type="button" className="rounded-[var(--store-button-radius)] border px-4 py-2 text-sm" style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)' }}>Secundario</button>
+          <button type="button" className="rounded-[var(--store-button-radius)] px-4 py-2 text-sm font-semibold" style={{ background: 'var(--store-accent)', color: 'var(--store-accent-contrast)' }}>Accion</button>
+        </div>
+
+        {/* Card grid, constrained by container width */}
+        <div className="transition-all duration-300" style={{ width: widthPercent }}>
+          <div className={`grid gap-2 ${previewCount === 4 ? 'grid-cols-4' : previewCount === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            {Array.from({ length: previewCount }).map((_, index) => (
+              <div key={index} className="overflow-hidden rounded-[var(--store-card-radius)] border" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
+                <div className={`${imageClass} w-full`} style={{ background: 'linear-gradient(145deg, color-mix(in srgb, var(--store-accent) 22%, transparent), color-mix(in srgb, var(--store-secondary) 18%, transparent))' }} />
+                <div className="space-y-1.5 p-2">
+                  <div className="h-2 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.12) }} />
+                  <div className="h-1.5 w-2/3 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.07) }} />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
