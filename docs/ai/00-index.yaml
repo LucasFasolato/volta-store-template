@@ -1,0 +1,87 @@
+repo:
+  name: VOLTA
+  type: production-ready SaaS
+  purpose: customizable storefronts that close orders through WhatsApp
+  stack:
+    - Next.js 16 App Router
+    - TypeScript
+    - Tailwind CSS 4
+    - shadcn/ui primitives
+    - Supabase Auth
+    - Supabase Postgres + Storage
+    - Zustand cart state
+
+entrypoints:
+  app_root: src/app/layout.tsx
+  root_redirect: src/app/page.tsx
+  login: src/app/login/page.tsx
+  auth_callback: src/app/auth/callback/route.ts
+  admin_layout: src/app/admin/layout.tsx
+  public_storefront: src/app/(public)/tienda/[slug]/page.tsx
+  middleware_proxy: src/proxy.ts
+
+read_order:
+  - src/app/layout.tsx
+  - src/proxy.ts
+  - src/lib/supabase/server.ts
+  - src/app/auth/callback/route.ts
+  - src/lib/actions/onboarding.ts
+  - src/lib/queries/store.ts
+  - src/app/admin/layout.tsx
+  - src/components/admin/AppearanceEditor.tsx
+  - src/components/admin/ThemeForm.tsx
+  - src/components/landing/StoreLayout.tsx
+  - supabase/migrations/20240101000001_schema.sql
+  - supabase/migrations/20240101000002_rls.sql
+  - supabase/migrations/20240101000003_storage.sql
+
+navigation:
+  auth_and_session:
+    - src/lib/actions/auth.ts
+    - src/components/auth/LoginForm.tsx
+    - src/app/auth/callback/route.ts
+    - src/lib/supabase/middleware.ts
+  onboarding_and_store_bootstrap:
+    - src/lib/actions/onboarding.ts
+    - src/lib/actions/store.ts
+  admin_ui:
+    - src/app/admin/**
+    - src/components/admin/**
+  public_storefront:
+    - src/app/(public)/tienda/[slug]/page.tsx
+    - src/components/landing/**
+    - src/components/product/**
+    - src/components/cart/**
+  data_layer:
+    - src/lib/queries/store.ts
+    - src/lib/actions/products.ts
+    - src/lib/validations/**
+    - src/types/**
+  database:
+    - supabase/migrations/**
+
+critical_files:
+  - src/lib/actions/onboarding.ts
+  - src/lib/actions/store.ts
+  - src/lib/actions/products.ts
+  - src/lib/queries/store.ts
+  - src/lib/validations/store.ts
+  - src/lib/validations/product.ts
+  - src/components/admin/ThemeForm.tsx
+  - src/components/admin/ProductForm.tsx
+  - src/components/landing/StoreLayout.tsx
+  - src/lib/stores/cart.ts
+
+current_shape:
+  strengths:
+    - clean feature scope
+    - RLS is enabled and mostly correct
+    - public storefront and admin are clearly separated
+    - onboarding self-heals missing store data
+    - premium visual direction is already present
+  scaling_limits:
+    - one-store-per-user rule is not enforced in DB
+    - public store rendering is fully dynamic and uncached
+    - asset bucket is public
+    - large client components concentrate too much logic
+    - some core invariants live only in application code

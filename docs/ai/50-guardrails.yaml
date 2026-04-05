@@ -1,0 +1,37 @@
+never_break:
+  security:
+    - never bypass RLS for user-facing reads or writes
+    - never use createAdminClient inside request-time user flows unless there is an explicit admin-only reason
+    - never expose inactive store data through public queries
+    - never assume storage privacy when using public bucket URLs
+    - never trust client-provided store_id or owner_id
+  data_integrity:
+    - never create a second store for the same owner once DB uniqueness is enforced
+    - never change slug semantics without handling redirects and shared-link fallout
+    - never write theme/layout/content rows without a valid store_id
+    - never delete product rows without deciding what happens to storage objects
+  product_ux:
+    - never introduce technical jargon into admin UI
+    - never hide the visual consequence of a design setting
+    - never allow unreadable color combinations
+    - never make first-run users hunt for the next setup step
+    - never degrade mobile storefront usability for visual flourish
+  architecture:
+    - prefer server actions over ad-hoc API routes unless a real integration needs them
+    - prefer additive refactors over broad rewrites
+    - keep business rules in lib/actions or lib/queries, not scattered across components
+    - keep public storefront resilient when optional store fields are missing
+
+required_checks_before_shipping:
+  - verify RLS policies still isolate owner data
+  - verify slug uniqueness and format validation
+  - verify contrast guardrails still pass
+  - verify auth callback still works for Google and magic link
+  - verify old and new public routes are revalidated after slug change
+  - verify Storage paths remain under auth.uid()
+
+preferred_patterns:
+  - consolidate duplicate auth/store lookup helpers
+  - enforce critical invariants in DB first, app second
+  - keep heavy preview UIs split into focused subcomponents
+  - optimize public routes for cacheability

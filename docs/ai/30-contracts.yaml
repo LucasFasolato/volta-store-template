@@ -1,0 +1,92 @@
+db_contracts:
+  profiles:
+    primary_key: id
+    relationship: one profile per auth.users row
+    invariant:
+      - profile.id must equal auth.users.id
+  stores:
+    primary_key: id
+    public_identifier: slug
+    invariant:
+      - slug must be globally unique
+      - app assumes exactly one store per owner_id
+    reality:
+      - owner_id is indexed but not unique
+  store_theme:
+    invariant:
+      - exactly one row per store_id
+      - values are enum-like but not DB-constrained
+  store_layout:
+    invariant:
+      - exactly one row per store_id
+  store_content:
+    invariant:
+      - exactly one row per store_id
+  categories:
+    invariant:
+      - slug unique within store_id
+  products:
+    invariant:
+      - slug unique within store_id
+      - category_id may be null
+      - public storefront should only show is_active = true
+  product_images:
+    invariant:
+      - many images per product
+      - storage object lifecycle is not enforced by DB
+
+security_contracts:
+  rls:
+    status: enabled on all app tables
+    public_reads:
+      - active stores
+      - related theme/layout/content/categories/products/images for active stores
+    owner_reads_and_writes:
+      - allowed through owner_id or related store ownership checks
+  storage:
+    bucket: store-assets
+    read_access: public
+    write_access: path must start with auth.uid()
+
+app_contracts:
+  auth_callback:
+    input:
+      - code
+      - error
+      - error_description
+      - next
+    behavior:
+      - exchange code for session when code is present
+      - fallback to existing session when code is absent
+      - run ensureOnboarding
+      - redirect to safe internal path or /admin
+  onboarding:
+    behavior:
+      - create profile if missing
+      - create store if missing
+      - create theme/layout/content rows if missing
+    risk:
+      - multi-step writes are not transactional
+  store_update_actions:
+    behavior:
+      - validate with Zod
+      - update a single rowset
+      - revalidate affected routes
+  product_actions:
+    behavior:
+      - create/update/delete products and categories for authenticated owner
+      - upload product images to storage
+    risk:
+      - image deletion does not remove storage object
+
+assumptions_to_preserve:
+  - one authenticated user owns one store
+  - slug is the durable public locator for a store
+  - onboarding can be safely re-run
+  - public assets may be embedded in a public page
+  - cart state is browser-local and not synced server-side
+
+assumptions_to_fix:
+  - one-store-per-user should be enforced in DB, not only in code
+  - theme enum-like values should be constrained at DB level
+  - storage privacy expectations should match public bucket behavior

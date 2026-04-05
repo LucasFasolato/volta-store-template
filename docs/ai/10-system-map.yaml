@@ -1,0 +1,110 @@
+system:
+  name: VOLTA
+  model: server-rendered SaaS with client-side commerce interactions
+
+architecture:
+  frontend:
+    framework: Next.js 16 App Router
+    rendering:
+      admin: server-rendered pages with client forms
+      storefront: server data fetch + client shell for modal/cart interactions
+    styling:
+      - Tailwind utility classes
+      - CSS variables built from store theme
+      - shadcn/ui base primitives
+  backend:
+    provider: Supabase
+    auth:
+      primary: Google OAuth
+      fallback: magic link
+      callback: /auth/callback
+    data:
+      tables:
+        - profiles
+        - stores
+        - store_theme
+        - store_layout
+        - store_content
+        - categories
+        - products
+        - product_images
+    storage:
+      bucket: store-assets
+      access_model: public read, owner-path write
+
+runtime_modules:
+  auth:
+    routes:
+      - /login
+      - /auth/callback
+    files:
+      - src/components/auth/LoginForm.tsx
+      - src/lib/actions/auth.ts
+      - src/app/auth/callback/route.ts
+      - src/lib/supabase/middleware.ts
+  onboarding:
+    trigger_points:
+      - auth callback
+      - admin layout
+    files:
+      - src/lib/actions/onboarding.ts
+    notes:
+      - idempotent in intent
+      - not transactional
+  admin:
+    routes:
+      - /admin
+      - /admin/apariencia
+      - /admin/contenido
+      - /admin/configuracion
+      - /admin/productos
+      - /admin/categorias
+    files:
+      - src/app/admin/**
+      - src/components/admin/**
+  storefront:
+    route: /tienda/[slug]
+    files:
+      - src/app/(public)/tienda/[slug]/page.tsx
+      - src/components/landing/**
+      - src/components/product/**
+      - src/components/cart/**
+  data_access:
+    files:
+      - src/lib/queries/store.ts
+      - src/lib/actions/store.ts
+      - src/lib/actions/products.ts
+      - src/lib/validations/**
+
+data_flow:
+  login:
+    - user chooses Google OAuth or magic link
+    - Supabase returns to /auth/callback
+    - callback exchanges code or reads session
+    - ensureOnboarding creates missing profile/store/theme/layout/content
+    - user lands in /admin
+  admin_update:
+    - page loads authenticated store data
+    - client form validates with Zod
+    - server action updates a single table
+    - relevant admin and public routes are revalidated
+  purchase:
+    - public route fetches store + theme + content + categories + products
+    - user adds items to Zustand cart
+    - client builds WhatsApp message
+    - browser opens wa.me URL
+
+ownership:
+  auth_boundary: src/lib/supabase/*
+  business_rules: src/lib/actions/*
+  read_models: src/lib/queries/*
+  admin_experience: src/components/admin/*
+  storefront_experience: src/components/landing/* + src/components/product/* + src/components/cart/*
+  schema_and_security: supabase/migrations/*
+
+hotspots:
+  - src/components/admin/ThemeForm.tsx
+  - src/components/admin/ProductForm.tsx
+  - src/lib/actions/onboarding.ts
+  - src/lib/actions/products.ts
+  - src/lib/actions/store.ts

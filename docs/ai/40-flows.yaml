@@ -1,0 +1,64 @@
+flows:
+  login_flow:
+    entry: /login
+    steps:
+      - user chooses Google OAuth or magic link
+      - Supabase returns to /auth/callback
+      - callback handles provider errors
+      - callback exchanges OAuth code or reads existing session
+      - ensureOnboarding fills missing profile/store records
+      - user is redirected to /admin or safe next path
+    failure_points:
+      - NEXT_PUBLIC_APP_URL mismatch can break redirect targets
+      - callback errors are redirected to /login but not surfaced clearly in UI
+
+  onboarding_flow:
+    trigger_points:
+      - new auth.users row
+      - /auth/callback
+      - /admin layout
+    steps:
+      - DB trigger inserts profile
+      - app verifies or inserts profile again
+      - app checks store by owner_id
+      - app creates unique slug when needed
+      - app inserts stores, store_theme, store_layout, store_content
+    failure_points:
+      - no transaction across inserts
+      - one-store invariant is not DB-enforced
+
+  admin_edit_flow:
+    entry: /admin/*
+    steps:
+      - middleware blocks anonymous users
+      - page loads authenticated store data
+      - user edits config/content/theme/layout/products/categories
+      - client validates input
+      - server action persists changes
+      - page and public route are revalidated
+    failure_points:
+      - repeated auth/store lookups across pages and actions
+      - large forms concentrate state and rendering costs
+
+  public_storefront_flow:
+    entry: /tienda/[slug]
+    steps:
+      - server fetches store, theme, layout, content, categories, products
+      - client sets cart namespace to current slug
+      - visitor browses products and opens modal
+      - visitor filters by category in client state
+    failure_points:
+      - all products are loaded at once
+      - route is dynamic and uncached
+
+  purchase_flow:
+    entry: product card or modal
+    steps:
+      - visitor adds items to persisted Zustand cart
+      - cart sheet computes subtotal and message preview
+      - buildWhatsAppUrl encodes order summary
+      - browser opens wa.me with prefilled message
+    failure_points:
+      - no abandoned cart analytics
+      - no server-side order record
+      - no validation that store WhatsApp is operational before publish

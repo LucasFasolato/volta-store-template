@@ -1,0 +1,108 @@
+debt:
+  - id: D001
+    severity: high
+    area: database
+    title: one-store-per-user rule is not enforced in DB
+    current_state: app code assumes one store per owner_id but stores.owner_id is not unique
+    impact: duplicate stores would break .single() queries and core navigation
+    recommended_fix: add unique index on stores(owner_id) after data verification
+
+  - id: D002
+    severity: high
+    area: storage
+    title: store-assets bucket is public
+    current_state: any asset URL is world-readable outside DB RLS
+    impact: unpublished or disabled store assets remain directly accessible
+    recommended_fix: decide if assets should stay public; if not, move to signed URLs or private bucket strategy
+
+  - id: D003
+    severity: high
+    area: onboarding
+    title: onboarding writes are multi-step and non-transactional
+    current_state: profile/store/theme/layout/content creation can partially succeed
+    impact: broken initial state and self-healing loops under failure
+    recommended_fix: move onboarding bootstrap into a DB function or transactional RPC
+
+  - id: D004
+    severity: medium
+    area: backend
+    title: duplicate auth store lookup logic
+    current_state: getAuthStore logic exists separately in store actions and product actions
+    impact: drift risk and repeated queries
+    recommended_fix: centralize owner-store resolution in one shared server helper
+
+  - id: D005
+    severity: medium
+    area: frontend
+    title: ThemeForm is too large
+    current_state: src/components/admin/ThemeForm.tsx is ~867 lines and owns many concerns
+    impact: slow iteration, harder testing, higher render complexity
+    recommended_fix: split into section components and isolate preview state helpers
+
+  - id: D006
+    severity: medium
+    area: media
+    title: product image deletion leaves storage objects behind
+    current_state: deleteProductImage removes DB rows but not Storage files
+    impact: storage bloat and stale public assets
+    recommended_fix: persist object path separately and delete Storage object on image removal
+
+  - id: D007
+    severity: medium
+    area: database
+    title: missing composite indexes for storefront queries
+    current_state: standalone indexes exist, but common store-scoped filters are not optimized
+    impact: query cost increases with catalog size
+    recommended_fix:
+      - add products(store_id, is_active, sort_order)
+      - add products(store_id, is_featured, sort_order)
+      - add categories(store_id, sort_order)
+      - add product_images(product_id, sort_order)
+
+  - id: D008
+    severity: medium
+    area: performance
+    title: public storefront is fully dynamic and uncached
+    current_state: server Supabase client with cookies makes route dynamic
+    impact: higher latency and infrastructure cost at scale
+    recommended_fix: introduce cache-friendly public data path or controlled revalidation strategy
+
+  - id: D009
+    severity: medium
+    area: frontend
+    title: global font loading is heavy
+    current_state: root layout loads many Google fonts for every page
+    impact: larger CSS/font payload across admin and storefront
+    recommended_fix: scope font loading or reduce always-on font set
+
+  - id: D010
+    severity: medium
+    area: auth
+    title: callback errors are not surfaced clearly on login
+    current_state: callback redirects with ?error but LoginForm does not consume search params
+    impact: confusing auth failures and support burden
+    recommended_fix: map query errors to user-facing feedback on /login
+
+  - id: D011
+    severity: medium
+    area: data_integrity
+    title: theme enum-like values are constrained only in app code
+    current_state: DB columns are plain text
+    impact: invalid values can enter through migrations, scripts, or future integrations
+    recommended_fix: add check constraints for controlled design tokens
+
+  - id: D012
+    severity: low
+    area: catalog
+    title: product slug does not update on product rename
+    current_state: create generates slug, update does not recompute it
+    impact: name and slug can drift
+    recommended_fix: decide if slugs are immutable or derive on rename with redirect strategy
+
+  - id: D013
+    severity: low
+    area: admin_ux
+    title: destructive actions still rely on browser confirm
+    current_state: product and category deletion use confirm()
+    impact: weak premium feel and inconsistent interaction model
+    recommended_fix: replace with controlled confirmation dialog using existing UI primitives

@@ -1,0 +1,74 @@
+VOLTA
+=====
+
+src/
+  app/
+    layout.tsx                     Root layout, global fonts, toaster
+    page.tsx                       Redirects to /admin or /login
+    login/
+      page.tsx                     Login screen
+    auth/
+      callback/
+        route.ts                   Shared auth callback for Google + magic link
+    admin/
+      layout.tsx                   Protected admin shell + onboarding check
+      page.tsx                     Admin dashboard
+      apariencia/                  Appearance section
+      configuracion/               Store config section
+      contenido/                   Store content section
+      categorias/                  Category management
+      productos/                   Product list/create/edit
+    (public)/
+      tienda/
+        [slug]/
+          page.tsx                 Public storefront by slug
+
+  components/
+    admin/                         Admin feature components and forms
+    auth/                          Login form
+    cart/                          Cart drawer and mobile cart bar
+    common/                        Shared UX primitives
+    landing/                       Public storefront sections
+    product/                       Product card and modal
+    ui/                            shadcn/ui style primitives
+
+  data/
+    defaults.ts                    Design/token defaults and limits
+    system-copy.ts                 Shared copy constants
+
+  lib/
+    actions/                       Server actions for auth, onboarding, store, products
+    queries/                       Store read models
+    stores/                        Zustand cart store
+    supabase/                      Browser/server/middleware Supabase helpers
+    utils/                         Color, theme, format utilities
+    validations/                   Zod schemas
+    whatsapp/                      WhatsApp message builder
+
+  types/
+    database.ts                    Supabase-generated DB types
+    store.ts                       App-level domain types
+
+  proxy.ts                         Next.js request proxy/middleware entry
+
+supabase/
+  migrations/
+    20240101000001_schema.sql      Core schema
+    20240101000002_rls.sql         RLS policies
+    20240101000003_storage.sql     Public bucket + policies
+    20240101000004_onboarding.sql  Profile trigger + slug function
+    20260403143000_*               Theme customization expansion
+    20260404000000_*               Gradient background support
+
+docs/
+  ai/
+    00-index.yaml
+    10-system-map.yaml
+    20-modules.yaml
+    30-contracts.yaml
+    40-flows.yaml
+    50-guardrails.yaml
+    60-debt.yaml
+    60-audit.md
+    70-roadmap.md
+    project-structure.txt

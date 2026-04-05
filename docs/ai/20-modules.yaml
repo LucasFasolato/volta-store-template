@@ -1,0 +1,111 @@
+modules:
+  - name: auth
+    responsibility: sign-in, session refresh, route protection
+    files:
+      - src/components/auth/LoginForm.tsx
+      - src/lib/actions/auth.ts
+      - src/app/auth/callback/route.ts
+      - src/lib/supabase/middleware.ts
+    notes:
+      - Google is primary
+      - magic link is fallback
+      - callback is shared by both methods
+
+  - name: onboarding
+    responsibility: ensure each authenticated user has a profile and a default store bundle
+    files:
+      - src/lib/actions/onboarding.ts
+      - supabase/migrations/20240101000004_onboarding.sql
+    notes:
+      - DB trigger creates profile
+      - app code also upserts profile and store-related rows
+      - one-store invariant is assumed, not enforced
+
+  - name: store_config
+    responsibility: update store identity and contact data
+    files:
+      - src/components/admin/ConfigForm.tsx
+      - src/lib/actions/store.ts
+      - src/lib/validations/store.ts
+    notes:
+      - slug is globally unique
+      - slug changes revalidate old and new public paths
+
+  - name: store_content
+    responsibility: edit hero copy and hero image
+    files:
+      - src/components/admin/ContentForm.tsx
+      - src/lib/actions/store.ts
+    notes:
+      - hero image stored in Supabase Storage
+
+  - name: appearance_system
+    responsibility: theme tokens, visual previews, layout controls
+    files:
+      - src/components/admin/AppearanceEditor.tsx
+      - src/components/admin/ThemeForm.tsx
+      - src/components/admin/LayoutForm.tsx
+      - src/lib/utils/theme.ts
+    notes:
+      - strongest differentiator in product
+      - currently concentrated in a very large client component
+
+  - name: catalog_admin
+    responsibility: product and category CRUD
+    files:
+      - src/components/admin/ProductForm.tsx
+      - src/components/admin/ProductList.tsx
+      - src/components/admin/CategoriasList.tsx
+      - src/lib/actions/products.ts
+      - src/lib/validations/product.ts
+    notes:
+      - product images live in Storage
+      - delete flow leaves storage cleanup debt
+
+  - name: storefront_read_model
+    responsibility: fetch public store data for rendering
+    files:
+      - src/lib/queries/store.ts
+      - src/app/(public)/tienda/[slug]/page.tsx
+    notes:
+      - fetches store, theme, layout, content, categories, products, images
+      - no pagination or caching layer
+
+  - name: storefront_ui
+    responsibility: present public store and drive browsing
+    files:
+      - src/components/landing/StoreLayout.tsx
+      - src/components/landing/HeroSection.tsx
+      - src/components/landing/FeaturedSection.tsx
+      - src/components/landing/CatalogSection.tsx
+      - src/components/landing/StoreNav.tsx
+      - src/components/landing/StoreFooter.tsx
+    notes:
+      - premium visual language
+      - client shell owns category filtering and modal state
+
+  - name: cart_and_checkout
+    responsibility: local cart state and WhatsApp checkout handoff
+    files:
+      - src/lib/stores/cart.ts
+      - src/components/cart/CartSheet.tsx
+      - src/components/cart/CartFloatingBar.tsx
+      - src/components/product/ProductCard.tsx
+      - src/components/product/ProductModal.tsx
+      - src/lib/whatsapp/builder.ts
+    notes:
+      - cart is per browser via persisted Zustand store
+      - checkout is stateless and externalized to WhatsApp
+
+  - name: shared_foundations
+    responsibility: reusable primitives, types, defaults, copy, formatting
+    files:
+      - src/components/ui/*
+      - src/components/common/*
+      - src/data/defaults.ts
+      - src/data/system-copy.ts
+      - src/types/*
+      - src/lib/utils/*
+    notes:
+      - clean separation exists
+      - domain logic still leaks into large feature components
