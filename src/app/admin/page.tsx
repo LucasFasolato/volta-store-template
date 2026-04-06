@@ -15,12 +15,6 @@ import { getAdminCategories, getAdminProducts } from '@/lib/queries/store'
 import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
 import { cn } from '@/lib/utils'
 
-const statusTone = {
-  draft: 'border-white/10 bg-white/6 text-neutral-200',
-  almost_ready: 'border-amber-300/20 bg-amber-400/10 text-amber-100',
-  ready: 'border-emerald-300/20 bg-emerald-400/10 text-emerald-100',
-} as const
-
 export default async function AdminPage() {
   const { storeData } = await requireAuthenticatedAdminStore()
 
@@ -72,41 +66,35 @@ export default async function AdminPage() {
   ]
 
   return (
-    <div className="space-y-6 p-4 sm:p-5 lg:p-6">
-      <section className="admin-surface rounded-[32px] p-5 sm:p-6">
-        <div className="max-w-3xl">
-          <div className={cn('inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.2em]', statusTone[plan.state])}>
-            {plan.stateLabel}
-          </div>
-          <h1 className="mt-4 text-[2rem] font-semibold tracking-[-0.055em] text-white sm:text-[2.6rem]">
+    <div className="space-y-4 p-4 sm:p-5 lg:p-6">
+      <section className="admin-surface rounded-[28px] px-4 py-4 sm:px-5 sm:py-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <h1 className="text-[1.8rem] font-semibold tracking-[-0.055em] text-white sm:text-[2.2rem]">
             Pone tu tienda en marcha
           </h1>
-          <p className="mt-3 text-sm leading-7 text-neutral-300 sm:text-[15px]">
-            Un paso a la vez para dejarla clara, confiable y lista para compartir.
-          </p>
-        </div>
 
-        <div className="mt-6">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
-              Progreso
-            </p>
-            <p className="text-sm font-medium text-neutral-300">
-              {plan.requiredCompletionPercent}%
-            </p>
-          </div>
-          <div className="h-2 rounded-full bg-white/6">
-            <div
-              className={cn(
-                'h-full rounded-full transition-all',
-                plan.state === 'ready'
-                  ? 'bg-[linear-gradient(90deg,rgba(46,230,166,0.95),rgba(111,243,223,0.75))]'
-                  : plan.state === 'almost_ready'
-                    ? 'bg-[linear-gradient(90deg,rgba(251,191,36,0.95),rgba(251,146,60,0.7))]'
-                    : 'bg-[linear-gradient(90deg,rgba(115,115,115,0.9),rgba(212,212,212,0.6))]',
-              )}
-              style={{ width: `${plan.requiredCompletionPercent}%` }}
-            />
+          <div className="sm:w-[240px]">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                Progreso
+              </p>
+              <p className="text-sm font-medium text-neutral-300">
+                {plan.requiredCompletionPercent}%
+              </p>
+            </div>
+            <div className="h-2 rounded-full bg-white/6">
+              <div
+                className={cn(
+                  'h-full rounded-full transition-all',
+                  plan.state === 'ready'
+                    ? 'bg-[linear-gradient(90deg,rgba(46,230,166,0.95),rgba(111,243,223,0.75))]'
+                    : plan.state === 'almost_ready'
+                      ? 'bg-[linear-gradient(90deg,rgba(251,191,36,0.95),rgba(251,146,60,0.7))]'
+                      : 'bg-[linear-gradient(90deg,rgba(115,115,115,0.9),rgba(212,212,212,0.6))]',
+                )}
+                style={{ width: `${plan.requiredCompletionPercent}%` }}
+              />
+            </div>
           </div>
         </div>
       </section>
