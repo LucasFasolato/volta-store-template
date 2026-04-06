@@ -40,6 +40,18 @@ export type StoreLaunchPlan = {
   }
 }
 
+export type ActivationFlowStep = {
+  id: 'contact' | 'hero' | 'products' | 'categories' | 'trust'
+  title: string
+  description: string
+  href: string
+  ctaLabel: string
+  skipLabel?: string
+  status: 'done' | 'current' | 'upcoming'
+  completionText: string
+  hint: string
+}
+
 function buildPublicUrl(slug: string) {
   const rawBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.trim() ?? 'https://tu-tienda.com'
   const normalizedBaseUrl = rawBaseUrl.replace(/\/+$/, '')
@@ -275,4 +287,104 @@ export function buildStoreLaunchPlan({
     blockers,
     nextBestAction,
   }
+}
+
+export function buildActivationFlowSteps(plan: StoreLaunchPlan): ActivationFlowStep[] {
+  const stepDrafts = [
+    {
+      id: 'contact',
+      title: 'WhatsApp listo',
+      description: 'Deja tu forma de contacto preparada para que puedan escribirte apenas entren.',
+      href: '/admin/configuracion#section-contacto',
+      ctaLabel: 'Cargar WhatsApp',
+      skipLabel: 'Seguir despues',
+      items: ['store-name', 'public-link', 'whatsapp'],
+    },
+    {
+      id: 'hero',
+      title: 'Portada',
+      description: 'Cuenta que vendes y acompanalo con una imagen que haga ver la tienda mas profesional.',
+      href: '/admin/contenido#section-copy',
+      ctaLabel: 'Editar portada',
+      skipLabel: 'Seguir despues',
+      items: ['hero-copy', 'hero-image'],
+    },
+    {
+      id: 'products',
+      title: 'Primer producto',
+      description: 'Agrega tus productos para que la tienda se sienta real y lista para compartir.',
+      href: '/admin/productos/nuevo',
+      ctaLabel: 'Agregar producto',
+      skipLabel: 'Seguir despues',
+      items: ['products'],
+    },
+    {
+      id: 'categories',
+      title: 'Primera categoria',
+      description: 'Ordena el catalogo para que mirar y encontrar productos sea mucho mas simple.',
+      href: '/admin/categorias',
+      ctaLabel: 'Crear categoria',
+      skipLabel: 'Seguir despues',
+      items: ['categories'],
+    },
+    {
+      id: 'trust',
+      title: 'Ajustes de confianza',
+      description: 'Suma Instagram, direccion y horarios para que tu negocio se vea mas solido.',
+      href: '/admin/configuracion#section-contexto',
+      ctaLabel: 'Completar confianza',
+      skipLabel: 'Dejar para despues',
+      items: ['instagram', 'address', 'hours'],
+    },
+  ] as const satisfies Array<{
+    id: ActivationFlowStep['id']
+    title: string
+    description: string
+    href: string
+    ctaLabel: string
+    skipLabel?: string
+    items: string[]
+  }>
+
+  const allItems = [...plan.requiredItems, ...plan.recommendedItems]
+
+  const mappedSteps: ActivationFlowStep[] = stepDrafts.map((step) => {
+    const stepItemIds = step.items as readonly string[]
+    const stepItems = allItems.filter((item) => stepItemIds.includes(item.id))
+    const doneCount = stepItems.filter((item) => item.status === 'done').length
+    const totalCount = stepItems.length
+    const isDone = totalCount > 0 && doneCount === totalCount
+    const firstIncompleteItem = stepItems.find((item) => item.status !== 'done')
+
+    return {
+      id: step.id,
+      title: step.title,
+      description: step.description,
+      href: firstIncompleteItem?.href ?? step.href,
+      ctaLabel: firstIncompleteItem?.ctaLabel ?? step.ctaLabel,
+      skipLabel: isDone ? undefined : step.skipLabel,
+      status: isDone ? 'done' : 'upcoming',
+      completionText: `${doneCount}/${totalCount}`,
+      hint: firstIncompleteItem
+        ? firstIncompleteItem.description
+        : 'Este paso ya esta listo y ayuda a que la tienda se vea mas completa.',
+    }
+  })
+
+  const currentStepIndex = mappedSteps.findIndex((step) => step.status !== 'done')
+
+  if (currentStepIndex === -1) {
+    mappedSteps[mappedSteps.length - 1] = {
+      ...mappedSteps[mappedSteps.length - 1],
+      status: 'done',
+    }
+    return mappedSteps
+  }
+
+  mappedSteps[currentStepIndex] = {
+    ...mappedSteps[currentStepIndex],
+    status: 'current',
+  }
+
+  return mappedSteps
 }
