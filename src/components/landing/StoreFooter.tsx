@@ -17,8 +17,7 @@ export function StoreFooter({ store, containerClass }: StoreFooterProps) {
       className="border-t"
       style={{
         borderColor: 'var(--store-card-border)',
-        background:
-          'linear-gradient(180deg, color-mix(in srgb, var(--store-bg) 96%, transparent), color-mix(in srgb, var(--store-surface) 92%, var(--store-text) 8%))',
+        background: 'var(--store-footer-bg-gradient)',
       }}
     >
       <div className={cn('mx-auto px-4 py-12 sm:px-6 sm:py-16', containerClass)}>

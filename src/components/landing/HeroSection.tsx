@@ -22,7 +22,7 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
     <section
       className="relative flex flex-col justify-end overflow-hidden"
       style={{
-        minHeight: 'clamp(520px, 80vh, 900px)',
+        minHeight: 'var(--store-hero-height)',
         background: content.hero_image_url
           ? undefined
           : 'radial-gradient(circle at top right, color-mix(in srgb, var(--store-accent) 14%, transparent), transparent 40%), radial-gradient(circle at left 60%, color-mix(in srgb, var(--store-secondary) 16%, transparent), transparent 36%), var(--store-bg)',

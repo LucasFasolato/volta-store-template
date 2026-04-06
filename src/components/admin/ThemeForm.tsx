@@ -68,9 +68,9 @@ const DENSITY_OPTIONS: VisualOption[] = [
 ]
 
 const SPACING_OPTIONS: VisualOption[] = [
-  { value: 'tight', label: 'Corto' },
-  { value: 'balanced', label: 'Balanceado' },
-  { value: 'airy', label: 'Amplio' },
+  { value: 'tight', label: 'Compacta' },
+  { value: 'balanced', label: 'Balanceada' },
+  { value: 'airy', label: 'Amplia' },
 ]
 
 const WIDTH_OPTIONS: VisualOption[] = [
@@ -760,6 +760,12 @@ function ColorsControls({
   )
 }
 
+const HERO_HEIGHT_BARS: Record<string, number> = {
+  tight: 40,
+  balanced: 62,
+  airy: 84,
+}
+
 function LayoutControls({
   theme,
   setThemeValue,
@@ -769,6 +775,44 @@ function LayoutControls({
 }) {
   return (
     <div className="space-y-5">
+      {/* 0. Hero height + spacing — spacing_scale drives both */}
+      <div>
+        <p className="mb-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Portada y espaciado</p>
+        <div className="grid grid-cols-3 gap-2">
+          {SPACING_OPTIONS.map((opt) => {
+            const isSelected = theme.spacing_scale === opt.value
+            const barH = HERO_HEIGHT_BARS[opt.value] ?? 60
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setThemeValue('spacing_scale', opt.value as StoreThemeInput['spacing_scale'])}
+                className={cn(
+                  'flex flex-col items-center gap-2 rounded-[14px] py-3 text-center transition duration-150',
+                  isSelected ? 'admin-surface-selected' : 'admin-button-soft',
+                )}
+              >
+                {/* Visual bar representing hero height */}
+                <div className="flex w-10 items-end justify-center" style={{ height: 44 }}>
+                  <div
+                    className="w-full rounded-sm transition-all duration-300"
+                    style={{
+                      height: barH,
+                      background: isSelected
+                        ? 'linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.14))'
+                        : 'rgba(255,255,255,0.1)',
+                    }}
+                  />
+                </div>
+                <span className={cn('text-xs font-medium', isSelected ? 'text-white' : 'text-neutral-400')}>
+                  {opt.label}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       {/* 1. Grid */}
       <div className="grid gap-3 sm:grid-cols-2">
         <PillGroup
@@ -778,10 +822,10 @@ function LayoutControls({
           onChange={(value) => setThemeValue('grid_columns', Number(value) as 2 | 3 | 4)}
         />
         <PillGroup
-          title="Espaciado"
-          options={SPACING_OPTIONS}
-          selected={theme.spacing_scale}
-          onChange={(value) => setThemeValue('spacing_scale', value as StoreThemeInput['spacing_scale'])}
+          title="Densidad"
+          options={DENSITY_OPTIONS}
+          selected={theme.ui_density}
+          onChange={(value) => setThemeValue('ui_density', value as StoreThemeInput['ui_density'])}
         />
       </div>
 
@@ -816,12 +860,6 @@ function LayoutControls({
             options={IMAGE_RATIO_OPTIONS.map((o) => ({ value: o.value, label: o.value }))}
             selected={theme.image_ratio}
             onChange={(value) => setThemeValue('image_ratio', value as StoreThemeInput['image_ratio'])}
-          />
-          <PillGroup
-            title="Densidad"
-            options={DENSITY_OPTIONS}
-            selected={theme.ui_density}
-            onChange={(value) => setThemeValue('ui_density', value as StoreThemeInput['ui_density'])}
           />
           <PillGroup
             title="Redondeo"
@@ -876,40 +914,137 @@ function TypographyLivePreview({ previewThemeVars }: { previewThemeVars: React.C
 
 function ColorStoreMockup({ previewThemeVars }: { previewThemeVars: React.CSSProperties }) {
   return (
-    <div className="overflow-hidden rounded-[24px] border border-white/[0.06]" style={{ ...previewThemeVars, background: 'var(--store-bg-gradient)' }}>
-      <div className="flex items-center justify-between border-b px-5 py-3.5" style={{ borderColor: 'var(--store-card-border)' }}>
-        <div>
-          <p className="store-heading text-base" style={{ color: 'var(--store-text)' }}>Navbar</p>
-          <p className="text-xs" style={{ color: 'var(--store-muted-text)' }}>Marca y CTA</p>
+    <div className="overflow-hidden rounded-[24px]" style={{ ...previewThemeVars, background: 'var(--store-bg-gradient)' }}>
+      {/* Nav strip */}
+      <div
+        className="flex items-center justify-between border-b px-4 py-2.5"
+        style={{
+          borderColor: 'var(--store-card-border)',
+          background: 'var(--store-nav-bg)',
+          backdropFilter: 'blur(12px)',
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <div className="size-5 rounded-[6px]" style={{ background: 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-accent) 50%, var(--store-primary) 50%))' }} />
+          <span className="store-heading text-sm font-semibold" style={{ color: 'var(--store-text)' }}>Mi Tienda</span>
         </div>
-        <button type="button" className="rounded-[var(--store-button-radius)] px-4 py-2 text-sm font-semibold" style={{ background: 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))', color: 'var(--store-primary-contrast)' }}>
-          Comprar
+        <button
+          type="button"
+          className="rounded-[var(--store-button-radius)] px-3 py-1.5 text-[10px] font-semibold"
+          style={{
+            background: 'linear-gradient(135deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
+            color: 'var(--store-primary-contrast)',
+          }}
+        >
+          Carrito
         </button>
       </div>
-      <div className="space-y-3.5 px-5 py-5">
-        <div className="rounded-[calc(var(--store-card-radius)*1.05)] border p-4" style={{ borderColor: 'var(--store-card-border)', background: 'linear-gradient(145deg, color-mix(in srgb, var(--store-surface) 88%, transparent), color-mix(in srgb, var(--store-bg) 88%, var(--store-text) 12%))' }}>
-          <span className="inline-flex rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ backgroundColor: withAlpha('#ffffff', 0.06), color: 'var(--store-secondary)', border: '1px solid color-mix(in srgb, var(--store-secondary) 18%, transparent)' }}>
-            Badge
-          </span>
-          <h4 className="store-heading mt-3.5 text-2xl" style={{ color: 'var(--store-text)' }}>Hero</h4>
-          <p className="mt-1.5 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>Mini mockup real para validar contraste y personalidad.</p>
+
+      {/* Hero area */}
+      <div
+        className="px-5 pb-6 pt-7"
+        style={{
+          background:
+            'radial-gradient(circle at top right, color-mix(in srgb, var(--store-accent) 12%, transparent), transparent 52%), radial-gradient(circle at left 70%, color-mix(in srgb, var(--store-secondary) 13%, transparent), transparent 42%), var(--store-bg-gradient)',
+        }}
+      >
+        <span
+          className="inline-flex rounded-full px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em]"
+          style={{
+            color: 'var(--store-secondary)',
+            backgroundColor: 'color-mix(in srgb, var(--store-secondary) 10%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--store-secondary) 18%, transparent)',
+          }}
+        >
+          Coleccion
+        </span>
+        <h4 className="store-heading mt-2.5 text-2xl leading-tight" style={{ color: 'var(--store-text)' }}>
+          Tu tienda, premium.
+        </h4>
+        <p className="mt-1.5 text-[11px] leading-5" style={{ color: 'var(--store-soft-text)' }}>
+          Contraste, color y personalidad desde el primer scroll.
+        </p>
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            className="rounded-[var(--store-button-radius)] px-4 py-2 text-[11px] font-semibold"
+            style={{
+              background: 'linear-gradient(135deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
+              color: 'var(--store-primary-contrast)',
+              boxShadow: '0 8px 20px color-mix(in srgb, var(--store-primary) 24%, transparent)',
+            }}
+          >
+            Ver catálogo
+          </button>
+          <button
+            type="button"
+            className="rounded-[var(--store-button-radius)] border px-4 py-2 text-[11px] font-medium"
+            style={{
+              borderColor: 'var(--store-border-strong)',
+              color: 'var(--store-text)',
+              background: 'color-mix(in srgb, var(--store-surface) 50%, transparent)',
+            }}
+          >
+            WhatsApp
+          </button>
         </div>
-        <div className="rounded-[var(--store-card-radius)] border p-3.5" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
-          <div className="aspect-[4/3] rounded-[calc(var(--store-card-radius)*0.72)]" style={{ background: 'linear-gradient(145deg, color-mix(in srgb, var(--store-accent) 18%, transparent), color-mix(in srgb, var(--store-secondary) 14%, transparent))' }} />
-          <div className="mt-3.5 flex items-start justify-between gap-3">
-            <div>
-              <p className="store-heading text-lg" style={{ color: 'var(--store-text)' }}>Card</p>
-              <p className="mt-1 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>Precio legible y CTA claro.</p>
+      </div>
+
+      {/* Product cards */}
+      <div className="grid grid-cols-2 gap-2.5 px-4 pb-4">
+        {[
+          { label: 'Producto estrella', price: '$24.900' },
+          { label: 'Nuevo ingreso', price: '$18.500' },
+        ].map((product) => (
+          <div
+            key={product.label}
+            className="overflow-hidden rounded-[var(--store-card-radius)] border"
+            style={{
+              borderColor: 'var(--store-card-border)',
+              background: 'var(--store-card-background)',
+              boxShadow: 'var(--store-card-shadow)',
+            }}
+          >
+            <div
+              className="aspect-[4/5]"
+              style={{
+                background:
+                  'linear-gradient(145deg, color-mix(in srgb, var(--store-accent) 18%, transparent), color-mix(in srgb, var(--store-secondary) 14%, transparent))',
+              }}
+            />
+            <div className="p-2.5">
+              <p className="store-heading text-xs font-semibold" style={{ color: 'var(--store-text)' }}>
+                {product.label}
+              </p>
+              <p className="mt-1 text-xs font-semibold" style={{ color: 'var(--store-primary)' }}>
+                {product.price}
+              </p>
             </div>
-            <p className="text-lg font-semibold" style={{ color: 'var(--store-primary)' }}>$42.000</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer strip */}
+      <div
+        className="border-t px-5 py-4"
+        style={{
+          borderColor: 'var(--store-card-border)',
+          background: 'var(--store-footer-bg-gradient)',
+        }}
+      >
+        <div className="flex items-center justify-between">
+          <p className="store-heading text-sm font-semibold" style={{ color: 'var(--store-text)' }}>
+            Mi Tienda
+          </p>
+          <div className="flex gap-1.5">
+            <div className="size-2 rounded-full" style={{ backgroundColor: 'var(--store-primary)' }} />
+            <div className="size-2 rounded-full" style={{ backgroundColor: 'var(--store-accent)' }} />
+            <div className="size-2 rounded-full" style={{ backgroundColor: 'var(--store-secondary)' }} />
           </div>
         </div>
-        <div className="rounded-[calc(var(--store-card-radius)*0.82)] border-t pt-3.5" style={{ borderColor: 'var(--store-card-border)' }}>
-          <div className="flex items-center justify-between rounded-[calc(var(--store-card-radius)*0.72)] px-4 py-2.5" style={{ backgroundColor: withAlpha('#000000', 0.08) }}>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>Footer</p>
-            <span className="size-2.5 rounded-full" style={{ backgroundColor: 'var(--store-accent)' }} />
-          </div>
-        </div>
+        <p className="mt-1 text-[10px]" style={{ color: 'var(--store-muted-text)' }}>
+          Powered by Volta Store
+        </p>
       </div>
     </div>
   )

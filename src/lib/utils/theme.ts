@@ -96,6 +96,20 @@ export function buildThemeVars(
     '--store-card-border': withAlpha(text, cardStyle.borderOpacity),
     '--store-card-shadow': cardStyle.shadow,
     '--store-card-blur': cardStyle.blur,
+
+    // Navigation — semi-transparent for backdrop-blur effect
+    '--store-nav-bg': withAlpha(background, isDark ? 0.88 : 0.84),
+
+    // Footer — gradient from bg to surface
+    '--store-footer-bg-gradient': `linear-gradient(180deg, ${withAlpha(background, isDark ? 0.97 : 1)}, ${withAlpha(mixHexColors(surface, background, isDark ? 0.35 : 0.5), 1)})`,
+
+    // Hero height derived from spacing_scale (compact → short, airy → tall)
+    '--store-hero-height': ({
+      tight: 'clamp(360px, 60vh, 640px)',
+      balanced: 'clamp(520px, 78vh, 880px)',
+      airy: 'clamp(660px, 92vh, 1060px)',
+    }[theme.spacing_scale] ?? 'clamp(520px, 78vh, 880px)'),
+
     colorScheme: resolvedMode,
   } as React.CSSProperties
 }

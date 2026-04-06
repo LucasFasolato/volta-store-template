@@ -33,8 +33,7 @@ export function StoreNav({ store, containerClass }: StoreNavProps) {
         className="sticky top-0 z-40 border-b backdrop-blur-xl"
         style={{
           borderColor: 'var(--store-card-border)',
-          background:
-            'linear-gradient(180deg, color-mix(in srgb, var(--store-bg) 92%, white 8%), color-mix(in srgb, var(--store-bg) 82%, transparent))',
+          background: 'var(--store-nav-bg)',
         }}
       >
         <div className={cn('mx-auto flex min-h-[5.25rem] items-center justify-between gap-4 px-4 py-3 sm:px-6', containerClass)}>
