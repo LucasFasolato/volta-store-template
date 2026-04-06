@@ -117,17 +117,17 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
         </div>
 
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-white">{blockingFeedback.title}</h2>
-          <p className="mt-3 text-sm leading-7 text-neutral-300">{blockingFeedback.message}</p>
+          <h2 className="text-2xl font-semibold text-foreground">{blockingFeedback.title}</h2>
+          <p className="mt-3 text-sm leading-7 text-muted-foreground">{blockingFeedback.message}</p>
           {blockingFeedback.email ? (
-            <p className="mt-3 font-medium text-white">{blockingFeedback.email}</p>
+            <p className="mt-3 font-medium text-foreground">{blockingFeedback.email}</p>
           ) : null}
         </div>
 
         <div className="mt-6 space-y-3">
           <StatusFeedback feedback={blockingFeedback} />
 
-          <div className="rounded-[24px] border border-white/8 bg-white/4 p-4 text-sm leading-6 text-neutral-300">
+          <div className="rounded-[24px] border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-4 text-sm leading-6 text-muted-foreground">
             El enlace es seguro y no necesitas contrasena. Se abre una sola vez y te lleva directo al admin.
           </div>
         </div>
@@ -138,7 +138,7 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
             setBlockingFeedback(null)
             setInlineFeedback(null)
           }}
-          className="mt-6 w-full rounded-full border border-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/6"
+          className="mt-6 w-full rounded-full border border-border dark:border-white/10 px-4 py-3 text-sm font-medium text-foreground transition hover:bg-black/[0.04] dark:hover:bg-white/6"
         >
           Usar otro email
         </button>
@@ -149,12 +149,12 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
   return (
     <div className="surface-panel premium-ring rounded-[34px] p-8">
       <div className="mb-6">
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/4 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-200">
           <ShieldCheck className="size-3.5" />
           Acceso seguro
         </div>
-        <h1 className="text-2xl font-semibold text-white">Ingresar al panel</h1>
-        <p className="mt-2 text-sm leading-6 text-neutral-300">
+        <h1 className="text-2xl font-semibold text-foreground">Ingresar al panel</h1>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Entra con Google en un click o usa magic link si prefieres seguir por email.
         </p>
       </div>
@@ -166,7 +166,7 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
           type="button"
           disabled={isGoogleLoading || isSubmitting}
           onClick={handleGoogleSignIn}
-          className="h-12 w-full rounded-full border border-white/10 bg-white text-black shadow-[0_18px_36px_rgba(255,255,255,0.08)] hover:bg-white/90"
+          className="h-12 w-full rounded-full border border-black/[0.08] dark:border-white/10 bg-white text-black shadow-[0_18px_36px_rgba(0,0,0,0.08)] dark:shadow-[0_18px_36px_rgba(255,255,255,0.08)] hover:bg-white/90"
         >
           {isGoogleLoading ? (
             <>
@@ -182,29 +182,29 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
         </Button>
 
         <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-white/8" />
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+          <div className="h-px flex-1 bg-border dark:bg-white/8" />
+          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             o usa email
           </span>
-          <div className="h-px flex-1 bg-white/8" />
+          <div className="h-px flex-1 bg-border dark:bg-white/8" />
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <LabelBlock label="Email de acceso" hint="Usa el correo con el que administras tu tienda.">
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-neutral-500" />
+                <Mail className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   {...register('email')}
                   type="email"
                   autoComplete="email"
                   placeholder="tu@email.com"
                   aria-invalid={!!errors.email}
-                  className="h-12 rounded-2xl border-white/10 bg-white/5 pl-11 text-white placeholder:text-neutral-500"
+                  className="h-12 rounded-2xl border-border dark:border-white/10 bg-black/[0.04] dark:bg-white/5 pl-11 text-foreground placeholder:text-muted-foreground"
                 />
               </div>
             </LabelBlock>
-            {errors.email ? <p className="mt-1.5 text-xs text-red-300">{errors.email.message}</p> : null}
+            {errors.email ? <p className="mt-1.5 text-xs text-red-500 dark:text-red-300">{errors.email.message}</p> : null}
           </div>
 
           <Button
@@ -227,9 +227,9 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
         </form>
       </div>
 
-      <div className="mt-6 rounded-[24px] border border-white/8 bg-black/10 p-4">
-        <p className="text-sm font-medium text-white">Que va a pasar despues</p>
-        <p className="mt-2 text-sm leading-6 text-neutral-400">
+      <div className="mt-6 rounded-[24px] border border-border dark:border-white/8 bg-black/[0.04] dark:bg-black/10 p-4">
+        <p className="text-sm font-medium text-foreground">Que va a pasar despues</p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Google te lleva directo al callback seguro. Si eliges email, revisas tu bandeja y entras desde el link.
         </p>
       </div>
@@ -286,8 +286,8 @@ function LabelBlock({
 }) {
   return (
     <div>
-      <p className="mb-2 text-sm font-medium text-neutral-200">{label}</p>
-      <p className="mb-2 text-xs text-neutral-500">{hint}</p>
+      <p className="mb-2 text-sm font-medium text-foreground">{label}</p>
+      <p className="mb-2 text-xs text-muted-foreground">{hint}</p>
       {children}
     </div>
   )

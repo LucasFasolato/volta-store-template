@@ -208,7 +208,7 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
                   <button
                     type="button"
                     onClick={() => handleDeleteImage(image.id)}
-                    className="rounded-full bg-black/60 p-2 text-white transition hover:bg-red-500/80"
+                    className="rounded-full bg-black/60 p-2 text-neutral-50 transition hover:bg-red-500/80"
                     aria-label="Eliminar imagen"
                   >
                     <Trash2 className="size-4" />

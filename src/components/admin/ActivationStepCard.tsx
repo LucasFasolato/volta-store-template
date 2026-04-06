@@ -47,50 +47,50 @@ export function ActivationStepCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-200">
+              <span className="rounded-full border border-border dark:border-white/10 bg-black/[0.04] dark:bg-white/6 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground dark:text-neutral-200">
                 Paso {stepNumber} de {totalSteps}
               </span>
               <span
                 className={cn(
                   'rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em]',
                   isDone
-                    ? 'border-emerald-300/20 bg-emerald-400/10 text-emerald-100'
+                    ? 'border-emerald-300/20 bg-emerald-400/10 text-emerald-700 dark:text-emerald-100'
                     : isCurrent
-                      ? 'border-white/10 bg-white/6 text-neutral-200'
-                      : 'border-white/8 bg-white/4 text-neutral-400',
+                      ? 'border-border dark:border-white/10 bg-black/[0.04] dark:bg-white/6 text-foreground dark:text-neutral-200'
+                      : 'border-border dark:border-white/8 bg-black/[0.03] dark:bg-white/4 text-muted-foreground dark:text-neutral-400',
                 )}
               >
                 {isDone ? 'Listo' : isCurrent ? 'Ahora' : 'Despues'}
               </span>
             </div>
 
-            <h2 className="mt-3 max-w-3xl text-[1.45rem] font-semibold tracking-[-0.05em] text-white sm:text-[1.75rem]">
+            <h2 className="mt-3 max-w-3xl text-[1.45rem] font-semibold tracking-[-0.05em] text-foreground sm:text-[1.75rem]">
               {step.title}
             </h2>
-            <p className="mt-1.5 max-w-2xl text-sm leading-6 text-neutral-300">
+            <p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted-foreground">
               {step.description}
             </p>
           </div>
 
-          <div className="shrink-0 rounded-md border border-white/8 bg-white/4 px-3 py-1.5 text-xs font-medium text-neutral-300">
+          <div className="shrink-0 rounded-md border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 px-3 py-1.5 text-xs font-medium text-muted-foreground">
             {step.completionText}
           </div>
         </div>
 
-        <div className="rounded-lg border border-white/8 bg-black/10 p-4">
+        <div className="rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-black/10 p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Vista previa
               </p>
-              <p className="mt-1.5 text-sm leading-6 text-neutral-400">
+              <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
                 {isDone ? step.doneMessage : step.hint}
               </p>
             </div>
             <div
               className={cn(
                 'flex size-9 shrink-0 items-center justify-center rounded-lg',
-                isDone ? 'bg-emerald-400/12 text-emerald-100' : 'bg-white/8 text-neutral-200',
+                isDone ? 'bg-emerald-400/12 text-emerald-700 dark:text-emerald-100' : 'bg-black/[0.06] dark:bg-white/8 text-muted-foreground dark:text-neutral-200',
               )}
             >
               <CheckCircle2 className="size-4" />
@@ -113,7 +113,7 @@ export function ActivationStepCard({
               </Link>
             </Button>
 
-            <p className="text-sm leading-6 text-neutral-400 sm:max-w-sm sm:text-right">
+            <p className="text-sm leading-6 text-muted-foreground sm:max-w-sm sm:text-right">
               {isDone
                 ? step.doneMessage
                 : 'Completa este paso y tu tienda va a sentirse mucho mas lista enseguida.'}
@@ -134,7 +134,7 @@ function StepPreview({
 }) {
   if (stepId === 'contact') {
     return (
-      <div className="rounded-lg border border-white/8 bg-white/4 p-3.5">
+      <div className="rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-3.5">
         <div className="flex items-center justify-between rounded-lg border border-emerald-300/18 bg-[linear-gradient(135deg,rgba(46,230,166,0.18),rgba(111,243,223,0.08))] px-4 py-3">
           <div>
             <p className="text-[11px] text-black/70">Boton principal</p>
@@ -148,12 +148,12 @@ function StepPreview({
 
   if (stepId === 'hero') {
     return (
-      <div className="rounded-lg border border-white/8 bg-white/4 p-3.5">
-        <div className="rounded-lg border border-white/8 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-4">
+      <div className="rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-3.5">
+        <div className="rounded-lg border border-border dark:border-white/8 bg-[linear-gradient(135deg,rgba(0,0,0,0.04),rgba(0,0,0,0.02))] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-4">
           <div className="mb-3 h-20 rounded-md bg-[linear-gradient(135deg,rgba(46,230,166,0.18),rgba(255,255,255,0.06))]" />
           <div className="space-y-2">
-            <div className="h-3 w-32 rounded-full bg-white/18" />
-            <div className="h-3 w-44 rounded-full bg-white/10" />
+            <div className="h-3 w-32 rounded-full bg-black/[0.1] dark:bg-white/18" />
+            <div className="h-3 w-44 rounded-full bg-black/[0.07] dark:bg-white/10" />
           </div>
         </div>
       </div>
@@ -162,15 +162,15 @@ function StepPreview({
 
   if (stepId === 'products') {
     return (
-      <div className="rounded-lg border border-white/8 bg-white/4 p-3.5">
-        <div className="flex items-center gap-3 rounded-lg border border-white/8 bg-black/10 p-3">
+      <div className="rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-3.5">
+        <div className="flex items-center gap-3 rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-black/10 p-3">
           <div className="size-14 rounded-md bg-[linear-gradient(135deg,rgba(46,230,166,0.16),rgba(255,255,255,0.04))]" />
           <div className="min-w-0 flex-1 space-y-2">
-            <div className="h-3 w-28 rounded-full bg-white/18" />
+            <div className="h-3 w-28 rounded-full bg-black/[0.1] dark:bg-white/18" />
             <div className="h-3 w-20 rounded-full bg-emerald-300/30" />
-            <div className="h-2.5 w-16 rounded-full bg-white/10" />
+            <div className="h-2.5 w-16 rounded-full bg-black/[0.07] dark:bg-white/10" />
           </div>
-          <Package className="size-4 text-neutral-400" />
+          <Package className="size-4 text-muted-foreground" />
         </div>
       </div>
     )
@@ -178,7 +178,7 @@ function StepPreview({
 
   if (stepId === 'categories') {
     return (
-      <div className="rounded-lg border border-white/8 bg-white/4 p-3.5">
+      <div className="rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-3.5">
         <div className="flex flex-wrap gap-2">
           {['Destacados', 'Nuevos', 'Regalos'].map((label) => (
             <span
@@ -186,8 +186,8 @@ function StepPreview({
               className={cn(
                 'rounded-full border px-3 py-2 text-xs font-medium',
                 isDone
-                  ? 'border-emerald-300/18 bg-emerald-400/8 text-emerald-100'
-                  : 'border-white/8 bg-white/6 text-neutral-300',
+                  ? 'border-emerald-300/18 bg-emerald-400/8 text-emerald-700 dark:text-emerald-100'
+                  : 'border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/6 text-muted-foreground',
               )}
             >
               {label}
@@ -199,7 +199,7 @@ function StepPreview({
   }
 
   return (
-    <div className="rounded-lg border border-white/8 bg-white/4 p-3.5">
+    <div className="rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-3.5">
       <div className="grid grid-cols-3 gap-2.5">
         <TrustPill icon={AtSign} label="Instagram" active={isDone} />
         <TrustPill icon={MapPin} label="Direccion" active={isDone} />
@@ -223,8 +223,8 @@ function TrustPill({
       className={cn(
         'rounded-md border px-3 py-3 text-center',
         active
-          ? 'border-emerald-300/18 bg-emerald-400/8 text-emerald-100'
-          : 'border-white/8 bg-black/10 text-neutral-300',
+          ? 'border-emerald-300/18 bg-emerald-400/8 text-emerald-700 dark:text-emerald-100'
+          : 'border-border dark:border-white/8 bg-black/[0.04] dark:bg-black/10 text-muted-foreground',
       )}
     >
       <Icon className="mx-auto size-4" />

@@ -75,14 +75,14 @@ export default async function AdminPage() {
         action={
           <div className="w-full sm:w-[240px]">
             <div className="mb-2 flex items-center justify-between gap-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Progreso
               </p>
-              <p className="text-sm font-medium text-neutral-300">
+              <p className="text-sm font-medium text-muted-foreground">
                 {plan.requiredCompletionPercent}%
               </p>
             </div>
-            <div className="h-2 rounded-full bg-white/6">
+            <div className="h-2 rounded-full bg-black/[0.07] dark:bg-white/6">
               <div
                 className={cn(
                   'h-full rounded-full transition-all',
@@ -106,17 +106,17 @@ export default async function AdminPage() {
       ) : (
         <section className="admin-surface rounded-xl p-5 sm:p-6">
           <p className="admin-label">Compartir tienda</p>
-          <h2 className="mt-2 text-xl font-semibold text-white">Todavia no es momento de compartirla</h2>
-          <p className="mt-2 text-sm leading-6 text-neutral-400">
+          <h2 className="mt-2 text-xl font-semibold text-foreground">Todavia no es momento de compartirla</h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Te faltan {plan.missingRequiredCount} cosa{plan.missingRequiredCount === 1 ? '' : 's'} para poder mostrarla con mas confianza.
           </p>
         </section>
       )}
 
       <details className="admin-surface rounded-xl p-5 sm:p-6">
-        <summary className="cursor-pointer list-none text-sm font-medium text-white marker:hidden">
+        <summary className="cursor-pointer list-none text-sm font-medium text-foreground marker:hidden">
           <span className="inline-flex items-center gap-2">
-            <ExternalLink className="size-4 text-neutral-400" />
+            <ExternalLink className="size-4 text-muted-foreground" />
             Ver mas
           </span>
         </summary>
@@ -129,16 +129,16 @@ export default async function AdminPage() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="group admin-surface-muted rounded-lg p-4 transition duration-150 hover:-translate-y-0.5 hover:border-white/12 hover:shadow-[0_22px_52px_rgba(2,6,23,0.24)]"
+                className="group admin-surface-muted rounded-lg p-4 transition duration-150 hover:-translate-y-0.5 dark:hover:border-white/12 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_22px_52px_rgba(2,6,23,0.24)]"
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <div className="flex size-9 items-center justify-center rounded-lg bg-white/6 text-neutral-300 transition-colors duration-150 group-hover:bg-white/8">
+                  <div className="flex size-9 items-center justify-center rounded-lg bg-black/[0.05] dark:bg-white/6 text-muted-foreground dark:text-neutral-300 transition-colors duration-150 group-hover:bg-black/[0.08] dark:group-hover:bg-white/8">
                     <Icon className="size-4" />
                   </div>
-                  <ExternalLink className="size-3.5 text-white/16 transition-all duration-150 group-hover:text-white/45" />
+                  <ExternalLink className="size-3.5 text-foreground/[0.16] dark:text-white/16 transition-all duration-150 group-hover:text-foreground/40 dark:group-hover:text-white/45" />
                 </div>
-                <p className="text-sm font-medium text-white">{link.label}</p>
-                <p className="mt-2 text-sm leading-6 text-neutral-400">{link.description}</p>
+                <p className="text-sm font-medium text-foreground">{link.label}</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{link.description}</p>
               </Link>
             )
           })}

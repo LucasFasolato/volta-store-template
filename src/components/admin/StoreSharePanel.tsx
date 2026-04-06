@@ -20,14 +20,14 @@ export function StoreSharePanel({ plan }: { plan: StoreLaunchPlan }) {
     <section id="share-tools" className="admin-surface rounded-xl p-5 sm:p-6">
       <div className="mb-5">
         <p className="admin-label">Compartir tienda</p>
-        <h2 className="mt-2 text-xl font-semibold text-white">
+        <h2 className="mt-2 text-xl font-semibold text-foreground">
           {plan.state === 'ready'
             ? 'Tu tienda ya puede salir a circular'
             : plan.state === 'almost_ready'
               ? 'Ya casi la tienes lista para compartir'
               : 'Antes de compartirla, termina esta base'}
         </h2>
-        <p className="mt-2 text-sm leading-6 text-neutral-400">
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
           {plan.state === 'ready'
             ? 'Copia el enlace, abre la tienda o enviala por WhatsApp en segundos.'
             : plan.state === 'almost_ready'
@@ -36,8 +36,8 @@ export function StoreSharePanel({ plan }: { plan: StoreLaunchPlan }) {
         </p>
       </div>
 
-      <div className="rounded-lg border border-white/8 bg-black/10 p-4">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">Enlace publico</p>
+      <div className="rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-black/10 p-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Enlace publico</p>
         <p className="mt-3 break-all text-sm font-medium text-emerald-300">{plan.publicUrl}</p>
       </div>
 
@@ -56,7 +56,7 @@ export function StoreSharePanel({ plan }: { plan: StoreLaunchPlan }) {
             <Button
               asChild
               variant="outline"
-              className="h-11 justify-between rounded-md border-white/10 bg-white/5 px-4 text-white hover:bg-white/10"
+              className="h-11 justify-between rounded-md border-border dark:border-white/10 bg-black/[0.04] dark:bg-white/5 px-4 text-foreground dark:text-white hover:bg-black/[0.07] dark:hover:bg-white/10"
             >
               <Link href={plan.publicPath} target="_blank">
                 <span>Abrir tienda</span>
@@ -67,7 +67,7 @@ export function StoreSharePanel({ plan }: { plan: StoreLaunchPlan }) {
             <Button
               asChild
               variant="outline"
-              className="h-11 justify-between rounded-md border-white/10 bg-white/5 px-4 text-white hover:bg-white/10"
+              className="h-11 justify-between rounded-md border-border dark:border-white/10 bg-black/[0.04] dark:bg-white/5 px-4 text-foreground dark:text-white hover:bg-black/[0.07] dark:hover:bg-white/10"
             >
               <Link href={plan.whatsappShareUrl} target="_blank" rel="noreferrer">
                 <span>Compartir por WhatsApp</span>
@@ -77,19 +77,19 @@ export function StoreSharePanel({ plan }: { plan: StoreLaunchPlan }) {
           </div>
 
           {plan.state === 'almost_ready' ? (
-            <div className="rounded-lg border border-amber-300/18 bg-amber-400/8 p-4 text-sm leading-6 text-amber-50">
+            <div className="rounded-lg border border-amber-300/18 bg-amber-400/8 p-4 text-sm leading-6 text-amber-700 dark:text-amber-50">
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-amber-300/12 text-amber-100">
+                <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-amber-300/12 text-amber-600 dark:text-amber-100">
                   <Sparkles className="size-4" />
                 </div>
                 <div>
-                  <p className="font-medium text-amber-100">Ultimo empujon antes de compartirla con total confianza</p>
-                  <p className="mt-1 text-amber-100/80">
+                  <p className="font-medium text-amber-700 dark:text-amber-100">Ultimo empujon antes de compartirla con total confianza</p>
+                  <p className="mt-1 text-amber-700/80 dark:text-amber-100/80">
                     Completa {plan.nextBestAction.title.toLowerCase()} y la tienda va a quedar mucho mas redonda.
                   </p>
                   <Link
                     href={plan.nextBestAction.href}
-                    className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-amber-100 transition hover:text-white"
+                    className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-100 transition hover:text-amber-900 dark:hover:text-white"
                   >
                     {plan.nextBestAction.label}
                   </Link>
@@ -99,9 +99,9 @@ export function StoreSharePanel({ plan }: { plan: StoreLaunchPlan }) {
           ) : null}
         </div>
       ) : (
-        <div className="mt-4 rounded-lg border border-white/8 bg-white/4 p-4">
-          <p className="text-sm font-medium text-white">Primero cierra estos puntos</p>
-          <ul className="mt-3 space-y-2 text-sm leading-6 text-neutral-300">
+        <div className="mt-4 rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-4">
+          <p className="text-sm font-medium text-foreground">Primero cierra estos puntos</p>
+          <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
             {plan.blockers.slice(0, 3).map((blocker) => (
               <li key={blocker}>- {blocker}</li>
             ))}

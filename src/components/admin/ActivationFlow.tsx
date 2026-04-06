@@ -34,20 +34,20 @@ export function ActivationFlow({ steps }: { steps: ActivationFlowStep[] }) {
               className={cn(
                 'group inline-flex shrink-0 items-center gap-2 rounded-full border px-2.5 py-1.5 text-left text-[11px] font-medium transition sm:px-3',
                 isActive
-                  ? 'border-emerald-300/24 bg-emerald-400/10 text-white'
+                  ? 'border-emerald-300/24 bg-emerald-400/10 text-foreground dark:text-white'
                   : step.status === 'done'
-                    ? 'border-white/10 bg-white/6 text-neutral-200 hover:text-white'
-                    : 'border-white/8 bg-white/4 text-neutral-400 hover:text-white',
+                    ? 'border-border dark:border-white/10 bg-black/[0.04] dark:bg-white/6 text-muted-foreground dark:text-neutral-200 hover:text-foreground dark:hover:text-white'
+                    : 'border-border dark:border-white/8 bg-black/[0.03] dark:bg-white/4 text-muted-foreground dark:text-neutral-400 hover:text-foreground dark:hover:text-white',
               )}
             >
               <span
                 className={cn(
                   'flex size-5 shrink-0 items-center justify-center rounded-full',
                   isActive
-                    ? 'bg-emerald-300/16 text-emerald-100'
+                    ? 'bg-emerald-300/16 text-emerald-700 dark:text-emerald-100'
                     : step.status === 'done'
-                      ? 'bg-emerald-400/12 text-emerald-100'
-                      : 'bg-white/8 text-neutral-500',
+                      ? 'bg-emerald-400/12 text-emerald-700 dark:text-emerald-100'
+                      : 'bg-black/[0.06] dark:bg-white/8 text-muted-foreground dark:text-neutral-500',
                 )}
               >
                 {step.status === 'done' ? <Check className="size-3.5" /> : <Circle className="size-2.5 fill-current stroke-0" />}

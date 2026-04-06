@@ -506,7 +506,128 @@
   color: #64748b;
 }
 
-/* Emerald accent text: light-emerald is invisible on white — swap to emerald-600 */
-.light .admin-gradient [class*="text-emerald-2"] {
+/* Emerald accent text: light variants (100–300) are low-contrast on white — swap to emerald-600 */
+.light .admin-gradient [class*="text-emerald-1"],
+.light .admin-gradient [class*="text-emerald-2"],
+.light .admin-gradient [class*="text-emerald-3"] {
   color: #059669;
+}
+
+/* ─── Neutral text variants ───────────────────────────────────
+   text-neutral-200/300 covered above; extend to 400 and 500.
+   ─────────────────────────────────────────────────────────── */
+
+.light .admin-gradient .text-neutral-200 {
+  color: var(--foreground);
+}
+
+.light .admin-gradient .text-neutral-400 {
+  color: var(--muted-foreground);
+}
+
+.light .admin-gradient .text-neutral-500 {
+  color: var(--muted-foreground);
+}
+
+/* Also cover the auth/login area (surface-panel, not admin-gradient) */
+.light .surface-panel .text-neutral-200,
+.light .surface-panel .text-neutral-300,
+.light .surface-panel .text-neutral-400,
+.light .surface-panel .text-neutral-500 {
+  color: var(--muted-foreground);
+}
+
+/* ─── Semi-transparent white borders ──────────────────────────
+   border-white/N generates rgba(255,255,255,N%) — invisible on
+   white backgrounds. Flip to a subtle dark border.
+   ─────────────────────────────────────────────────────────── */
+
+.light .admin-gradient [class~="border-white/4"],
+.light .admin-gradient [class~="border-white/6"],
+.light .admin-gradient [class~="border-white/8"],
+.light .admin-gradient [class~="border-white/10"],
+.light .admin-gradient [class~="border-white/12"],
+.light .admin-gradient [class~="border-white/16"],
+.light .admin-gradient [class~="border-white/18"] {
+  border-color: var(--border);
+}
+
+.light .surface-panel [class~="border-white/4"],
+.light .surface-panel [class~="border-white/6"],
+.light .surface-panel [class~="border-white/8"],
+.light .surface-panel [class~="border-white/10"],
+.light .surface-panel [class~="border-white/12"] {
+  border-color: var(--border);
+}
+
+/* ─── Semi-transparent white backgrounds ─────────────────────
+   bg-white/4/5/6/8 are near-invisible on white; swap to subtle
+   dark-alpha equivalents. bg-black/10 becomes too heavy; soften.
+   ─────────────────────────────────────────────────────────── */
+
+.light .admin-gradient [class~="bg-white/4"],
+.light .admin-gradient [class~="bg-white/5"],
+.light .admin-gradient [class~="bg-white/6"],
+.light .admin-gradient [class~="bg-white/8"] {
+  background-color: rgba(15, 23, 42, 0.04);
+}
+
+.light .admin-gradient [class~="bg-black/10"] {
+  background-color: rgba(15, 23, 42, 0.04);
+}
+
+.light .surface-panel [class~="bg-white/4"],
+.light .surface-panel [class~="bg-white/5"],
+.light .surface-panel [class~="bg-white/6"],
+.light .surface-panel [class~="bg-white/8"] {
+  background-color: rgba(15, 23, 42, 0.04);
+}
+
+.light .surface-panel [class~="bg-black/10"] {
+  background-color: rgba(15, 23, 42, 0.04);
+}
+
+/* ─── Skeleton shimmer bars ───────────────────────────────────
+   bg-white/18 and bg-white/10 skeleton bars — give them dark alpha
+   ─────────────────────────────────────────────────────────── */
+
+.light .admin-gradient [class~="bg-white/18"] {
+  background-color: rgba(15, 23, 42, 0.1);
+}
+
+.light .admin-gradient [class~="bg-white/16"] {
+  background-color: rgba(15, 23, 42, 0.08);
+}
+
+/* ─── Hover states that flip to white ─────────────────────────
+   hover:text-white and hover:border-white/N become invisible/jarring
+   on light backgrounds — redirect to foreground/border tokens.
+   ─────────────────────────────────────────────────────────── */
+
+.light .admin-gradient .hover\:text-white:hover {
+  color: var(--foreground);
+}
+
+.light .admin-gradient .hover\:border-white\/15:hover,
+.light .admin-gradient .hover\:border-white\/12:hover,
+.light .admin-gradient .hover\:border-white\/10:hover,
+.light .admin-gradient .hover\:border-white\/8:hover {
+  border-color: rgba(15, 23, 42, 0.14);
+}
+
+.light .admin-gradient .hover\:bg-white\/10:hover,
+.light .admin-gradient .hover\:bg-white\/8:hover,
+.light .admin-gradient .hover\:bg-white\/6:hover {
+  background-color: rgba(15, 23, 42, 0.06);
+}
+
+/* ─── Input placeholder text ──────────────────────────────────
+   placeholder:text-neutral-500 generates a ::placeholder rule —
+   override to use muted-foreground in light mode.
+   ─────────────────────────────────────────────────────────── */
+
+.light .admin-gradient input::placeholder,
+.light .admin-gradient textarea::placeholder {
+  color: var(--muted-foreground);
+  opacity: 1;
 }

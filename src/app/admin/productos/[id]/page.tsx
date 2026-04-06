@@ -24,7 +24,7 @@ export default async function EditProductoPage({
 
   return (
     <div className="p-4 sm:p-6 lg:p-10">
-      <Button asChild variant="ghost" size="sm" className="-ml-2 mb-5 rounded-full text-neutral-400 hover:text-white">
+      <Button asChild variant="ghost" size="sm" className="-ml-2 mb-5 rounded-full text-muted-foreground hover:text-foreground dark:hover:text-white">
         <Link href="/admin/productos">
           <ArrowLeft className="mr-1.5 size-4" />
           Productos
