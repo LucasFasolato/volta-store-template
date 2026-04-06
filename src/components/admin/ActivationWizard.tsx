@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { CheckCircle2 } from 'lucide-react'
 import type { ActivationFlowStep, StoreLaunchPlan } from '@/lib/dashboard/store-launch'
-import type { AdminStoreData, Category } from '@/types/store'
+import type { AdminStoreData, Category, ProductWithImages } from '@/types/store'
 import { cn } from '@/lib/utils'
 import { WizardStepContact } from './wizard/WizardStepContact'
 import { WizardStepHero } from './wizard/WizardStepHero'
@@ -15,12 +15,14 @@ export function ActivationWizard({
   storeData,
   categories,
   activeProductCount,
+  products,
 }: {
   steps: ActivationFlowStep[]
   plan: StoreLaunchPlan
   storeData: AdminStoreData
   categories: Category[]
   activeProductCount: number
+  products: ProductWithImages[]
 }) {
   const currentIndex = steps.findIndex((s) => s.status === 'current')
   const activeIndex = currentIndex === -1 ? steps.length - 1 : currentIndex
@@ -44,6 +46,7 @@ export function ActivationWizard({
                 storeData={storeData}
                 categories={categories}
                 activeProductCount={activeProductCount}
+                products={products}
               />
             )
           }
@@ -143,6 +146,7 @@ function ActiveCard({
   storeData,
   categories,
   activeProductCount,
+  products,
 }: {
   step: ActivationFlowStep
   stepNumber: number
@@ -150,6 +154,7 @@ function ActiveCard({
   storeData: AdminStoreData
   categories: Category[]
   activeProductCount: number
+  products: ProductWithImages[]
 }) {
   return (
     <section className="admin-surface relative overflow-hidden rounded-2xl p-6 sm:p-8">
@@ -189,7 +194,12 @@ function ActiveCard({
           {step.id === 'products' && (
             <WizardStepProduct categories={categories} activeProductCount={activeProductCount} />
           )}
-          {step.id === 'categories' && <WizardStepCategory />}
+          {step.id === 'categories' && (
+            <WizardStepCategory
+              products={products}
+              hasExistingCategories={categories.length > 0}
+            />
+          )}
           {step.id === 'trust' && <WizardStepTrust store={storeData.store} />}
         </div>
       </div>

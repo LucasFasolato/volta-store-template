@@ -266,3 +266,18 @@ export async function deleteCategory(categoryId: string) {
   revalidateStorePaths(store.slug)
   return { success: true }
 }
+
+export async function assignProductToCategory(productId: string, categoryId: string) {
+  const { supabase, store } = await requireAuthenticatedStoreContext()
+
+  const { error } = await supabase
+    .from('products')
+    .update({ category_id: categoryId })
+    .eq('id', productId)
+    .eq('store_id', store.id)
+
+  if (error) return { error: error.message }
+
+  revalidateStorePaths(store.slug)
+  return { success: true }
+}

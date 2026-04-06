@@ -37,6 +37,7 @@ export default async function AdminPage() {
       storeData={storeData}
       categories={categories}
       activeProductCount={activeProductCount}
+      products={products}
     />
   )
 }

@@ -216,6 +216,37 @@ export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
     setThemeValue('heading_weight', preset.heading_weight as StoreThemeInput['heading_weight'])
   }
 
+  const visualModeHeader = (
+    <div className="admin-surface rounded-[18px] px-3 py-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+          Vista previa
+        </p>
+        <div className="flex gap-1">
+          {[
+            { value: 'light', label: 'Claro' },
+            { value: 'auto', label: 'Auto' },
+            { value: 'dark', label: 'Oscuro' },
+          ].map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setThemeValue('visual_mode', option.value as StoreThemeInput['visual_mode'])}
+              className={cn(
+                'rounded-[10px] px-3 py-1 text-xs font-medium transition duration-150',
+                previewTheme.visual_mode === option.value
+                  ? 'admin-surface-selected text-white'
+                  : 'text-neutral-400 hover:text-white',
+              )}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {activeSection === 'fuentes' ? (
@@ -228,6 +259,7 @@ export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
             />
           }
           preview={<TypographyLivePreview previewThemeVars={previewThemeVars} />}
+          previewHeader={visualModeHeader}
         />
       ) : null}
 
@@ -245,6 +277,7 @@ export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
             />
           }
           preview={<ColorStoreMockup previewThemeVars={previewThemeVars} />}
+          previewHeader={visualModeHeader}
         />
       ) : null}
 
@@ -257,6 +290,7 @@ export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
             />
           }
           preview={<DesignLivePreview previewThemeVars={previewThemeVars} columns={previewTheme.grid_columns} imageRatio={previewTheme.image_ratio} containerWidth={previewTheme.container_width} />}
+          previewHeader={visualModeHeader}
         />
       ) : null}
 
@@ -273,14 +307,19 @@ export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
 function EditorShell({
   controls,
   preview,
+  previewHeader,
 }: {
   controls: React.ReactNode
   preview: React.ReactNode
+  previewHeader?: React.ReactNode
 }) {
   return (
     <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
       <div className="admin-surface rounded-[24px] p-4 sm:p-5">{controls}</div>
-      <div className="xl:sticky xl:top-6 xl:self-start">{preview}</div>
+      <div className="space-y-2 xl:sticky xl:top-6 xl:self-start">
+        {previewHeader}
+        {preview}
+      </div>
     </section>
   )
 }
@@ -573,6 +612,7 @@ function ColorsControls({
   contrastTextOnSurface: string
   contrastPrimary: string
 }) {
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const isGradient = !!(theme.background_color_2)
 
   function toggleGradient(on: boolean) {
@@ -585,6 +625,19 @@ function ColorsControls({
 
   return (
     <div className="space-y-3">
+      {/* Primary — brand color, most important */}
+      <ColorSection title="Color de marca">
+        <ColorRow
+          label="CTA y botones"
+          hint="El color principal de tu tienda"
+          fieldName="primary_color"
+          value={theme.primary_color}
+          register={register}
+          onColorChange={(v) => setThemeValue('primary_color', v as StoreThemeInput['primary_color'])}
+          error={errors.primary_color?.message}
+        />
+      </ColorSection>
+
       {/* Fondo */}
       <ColorSection title="Fondo">
         <div className="flex gap-1 py-2.5">
@@ -641,70 +694,61 @@ function ColorsControls({
         ) : null}
       </ColorSection>
 
-      {/* Texto */}
-      <ColorSection title="Texto">
-        <ColorRow
-          label="Principal"
-          hint="Titulos y etiquetas"
-          fieldName="text_color"
-          value={theme.text_color}
-          register={register}
-          onColorChange={(v) => setThemeValue('text_color', v as StoreThemeInput['text_color'])}
-          error={errors.text_color?.message}
-        />
-        <ColorRow
-          label="Secundario"
-          hint="Subtitulos y links"
-          fieldName="secondary_color"
-          value={theme.secondary_color}
-          register={register}
-          onColorChange={(v) => setThemeValue('secondary_color', v as StoreThemeInput['secondary_color'])}
-          error={errors.secondary_color?.message}
-        />
-      </ColorSection>
+      {/* Advanced colors — collapsed */}
+      <button
+        type="button"
+        onClick={() => setShowAdvanced((v) => !v)}
+        className="flex w-full items-center gap-2 rounded-[14px] px-3 py-2 text-xs font-semibold text-neutral-500 transition hover:text-neutral-300"
+      >
+        <span className="flex-1 text-left uppercase tracking-[0.16em]">Avanzado</span>
+        <span className="text-neutral-600">{showAdvanced ? '↑ Ocultar' : '↓ Más colores'}</span>
+      </button>
 
-      {/* Tarjetas */}
-      <ColorSection title="Tarjetas">
-        <ColorRow
-          label="Fondo de tarjetas"
-          hint="Superficie de productos"
-          fieldName="surface_color"
-          value={theme.surface_color}
-          register={register}
-          onColorChange={(v) => setThemeValue('surface_color', v as StoreThemeInput['surface_color'])}
-          error={errors.surface_color?.message}
-        />
-      </ColorSection>
+      {showAdvanced ? (
+        <>
+          <ColorSection title="Texto">
+            <ColorRow
+              label="Principal"
+              hint="Títulos y etiquetas"
+              fieldName="text_color"
+              value={theme.text_color}
+              register={register}
+              onColorChange={(v) => setThemeValue('text_color', v as StoreThemeInput['text_color'])}
+              error={errors.text_color?.message}
+            />
+            <ColorRow
+              label="Secundario"
+              hint="Subtítulos y links"
+              fieldName="secondary_color"
+              value={theme.secondary_color}
+              register={register}
+              onColorChange={(v) => setThemeValue('secondary_color', v as StoreThemeInput['secondary_color'])}
+              error={errors.secondary_color?.message}
+            />
+          </ColorSection>
 
-      {/* Acciones */}
-      <ColorSection title="Acciones">
-        <ColorRow
-          label="Botones / CTA"
-          hint="Color principal de accion"
-          fieldName="primary_color"
-          value={theme.primary_color}
-          register={register}
-          onColorChange={(v) => setThemeValue('primary_color', v as StoreThemeInput['primary_color'])}
-          error={errors.primary_color?.message}
-        />
-        <ColorRow
-          label="Precio / Destaque"
-          hint="Precio de producto y badges"
-          fieldName="accent_color"
-          value={theme.accent_color}
-          register={register}
-          onColorChange={(v) => setThemeValue('accent_color', v as StoreThemeInput['accent_color'])}
-          error={errors.accent_color?.message}
-        />
-      </ColorSection>
-
-      {/* Modo visual */}
-      <PillGroup
-        title="Modo visual"
-        options={VISUAL_MODE_OPTIONS.map((item) => ({ value: item.value, label: item.label }))}
-        selected={theme.visual_mode}
-        onChange={(value) => setThemeValue('visual_mode', value as StoreThemeInput['visual_mode'])}
-      />
+          <ColorSection title="Tarjetas y destaque">
+            <ColorRow
+              label="Fondo de tarjetas"
+              hint="Superficie de productos"
+              fieldName="surface_color"
+              value={theme.surface_color}
+              register={register}
+              onColorChange={(v) => setThemeValue('surface_color', v as StoreThemeInput['surface_color'])}
+              error={errors.surface_color?.message}
+            />
+            <ColorRow
+              label="Precio / Badge"
+              hint="Precio de producto y etiquetas"
+              fieldName="accent_color"
+              value={theme.accent_color}
+              register={register}
+              onColorChange={(v) => setThemeValue('accent_color', v as StoreThemeInput['accent_color'])}
+              error={errors.accent_color?.message}
+            />
+          </ColorSection>
+        </>
+      ) : null}
 
       {/* Contraste */}
       <div className="grid gap-2.5 sm:grid-cols-3">

@@ -80,7 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans">
         <ThemeProvider>
           {children}
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position="top-center" />
         </ThemeProvider>
       </body>
     </html>
