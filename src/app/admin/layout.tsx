@@ -1,21 +1,15 @@
 import { redirect } from 'next/navigation'
 import { ensureOnboarding } from '@/lib/actions/onboarding'
-import { getAdminStore } from '@/lib/queries/store'
-import { createClient } from '@/lib/supabase/server'
+import { getOwnerStoreData, requireAuthenticatedUser } from '@/lib/server/store-context'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { MobileAdminNav } from '@/components/admin/MobileAdminNav'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
+  const user = await requireAuthenticatedUser()
 
   await ensureOnboarding(user)
 
-  const storeData = await getAdminStore(user.id)
+  const storeData = await getOwnerStoreData(user.id)
   if (!storeData) redirect('/login')
 
   return (

@@ -1,12 +1,19 @@
 import type { Metadata } from 'next'
 import { LoginForm } from '@/components/auth/LoginForm'
+import { getLoginFeedbackFromSearchParams } from '@/lib/auth/login-feedback'
 
 export const metadata: Metadata = {
   title: 'Ingresar - Volta Store',
   description: 'Accede a tu panel de administracion',
 }
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const feedback = getLoginFeedbackFromSearchParams(await searchParams)
+
   return (
     <div className="admin-gradient relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="absolute left-1/2 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-emerald-400/10 blur-3xl" />
@@ -23,7 +30,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <LoginForm />
+        <LoginForm initialFeedback={feedback} />
       </div>
     </div>
   )

@@ -1,17 +1,8 @@
-import { redirect } from 'next/navigation'
-import { getAdminStore } from '@/lib/queries/store'
-import { createClient } from '@/lib/supabase/server'
+import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
 import { AppearanceEditor } from '@/components/admin/AppearanceEditor'
 
 export default async function AparienciaPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const storeData = await getAdminStore(user.id)
-  if (!storeData) redirect('/login')
+  const { storeData } = await requireAuthenticatedAdminStore()
 
   return (
     <div className="p-4 sm:p-5 lg:p-6">

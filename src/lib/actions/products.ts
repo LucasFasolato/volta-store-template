@@ -2,26 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { requireAuthenticatedStoreContext } from '@/lib/server/store-context'
 import { categorySchema, productSchema } from '@/lib/validations/product'
 import { slugify } from '@/lib/utils/format'
 import type { CategoryInput, ProductInput } from '@/lib/validations/product'
-
-async function getAuthStore() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
-
-  const { data: store } = await supabase
-    .from('stores')
-    .select('id, slug')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!store) throw new Error('Store not found')
-  return { supabase, store, user }
-}
 
 async function getUniqueSlug({
   supabase,
@@ -52,7 +36,11 @@ async function getUniqueSlug({
       query = query.neq('id', excludeId)
     }
 
-    const { data: existing } = await query.single()
+    const { data: existing, error } = await query.maybeSingle()
+    if (error) {
+      throw new Error(`Failed to generate unique slug: ${error.message}`)
+    }
+
     if (!existing) return candidate
     suffix += 1
   }
@@ -68,7 +56,7 @@ export async function createProduct(input: ProductInput) {
   const validated = productSchema.safeParse(input)
   if (!validated.success) return { error: validated.error.flatten() }
 
-  const { supabase, store } = await getAuthStore()
+  const { supabase, store } = await requireAuthenticatedStoreContext()
   const data = validated.data
 
   const slug = await getUniqueSlug({
@@ -107,7 +95,7 @@ export async function updateProduct(productId: string, input: ProductInput) {
   const validated = productSchema.safeParse(input)
   if (!validated.success) return { error: validated.error.flatten() }
 
-  const { supabase, store } = await getAuthStore()
+  const { supabase, store } = await requireAuthenticatedStoreContext()
   const data = validated.data
 
   const { error } = await supabase
@@ -135,7 +123,7 @@ export async function updateProduct(productId: string, input: ProductInput) {
 }
 
 export async function deleteProduct(productId: string) {
-  const { supabase, store } = await getAuthStore()
+  const { supabase, store } = await requireAuthenticatedStoreContext()
 
   const { error } = await supabase
     .from('products')
@@ -150,7 +138,7 @@ export async function deleteProduct(productId: string) {
 }
 
 export async function uploadProductImage(productId: string, file: FormData) {
-  const { supabase, store, user } = await getAuthStore()
+  const { supabase, store, user } = await requireAuthenticatedStoreContext()
 
   const imageFile = file.get('image') as File | null
   if (!imageFile) return { error: 'No image provided' }
@@ -180,7 +168,7 @@ export async function uploadProductImage(productId: string, file: FormData) {
 }
 
 export async function deleteProductImage(imageId: string, productId: string) {
-  const { supabase, store } = await getAuthStore()
+  const { supabase, store } = await requireAuthenticatedStoreContext()
 
   const { error } = await supabase
     .from('product_images')
@@ -199,7 +187,7 @@ export async function createCategory(input: CategoryInput) {
   const validated = categorySchema.safeParse(input)
   if (!validated.success) return { error: validated.error.flatten() }
 
-  const { supabase, store } = await getAuthStore()
+  const { supabase, store } = await requireAuthenticatedStoreContext()
   const data = validated.data
 
   const slug = await getUniqueSlug({
@@ -235,7 +223,7 @@ export async function updateCategory(categoryId: string, input: CategoryInput) {
   const validated = categorySchema.safeParse(input)
   if (!validated.success) return { error: validated.error.flatten() }
 
-  const { supabase, store } = await getAuthStore()
+  const { supabase, store } = await requireAuthenticatedStoreContext()
 
   const slug = await getUniqueSlug({
     supabase,
@@ -264,7 +252,7 @@ export async function updateCategory(categoryId: string, input: CategoryInput) {
 }
 
 export async function deleteCategory(categoryId: string) {
-  const { supabase, store } = await getAuthStore()
+  const { supabase, store } = await requireAuthenticatedStoreContext()
 
   const { error } = await supabase
     .from('categories')

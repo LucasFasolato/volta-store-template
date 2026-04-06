@@ -1,18 +1,10 @@
-import { redirect } from 'next/navigation'
-import { getAdminCategories, getAdminStore } from '@/lib/queries/store'
-import { createClient } from '@/lib/supabase/server'
+import { getAdminCategories } from '@/lib/queries/store'
+import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 import { CategoriasList } from '@/components/admin/CategoriasList'
 
 export default async function CategoriasPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const storeData = await getAdminStore(user.id)
-  if (!storeData) redirect('/login')
+  const { storeData } = await requireAuthenticatedAdminStore()
 
   const categories = await getAdminCategories(storeData.store.id)
 

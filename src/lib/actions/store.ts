@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { requireAuthenticatedStoreContext } from '@/lib/server/store-context'
 import {
   storeConfigSchema,
   storeContentSchema,
@@ -15,26 +15,11 @@ import {
 } from '@/lib/validations/store'
 import { slugify } from '@/lib/utils/format'
 
-async function getAuthStore() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
-
-  const { data: store } = await supabase
-    .from('stores')
-    .select('id, slug')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!store) throw new Error('Store not found')
-  return { supabase, store }
-}
-
 export async function updateStoreConfig(input: StoreConfigInput) {
   const validated = storeConfigSchema.safeParse(input)
   if (!validated.success) return { error: validated.error.flatten() }
 
-  const { supabase, store } = await getAuthStore()
+  const { supabase, store } = await requireAuthenticatedStoreContext()
   const nextSlug = validated.data.slug
 
   if (nextSlug !== store.slug) {
@@ -94,7 +79,7 @@ export async function checkStoreSlugAvailability(rawSlug: string) {
     }
   }
 
-  const { supabase, store } = await getAuthStore()
+  const { supabase, store } = await requireAuthenticatedStoreContext()
 
   if (validated.data === store.slug) {
     return {
@@ -139,7 +124,7 @@ export async function updateStoreContent(input: StoreContentInput) {
   const validated = storeContentSchema.safeParse(input)
   if (!validated.success) return { error: validated.error.flatten() }
 
-  const { supabase, store } = await getAuthStore()
+  const { supabase, store } = await requireAuthenticatedStoreContext()
 
   const { error } = await supabase
     .from('store_content')
@@ -161,7 +146,7 @@ export async function updateStoreTheme(input: StoreThemeInput) {
   const validated = storeThemeSchema.safeParse(input)
   if (!validated.success) return { error: validated.error.flatten() }
 
-  const { supabase, store } = await getAuthStore()
+  const { supabase, store } = await requireAuthenticatedStoreContext()
 
   const { error } = await supabase
     .from('store_theme')
@@ -179,7 +164,7 @@ export async function updateStoreLayout(input: StoreLayoutInput) {
   const validated = storeLayoutSchema.safeParse(input)
   if (!validated.success) return { error: validated.error.flatten() }
 
-  const { supabase, store } = await getAuthStore()
+  const { supabase, store } = await requireAuthenticatedStoreContext()
 
   const { error } = await supabase
     .from('store_layout')
@@ -194,17 +179,7 @@ export async function updateStoreLayout(input: StoreLayoutInput) {
 }
 
 export async function uploadLogo(formData: FormData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
-
-  const { data: store } = await supabase
-    .from('stores')
-    .select('id, slug')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!store) throw new Error('Store not found')
+  const { supabase, store, user } = await requireAuthenticatedStoreContext()
 
   const file = formData.get('logo') as File
   if (!file) return { error: 'No file provided' }
@@ -233,17 +208,7 @@ export async function uploadLogo(formData: FormData) {
 }
 
 export async function uploadHeroImage(formData: FormData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
-
-  const { data: store } = await supabase
-    .from('stores')
-    .select('id, slug')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!store) throw new Error('Store not found')
+  const { supabase, store, user } = await requireAuthenticatedStoreContext()
 
   const file = formData.get('hero') as File
   if (!file) return { error: 'No file provided' }

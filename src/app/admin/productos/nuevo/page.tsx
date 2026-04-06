@@ -1,21 +1,13 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
-import { getAdminCategories, getAdminStore } from '@/lib/queries/store'
-import { createClient } from '@/lib/supabase/server'
+import { getAdminCategories } from '@/lib/queries/store'
+import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 import { ProductForm } from '@/components/admin/ProductForm'
 import { Button } from '@/components/ui/button'
 
 export default async function NuevoProductoPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const storeData = await getAdminStore(user.id)
-  if (!storeData) redirect('/login')
+  const { storeData } = await requireAuthenticatedAdminStore()
 
   const categories = await getAdminCategories(storeData.store.id)
 

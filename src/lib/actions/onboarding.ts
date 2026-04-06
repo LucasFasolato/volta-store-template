@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { DEFAULT_THEME, DEFAULT_LAYOUT, DEFAULT_CONTENT } from '@/data/defaults'
+import { getOwnerStoreIdentity } from '@/lib/server/store-context'
 import type { User } from '@supabase/supabase-js'
 
 function generateSlugFromEmail(email: string): string {
@@ -14,77 +15,135 @@ function generateSlugFromEmail(email: string): string {
     .slice(0, 32) || 'mtienda'
 }
 
-export async function ensureOnboarding(user: User): Promise<{ storeSlug: string }> {
+async function ensureProfile(user: User) {
   const supabase = await createClient()
+  const email = user.email?.trim()
 
-  // 1. Ensure profile exists
-  const { data: profile } = await supabase
+  if (!email) {
+    throw new Error('User email is required for onboarding.')
+  }
+
+  const { error } = await supabase
     .from('profiles')
-    .select('id')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile) {
-    await supabase.from('profiles').insert({
+    .upsert({
       id: user.id,
-      email: user.email!,
+      email,
       full_name: user.user_metadata?.full_name ?? null,
+    }, {
+      onConflict: 'id',
     })
+
+  if (error) {
+    throw new Error(`Failed to ensure profile: ${error.message}`)
   }
+}
 
-  // 2. Check if store exists
-  const { data: store } = await supabase
-    .from('stores')
-    .select('id, slug')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (store) {
-    return { storeSlug: store.slug }
-  }
-
-  // 3. Create store with unique slug
-  let slug = generateSlugFromEmail(user.email!)
+async function findAvailableStoreSlug(email: string) {
+  const supabase = await createClient()
+  const baseSlug = generateSlugFromEmail(email)
   let suffix = 0
 
   while (true) {
-    const candidateSlug = suffix === 0 ? slug : `${slug}-${suffix}`
-    const { data: existing } = await supabase
+    const candidateSlug = suffix === 0 ? baseSlug : `${baseSlug}-${suffix}`
+    const { data: existing, error } = await supabase
       .from('stores')
       .select('id')
       .eq('slug', candidateSlug)
-      .single()
+      .maybeSingle()
+
+    if (error) {
+      throw new Error(`Failed to check store slug availability: ${error.message}`)
+    }
 
     if (!existing) {
-      slug = candidateSlug
-      break
+      return candidateSlug
     }
+
     suffix++
   }
+}
 
-  const storeName = user.user_metadata?.full_name ?? user.email!.split('@')[0]
-
-  const { data: newStore, error: storeError } = await supabase
-    .from('stores')
-    .insert({
-      owner_id: user.id,
-      slug,
-      name: storeName,
-      whatsapp: '',
-    })
-    .select('id, slug')
-    .single()
-
-  if (storeError || !newStore) {
-    throw new Error(`Failed to create store: ${storeError?.message}`)
-  }
-
-  // 4. Create theme, layout, content with defaults
-  await Promise.all([
-    supabase.from('store_theme').insert({ store_id: newStore.id, ...DEFAULT_THEME }),
-    supabase.from('store_layout').insert({ store_id: newStore.id, ...DEFAULT_LAYOUT }),
-    supabase.from('store_content').insert({ store_id: newStore.id, ...DEFAULT_CONTENT }),
+async function ensureStoreScaffold(storeId: string) {
+  const supabase = await createClient()
+  const results = await Promise.all([
+    supabase
+      .from('store_theme')
+      .upsert({ store_id: storeId, ...DEFAULT_THEME }, { onConflict: 'store_id', ignoreDuplicates: true }),
+    supabase
+      .from('store_layout')
+      .upsert({ store_id: storeId, ...DEFAULT_LAYOUT }, { onConflict: 'store_id', ignoreDuplicates: true }),
+    supabase
+      .from('store_content')
+      .upsert({ store_id: storeId, ...DEFAULT_CONTENT }, { onConflict: 'store_id', ignoreDuplicates: true }),
   ])
 
-  return { storeSlug: newStore.slug }
+  const firstError = results.find((result) => result.error)?.error
+
+  if (firstError) {
+    throw new Error(`Failed to ensure store scaffold: ${firstError.message}`)
+  }
+}
+
+async function createStoreForOwner(user: User) {
+  const supabase = await createClient()
+  const email = user.email?.trim()
+
+  if (!email) {
+    throw new Error('User email is required for onboarding.')
+  }
+
+  const storeName = user.user_metadata?.full_name ?? email.split('@')[0]
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const slug = await findAvailableStoreSlug(email)
+
+    const { data: newStore, error: storeError } = await supabase
+      .from('stores')
+      .insert({
+        owner_id: user.id,
+        slug,
+        name: storeName,
+        whatsapp: '',
+      })
+      .select('id, slug')
+      .single()
+
+    if (!storeError && newStore) {
+      return newStore
+    }
+
+    const existingStore = await getOwnerStoreIdentity(user.id, supabase)
+    if (existingStore) {
+      return existingStore
+    }
+
+    if (storeError?.code === '23505') {
+      continue
+    }
+
+    throw new Error(`Failed to create store: ${storeError?.message ?? 'Unknown error'}`)
+  }
+
+  throw new Error('Failed to create store after retrying.')
+}
+
+export async function ensureOnboarding(user: User): Promise<{ storeSlug: string }> {
+  const supabase = await createClient()
+  const email = user.email?.trim()
+
+  if (!email) {
+    throw new Error('User email is required for onboarding.')
+  }
+
+  await ensureProfile(user)
+
+  let store = await getOwnerStoreIdentity(user.id, supabase)
+
+  if (!store) {
+    store = await createStoreForOwner(user)
+  }
+
+  await ensureStoreScaffold(store.id)
+
+  return { storeSlug: store.slug }
 }

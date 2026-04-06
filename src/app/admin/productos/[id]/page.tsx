@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
-import { getAdminCategories, getAdminProductById, getAdminStore } from '@/lib/queries/store'
-import { createClient } from '@/lib/supabase/server'
+import { getAdminCategories, getAdminProductById } from '@/lib/queries/store'
+import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 import { ProductForm } from '@/components/admin/ProductForm'
 import { Button } from '@/components/ui/button'
@@ -13,15 +13,7 @@ export default async function EditProductoPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const storeData = await getAdminStore(user.id)
-  if (!storeData) redirect('/login')
+  const { storeData } = await requireAuthenticatedAdminStore()
 
   const [product, categories] = await Promise.all([
     getAdminProductById(storeData.store.id, id),

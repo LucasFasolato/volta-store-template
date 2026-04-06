@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import {
   ArrowRight,
   ExternalLink,
@@ -10,20 +9,13 @@ import {
   Tag,
   TrendingUp,
 } from 'lucide-react'
-import { getAdminCategories, getAdminProducts, getAdminStore } from '@/lib/queries/store'
-import { createClient } from '@/lib/supabase/server'
+import { getAdminCategories, getAdminProducts } from '@/lib/queries/store'
+import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 export default async function AdminPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const storeData = await getAdminStore(user.id)
-  if (!storeData) redirect('/login')
+  const { storeData } = await requireAuthenticatedAdminStore()
 
   const [products, categories] = await Promise.all([
     getAdminProducts(storeData.store.id),
