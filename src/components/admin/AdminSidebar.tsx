@@ -14,6 +14,7 @@ import {
   Tag,
 } from 'lucide-react'
 import { signOut } from '@/lib/actions/auth'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { cn } from '@/lib/utils'
 
 type NavItem = {
@@ -54,8 +55,8 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
               V
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">{storeName}</p>
-              <p className="text-[10px] uppercase tracking-[0.16em] text-neutral-500">Admin</p>
+              <p className="truncate text-sm font-semibold text-foreground">{storeName}</p>
+              <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Admin</p>
             </div>
           </div>
         </div>
@@ -73,19 +74,19 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
                 className={cn(
                   'flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm transition duration-150',
                   active
-                    ? 'admin-surface-selected font-medium text-white'
-                    : 'text-neutral-400 hover:bg-white/[0.06] hover:text-white',
+                    ? 'admin-surface-selected font-medium text-foreground'
+                    : 'text-muted-foreground hover:bg-foreground/[0.05] hover:text-foreground',
                 )}
               >
                 <Icon
                   className={cn(
                     'size-4 shrink-0',
-                    active ? 'text-emerald-200' : 'text-neutral-500',
+                    active ? 'text-emerald-500' : 'text-muted-foreground',
                   )}
                 />
                 <span>{item.label}</span>
                 {active ? (
-                  <span className="ml-auto size-1.5 rounded-full bg-emerald-200" />
+                  <span className="ml-auto size-1.5 rounded-full bg-emerald-500" />
                 ) : null}
               </Link>
             )
@@ -93,21 +94,23 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className="space-y-1.5 border-t border-white/8 pt-3">
+        <div className="space-y-1.5 border-t border-border pt-3">
           <Link
             href={`/tienda/${storeSlug}`}
             target="_blank"
-            className="admin-surface-elevated flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm font-medium text-white transition duration-150 hover:brightness-110"
+            className="admin-surface-elevated flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm font-medium text-foreground transition duration-150 hover:brightness-105"
           >
             <Store className="size-4 shrink-0" />
             <span className="flex-1">Ver tienda</span>
-            <ExternalLink className="size-3.5 text-white/50" />
+            <ExternalLink className="size-3.5 text-muted-foreground" />
           </Link>
+
+          <ThemeToggle variant="sidebar" />
 
           <form action={signOut}>
             <button
               type="submit"
-              className="flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-sm text-neutral-500 transition hover:bg-red-400/8 hover:text-red-300"
+              className="flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-red-400/8 hover:text-red-500"
             >
               <LogOut className="size-4 shrink-0" />
               Salir

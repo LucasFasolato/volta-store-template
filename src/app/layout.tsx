@@ -10,6 +10,7 @@ import {
   Space_Grotesk,
 } from 'next/font/google'
 import { Toaster } from '@/components/ui/sonner'
+import { ThemeProvider } from '@/components/ThemeProvider'
 import './globals.css'
 
 const geistSans = Geist({
@@ -74,10 +75,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${manrope.variable} ${plusJakarta.variable} ${playfair.variable} ${poppins.variable} ${spaceGrotesk.variable}`}
+      suppressHydrationWarning
     >
       <body className="font-sans">
-        {children}
-        <Toaster richColors position="top-right" />
+        <ThemeProvider>
+          {children}
+          <Toaster richColors position="top-right" />
+        </ThemeProvider>
       </body>
     </html>
   )

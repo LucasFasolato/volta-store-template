@@ -28,7 +28,7 @@ export function MobileAdminNav() {
               href={item.href}
               className={cn(
                 'flex flex-col items-center justify-center gap-1 rounded-md px-2 py-2.5 text-[11px] font-medium transition',
-                active ? 'admin-surface-selected text-white' : 'text-neutral-500',
+                active ? 'admin-surface-selected text-foreground' : 'text-muted-foreground',
               )}
             >
               <Icon className="size-4" />

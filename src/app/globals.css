@@ -118,7 +118,8 @@
 }
 
 .light {
-  --background: #ffffff;
+  /* ─── Semantic tokens ──────────────────────────────────── */
+  --background: #f5f7fa;
   --foreground: #0f172a;
   --card: #ffffff;
   --card-foreground: #0f172a;
@@ -128,7 +129,7 @@
   --primary-foreground: #ffffff;
   --secondary: #f1f5f9;
   --secondary-foreground: #0f172a;
-  --muted: #f8fafc;
+  --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --accent: #f1f5f9;
   --accent-foreground: #0f172a;
@@ -375,4 +376,137 @@
   100% {
     transform: translateX(100%);
   }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   LIGHT MODE — global overrides
+   Applied when <html class="light"> (set by ThemeProvider).
+   Covers:
+     - body background
+     - all admin utility surfaces
+     - login surface-panel
+     - scoped text-white within admin shell
+   Components that use semantic tokens (text-foreground, etc.)
+   respond automatically via the .light variables above.
+   ───────────────────────────────────────────────────────────── */
+
+/* Body ──────────────────────────────────────── */
+
+.light body {
+  background-color: var(--background);
+  background-image: none;
+}
+
+/* Admin shell / layout ───────────────────────── */
+
+.light .admin-gradient {
+  background: var(--background);
+}
+
+.light .admin-shell::before {
+  content: none;
+}
+
+/* Admin surfaces ─────────────────────────────── */
+
+.light .admin-surface {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.04);
+  backdrop-filter: none;
+}
+
+.light .admin-surface-muted {
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: rgba(15, 23, 42, 0.03);
+  box-shadow: none;
+}
+
+.light .admin-surface-elevated {
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
+  backdrop-filter: none;
+}
+
+.light .admin-surface-selected {
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  background: linear-gradient(
+    180deg,
+    rgba(16, 185, 129, 0.07),
+    rgba(16, 185, 129, 0.025)
+  );
+  box-shadow: none;
+}
+
+/* Admin buttons ──────────────────────────────── */
+
+.light .admin-button-soft {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.light .admin-button-soft:hover {
+  border-color: rgba(15, 23, 42, 0.12);
+  background: rgba(15, 23, 42, 0.07);
+  transform: translateY(-1px);
+}
+
+/* Login / auth panels ────────────────────────── */
+
+.light .surface-panel {
+  background: #ffffff;
+  backdrop-filter: none;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.light .surface-panel-soft {
+  background: #f8fafc;
+  backdrop-filter: none;
+}
+
+.light .premium-ring {
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.07), 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* Misc utilities ─────────────────────────────── */
+
+.light .text-fade {
+  color: rgba(15, 23, 42, 0.55);
+}
+
+/* admin-label uses @apply text-white/42 — override with foreground at same opacity */
+.light .admin-label {
+  color: rgba(15, 23, 42, 0.42);
+}
+
+/* admin-title uses @apply text-white — override with foreground */
+.light .admin-title {
+  color: var(--foreground);
+}
+
+/* ─── Scoped text-white override ─────────────────────────────
+   Within the admin shell AND login (both use admin-gradient),
+   white text becomes foreground text. Scoped so it does NOT
+   affect text-white on buttons that have their own background
+   (admin-button-primary sets color: #04130e explicitly, which
+   has the same visual effect in both modes).
+   ─────────────────────────────────────────────────────────── */
+
+.light .admin-gradient .text-white {
+  color: var(--foreground);
+}
+
+/* Dim neutral-300 is borderline on white — lift to readable gray */
+.light .admin-gradient .text-neutral-300 {
+  color: #64748b;
+}
+
+/* Emerald accent text: light-emerald is invisible on white — swap to emerald-600 */
+.light .admin-gradient [class*="text-emerald-2"] {
+  color: #059669;
 }
