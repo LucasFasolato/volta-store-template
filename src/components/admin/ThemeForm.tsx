@@ -276,7 +276,7 @@ export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
               contrastPrimary={contrastPrimary}
             />
           }
-          preview={<ColorStoreMockup previewThemeVars={previewThemeVars} />}
+          preview={<ColorStoreMockup previewThemeVars={previewThemeVars} theme={previewTheme} />}
           previewHeader={visualModeHeader}
         />
       ) : null}
@@ -289,7 +289,7 @@ export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
               setThemeValue={setThemeValue}
             />
           }
-          preview={<DesignLivePreview previewThemeVars={previewThemeVars} columns={previewTheme.grid_columns} imageRatio={previewTheme.image_ratio} containerWidth={previewTheme.container_width} />}
+          preview={<DesignLivePreview previewThemeVars={previewThemeVars} columns={previewTheme.grid_columns} imageRatio={previewTheme.image_ratio} containerWidth={previewTheme.container_width} spacingScale={previewTheme.spacing_scale} />}
           previewHeader={visualModeHeader}
         />
       ) : null}
@@ -617,7 +617,7 @@ function ColorsControls({
 
   function toggleGradient(on: boolean) {
     if (on) {
-      setThemeValue('background_color_2', theme.text_color as StoreThemeInput['background_color_2'])
+      setThemeValue('background_color_2', theme.surface_color as StoreThemeInput['background_color_2'])
     } else {
       setThemeValue('background_color_2', null)
     }
@@ -625,11 +625,11 @@ function ColorsControls({
 
   return (
     <div className="space-y-3">
-      {/* Primary — brand color, most important */}
-      <ColorSection title="Color de marca">
+      {/* Básico: Color principal */}
+      <ColorSection title="Color principal">
         <ColorRow
-          label="CTA y botones"
-          hint="El color principal de tu tienda"
+          label="CTA, botones y precio destacado"
+          hint="El color más importante de tu tienda"
           fieldName="primary_color"
           value={theme.primary_color}
           register={register}
@@ -638,8 +638,8 @@ function ColorsControls({
         />
       </ColorSection>
 
-      {/* Fondo */}
-      <ColorSection title="Fondo">
+      {/* Básico: Fondo */}
+      <ColorSection title="Fondo de la tienda">
         <div className="flex gap-1 py-2.5">
           <button
             type="button"
@@ -657,7 +657,7 @@ function ColorsControls({
           </button>
         </div>
         <ColorRow
-          label={isGradient ? 'Color inicio' : 'Color'}
+          label={isGradient ? 'Color inicio' : 'Color de fondo'}
           fieldName="background_color"
           value={theme.background_color}
           register={register}
@@ -694,43 +694,23 @@ function ColorsControls({
         ) : null}
       </ColorSection>
 
-      {/* Advanced colors — collapsed */}
+      {/* Advanced toggle */}
       <button
         type="button"
         onClick={() => setShowAdvanced((v) => !v)}
         className="flex w-full items-center gap-2 rounded-[14px] px-3 py-2 text-xs font-semibold text-neutral-500 transition hover:text-neutral-300"
       >
-        <span className="flex-1 text-left uppercase tracking-[0.16em]">Avanzado</span>
-        <span className="text-neutral-600">{showAdvanced ? '↑ Ocultar' : '↓ Más colores'}</span>
+        <span className="flex-1 text-left uppercase tracking-[0.16em]">Por componente</span>
+        <span className="text-neutral-600">{showAdvanced ? '↑ Ocultar' : '↓ Personalización avanzada'}</span>
       </button>
 
       {showAdvanced ? (
         <>
-          <ColorSection title="Texto">
+          {/* Tarjetas y productos */}
+          <ColorSection title="Tarjetas y productos">
             <ColorRow
-              label="Principal"
-              hint="Títulos y etiquetas"
-              fieldName="text_color"
-              value={theme.text_color}
-              register={register}
-              onColorChange={(v) => setThemeValue('text_color', v as StoreThemeInput['text_color'])}
-              error={errors.text_color?.message}
-            />
-            <ColorRow
-              label="Secundario"
-              hint="Subtítulos y links"
-              fieldName="secondary_color"
-              value={theme.secondary_color}
-              register={register}
-              onColorChange={(v) => setThemeValue('secondary_color', v as StoreThemeInput['secondary_color'])}
-              error={errors.secondary_color?.message}
-            />
-          </ColorSection>
-
-          <ColorSection title="Tarjetas y destaque">
-            <ColorRow
-              label="Fondo de tarjetas"
-              hint="Superficie de productos"
+              label="Fondo de cards"
+              hint="Superficie detrás de cada producto"
               fieldName="surface_color"
               value={theme.surface_color}
               register={register}
@@ -739,7 +719,7 @@ function ColorsControls({
             />
             <ColorRow
               label="Precio / Badge"
-              hint="Precio de producto y etiquetas"
+              hint="Color de precios y etiquetas destacadas"
               fieldName="accent_color"
               value={theme.accent_color}
               register={register}
@@ -747,6 +727,49 @@ function ColorsControls({
               error={errors.accent_color?.message}
             />
           </ColorSection>
+
+          {/* Texto y destaque */}
+          <ColorSection title="Texto y destaque">
+            <ColorRow
+              label="Texto principal"
+              hint="Títulos, nav, cards y footer"
+              fieldName="text_color"
+              value={theme.text_color}
+              register={register}
+              onColorChange={(v) => setThemeValue('text_color', v as StoreThemeInput['text_color'])}
+              error={errors.text_color?.message}
+            />
+            <ColorRow
+              label="Destaque / botón secundario"
+              hint="Subtítulos, badges y acción alternativa"
+              fieldName="secondary_color"
+              value={theme.secondary_color}
+              register={register}
+              onColorChange={(v) => setThemeValue('secondary_color', v as StoreThemeInput['secondary_color'])}
+              error={errors.secondary_color?.message}
+            />
+          </ColorSection>
+
+          {/* Auto-derived info */}
+          <div className="admin-surface-muted space-y-2 rounded-[16px] px-4 py-3.5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">Derivados automáticamente</p>
+            {[
+              { label: 'Fondo de navegación', from: 'fondo general + transparencia' },
+              { label: 'Fondo de footer', from: 'fondo + superficie de cards' },
+              { label: 'Texto sobre botones', from: 'contraste calculado del color principal' },
+              { label: 'Bordes y sombras', from: 'texto + opacidad ajustada' },
+            ].map((item) => (
+              <div key={item.label} className="flex items-start gap-2.5">
+                <span className="mt-px shrink-0 rounded-full bg-white/[0.07] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-neutral-600">
+                  Auto
+                </span>
+                <p className="text-[11px] text-neutral-500">
+                  <span className="font-medium text-neutral-400">{item.label}</span>
+                  <span className="ml-1.5">← {item.from}</span>
+                </p>
+              </div>
+            ))}
+          </div>
         </>
       ) : null}
 
@@ -760,10 +783,76 @@ function ColorsControls({
   )
 }
 
-const HERO_HEIGHT_BARS: Record<string, number> = {
-  tight: 40,
-  balanced: 62,
-  airy: 84,
+const HERO_HEIGHT_BARS: Record<string, number> = { tight: 40, balanced: 62, airy: 84 }
+
+const HERO_LAYOUT_OPTIONS = [
+  { value: 'full', label: 'Completo', hint: 'Sin márgenes', contentPercent: '100%' },
+  { value: 'xl', label: 'Grande', hint: 'Margen suave', contentPercent: '80%' },
+  { value: 'lg', label: 'Centrada', hint: 'Más encuadrado', contentPercent: '58%' },
+] as const
+
+function HeroLayoutThumbnail({
+  label,
+  hint,
+  isSelected,
+  onClick,
+  contentPercent,
+}: {
+  label: string
+  hint: string
+  isSelected: boolean
+  onClick: () => void
+  contentPercent: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'flex flex-col gap-2.5 rounded-[14px] p-2.5 text-center transition duration-150',
+        isSelected ? 'admin-surface-selected' : 'admin-button-soft',
+      )}
+    >
+      {/* Mini hero sketch */}
+      <div
+        className="w-full overflow-hidden rounded-[7px]"
+        style={{
+          height: 58,
+          background: isSelected ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.03)',
+          border: `1px solid ${isSelected ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.06)'}`,
+        }}
+      >
+        {/* Nav bar */}
+        <div
+          className="flex h-[9px] items-center px-1.5"
+          style={{ background: isSelected ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)' }}
+        >
+          <div className="h-[3px] w-3 rounded-full" style={{ background: 'rgba(255,255,255,0.3)' }} />
+        </div>
+        {/* Hero content — width changes visually */}
+        <div className="flex h-[49px] items-end pb-2 pl-1.5">
+          <div style={{ width: contentPercent, transition: 'width 0.25s ease' }}>
+            <div
+              className="h-[4px] rounded-full"
+              style={{ background: isSelected ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.2)', width: '85%' }}
+            />
+            <div
+              className="mt-[3px] h-[3px] rounded-full"
+              style={{ background: isSelected ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)', width: '58%' }}
+            />
+            <div
+              className="mt-[4px] h-[5px] w-[38%] rounded-[3px]"
+              style={{ background: isSelected ? 'rgba(99,102,241,0.75)' : 'rgba(255,255,255,0.09)' }}
+            />
+          </div>
+        </div>
+      </div>
+      <div>
+        <p className={cn('text-xs font-medium', isSelected ? 'text-white' : 'text-neutral-400')}>{label}</p>
+        <p className="mt-0.5 text-[10px] text-neutral-600">{hint}</p>
+      </div>
+    </button>
+  )
 }
 
 function LayoutControls({
@@ -773,66 +862,94 @@ function LayoutControls({
   theme: StoreTheme
   setThemeValue: <K extends keyof StoreThemeInput>(name: K, value: StoreThemeInput[K]) => void
 }) {
+  // Map container_width → closest hero layout option
+  const activeLayout = theme.container_width === 'full'
+    ? 'full'
+    : theme.container_width === 'xl'
+      ? 'xl'
+      : 'lg'
+
   return (
     <div className="space-y-5">
-      {/* 0. Hero height + spacing — spacing_scale drives both */}
-      <div>
-        <p className="mb-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Portada y espaciado</p>
-        <div className="grid grid-cols-3 gap-2">
-          {SPACING_OPTIONS.map((opt) => {
-            const isSelected = theme.spacing_scale === opt.value
-            const barH = HERO_HEIGHT_BARS[opt.value] ?? 60
-            return (
-              <button
+      {/* ── Portada ── */}
+      <div className="space-y-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Portada</p>
+
+        {/* Layout de portada → container_width */}
+        <div>
+          <p className="mb-2 text-[11px] font-medium text-neutral-600">Composición del layout</p>
+          <div className="grid grid-cols-3 gap-2">
+            {HERO_LAYOUT_OPTIONS.map((opt) => (
+              <HeroLayoutThumbnail
                 key={opt.value}
-                type="button"
-                onClick={() => setThemeValue('spacing_scale', opt.value as StoreThemeInput['spacing_scale'])}
-                className={cn(
-                  'flex flex-col items-center gap-2 rounded-[14px] py-3 text-center transition duration-150',
-                  isSelected ? 'admin-surface-selected' : 'admin-button-soft',
-                )}
-              >
-                {/* Visual bar representing hero height */}
-                <div className="flex w-10 items-end justify-center" style={{ height: 44 }}>
-                  <div
-                    className="w-full rounded-sm transition-all duration-300"
-                    style={{
-                      height: barH,
-                      background: isSelected
-                        ? 'linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.14))'
-                        : 'rgba(255,255,255,0.1)',
-                    }}
-                  />
-                </div>
-                <span className={cn('text-xs font-medium', isSelected ? 'text-white' : 'text-neutral-400')}>
-                  {opt.label}
-                </span>
-              </button>
-            )
-          })}
+                label={opt.label}
+                hint={opt.hint}
+                isSelected={activeLayout === opt.value}
+                onClick={() => setThemeValue('container_width', opt.value as StoreThemeInput['container_width'])}
+                contentPercent={opt.contentPercent}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Altura del hero → spacing_scale */}
+        <div>
+          <p className="mb-2 text-[11px] font-medium text-neutral-600">Altura del hero</p>
+          <div className="grid grid-cols-3 gap-2">
+            {SPACING_OPTIONS.map((opt) => {
+              const isSelected = theme.spacing_scale === opt.value
+              const barH = HERO_HEIGHT_BARS[opt.value] ?? 62
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setThemeValue('spacing_scale', opt.value as StoreThemeInput['spacing_scale'])}
+                  className={cn(
+                    'flex flex-col items-center gap-2 rounded-[14px] py-3 text-center transition duration-150',
+                    isSelected ? 'admin-surface-selected' : 'admin-button-soft',
+                  )}
+                >
+                  <div className="flex w-10 items-end justify-center" style={{ height: 44 }}>
+                    <div
+                      className="w-full rounded-sm transition-all duration-300"
+                      style={{
+                        height: barH,
+                        background: isSelected
+                          ? 'linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.14))'
+                          : 'rgba(255,255,255,0.1)',
+                      }}
+                    />
+                  </div>
+                  <span className={cn('text-xs font-medium', isSelected ? 'text-white' : 'text-neutral-400')}>
+                    {opt.label}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
         </div>
       </div>
 
-      {/* 1. Grid */}
+      {/* ── Grilla de productos ── */}
       <div className="grid gap-3 sm:grid-cols-2">
         <PillGroup
-          title="Columnas"
+          title="Columnas de productos"
           options={GRID_OPTIONS.map((o) => ({ value: String(o.value), label: o.label }))}
           selected={String(theme.grid_columns)}
           onChange={(value) => setThemeValue('grid_columns', Number(value) as 2 | 3 | 4)}
         />
         <PillGroup
-          title="Densidad"
+          title="Densidad visual"
           options={DENSITY_OPTIONS}
           selected={theme.ui_density}
           onChange={(value) => setThemeValue('ui_density', value as StoreThemeInput['ui_density'])}
         />
       </div>
 
-      {/* 2. Cards + Buttons */}
+      {/* ── Cards + Botones ── */}
       <div className="grid gap-3 sm:grid-cols-2">
         <PillGroup
-          title="Tarjetas"
+          title="Estilo de tarjetas"
           options={CARD_OPTIONS}
           selected={theme.card_style}
           onChange={(value) => setThemeValue('card_style', value as StoreThemeInput['card_style'])}
@@ -845,16 +962,10 @@ function LayoutControls({
         />
       </div>
 
-      {/* 3. Advanced */}
+      {/* ── Avanzado ── */}
       <div className="admin-surface-muted rounded-[20px] p-4">
         <p className="mb-3.5 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Avanzado</p>
         <div className="grid gap-3.5 sm:grid-cols-2">
-          <PillGroup
-            title="Ancho"
-            options={WIDTH_OPTIONS}
-            selected={theme.container_width}
-            onChange={(value) => setThemeValue('container_width', value as StoreThemeInput['container_width'])}
-          />
           <PillGroup
             title="Ratio de imagen"
             options={IMAGE_RATIO_OPTIONS.map((o) => ({ value: o.value, label: o.value }))}
@@ -862,7 +973,7 @@ function LayoutControls({
             onChange={(value) => setThemeValue('image_ratio', value as StoreThemeInput['image_ratio'])}
           />
           <PillGroup
-            title="Redondeo"
+            title="Redondeo global"
             options={BORDER_RADIUS_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
             selected={theme.border_radius}
             onChange={(value) => setThemeValue('border_radius', value as StoreThemeInput['border_radius'])}
@@ -912,7 +1023,25 @@ function TypographyLivePreview({ previewThemeVars }: { previewThemeVars: React.C
   )
 }
 
-function ColorStoreMockup({ previewThemeVars }: { previewThemeVars: React.CSSProperties }) {
+// Maps container_width to visible content width inside the mockup's hero area.
+// This makes the layout picker educate the user about composition changes.
+const HERO_CONTENT_WIDTH: Record<string, string> = {
+  full: '100%',
+  xl: '82%',
+  lg: '65%',
+  md: '52%',
+  sm: '40%',
+}
+
+function ColorStoreMockup({
+  previewThemeVars,
+  theme,
+}: {
+  previewThemeVars: React.CSSProperties
+  theme: StoreTheme
+}) {
+  const heroContentWidth = HERO_CONTENT_WIDTH[theme.container_width] ?? '65%'
+
   return (
     <div className="overflow-hidden rounded-[24px]" style={{ ...previewThemeVars, background: 'var(--store-bg-gradient)' }}>
       {/* Nav strip */}
@@ -925,8 +1054,13 @@ function ColorStoreMockup({ previewThemeVars }: { previewThemeVars: React.CSSPro
         }}
       >
         <div className="flex items-center gap-2">
-          <div className="size-5 rounded-[6px]" style={{ background: 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-accent) 50%, var(--store-primary) 50%))' }} />
-          <span className="store-heading text-sm font-semibold" style={{ color: 'var(--store-text)' }}>Mi Tienda</span>
+          <div
+            className="size-5 rounded-[6px]"
+            style={{ background: 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-accent) 50%, var(--store-primary) 50%))' }}
+          />
+          <span className="store-heading text-sm font-semibold" style={{ color: 'var(--store-text)' }}>
+            Mi Tienda
+          </span>
         </div>
         <button
           type="button"
@@ -940,58 +1074,64 @@ function ColorStoreMockup({ previewThemeVars }: { previewThemeVars: React.CSSPro
         </button>
       </div>
 
-      {/* Hero area */}
+      {/* Hero area — background always full width; content constrained by container_width */}
       <div
-        className="px-5 pb-6 pt-7"
+        className="pb-7 pt-8"
         style={{
           background:
             'radial-gradient(circle at top right, color-mix(in srgb, var(--store-accent) 12%, transparent), transparent 52%), radial-gradient(circle at left 70%, color-mix(in srgb, var(--store-secondary) 13%, transparent), transparent 42%), var(--store-bg-gradient)',
         }}
       >
-        <span
-          className="inline-flex rounded-full px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em]"
-          style={{
-            color: 'var(--store-secondary)',
-            backgroundColor: 'color-mix(in srgb, var(--store-secondary) 10%, transparent)',
-            border: '1px solid color-mix(in srgb, var(--store-secondary) 18%, transparent)',
-          }}
+        {/* Content width responds to container_width — pedagogical layout preview */}
+        <div
+          className="pl-5 pr-2"
+          style={{ width: heroContentWidth, transition: 'width 0.3s ease' }}
         >
-          Coleccion
-        </span>
-        <h4 className="store-heading mt-2.5 text-2xl leading-tight" style={{ color: 'var(--store-text)' }}>
-          Tu tienda, premium.
-        </h4>
-        <p className="mt-1.5 text-[11px] leading-5" style={{ color: 'var(--store-soft-text)' }}>
-          Contraste, color y personalidad desde el primer scroll.
-        </p>
-        <div className="mt-4 flex gap-2">
-          <button
-            type="button"
-            className="rounded-[var(--store-button-radius)] px-4 py-2 text-[11px] font-semibold"
+          <span
+            className="inline-flex rounded-full px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em]"
             style={{
-              background: 'linear-gradient(135deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
-              color: 'var(--store-primary-contrast)',
-              boxShadow: '0 8px 20px color-mix(in srgb, var(--store-primary) 24%, transparent)',
+              color: 'var(--store-secondary)',
+              backgroundColor: 'color-mix(in srgb, var(--store-secondary) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--store-secondary) 18%, transparent)',
             }}
           >
-            Ver catálogo
-          </button>
-          <button
-            type="button"
-            className="rounded-[var(--store-button-radius)] border px-4 py-2 text-[11px] font-medium"
-            style={{
-              borderColor: 'var(--store-border-strong)',
-              color: 'var(--store-text)',
-              background: 'color-mix(in srgb, var(--store-surface) 50%, transparent)',
-            }}
-          >
-            WhatsApp
-          </button>
+            Coleccion
+          </span>
+          <h4 className="store-heading mt-2.5 text-2xl leading-tight" style={{ color: 'var(--store-text)' }}>
+            Tu tienda, premium.
+          </h4>
+          <p className="mt-1.5 text-[11px] leading-5" style={{ color: 'var(--store-soft-text)' }}>
+            Contraste, color y personalidad desde el primer scroll.
+          </p>
+          <div className="mt-4 flex gap-2">
+            <button
+              type="button"
+              className="rounded-[var(--store-button-radius)] px-4 py-2 text-[11px] font-semibold"
+              style={{
+                background: 'linear-gradient(135deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
+                color: 'var(--store-primary-contrast)',
+                boxShadow: '0 8px 20px color-mix(in srgb, var(--store-primary) 24%, transparent)',
+              }}
+            >
+              Ver catálogo
+            </button>
+            <button
+              type="button"
+              className="rounded-[var(--store-button-radius)] border px-4 py-2 text-[11px] font-medium"
+              style={{
+                borderColor: 'var(--store-border-strong)',
+                color: 'var(--store-text)',
+                background: 'color-mix(in srgb, var(--store-surface) 50%, transparent)',
+              }}
+            >
+              WhatsApp
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Product cards */}
-      <div className="grid grid-cols-2 gap-2.5 px-4 pb-4">
+      <div className="grid grid-cols-2 gap-2.5 px-4 pb-4 pt-3">
         {[
           { label: 'Producto estrella', price: '$24.900' },
           { label: 'Nuevo ingreso', price: '$18.500' },
@@ -1050,26 +1190,59 @@ function ColorStoreMockup({ previewThemeVars }: { previewThemeVars: React.CSSPro
   )
 }
 
+const HERO_PREVIEW_HEIGHT: Record<string, number> = { tight: 56, balanced: 76, airy: 96 }
+
 function DesignLivePreview({
   previewThemeVars,
   columns,
   imageRatio,
   containerWidth,
+  spacingScale,
 }: {
   previewThemeVars: React.CSSProperties
   columns: number
   imageRatio: string
   containerWidth: string
+  spacingScale: string
 }) {
   const previewCount = columns === 4 ? 4 : columns === 3 ? 3 : 2
   const imageClass = imageRatio === '1:1' ? 'aspect-square' : imageRatio === '16:9' ? 'aspect-video' : imageRatio === '3:4' ? 'aspect-[3/4]' : 'aspect-[4/5]'
   const widthPercent = WIDTH_VISUAL[containerWidth] ?? '80%'
+  const heroH = HERO_PREVIEW_HEIGHT[spacingScale] ?? 76
 
   return (
     <div className="admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
-      {/* Header + width indicator */}
-      <div className="flex items-center gap-3 border-b px-5 py-3" style={{ borderColor: 'var(--store-card-border)' }}>
-        <p className="text-[9px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>Layout</p>
+      {/* Hero zone — height from spacing_scale, content width from container_width */}
+      <div
+        className="relative"
+        style={{
+          height: heroH,
+          background: 'var(--store-bg-gradient)',
+          transition: 'height 0.3s ease',
+        }}
+      >
+        {/* Nav bar */}
+        <div
+          className="absolute inset-x-0 top-0 flex items-center justify-between px-3"
+          style={{ height: 20, background: 'var(--store-nav-bg)', borderBottom: '1px solid var(--store-card-border)' }}
+        >
+          <div className="h-[5px] w-6 rounded-full" style={{ background: 'var(--store-text)', opacity: 0.45 }} />
+          <div className="h-[14px] w-8 rounded-[var(--store-button-radius)]" style={{ background: 'var(--store-primary)' }} />
+        </div>
+        {/* Hero content — width tracks container_width */}
+        <div
+          className="absolute bottom-3 left-3 transition-all duration-300"
+          style={{ width: widthPercent }}
+        >
+          <div className="h-[6px] rounded-full" style={{ background: 'var(--store-text)', opacity: 0.5, width: '68%' }} />
+          <div className="mt-1.5 h-[4px] rounded-full" style={{ background: 'var(--store-soft-text)', opacity: 0.55, width: '46%' }} />
+          <div className="mt-2 h-[10px] w-12 rounded-[var(--store-button-radius)]" style={{ background: 'var(--store-primary)' }} />
+        </div>
+      </div>
+
+      {/* Width indicator bar */}
+      <div className="flex items-center gap-3 border-b px-5 py-2" style={{ borderColor: 'var(--store-card-border)' }}>
+        <p className="text-[9px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>Ancho</p>
         <div className="flex flex-1 items-center gap-2">
           <div className="h-1 flex-1 overflow-hidden rounded-full" style={{ background: withAlpha('#ffffff', 0.08) }}>
             <div
@@ -1081,15 +1254,18 @@ function DesignLivePreview({
         </div>
       </div>
 
-      <div className="space-y-3.5 px-5 py-5">
+      <div className="space-y-3 px-5 py-4">
         {/* Buttons */}
         <div className="flex flex-wrap gap-2">
-          <button type="button" className="rounded-[var(--store-button-radius)] px-4 py-2 text-sm font-semibold" style={{ background: 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))', color: 'var(--store-primary-contrast)' }}>Principal</button>
-          <button type="button" className="rounded-[var(--store-button-radius)] border px-4 py-2 text-sm" style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)' }}>Secundario</button>
-          <button type="button" className="rounded-[var(--store-button-radius)] px-4 py-2 text-sm font-semibold" style={{ background: 'var(--store-accent)', color: 'var(--store-accent-contrast)' }}>Accion</button>
+          <button type="button" className="rounded-[var(--store-button-radius)] px-4 py-2 text-sm font-semibold" style={{ background: 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))', color: 'var(--store-primary-contrast)' }}>
+            Principal
+          </button>
+          <button type="button" className="rounded-[var(--store-button-radius)] border px-4 py-2 text-sm" style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)' }}>
+            Secundario
+          </button>
         </div>
 
-        {/* Card grid, constrained by container width */}
+        {/* Card grid constrained by container width */}
         <div className="transition-all duration-300" style={{ width: widthPercent }}>
           <div className={`grid gap-2 ${previewCount === 4 ? 'grid-cols-4' : previewCount === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
             {Array.from({ length: previewCount }).map((_, index) => (

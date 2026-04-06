@@ -13,7 +13,7 @@ export const DEFAULT_THEME: Omit<ThemeInsert, 'store_id'> = {
   text_color: '#0b1220',
   visual_mode: 'light',
   border_radius: 'lg',
-  container_width: 'lg',
+  container_width: 'xl',
   font_preset: 'modern',
   heading_font: 'plus-jakarta',
   body_font: 'geist',
