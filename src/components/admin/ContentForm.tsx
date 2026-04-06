@@ -63,7 +63,7 @@ export function ContentForm({ content, store }: ContentFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <section className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
-        <div className="xl:sticky xl:top-6 xl:self-start">
+        <div id="section-hero-image" className="xl:sticky xl:top-6 xl:self-start">
           <div className="admin-surface rounded-[30px] p-5">
             <p className="admin-label">Visual principal</p>
             <div className="mt-3 flex items-center justify-between gap-3">
@@ -88,7 +88,7 @@ export function ContentForm({ content, store }: ContentFormProps) {
           </div>
         </div>
 
-        <div className="admin-surface rounded-[30px] p-6">
+        <div id="section-copy" className="admin-surface rounded-[30px] p-6">
           <div className="mb-6">
             <p className="admin-label">Copy comercial</p>
             <h3 className="mt-3 text-xl font-semibold text-white">Editor de contenido</h3>
