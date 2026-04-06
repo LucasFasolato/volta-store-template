@@ -117,6 +117,27 @@
   --sidebar-ring: rgba(20, 241, 168, 0.32);
 }
 
+.light {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #0f172a;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --border: rgba(15, 23, 42, 0.1);
+  --input: rgba(15, 23, 42, 0.07);
+  --ring: rgba(20, 241, 168, 0.45);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/70;

@@ -1,5 +1,7 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { DEFAULT_THEME, DEFAULT_LAYOUT, DEFAULT_CONTENT } from '@/data/defaults'
 import { getOwnerStoreIdentity } from '@/lib/server/store-context'
@@ -125,6 +127,52 @@ async function createStoreForOwner(user: User) {
   }
 
   throw new Error('Failed to create store after retrying.')
+}
+
+export async function needsOnboarding(userId: string): Promise<boolean> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('stores')
+    .select('whatsapp')
+    .eq('owner_id', userId)
+    .maybeSingle()
+  return !data?.whatsapp
+}
+
+export async function completeOnboarding(data: {
+  storeName: string
+  whatsapp: string
+}): Promise<{ success?: boolean; error?: string }> {
+  const nameSchema = z.string().min(2, 'Mínimo 2 caracteres').max(48)
+  const waSchema = z
+    .string()
+    .min(8, 'Ingresa un número válido')
+    .regex(/^\+?[0-9\s\-()]+$/, 'Formato inválido. Ejemplo: +5491112345678')
+
+  const nameResult = nameSchema.safeParse(data.storeName.trim())
+  if (!nameResult.success) return { error: nameResult.error.errors[0].message }
+
+  const waResult = waSchema.safeParse(data.whatsapp.trim())
+  if (!waResult.success) return { error: waResult.error.errors[0].message }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+
+  const store = await getOwnerStoreIdentity(user.id, supabase)
+  if (!store) return { error: 'Tienda no encontrada' }
+
+  const { error } = await supabase
+    .from('stores')
+    .update({ name: nameResult.data, whatsapp: waResult.data })
+    .eq('id', store.id)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/admin')
+  return { success: true }
 }
 
 export async function ensureOnboarding(user: User): Promise<{ storeSlug: string }> {

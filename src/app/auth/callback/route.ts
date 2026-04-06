@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { ensureOnboarding } from '@/lib/actions/onboarding'
+import { ensureOnboarding, needsOnboarding } from '@/lib/actions/onboarding'
 import { inferLoginErrorReason } from '@/lib/auth/login-feedback'
 import { createClient } from '@/lib/supabase/server'
 
@@ -45,7 +45,8 @@ export async function GET(request: Request) {
         // Non-blocking
       }
 
-      return NextResponse.redirect(`${origin}/admin`)
+      const goToOnboarding = await needsOnboarding(user.id).catch(() => false)
+      return NextResponse.redirect(`${origin}${goToOnboarding ? '/onboarding' : '/admin'}`)
     }
 
     const reason =
@@ -71,6 +72,11 @@ export async function GET(request: Request) {
     await ensureOnboarding(data.user)
   } catch {
     // Non-blocking
+  }
+
+  const goToOnboarding = await needsOnboarding(data.user.id).catch(() => false)
+  if (goToOnboarding) {
+    return NextResponse.redirect(`${origin}/onboarding`)
   }
 
   const next = searchParams.get('next') ?? ''
