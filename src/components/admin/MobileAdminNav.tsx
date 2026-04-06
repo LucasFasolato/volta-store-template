@@ -16,7 +16,7 @@ export function MobileAdminNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="safe-area-pb admin-surface fixed inset-x-3 bottom-3 z-40 rounded-[24px] p-2 lg:hidden">
+    <nav className="safe-area-pb admin-surface fixed inset-x-3 bottom-3 z-40 rounded-xl p-2 lg:hidden">
       <div className="grid grid-cols-4 gap-1">
         {MOBILE_NAV.map((item) => {
           const Icon = item.icon
@@ -27,7 +27,7 @@ export function MobileAdminNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 rounded-[16px] px-2 py-2.5 text-[11px] font-medium transition',
+                'flex flex-col items-center justify-center gap-1 rounded-md px-2 py-2.5 text-[11px] font-medium transition',
                 active ? 'admin-surface-selected text-white' : 'text-neutral-500',
               )}
             >

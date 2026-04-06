@@ -28,7 +28,7 @@ export function ActivationStepCard({
   const isCurrent = step.status === 'current'
 
   return (
-    <section className="admin-surface relative overflow-hidden rounded-[30px] p-4 sm:p-5">
+    <section className="admin-surface relative overflow-hidden rounded-xl p-4 sm:p-5">
       <div
         className={cn(
           'absolute inset-x-0 top-0 h-px',
@@ -72,12 +72,12 @@ export function ActivationStepCard({
             </p>
           </div>
 
-          <div className="shrink-0 rounded-full border border-white/8 bg-white/4 px-3 py-1.5 text-xs font-medium text-neutral-300">
+          <div className="shrink-0 rounded-md border border-white/8 bg-white/4 px-3 py-1.5 text-xs font-medium text-neutral-300">
             {step.completionText}
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-white/8 bg-black/10 p-4">
+        <div className="rounded-lg border border-white/8 bg-black/10 p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
@@ -89,7 +89,7 @@ export function ActivationStepCard({
             </div>
             <div
               className={cn(
-                'flex size-9 shrink-0 items-center justify-center rounded-2xl',
+                'flex size-9 shrink-0 items-center justify-center rounded-lg',
                 isDone ? 'bg-emerald-400/12 text-emerald-100' : 'bg-white/8 text-neutral-200',
               )}
             >
@@ -105,7 +105,7 @@ export function ActivationStepCard({
             <Button
               asChild
               size="lg"
-              className="h-12 rounded-full bg-[linear-gradient(135deg,#2ee6a6,#6ff3df)] px-5 text-black shadow-[0_18px_36px_rgba(16,185,129,0.18)] hover:brightness-105"
+              className="h-11 rounded-md bg-[linear-gradient(135deg,#2ee6a6,#6ff3df)] px-5 text-black shadow-[0_18px_36px_rgba(16,185,129,0.18)] hover:brightness-105"
             >
               <Link href={step.href}>
                 {step.ctaLabel}
@@ -134,8 +134,8 @@ function StepPreview({
 }) {
   if (stepId === 'contact') {
     return (
-      <div className="rounded-[22px] border border-white/8 bg-white/4 p-3.5">
-        <div className="flex items-center justify-between rounded-[18px] border border-emerald-300/18 bg-[linear-gradient(135deg,rgba(46,230,166,0.18),rgba(111,243,223,0.08))] px-4 py-3">
+      <div className="rounded-lg border border-white/8 bg-white/4 p-3.5">
+        <div className="flex items-center justify-between rounded-lg border border-emerald-300/18 bg-[linear-gradient(135deg,rgba(46,230,166,0.18),rgba(111,243,223,0.08))] px-4 py-3">
           <div>
             <p className="text-[11px] text-black/70">Boton principal</p>
             <p className="text-sm font-semibold text-black">Hablar por WhatsApp</p>
@@ -148,9 +148,9 @@ function StepPreview({
 
   if (stepId === 'hero') {
     return (
-      <div className="rounded-[22px] border border-white/8 bg-white/4 p-3.5">
-        <div className="rounded-[18px] border border-white/8 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-4">
-          <div className="mb-3 h-20 rounded-[16px] bg-[linear-gradient(135deg,rgba(46,230,166,0.18),rgba(255,255,255,0.06))]" />
+      <div className="rounded-lg border border-white/8 bg-white/4 p-3.5">
+        <div className="rounded-lg border border-white/8 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-4">
+          <div className="mb-3 h-20 rounded-md bg-[linear-gradient(135deg,rgba(46,230,166,0.18),rgba(255,255,255,0.06))]" />
           <div className="space-y-2">
             <div className="h-3 w-32 rounded-full bg-white/18" />
             <div className="h-3 w-44 rounded-full bg-white/10" />
@@ -162,9 +162,9 @@ function StepPreview({
 
   if (stepId === 'products') {
     return (
-      <div className="rounded-[22px] border border-white/8 bg-white/4 p-3.5">
-        <div className="flex items-center gap-3 rounded-[18px] border border-white/8 bg-black/10 p-3">
-          <div className="size-14 rounded-[14px] bg-[linear-gradient(135deg,rgba(46,230,166,0.16),rgba(255,255,255,0.04))]" />
+      <div className="rounded-lg border border-white/8 bg-white/4 p-3.5">
+        <div className="flex items-center gap-3 rounded-lg border border-white/8 bg-black/10 p-3">
+          <div className="size-14 rounded-md bg-[linear-gradient(135deg,rgba(46,230,166,0.16),rgba(255,255,255,0.04))]" />
           <div className="min-w-0 flex-1 space-y-2">
             <div className="h-3 w-28 rounded-full bg-white/18" />
             <div className="h-3 w-20 rounded-full bg-emerald-300/30" />
@@ -178,7 +178,7 @@ function StepPreview({
 
   if (stepId === 'categories') {
     return (
-      <div className="rounded-[22px] border border-white/8 bg-white/4 p-3.5">
+      <div className="rounded-lg border border-white/8 bg-white/4 p-3.5">
         <div className="flex flex-wrap gap-2">
           {['Destacados', 'Nuevos', 'Regalos'].map((label) => (
             <span
@@ -199,7 +199,7 @@ function StepPreview({
   }
 
   return (
-    <div className="rounded-[22px] border border-white/8 bg-white/4 p-3.5">
+    <div className="rounded-lg border border-white/8 bg-white/4 p-3.5">
       <div className="grid grid-cols-3 gap-2.5">
         <TrustPill icon={AtSign} label="Instagram" active={isDone} />
         <TrustPill icon={MapPin} label="Direccion" active={isDone} />
@@ -221,7 +221,7 @@ function TrustPill({
   return (
     <div
       className={cn(
-        'rounded-[16px] border px-3 py-3 text-center',
+        'rounded-md border px-3 py-3 text-center',
         active
           ? 'border-emerald-300/18 bg-emerald-400/8 text-emerald-100'
           : 'border-white/8 bg-black/10 text-neutral-300',

@@ -64,7 +64,7 @@ export function ContentForm({ content, store }: ContentFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <section className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
         <div id="section-hero-image" className="xl:sticky xl:top-6 xl:self-start">
-          <div className="admin-surface rounded-[30px] p-5">
+          <div className="admin-surface rounded-xl p-5">
             <p className="admin-label">Visual principal</p>
             <div className="mt-3 flex items-center justify-between gap-3">
               <h3 className="text-xl font-semibold text-white">Hero image</h3>
@@ -88,7 +88,7 @@ export function ContentForm({ content, store }: ContentFormProps) {
           </div>
         </div>
 
-        <div id="section-copy" className="admin-surface rounded-[30px] p-6">
+        <div id="section-copy" className="admin-surface rounded-xl p-6">
           <div className="mb-6">
             <p className="admin-label">Copy comercial</p>
             <h3 className="mt-3 text-xl font-semibold text-white">Editor de contenido</h3>
@@ -103,7 +103,7 @@ export function ContentForm({ content, store }: ContentFormProps) {
                 {...register('hero_title')}
                 placeholder="Nueva coleccion disponible"
                 aria-invalid={!!errors.hero_title}
-                className="h-12 rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+                className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
                 maxLength={CONTENT_LIMITS.hero_title}
               />
               {errors.hero_title ? <p className="mt-1.5 text-xs text-red-300">{errors.hero_title.message}</p> : null}
@@ -114,7 +114,7 @@ export function ContentForm({ content, store }: ContentFormProps) {
                 {...register('hero_subtitle')}
                 placeholder="Descubri piezas seleccionadas para comprar facil, rapido y con atencion personal."
                 aria-invalid={!!errors.hero_subtitle}
-                className="min-h-32 rounded-[24px] border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+                className="min-h-32 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
                 maxLength={CONTENT_LIMITS.hero_subtitle}
               />
               {errors.hero_subtitle ? <p className="mt-1.5 text-xs text-red-300">{errors.hero_subtitle.message}</p> : null}
@@ -125,13 +125,13 @@ export function ContentForm({ content, store }: ContentFormProps) {
                 {...register('support_text')}
                 placeholder="Pedidos por WhatsApp · Envio o retiro"
                 aria-invalid={!!errors.support_text}
-                className="h-12 rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+                className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
                 maxLength={CONTENT_LIMITS.support_text}
               />
               {errors.support_text ? <p className="mt-1.5 text-xs text-red-300">{errors.support_text.message}</p> : null}
             </FieldBlock>
 
-            <div className="admin-surface-muted rounded-[24px] p-4">
+            <div className="admin-surface-muted rounded-lg p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">Copy del sistema</p>
               <div className="mt-3 grid gap-2 text-sm text-neutral-300 sm:grid-cols-2">
                 {[

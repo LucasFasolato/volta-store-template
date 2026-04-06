@@ -8,6 +8,7 @@ import {
   Store,
   Tag,
 } from 'lucide-react'
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 import { ActivationFlow } from '@/components/admin/ActivationFlow'
 import { StoreSharePanel } from '@/components/admin/StoreSharePanel'
 import { buildActivationFlowSteps, buildStoreLaunchPlan } from '@/lib/dashboard/store-launch'
@@ -67,13 +68,12 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-4 p-4 sm:p-5 lg:p-6">
-      <section className="admin-surface rounded-[28px] px-4 py-4 sm:px-5 sm:py-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <h1 className="text-[1.8rem] font-semibold tracking-[-0.055em] text-white sm:text-[2.2rem]">
-            Pone tu tienda en marcha
-          </h1>
-
-          <div className="sm:w-[240px]">
+      <AdminPageHeader
+        title="Pone tu tienda en marcha"
+        description="Completa lo justo para dejarla lista y compartirla con confianza."
+        className="mb-2"
+        action={
+          <div className="w-full sm:w-[240px]">
             <div className="mb-2 flex items-center justify-between gap-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
                 Progreso
@@ -96,15 +96,15 @@ export default async function AdminPage() {
               />
             </div>
           </div>
-        </div>
-      </section>
+        }
+      />
 
       <ActivationFlow steps={steps} />
 
       {plan.shareEnabled ? (
         <StoreSharePanel plan={plan} />
       ) : (
-        <section className="admin-surface rounded-[30px] p-5 sm:p-6">
+        <section className="admin-surface rounded-xl p-5 sm:p-6">
           <p className="admin-label">Compartir tienda</p>
           <h2 className="mt-2 text-xl font-semibold text-white">Todavia no es momento de compartirla</h2>
           <p className="mt-2 text-sm leading-6 text-neutral-400">
@@ -113,7 +113,7 @@ export default async function AdminPage() {
         </section>
       )}
 
-      <details className="admin-surface rounded-[30px] p-5 sm:p-6">
+      <details className="admin-surface rounded-xl p-5 sm:p-6">
         <summary className="cursor-pointer list-none text-sm font-medium text-white marker:hidden">
           <span className="inline-flex items-center gap-2">
             <ExternalLink className="size-4 text-neutral-400" />
@@ -129,10 +129,10 @@ export default async function AdminPage() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="group admin-surface-muted rounded-[24px] p-4 transition duration-150 hover:-translate-y-0.5 hover:border-white/12 hover:shadow-[0_22px_52px_rgba(2,6,23,0.24)]"
+                className="group admin-surface-muted rounded-lg p-4 transition duration-150 hover:-translate-y-0.5 hover:border-white/12 hover:shadow-[0_22px_52px_rgba(2,6,23,0.24)]"
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <div className="flex size-9 items-center justify-center rounded-2xl bg-white/6 text-neutral-300 transition-colors duration-150 group-hover:bg-white/8">
+                  <div className="flex size-9 items-center justify-center rounded-lg bg-white/6 text-neutral-300 transition-colors duration-150 group-hover:bg-white/8">
                     <Icon className="size-4" />
                   </div>
                   <ExternalLink className="size-3.5 text-white/16 transition-all duration-150 group-hover:text-white/45" />

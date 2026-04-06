@@ -46,9 +46,9 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
 
   return (
     <aside className="fixed inset-y-0 left-0 z-20 hidden w-[220px] px-3 py-3 lg:block">
-      <div className="admin-surface flex h-full flex-col rounded-[26px] p-3">
+      <div className="admin-surface flex h-full flex-col rounded-xl p-3">
         {/* Brand */}
-        <div className="admin-surface-muted rounded-[20px] px-3 py-3">
+        <div className="admin-surface-muted rounded-lg px-3 py-3">
           <div className="flex items-center gap-2.5">
             <div className="admin-button-primary flex size-8 shrink-0 items-center justify-center rounded-xl text-xs font-black">
               V
@@ -71,7 +71,7 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-2.5 rounded-[16px] px-3 py-2.5 text-sm transition duration-150',
+                  'flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm transition duration-150',
                   active
                     ? 'admin-surface-selected font-medium text-white'
                     : 'text-neutral-400 hover:bg-white/[0.06] hover:text-white',
@@ -97,7 +97,7 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
           <Link
             href={`/tienda/${storeSlug}`}
             target="_blank"
-            className="admin-surface-elevated flex items-center gap-2.5 rounded-[16px] px-3 py-2.5 text-sm font-medium text-white transition duration-150 hover:brightness-110"
+            className="admin-surface-elevated flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm font-medium text-white transition duration-150 hover:brightness-110"
           >
             <Store className="size-4 shrink-0" />
             <span className="flex-1">Ver tienda</span>
@@ -107,7 +107,7 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
           <form action={signOut}>
             <button
               type="submit"
-              className="flex w-full items-center gap-2.5 rounded-[16px] px-3 py-2.5 text-sm text-neutral-500 transition hover:bg-red-400/8 hover:text-red-300"
+              className="flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-sm text-neutral-500 transition hover:bg-red-400/8 hover:text-red-300"
             >
               <LogOut className="size-4 shrink-0" />
               Salir

@@ -116,7 +116,7 @@ export function ImageUpload({
       />
 
       {displayUrl ? (
-        <div className="surface-panel-soft premium-ring group relative overflow-hidden rounded-[24px]">
+        <div className="surface-panel-soft premium-ring group relative overflow-hidden rounded-xl">
           <div className={cn('relative w-full', aspectHint === '16:9' ? 'aspect-video' : 'aspect-[4/5] max-w-[220px]')}>
             <Image src={displayUrl} alt="Vista previa" fill className="object-cover" />
           </div>
@@ -154,7 +154,7 @@ export function ImageUpload({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={isUploading}
-          className="surface-panel-soft premium-ring group w-full rounded-[24px] border border-dashed border-white/10 px-6 py-9 text-center transition hover:border-emerald-400/30 hover:bg-white/6"
+          className="surface-panel-soft premium-ring group w-full rounded-xl border border-dashed border-white/10 px-6 py-9 text-center transition hover:border-emerald-400/30 hover:bg-white/6"
         >
           <div className="flex flex-col items-center gap-3">
             {isUploading ? (

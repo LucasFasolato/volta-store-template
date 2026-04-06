@@ -145,7 +145,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
 
   return (
     <div className="space-y-8">
-      <section className="admin-surface rounded-[32px] px-5 py-6 sm:px-6">
+      <section className="admin-surface rounded-xl px-5 py-6 sm:px-6">
         <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
           <div>
             <h3 className="text-lg font-semibold text-white">Logo del negocio</h3>
@@ -164,7 +164,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
             </div>
           </div>
 
-          <div className="admin-surface-muted rounded-[28px] p-5">
+          <div className="admin-surface-muted rounded-lg p-5">
             <p className="admin-label">Lo que ve tu cliente</p>
             <h4 className="mt-3 text-xl font-semibold text-white">{store.name}</h4>
             <p className="mt-2 text-sm leading-6 text-neutral-400">
@@ -181,7 +181,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
       </section>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <section id="section-identidad" className="admin-surface rounded-[32px] px-5 py-6 sm:px-6">
+        <section id="section-identidad" className="admin-surface rounded-xl px-5 py-6 sm:px-6">
           <div className="mb-5">
             <p className="admin-label">Identidad y enlace publico</p>
             <h3 className="mt-3 text-xl font-semibold text-white">Lo esencial para que la tienda se entienda rapido</h3>
@@ -197,7 +197,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
                 {...register('name')}
                 placeholder="Ej: Atelier Norte"
                 aria-invalid={!!errors.name}
-                className="h-12 rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+                className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
               />
               {errors.name ? <p className="mt-1.5 text-xs text-red-300">{errors.name.message}</p> : null}
             </div>
@@ -213,13 +213,13 @@ export function ConfigForm({ store }: ConfigFormProps) {
                 })}
                 placeholder="atelier-norte"
                 aria-invalid={!!errors.slug || slugStatus.tone === 'error'}
-                className="h-12 rounded-2xl border-white/10 bg-white/5 font-mono text-white placeholder:text-neutral-500"
+                className="h-12 rounded-md border-white/10 bg-white/5 font-mono text-white placeholder:text-neutral-500"
               />
               {errors.slug ? <p className="mt-1.5 text-xs text-red-300">{errors.slug.message}</p> : null}
             </div>
           </div>
 
-          <div className="mt-5 rounded-[28px] border border-white/8 bg-black/10 p-5">
+          <div className="mt-5 rounded-lg border border-white/8 bg-black/10 p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <p className="admin-label">Preview de URL final</p>
@@ -231,12 +231,12 @@ export function ConfigForm({ store }: ConfigFormProps) {
                 <button
                   type="button"
                   onClick={copyUrl}
-                  className="admin-button-soft inline-flex h-11 items-center gap-2 rounded-2xl px-4 text-sm text-white"
+                  className="admin-button-soft inline-flex h-11 items-center gap-2 rounded-md px-4 text-sm text-white"
                 >
                   <Copy className="size-4" />
                   {copied ? 'Copiada' : 'Copiar'}
                 </button>
-                <div className="flex size-11 items-center justify-center rounded-2xl bg-white/6">
+                <div className="flex size-11 items-center justify-center rounded-md bg-white/6">
                   {slugStatus.tone === 'checking' ? (
                     <Loader2 className="size-4 animate-spin text-emerald-200" />
                   ) : slugStatus.tone === 'error' ? (
@@ -248,7 +248,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
               </div>
             </div>
 
-            <div className="mt-4 rounded-[22px] border border-white/8 bg-white/4 px-4 py-3">
+            <div className="mt-4 rounded-lg border border-white/8 bg-white/4 px-4 py-3">
               <div className="flex items-center gap-2 text-sm text-white">
                 <Link2 className="size-4 text-emerald-300" />
                 {slugStatus.message}
@@ -262,7 +262,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
           </div>
         </section>
 
-        <section id="section-contacto" className="admin-surface rounded-[32px] px-5 py-6 sm:px-6">
+        <section id="section-contacto" className="admin-surface rounded-xl px-5 py-6 sm:px-6">
           <div className="mb-5">
             <p className="admin-label">Canales de contacto</p>
             <h3 className="mt-3 text-xl font-semibold text-white">Como te encuentra y te escribe tu cliente</h3>
@@ -278,7 +278,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
                 {...register('whatsapp')}
                 placeholder="+5491112345678"
                 aria-invalid={!!errors.whatsapp}
-                className="h-12 rounded-2xl border-white/10 bg-white/5 font-mono text-white placeholder:text-neutral-500"
+                className="h-12 rounded-md border-white/10 bg-white/5 font-mono text-white placeholder:text-neutral-500"
               />
               {errors.whatsapp ? (
                 <p className="mt-1.5 text-xs text-red-300">{errors.whatsapp.message}</p>
@@ -295,13 +295,13 @@ export function ConfigForm({ store }: ConfigFormProps) {
                   onBlur: (event) => setValue('instagram', sanitizeInstagramHandle(event.target.value)),
                 })}
                 placeholder="ateliernorte"
-                className="h-12 rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+                className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
               />
             </div>
           </div>
         </section>
 
-        <section id="section-contexto" className="admin-surface rounded-[32px] px-5 py-6 sm:px-6">
+        <section id="section-contexto" className="admin-surface rounded-xl px-5 py-6 sm:px-6">
           <div className="mb-5">
             <p className="admin-label">Contexto y confianza</p>
             <h3 className="mt-3 text-xl font-semibold text-white">Informacion que ayuda a comprar con menos dudas</h3>
@@ -313,7 +313,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
               <Input
                 {...register('hours')}
                 placeholder="Lun a Vie 9 a 18 hs"
-                className="h-12 rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+                className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
               />
             </div>
 
@@ -322,7 +322,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
               <Input
                 {...register('address')}
                 placeholder="Av. Corrientes 1234, CABA"
-                className="h-12 rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+                className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
               />
             </div>
           </div>
@@ -349,7 +349,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
 
 function InfoTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="admin-surface-muted rounded-[22px] px-4 py-3">
+    <div className="admin-surface-muted rounded-lg px-4 py-3">
       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">{label}</p>
       <p className="mt-2 text-sm font-medium text-neutral-100">{value}</p>
     </div>

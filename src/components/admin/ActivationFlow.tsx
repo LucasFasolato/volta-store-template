@@ -21,8 +21,8 @@ export function ActivationFlow({ steps }: { steps: ActivationFlowStep[] }) {
   const activeStep = steps[activeIndex]
 
   return (
-    <div className="space-y-2">
-      <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="space-y-2.5">
+      <div className="flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {steps.map((step, index) => {
           const isActive = index === activeIndex
 
@@ -32,7 +32,7 @@ export function ActivationFlow({ steps }: { steps: ActivationFlowStep[] }) {
               type="button"
               onClick={() => setActiveIndex(index)}
               className={cn(
-                'group inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-left text-xs font-medium transition sm:px-3.5',
+                'group inline-flex shrink-0 items-center gap-2 rounded-full border px-2.5 py-1.5 text-left text-[11px] font-medium transition sm:px-3',
                 isActive
                   ? 'border-emerald-300/24 bg-emerald-400/10 text-white'
                   : step.status === 'done'
