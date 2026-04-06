@@ -1,22 +1,33 @@
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
 import type { ActivationFlowStep, StoreLaunchPlan } from '@/lib/dashboard/store-launch'
+import type { AdminStoreData, Category } from '@/types/store'
 import { cn } from '@/lib/utils'
+import { WizardStepContact } from './wizard/WizardStepContact'
+import { WizardStepHero } from './wizard/WizardStepHero'
+import { WizardStepProduct } from './wizard/WizardStepProduct'
+import { WizardStepCategory } from './wizard/WizardStepCategory'
+import { WizardStepTrust } from './wizard/WizardStepTrust'
 
 export function ActivationWizard({
   steps,
   plan,
+  storeData,
+  categories,
+  activeProductCount,
 }: {
   steps: ActivationFlowStep[]
   plan: StoreLaunchPlan
+  storeData: AdminStoreData
+  categories: Category[]
+  activeProductCount: number
 }) {
   const currentIndex = steps.findIndex((s) => s.status === 'current')
-  // If all done somehow (edge case), focus the last step
   const activeIndex = currentIndex === -1 ? steps.length - 1 : currentIndex
 
   return (
     <div className="space-y-2.5 p-4 sm:p-5 lg:p-6">
-      <WizardHeader steps={steps} activeIndex={activeIndex} percent={plan.requiredCompletionPercent} />
+      <WizardHeader steps={steps} activeIndex={activeIndex} />
 
       <div className="space-y-2">
         {steps.map((step, index) => {
@@ -30,6 +41,9 @@ export function ActivationWizard({
                 step={step}
                 stepNumber={index + 1}
                 totalSteps={steps.length}
+                storeData={storeData}
+                categories={categories}
+                activeProductCount={activeProductCount}
               />
             )
           }
@@ -43,11 +57,9 @@ export function ActivationWizard({
 function WizardHeader({
   steps,
   activeIndex,
-  percent,
 }: {
   steps: ActivationFlowStep[]
   activeIndex: number
-  percent: number
 }) {
   return (
     <div className="admin-surface rounded-2xl px-5 py-5 sm:px-6">
@@ -60,30 +72,44 @@ function WizardHeader({
             Preparando tu tienda
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Completa cada paso para dejarla lista y compartirla con confianza.
+            Completá cada paso para dejarla lista y compartirla con confianza.
           </p>
         </div>
         <div className="shrink-0 text-right">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Paso {activeIndex + 1} de {steps.length}
           </p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">{percent}%</p>
         </div>
       </div>
 
-      <div className="mt-4 flex gap-1.5">
+      {/* Labeled step progress bar */}
+      <div className="mt-5 flex gap-1">
         {steps.map((step, index) => (
-          <div
-            key={step.id}
-            className={cn(
-              'h-1.5 flex-1 rounded-full transition-all duration-500',
-              step.status === 'done'
-                ? 'bg-emerald-500'
-                : index === activeIndex
-                  ? 'bg-emerald-400/40 dark:bg-emerald-400/30'
-                  : 'bg-black/[0.08] dark:bg-white/10',
-            )}
-          />
+          <div key={step.id} className="flex flex-1 flex-col gap-1.5">
+            <div
+              className={cn(
+                'h-1.5 w-full rounded-full transition-all duration-500',
+                step.status === 'done'
+                  ? 'bg-emerald-500'
+                  : index === activeIndex
+                    ? 'bg-emerald-400/40 dark:bg-emerald-400/30'
+                    : 'bg-black/[0.08] dark:bg-white/10',
+              )}
+            />
+            <span
+              className={cn(
+                'hidden text-[10px] font-semibold uppercase tracking-[0.14em] sm:block',
+                step.status === 'done'
+                  ? 'text-emerald-500 dark:text-emerald-400'
+                  : index === activeIndex
+                    ? 'text-foreground'
+                    : 'text-muted-foreground/40',
+              )}
+            >
+              {step.status === 'done' ? '✓ ' : ''}
+              {step.navLabel}
+            </span>
+          </div>
         ))}
       </div>
     </div>
@@ -114,10 +140,16 @@ function ActiveCard({
   step,
   stepNumber,
   totalSteps,
+  storeData,
+  categories,
+  activeProductCount,
 }: {
   step: ActivationFlowStep
   stepNumber: number
   totalSteps: number
+  storeData: AdminStoreData
+  categories: Category[]
+  activeProductCount: number
 }) {
   return (
     <section className="admin-surface relative overflow-hidden rounded-2xl p-6 sm:p-8">
@@ -145,20 +177,20 @@ function ActiveCard({
           {step.title}
         </h2>
 
-        {/* Description — the "why" */}
-        <p className="mt-3 max-w-xl text-[15px] leading-7 text-muted-foreground">
-          {step.description}
+        {/* Hint — specific item description */}
+        <p className="mt-2 max-w-xl text-[15px] leading-7 text-muted-foreground">
+          {step.hint}
         </p>
 
-        {/* CTA */}
+        {/* Inline form */}
         <div className="mt-7">
-          <Link
-            href={step.href}
-            className="inline-flex h-12 items-center gap-2.5 rounded-full bg-[linear-gradient(135deg,#2ee6a6,#6ff3df)] px-7 text-sm font-semibold text-black shadow-[0_12px_28px_rgba(16,185,129,0.22)] transition hover:brightness-105 active:scale-[0.98]"
-          >
-            {step.ctaLabel}
-            <ArrowRight className="size-4" />
-          </Link>
+          {step.id === 'contact' && <WizardStepContact store={storeData.store} />}
+          {step.id === 'hero' && <WizardStepHero content={storeData.content} />}
+          {step.id === 'products' && (
+            <WizardStepProduct categories={categories} activeProductCount={activeProductCount} />
+          )}
+          {step.id === 'categories' && <WizardStepCategory />}
+          {step.id === 'trust' && <WizardStepTrust store={storeData.store} />}
         </div>
       </div>
     </section>

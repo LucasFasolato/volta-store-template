@@ -47,6 +47,7 @@ async function getUniqueSlug({
 }
 
 function revalidateStorePaths(storeSlug: string) {
+  revalidatePath('/admin')
   revalidatePath('/admin/productos')
   revalidatePath('/admin/categorias')
   revalidatePath(`/tienda/${storeSlug}`)

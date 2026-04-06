@@ -137,6 +137,7 @@ export async function updateStoreContent(input: StoreContentInput) {
 
   if (error) return { error: { formErrors: [error.message], fieldErrors: {} } }
 
+  revalidatePath('/admin')
   revalidatePath('/admin/contenido')
   revalidatePath(`/tienda/${store.slug}`)
   return { success: true }
@@ -231,6 +232,7 @@ export async function uploadHeroImage(formData: FormData) {
 
   if (updateError) return { error: updateError.message }
 
+  revalidatePath('/admin')
   revalidatePath('/admin/contenido')
   revalidatePath(`/tienda/${store.slug}`)
   return { success: true, url: urlData.publicUrl }

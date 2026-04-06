@@ -26,7 +26,17 @@ export default async function AdminPage() {
     )
   }
 
-  // Mode A — store in progress: show linear activation wizard
+  // Mode A — store in progress: show inline activation wizard
   const steps = buildActivationFlowSteps(plan)
-  return <ActivationWizard steps={steps} plan={plan} />
+  const activeProductCount = products.filter((p) => p.is_active).length
+
+  return (
+    <ActivationWizard
+      steps={steps}
+      plan={plan}
+      storeData={storeData}
+      categories={categories}
+      activeProductCount={activeProductCount}
+    />
+  )
 }
