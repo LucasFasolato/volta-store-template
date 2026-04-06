@@ -42,6 +42,7 @@ export type StoreLaunchPlan = {
 
 export type ActivationFlowStep = {
   id: 'contact' | 'hero' | 'products' | 'categories' | 'trust'
+  navLabel: string
   title: string
   description: string
   href: string
@@ -50,6 +51,7 @@ export type ActivationFlowStep = {
   status: 'done' | 'current' | 'upcoming'
   completionText: string
   hint: string
+  doneMessage: string
 }
 
 function buildPublicUrl(slug: string) {
@@ -293,57 +295,69 @@ export function buildActivationFlowSteps(plan: StoreLaunchPlan): ActivationFlowS
   const stepDrafts = [
     {
       id: 'contact',
-      title: 'WhatsApp listo',
-      description: 'Deja tu forma de contacto preparada para que puedan escribirte apenas entren.',
+      navLabel: 'WhatsApp',
+      title: 'Agrega tu WhatsApp para recibir pedidos',
+      description: 'Asi los clientes pueden escribirte apenas entran a la tienda.',
       href: '/admin/configuracion#section-contacto',
       ctaLabel: 'Cargar WhatsApp',
       skipLabel: 'Seguir despues',
       items: ['store-name', 'public-link', 'whatsapp'],
+      doneMessage: 'Listo, ya pueden encontrarte y escribirte.',
     },
     {
       id: 'hero',
-      title: 'Portada',
-      description: 'Cuenta que vendes y acompanalo con una imagen que haga ver la tienda mas profesional.',
+      navLabel: 'Portada',
+      title: 'Define tu portada para dar una gran primera impresion',
+      description: 'Un buen titulo, subtitulo e imagen hacen que la tienda se vea mas profesional.',
       href: '/admin/contenido#section-copy',
       ctaLabel: 'Editar portada',
       skipLabel: 'Seguir despues',
       items: ['hero-copy', 'hero-image'],
+      doneMessage: 'Perfecto, tu portada ya transmite mejor tu marca.',
     },
     {
       id: 'products',
-      title: 'Primer producto',
-      description: 'Agrega tus productos para que la tienda se sienta real y lista para compartir.',
+      navLabel: 'Productos',
+      title: 'Agrega productos para que tu tienda cobre vida',
+      description: 'Con tus primeros productos la tienda ya se siente real y lista para mirar.',
       href: '/admin/productos/nuevo',
       ctaLabel: 'Agregar producto',
       skipLabel: 'Seguir despues',
       items: ['products'],
+      doneMessage: 'Listo, tu catalogo ya empezo a tomar forma.',
     },
     {
       id: 'categories',
-      title: 'Primera categoria',
-      description: 'Ordena el catalogo para que mirar y encontrar productos sea mucho mas simple.',
+      navLabel: 'Categorias',
+      title: 'Crea categorias para que todo sea mas facil de encontrar',
+      description: 'Ordenar el catalogo ayuda a que mirar y elegir sea mucho mas simple.',
       href: '/admin/categorias',
       ctaLabel: 'Crear categoria',
       skipLabel: 'Seguir despues',
       items: ['categories'],
+      doneMessage: 'Bien, tu tienda ya se entiende mucho mejor.',
     },
     {
       id: 'trust',
-      title: 'Ajustes de confianza',
-      description: 'Suma Instagram, direccion y horarios para que tu negocio se vea mas solido.',
+      navLabel: 'Confianza',
+      title: 'Suma confianza para vender con mas tranquilidad',
+      description: 'Instagram, direccion y horarios ayudan a que tu negocio se vea mas confiable.',
       href: '/admin/configuracion#section-contexto',
-      ctaLabel: 'Completar confianza',
+      ctaLabel: 'Sumar confianza',
       skipLabel: 'Dejar para despues',
       items: ['instagram', 'address', 'hours'],
+      doneMessage: 'Excelente, tu tienda ya transmite mucha mas confianza.',
     },
   ] as const satisfies Array<{
     id: ActivationFlowStep['id']
+    navLabel: string
     title: string
     description: string
     href: string
     ctaLabel: string
     skipLabel?: string
     items: string[]
+    doneMessage: string
   }>
 
   const allItems = [...plan.requiredItems, ...plan.recommendedItems]
@@ -358,6 +372,7 @@ export function buildActivationFlowSteps(plan: StoreLaunchPlan): ActivationFlowS
 
     return {
       id: step.id,
+      navLabel: step.navLabel,
       title: step.title,
       description: step.description,
       href: firstIncompleteItem?.href ?? step.href,
@@ -368,6 +383,7 @@ export function buildActivationFlowSteps(plan: StoreLaunchPlan): ActivationFlowS
       hint: firstIncompleteItem
         ? firstIncompleteItem.description
         : 'Este paso ya esta listo y ayuda a que la tienda se vea mas completa.',
+      doneMessage: step.doneMessage,
     }
   })
 
