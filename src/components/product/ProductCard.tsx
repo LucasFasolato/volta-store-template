@@ -1,7 +1,8 @@
 'use client'
 
+import { useRef, useState } from 'react'
 import Image from 'next/image'
-import { ShoppingBag } from 'lucide-react'
+import { Check, ShoppingBag } from 'lucide-react'
 import { COPY } from '@/data/system-copy'
 import { useCartStore } from '@/lib/stores/cart'
 import { formatCurrency } from '@/lib/utils/format'
@@ -17,6 +18,8 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem)
   const coverImage = product.images?.[0]
   const hasOptions = (product.options?.length ?? 0) > 0
+  const [added, setAdded] = useState(false)
+  const addedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const discountPct =
     product.compare_price && product.compare_price > product.price
@@ -36,6 +39,10 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
       price: product.price,
       imageUrl: coverImage?.url ?? null,
     })
+    // Brief "added" feedback — no useEffect needed, fires inside event handler
+    if (addedTimer.current) clearTimeout(addedTimer.current)
+    setAdded(true)
+    addedTimer.current = setTimeout(() => setAdded(false), 1500)
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLElement>) {
@@ -60,11 +67,11 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
       tabIndex={0}
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      className="store-card group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+      className="store-card group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
       style={{ outlineColor: 'var(--store-primary)' }}
       aria-label={`Ver detalle de ${product.name}`}
     >
-      {/* ── Image — full-bleed, clips to card radius via overflow-hidden ── */}
+      {/* ── Image ── */}
       <div
         className={`relative w-full overflow-hidden ${imageRatio}`}
         style={{
@@ -96,18 +103,18 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
           </div>
         )}
 
-        {/* Subtle bottom scrim for legibility */}
+        {/* Bottom scrim */}
         {coverImage ? (
           <div
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                'linear-gradient(to top, color-mix(in srgb, var(--store-bg) 20%, transparent) 0%, transparent 40%)',
+                'linear-gradient(to top, color-mix(in srgb, var(--store-bg) 20%, transparent) 0%, transparent 38%)',
             }}
           />
         ) : null}
 
-        {/* Badge — marketing tag or discount pct */}
+        {/* Badge */}
         {product.badge ? (
           <span
             className="absolute left-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em]"
@@ -132,13 +139,13 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
           </span>
         ) : null}
 
-        {/* Hover reveal — desktop */}
+        {/* Hover overlay — fade + pill slides up */}
         <div
-          className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          style={{ background: 'color-mix(in srgb, var(--store-primary) 9%, transparent)' }}
+          className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-250 group-hover:opacity-100"
+          style={{ background: 'color-mix(in srgb, var(--store-primary) 10%, transparent)' }}
         >
           <span
-            className="rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em]"
+            className="translate-y-2 rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] transition-transform duration-250 group-hover:translate-y-0"
             style={{
               background: 'var(--store-primary)',
               color: 'var(--store-primary-contrast)',
@@ -150,7 +157,7 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
         </div>
       </div>
 
-      {/* ── Content — padded ── */}
+      {/* ── Content ── */}
       <div
         className="flex flex-1 flex-col"
         style={{
@@ -184,13 +191,10 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
           </p>
         ) : null}
 
-        {/* ── Price + CTA row ── */}
+        {/* ── Price + CTA ── */}
         <div className="mt-auto flex items-end justify-between gap-3 pt-4">
           <div>
-            <p
-              className="text-base font-semibold tracking-tight sm:text-lg"
-              style={{ color: 'var(--store-text)' }}
-            >
+            <p className="text-base font-semibold tracking-tight sm:text-lg" style={{ color: 'var(--store-text)' }}>
               {formatCurrency(product.price)}
             </p>
             {discountPct ? (
@@ -203,23 +207,36 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
           <button
             type="button"
             onClick={handleAddToCart}
-            className="store-button inline-flex shrink-0 items-center gap-1.5 px-3.5 text-xs font-semibold transition duration-200 hover:-translate-y-0.5 active:translate-y-0"
+            className="store-button inline-flex shrink-0 items-center gap-1.5 px-3.5 text-xs font-semibold transition-all duration-200 active:scale-95"
             style={{
-              background:
-                'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
-              color: 'var(--store-primary-contrast)',
-              boxShadow: '0 10px 24px color-mix(in srgb, var(--store-primary) 18%, transparent)',
+              background: added
+                ? 'linear-gradient(145deg, #22c55e, #16a34a)'
+                : 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
+              color: added ? '#ffffff' : 'var(--store-primary-contrast)',
+              boxShadow: added
+                ? '0 8px 20px rgba(34,197,94,0.22)'
+                : '0 10px 24px color-mix(in srgb, var(--store-primary) 18%, transparent)',
               minHeight: '2.25rem',
               paddingTop: '0.5rem',
               paddingBottom: '0.5rem',
+              transform: added ? 'scale(1.04)' : undefined,
             }}
             aria-label={hasOptions ? `Elegir opciones de ${product.name}` : COPY.cart.addToCart}
           >
-            <ShoppingBag className="size-3.5" />
-            {hasOptions ? (
-              'Elegir'
+            {added ? (
+              <>
+                <Check className="size-3.5" />
+                <span className="hidden sm:inline">¡Listo!</span>
+              </>
             ) : (
-              <span className="hidden sm:inline">Agregar</span>
+              <>
+                <ShoppingBag className="size-3.5" />
+                {hasOptions ? (
+                  'Elegir'
+                ) : (
+                  <span className="hidden sm:inline">Agregar</span>
+                )}
+              </>
             )}
           </button>
         </div>
