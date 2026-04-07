@@ -19,7 +19,13 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
 
   function handleAddToCart(event: React.MouseEvent<HTMLButtonElement>) {
     event.stopPropagation()
+    // If the product has options the customer must choose them first → open modal
+    if (product.options && product.options.length > 0) {
+      onClick()
+      return
+    }
     addItem({
+      cartItemKey: product.id,
       productId: product.id,
       name: product.name,
       price: product.price,
