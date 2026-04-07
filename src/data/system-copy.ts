@@ -29,12 +29,12 @@ export const COPY = {
   checkout: {
     greeting: 'Hola! Quiero hacer este pedido:',
     orderLabel: 'Pedido',
-    dataLabel: 'Mis datos:',
+    dataLabel: 'Datos para coordinar',
     nameField: '- Nombre:',
     phoneField: '- Telefono:',
-    addressField: '- Direccion o retiro:',
+    addressField: '- Entrega o retiro:',
     notesField: '- Aclaraciones:',
-    closing: 'Gracias! Quedo atento.',
+    closing: 'Quedo atento a la confirmacion. Gracias!',
   },
   admin: {
     saved: 'Guardado',

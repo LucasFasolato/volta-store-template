@@ -54,15 +54,12 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
 
   function handleAddToCart() {
     const cartItemKey = buildCartItemKey(product.id, hasOptions ? selectedOptions : undefined)
-    const nameWithOptions = hasOptions
-      ? `${product.name} (${Object.values(selectedOptions).join(' / ')})`
-      : product.name
 
     for (let index = 0; index < quantity; index += 1) {
       addItem({
         cartItemKey,
         productId: product.id,
-        name: nameWithOptions,
+        name: product.name,
         price: product.price,
         imageUrl: product.images?.[0]?.url ?? null,
         selectedOptions: hasOptions ? { ...selectedOptions } : undefined,

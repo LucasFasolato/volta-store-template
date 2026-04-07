@@ -1,19 +1,32 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
-import { MessageCircle, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react'
+import { ArrowRight, MessageCircle, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react'
 import { EmptyState } from '@/components/common/EmptyState'
 import { COPY } from '@/data/system-copy'
-import { useCartStore } from '@/lib/stores/cart'
+import {
+  getCartItemDisplayName,
+  getCartItemLineTotal,
+  getCartItemOptionEntries,
+  getCartSummary,
+} from '@/lib/cart/summary'
+import { useCartStore, type CartItem as StoreCartItem } from '@/lib/stores/cart'
 import { formatCurrency } from '@/lib/utils/format'
-import { buildWhatsAppUrl } from '@/lib/whatsapp/builder'
+import { buildWhatsAppMessage, buildWhatsAppUrl } from '@/lib/whatsapp/builder'
 
 type CartSheetProps = {
   whatsapp: string
   storeName: string
 }
+
+const FLOW_STEPS = [
+  'Armas el pedido',
+  'Revisas el resumen',
+  'Se abre WhatsApp',
+  'Envias al vendedor',
+]
 
 export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -22,10 +35,9 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
   const closeCart = useCartStore((state) => state.closeCart)
   const updateQuantity = useCartStore((state) => state.updateQuantity)
   const removeItem = useCartStore((state) => state.removeItem)
-  const getSubtotal = useCartStore((state) => state.getSubtotal)
 
-  const subtotal = getSubtotal()
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
+  const { subtotal, totalItems } = useMemo(() => getCartSummary(items), [items])
+  const whatsappPreview = useMemo(() => buildWhatsAppMessage(items), [items])
 
   useEffect(() => {
     if (!isOpen) return
@@ -48,6 +60,7 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
 
   function handleCheckout() {
     if (!whatsapp || items.length === 0) return
+
     const url = buildWhatsAppUrl(whatsapp, items)
     window.open(url, '_blank', 'noopener,noreferrer')
     closeCart()
@@ -76,7 +89,7 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 260 }}
-            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[27rem] flex-col"
+            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[28rem] flex-col"
             style={{
               background:
                 'linear-gradient(180deg, color-mix(in srgb, var(--store-surface) 94%, white 6%), color-mix(in srgb, var(--store-bg) 96%, var(--store-text) 4%))',
@@ -88,7 +101,7 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
             aria-labelledby="cart-title"
           >
             <div className="flex items-center justify-between border-b px-5 py-5" style={{ borderColor: 'var(--store-card-border)' }}>
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <div
                     className="flex size-10 items-center justify-center"
@@ -99,8 +112,8 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
                   >
                     <ShoppingBag className="size-4" style={{ color: 'var(--store-primary)' }} />
                   </div>
-                  <div>
-                    <h2 id="cart-title" className="store-heading text-lg font-semibold" style={{ color: 'var(--store-text)' }}>
+                  <div className="min-w-0">
+                    <h2 id="cart-title" className="store-heading truncate text-lg font-semibold" style={{ color: 'var(--store-text)' }}>
                       {COPY.cart.title}
                     </h2>
                     <p className="mt-1 text-xs uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
@@ -111,7 +124,7 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
               </div>
 
               <div className="flex items-center gap-2">
-                {itemCount > 0 ? (
+                {totalItems > 0 ? (
                   <span
                     className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
                     style={{
@@ -119,7 +132,7 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
                       color: 'var(--store-primary)',
                     }}
                   >
-                    {itemCount}
+                    {totalItems}
                   </span>
                 ) : null}
                 <button
@@ -151,11 +164,11 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
                       type="button"
                       onClick={closeCart}
                       className="store-button px-5 py-3 text-sm font-semibold transition duration-200 hover:-translate-y-0.5"
-                    style={{
-                      background:
-                        'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
-                      color: 'var(--store-primary-contrast)',
-                    }}
+                      style={{
+                        background:
+                          'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
+                        color: 'var(--store-primary-contrast)',
+                      }}
                     >
                       {COPY.cart.continueShopping}
                     </button>
@@ -164,15 +177,137 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
                   tone="light"
                 />
               ) : (
-                <div className="space-y-3">
-                  {items.map((item) => (
-                    <CartItem
-                      key={item.cartItemKey}
-                      item={item}
-                      onUpdateQty={(quantity) => updateQuantity(item.cartItemKey, quantity)}
-                      onRemove={() => removeItem(item.cartItemKey)}
-                    />
-                  ))}
+                <div className="space-y-4 pb-2">
+                  <section
+                    className="rounded-[calc(var(--store-card-radius)*0.72)] p-4"
+                    style={{
+                      background: 'var(--store-card-background)',
+                      border: '1px solid var(--store-card-border)',
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-primary)' }}>
+                          Ultimo paso
+                        </p>
+                        <h3 className="mt-2 text-base font-semibold leading-6" style={{ color: 'var(--store-text)' }}>
+                          Revisa el pedido y abre WhatsApp con todo listo
+                        </h3>
+                        <p className="mt-2 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+                          Vas a confirmar productos, variantes, cantidades y total estimado antes de enviar.
+                        </p>
+                      </div>
+
+                      <div
+                        className="shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
+                        style={{
+                          backgroundColor: 'color-mix(in srgb, var(--store-primary) 10%, transparent)',
+                          color: 'var(--store-primary)',
+                        }}
+                      >
+                        {totalItems} {totalItems === 1 ? 'item' : 'items'}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      {FLOW_STEPS.map((step, index) => (
+                        <FlowStep key={step} index={index + 1} label={step} />
+                      ))}
+                    </div>
+                  </section>
+
+                  <section>
+                    <div className="flex items-end justify-between gap-3 px-1">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
+                          Resumen del pedido
+                        </p>
+                        <p className="mt-1 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+                          Todo lo que vas a mandar ya queda visible aca.
+                        </p>
+                      </div>
+                      <p className="text-xs" style={{ color: 'var(--store-muted-text)' }}>
+                        {items.length} {items.length === 1 ? 'linea' : 'lineas'}
+                      </p>
+                    </div>
+
+                    <div className="mt-3 space-y-3">
+                      {items.map((item) => (
+                        <CartItem
+                          key={item.cartItemKey}
+                          item={item}
+                          onUpdateQty={(quantity) => updateQuantity(item.cartItemKey, quantity)}
+                          onRemove={() => removeItem(item.cartItemKey)}
+                        />
+                      ))}
+                    </div>
+                  </section>
+
+                  <section
+                    className="rounded-[calc(var(--store-card-radius)*0.72)] p-4"
+                    style={{
+                      background: 'var(--store-card-background)',
+                      border: '1px solid var(--store-card-border)',
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-start gap-3">
+                        <div
+                          className="flex size-10 shrink-0 items-center justify-center"
+                          style={{
+                            borderRadius: 'var(--store-button-radius)',
+                            backgroundColor: 'color-mix(in srgb, #25D366 12%, transparent)',
+                            color: '#25D366',
+                          }}
+                        >
+                          <MessageCircle className="size-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
+                            Preview de WhatsApp
+                          </p>
+                          <p className="mt-1 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+                            Asi se abre el mensaje final antes de enviarlo.
+                          </p>
+                        </div>
+                      </div>
+
+                      <span
+                        className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+                        style={{
+                          backgroundColor: 'color-mix(in srgb, #25D366 12%, transparent)',
+                          color: '#25D366',
+                        }}
+                      >
+                        Listo
+                      </span>
+                    </div>
+
+                    <div
+                      className="mt-4 rounded-[calc(var(--store-card-radius)*0.6)] p-3"
+                      style={{
+                        background:
+                          'linear-gradient(180deg, color-mix(in srgb, #25D366 10%, var(--store-surface) 90%), color-mix(in srgb, var(--store-surface) 92%, transparent))',
+                        border: '1px solid color-mix(in srgb, #25D366 20%, var(--store-card-border) 80%)',
+                      }}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
+                          Mensaje listo para enviar
+                        </p>
+                        <p className="text-[11px] font-medium" style={{ color: 'var(--store-soft-text)' }}>
+                          WhatsApp
+                        </p>
+                      </div>
+
+                      <pre
+                        className="mt-3 max-h-56 overflow-y-auto whitespace-pre-wrap break-words pr-1 font-sans text-[12px] leading-5"
+                        style={{ color: 'var(--store-text)' }}
+                      >
+                        {whatsappPreview}
+                      </pre>
+                    </div>
+                  </section>
                 </div>
               )}
             </div>
@@ -189,16 +324,27 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
-                        {COPY.cart.subtotal}
+                        Subtotal estimado
                       </p>
-                      <p className="mt-2 text-2xl font-semibold tracking-tight" style={{ color: 'var(--store-primary)' }}>
+                      <p className="mt-2 text-3xl font-semibold tracking-tight" style={{ color: 'var(--store-primary)' }}>
                         {formatCurrency(subtotal)}
                       </p>
                     </div>
-                    <p className="max-w-[11rem] text-right text-xs leading-5" style={{ color: 'var(--store-soft-text)' }}>
-                      El mensaje sale ordenado con productos, cantidades y total estimado.
-                    </p>
+                    <div
+                      className="rounded-[calc(var(--store-button-radius)+1px)] px-3 py-2 text-right"
+                      style={{
+                        backgroundColor: 'color-mix(in srgb, #25D366 10%, transparent)',
+                        color: '#25D366',
+                      }}
+                    >
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.18em]">Siguiente</p>
+                      <p className="mt-1 text-sm font-semibold">WhatsApp</p>
+                    </div>
                   </div>
+
+                  <p className="mt-3 text-xs leading-5" style={{ color: 'var(--store-soft-text)' }}>
+                    Se abrira WhatsApp con tu pedido listo para enviar a {storeName}. Ahi solo revisas el mensaje y confirmas la compra con el vendedor.
+                  </p>
                 </div>
 
                 <button
@@ -213,8 +359,13 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
                   }}
                 >
                   <MessageCircle className="size-4" />
-                  {COPY.cart.checkout}
+                  <span>Abrir WhatsApp con mi pedido</span>
+                  <ArrowRight className="size-4" />
                 </button>
+
+                <p className="mt-3 text-center text-xs leading-5" style={{ color: 'var(--store-muted-text)' }}>
+                  Paso siguiente: se abre WhatsApp con el mensaje completo y listo para enviar.
+                </p>
 
                 {!whatsapp ? (
                   <p className="mt-3 text-center text-xs" style={{ color: 'var(--store-muted-text)' }}>
@@ -244,19 +395,13 @@ function CartItem({
   onUpdateQty,
   onRemove,
 }: {
-  item: {
-    cartItemKey: string
-    productId: string
-    name: string
-    price: number
-    quantity: number
-    imageUrl: string | null
-    selectedOptions?: Record<string, string>
-  }
+  item: StoreCartItem
   onUpdateQty: (quantity: number) => void
   onRemove: () => void
 }) {
-  const optionEntries = item.selectedOptions ? Object.entries(item.selectedOptions) : []
+  const displayName = getCartItemDisplayName(item)
+  const optionEntries = getCartItemOptionEntries(item.selectedOptions)
+  const lineTotal = getCartItemLineTotal(item)
 
   return (
     <div
@@ -275,37 +420,66 @@ function CartItem({
             backgroundColor: 'color-mix(in srgb, var(--store-surface) 84%, transparent)',
           }}
         >
-          {item.imageUrl ? <Image src={item.imageUrl} alt={item.name} fill className="object-cover" /> : null}
+          {item.imageUrl ? <Image src={item.imageUrl} alt={displayName} fill className="object-cover" /> : null}
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="line-clamp-2 text-sm font-medium leading-5" style={{ color: 'var(--store-text)' }}>
-            {item.name}
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
+                Producto
+              </p>
+              <p className="mt-1 line-clamp-2 text-sm font-semibold leading-5" style={{ color: 'var(--store-text)' }}>
+                {displayName}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={onRemove}
+              className="flex size-9 shrink-0 items-center justify-center transition"
+              style={{
+                borderRadius: 'var(--store-button-radius)',
+                color: 'var(--store-muted-text)',
+                backgroundColor: 'color-mix(in srgb, var(--store-surface) 68%, transparent)',
+              }}
+              aria-label={COPY.cart.remove}
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </div>
 
           {optionEntries.length > 0 ? (
-            <div className="mt-1.5 flex flex-wrap gap-1">
-              {optionEntries.map(([k, v]) => (
-                <span
-                  key={k}
-                  className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+            <dl className="mt-3 grid gap-2">
+              {optionEntries.map(([name, value]) => (
+                <div
+                  key={name}
+                  className="flex items-center justify-between gap-3 rounded-[calc(var(--store-button-radius)+1px)] px-3 py-2"
                   style={{
-                    backgroundColor: 'color-mix(in srgb, var(--store-primary) 10%, transparent)',
-                    color: 'var(--store-primary)',
-                    border: '1px solid color-mix(in srgb, var(--store-primary) 18%, transparent)',
+                    backgroundColor: 'color-mix(in srgb, var(--store-primary) 8%, transparent)',
                   }}
                 >
-                  {k}: {v}
-                </span>
+                  <dt className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
+                    {name}
+                  </dt>
+                  <dd className="text-sm font-medium text-right" style={{ color: 'var(--store-text)' }}>
+                    {value}
+                  </dd>
+                </div>
               ))}
-            </div>
+            </dl>
           ) : null}
 
-          <div className="mt-2 flex items-center justify-between gap-3">
-            <p className="text-sm font-semibold" style={{ color: 'var(--store-primary)' }}>
-              {formatCurrency(item.price * item.quantity)}
-            </p>
-            <p className="text-xs" style={{ color: 'var(--store-muted-text)' }}>
+          <div className="mt-3 flex items-end justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
+                Subtotal
+              </p>
+              <p className="mt-1 text-base font-semibold" style={{ color: 'var(--store-primary)' }}>
+                {formatCurrency(lineTotal)}
+              </p>
+            </div>
+            <p className="text-xs text-right" style={{ color: 'var(--store-soft-text)' }}>
               {item.quantity} x {formatCurrency(item.price)}
             </p>
           </div>
@@ -323,22 +497,31 @@ function CartItem({
               </CounterButton>
             </div>
 
-            <button
-              type="button"
-              onClick={onRemove}
-              className="flex size-9 items-center justify-center transition"
-              style={{
-                borderRadius: 'var(--store-button-radius)',
-                color: 'var(--store-muted-text)',
-                backgroundColor: 'color-mix(in srgb, var(--store-surface) 68%, transparent)',
-              }}
-              aria-label={COPY.cart.remove}
-            >
-              <Trash2 className="size-4" />
-            </button>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
+              Listo para enviar
+            </p>
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+function FlowStep({ index, label }: { index: number; label: string }) {
+  return (
+    <div
+      className="rounded-[calc(var(--store-button-radius)+1px)] px-3 py-2"
+      style={{
+        backgroundColor: 'color-mix(in srgb, var(--store-surface) 78%, transparent)',
+        border: '1px solid var(--store-card-border)',
+      }}
+    >
+      <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
+        Paso {index}
+      </p>
+      <p className="mt-1 text-sm font-medium leading-5" style={{ color: 'var(--store-text)' }}>
+        {label}
+      </p>
     </div>
   )
 }

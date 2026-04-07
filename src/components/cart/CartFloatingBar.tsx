@@ -66,10 +66,10 @@ export function CartFloatingBar() {
 
               <div>
                 <p className="text-sm font-semibold" style={{ color: 'var(--store-text)' }}>
-                  Ver pedido
+                  Revisar pedido
                 </p>
                 <p className="text-xs uppercase tracking-[0.14em]" style={{ color: 'var(--store-muted-text)' }}>
-                  {itemCount} {itemCount === 1 ? 'producto' : 'productos'}
+                  {itemCount} {itemCount === 1 ? 'producto' : 'productos'} · listo para WhatsApp
                 </p>
               </div>
             </div>
