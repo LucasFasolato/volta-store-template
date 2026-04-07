@@ -22,32 +22,28 @@ export function FeaturedSection({
   return (
     <section className="py-[var(--store-space-section)]">
       <div className={cn('mx-auto px-4 sm:px-6', containerClass)}>
-        <div
-          className="mb-8 flex flex-col gap-5 rounded-[calc(var(--store-card-radius)*0.9)] p-6 sm:flex-row sm:items-end sm:justify-between"
-          style={{
-            background:
-              'linear-gradient(145deg, color-mix(in srgb, var(--store-surface) 88%, white 12%), color-mix(in srgb, var(--store-bg) 94%, transparent))',
-            border: '1px solid var(--store-card-border)',
-          }}
-        >
-          <div className="max-w-2xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'var(--store-muted-text)' }}>
-              Seleccion curada
+        <div className="mb-8 flex items-end justify-between gap-5">
+          <div>
+            <p
+              className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+              style={{ color: 'var(--store-muted-text)' }}
+            >
+              Selección curada
             </p>
-            <h2 className="store-heading mt-3 text-3xl font-semibold tracking-tight sm:text-[2.2rem]" style={{ color: 'var(--store-text)' }}>
+            <h2
+              className="store-heading mt-3 text-3xl font-semibold tracking-tight sm:text-[2.2rem]"
+              style={{ color: 'var(--store-text)' }}
+            >
               {COPY.product.featured}
             </h2>
-            <p className="mt-3 text-sm leading-7 sm:text-[15px]" style={{ color: 'var(--store-soft-text)' }}>
-              Piezas con mejor traccion visual, listas para abrir conversacion y acelerar la conversion.
-            </p>
           </div>
 
           <a
             href="#catalogo"
-            className="inline-flex items-center gap-2 text-sm font-semibold transition"
+            className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold transition hover:gap-3"
             style={{ color: 'var(--store-primary)' }}
           >
-            Ir al catalogo
+            Ver todos
             <ArrowRight className="size-4" />
           </a>
         </div>

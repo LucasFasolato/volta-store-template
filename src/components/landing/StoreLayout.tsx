@@ -8,6 +8,7 @@ import { FeaturedSection } from '@/components/landing/FeaturedSection'
 import { HeroSection } from '@/components/landing/HeroSection'
 import { StoreFooter } from '@/components/landing/StoreFooter'
 import { StoreNav } from '@/components/landing/StoreNav'
+import { TrustBar } from '@/components/landing/TrustBar'
 import { ProductModal } from '@/components/product/ProductModal'
 import { useCartStore } from '@/lib/stores/cart'
 import { buildThemeVars, CONTAINER_CLASS } from '@/lib/utils/theme'
@@ -94,6 +95,8 @@ export function StoreLayout({
         {layout.show_hero ? (
           <HeroSection content={content} store={store} containerClass={containerClass} />
         ) : null}
+
+        <TrustBar store={store} />
 
         {layout.show_featured && featuredProducts.length > 0 ? (
           <FeaturedSection

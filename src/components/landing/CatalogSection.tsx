@@ -37,15 +37,18 @@ export function CatalogSection({
       <div className={cn('mx-auto px-4 sm:px-6', containerClass)}>
         <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'var(--store-muted-text)' }}>
-              Catalogo
+            <p
+              className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+              style={{ color: 'var(--store-muted-text)' }}
+            >
+              Catálogo
             </p>
-            <h2 className="store-heading mt-3 text-3xl font-semibold tracking-tight sm:text-[2.2rem]" style={{ color: 'var(--store-text)' }}>
+            <h2
+              className="store-heading mt-3 text-3xl font-semibold tracking-tight sm:text-[2.2rem]"
+              style={{ color: 'var(--store-text)' }}
+            >
               {COPY.product.catalog}
             </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-7 sm:text-[15px]" style={{ color: 'var(--store-soft-text)' }}>
-              Un grid limpio, rapido de escanear y listo para empujar conversion con menos ruido visual.
-            </p>
           </div>
           <div
             className="inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm"
@@ -77,11 +80,15 @@ export function CatalogSection({
         {products.length === 0 ? (
           <EmptyState
             icon={SearchX}
-            title={activeCategoryName ? `No encontramos productos en ${activeCategoryName}` : COPY.product.noProducts}
+            title={
+              activeCategoryName
+                ? `No encontramos productos en ${activeCategoryName}`
+                : COPY.product.noProducts
+            }
             description={
               activeCategoryName
-                ? 'Prueba quitando el filtro o agrega productos a esta categoria desde el admin.'
-                : 'Cuando cargues productos activos apareceran aqui con portada, precio y acceso rapido al pedido.'
+                ? 'Probá quitando el filtro o agregá productos a esta categoría desde el admin.'
+                : 'Cuando cargues productos activos aparecerán aquí con portada, precio y acceso rápido al pedido.'
             }
             action={
               activeCategory ? (
@@ -116,7 +123,7 @@ export function CatalogSection({
         )}
 
         {products.length > 0 && allProducts.length !== products.length ? (
-          <p className="mt-5 text-sm" style={{ color: 'var(--store-soft-text)' }}>
+          <p className="mt-6 text-sm" style={{ color: 'var(--store-soft-text)' }}>
             Mostrando {products.length} de {allProducts.length} productos activos.
           </p>
         ) : null}
@@ -146,7 +153,7 @@ function CategoryPill({
               background:
                 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 72%, black 28%))',
               color: 'var(--store-primary-contrast)',
-              boxShadow: '0 14px 28px color-mix(in srgb, var(--store-primary) 20%, transparent)',
+              boxShadow: '0 12px 26px color-mix(in srgb, var(--store-primary) 20%, transparent)',
             }
           : {
               borderRadius: 'var(--store-button-radius)',
