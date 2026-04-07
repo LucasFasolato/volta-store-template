@@ -9,6 +9,8 @@ type SaveButtonProps = {
   isSaved?: boolean
   className?: string
   label?: string
+  loadingLabel?: string
+  savedLabel?: string
 }
 
 export function SaveButton({
@@ -16,6 +18,8 @@ export function SaveButton({
   isSaved,
   className,
   label = 'Guardar cambios',
+  loadingLabel = 'Guardando...',
+  savedLabel = 'Guardado',
 }: SaveButtonProps) {
   return (
     <Button
@@ -33,12 +37,12 @@ export function SaveButton({
       {isLoading ? (
         <>
           <Loader2 className="mr-2 size-4 animate-spin" />
-          Guardando...
+          {loadingLabel}
         </>
       ) : isSaved ? (
         <>
           <Check className="mr-2 size-4" />
-          Guardado
+          {savedLabel}
         </>
       ) : (
         label

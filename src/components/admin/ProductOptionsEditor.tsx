@@ -1,140 +1,86 @@
 'use client'
 
-import { useState } from 'react'
 import { GripVertical, Plus, Tag, Trash2, X } from 'lucide-react'
-import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { replaceProductOptions } from '@/lib/actions/product-options'
-import type { ProductOption } from '@/types/store'
-
-type DraftOption = {
-  id?: string       // undefined = new, string = existing
-  name: string
-  valuesRaw: string // comma-separated editing buffer
-  values: string[]
-}
+import {
+  createEmptyDraftProductOption,
+  parseProductOptionValues,
+  type DraftProductOption,
+} from '@/lib/products/options'
 
 type ProductOptionsEditorProps = {
-  productId: string
-  initialOptions: ProductOption[]
+  value: DraftProductOption[]
+  onChange: (nextValue: DraftProductOption[]) => void
+  disabled?: boolean
 }
 
-function parseTags(raw: string): string[] {
-  return raw
-    .split(',')
-    .map((v) => v.trim())
-    .filter((v) => v.length > 0)
-}
-
-export function ProductOptionsEditor({ productId, initialOptions }: ProductOptionsEditorProps) {
-  const [options, setOptions] = useState<DraftOption[]>(
-    initialOptions
-      .sort((a, b) => a.sort_order - b.sort_order)
-      .map((o) => ({
-        id: o.id,
-        name: o.name,
-        valuesRaw: o.values.join(', '),
-        values: o.values,
-      })),
-  )
-  const [isSaving, setIsSaving] = useState(false)
-
+export function ProductOptionsEditor({
+  value,
+  onChange,
+  disabled = false,
+}: ProductOptionsEditorProps) {
   function addOption() {
-    setOptions((prev) => [...prev, { name: '', valuesRaw: '', values: [] }])
+    onChange([...value, createEmptyDraftProductOption()])
   }
 
   function removeOption(index: number) {
-    setOptions((prev) => prev.filter((_, i) => i !== index))
+    onChange(value.filter((_, currentIndex) => currentIndex !== index))
   }
 
   function updateName(index: number, name: string) {
-    setOptions((prev) => prev.map((o, i) => (i === index ? { ...o, name } : o)))
-  }
-
-  function updateValuesRaw(index: number, raw: string) {
-    setOptions((prev) =>
-      prev.map((o, i) =>
-        i === index ? { ...o, valuesRaw: raw, values: parseTags(raw) } : o,
+    onChange(
+      value.map((option, currentIndex) =>
+        currentIndex === index ? { ...option, name } : option,
       ),
     )
   }
 
-  // Remove an individual tag chip from an option
-  function removeTag(optionIndex: number, tag: string) {
-    setOptions((prev) =>
-      prev.map((o, i) => {
-        if (i !== optionIndex) return o
-        const values = o.values.filter((v) => v !== tag)
-        return { ...o, values, valuesRaw: values.join(', ') }
+  function updateValues(index: number, valuesRaw: string) {
+    onChange(
+      value.map((option, currentIndex) =>
+        currentIndex === index
+          ? { ...option, valuesRaw, values: parseProductOptionValues(valuesRaw) }
+          : option,
+      ),
+    )
+  }
+
+  function removeTag(index: number, tag: string) {
+    onChange(
+      value.map((option, currentIndex) => {
+        if (currentIndex !== index) return option
+
+        const values = option.values.filter((valueItem) => valueItem !== tag)
+
+        return {
+          ...option,
+          values,
+          valuesRaw: values.join(', '),
+        }
       }),
     )
   }
 
-  // Add a tag when user presses Enter or comma in the values input
-  function handleValuesKeyDown(
-    event: React.KeyboardEvent<HTMLInputElement>,
-    index: number,
-    raw: string,
-  ) {
-    if (event.key === 'Enter') {
-      event.preventDefault()
-      updateValuesRaw(index, raw)
-    }
-  }
-
-  async function handleSave() {
-    // Validate
-    for (const opt of options) {
-      if (!opt.name.trim()) {
-        toast.error('Cada atributo necesita un nombre.')
-        return
-      }
-      if (opt.values.length === 0) {
-        toast.error(`El atributo "${opt.name}" no tiene valores.`)
-        return
-      }
-    }
-
-    setIsSaving(true)
-
-    const result = await replaceProductOptions(
-      productId,
-      options.map((o, i) => ({ name: o.name.trim(), values: o.values, sort_order: i })),
-    )
-
-    if (result?.error) {
-      const msg =
-        typeof result.error === 'object' && 'formErrors' in result.error
-          ? result.error.formErrors?.[0]
-          : String(result.error)
-      toast.error(msg ?? 'No se pudo guardar.')
-    } else {
-      toast.success('Opciones guardadas.')
-    }
-
-    setIsSaving(false)
-  }
-
   return (
     <div className="space-y-4">
-      {options.length === 0 ? (
-        <div className="rounded-[20px] border border-dashed border-white/12 bg-white/3 px-5 py-6 text-center">
+      {value.length === 0 ? (
+        <div className="rounded-[20px] border border-dashed border-white/10 bg-white/[0.03] px-5 py-6 text-center">
           <Tag className="mx-auto mb-3 size-7 text-neutral-500" />
-          <p className="text-sm font-medium text-neutral-300">Sin opciones todavía</p>
-          <p className="mt-1 text-xs text-neutral-500">
-            Agregá talle, color, medida o cualquier atributo que el cliente deba elegir.
+          <p className="text-sm font-medium text-white">Sin opciones todavia</p>
+          <p className="mt-1 text-xs leading-5 text-neutral-500">
+            Agrega talle, color, medida o cualquier atributo que el cliente deba elegir.
           </p>
         </div>
       ) : (
         <div className="space-y-3">
-          {options.map((opt, index) => (
+          {value.map((option, index) => (
             <OptionRow
-              key={index}
-              option={opt}
-              onNameChange={(v) => updateName(index, v)}
-              onValuesChange={(v) => updateValuesRaw(index, v)}
-              onValuesKeyDown={(e) => handleValuesKeyDown(e, index, opt.valuesRaw)}
+              key={option.id ?? `${option.name}-${index}`}
+              option={option}
+              disabled={disabled}
+              onNameChange={(nextName) => updateName(index, nextName)}
+              onValuesChange={(nextValues) => updateValues(index, nextValues)}
               onRemoveTag={(tag) => removeTag(index, tag)}
               onDelete={() => removeOption(index)}
             />
@@ -142,45 +88,33 @@ export function ProductOptionsEditor({ productId, initialOptions }: ProductOptio
         </div>
       )}
 
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={addOption}
-          className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-white/20 hover:bg-white/8"
-        >
-          <Plus className="size-4" />
-          Agregar atributo
-        </button>
-
-        {options.length > 0 ? (
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving}
-            className="inline-flex items-center gap-2 rounded-full bg-emerald-400 px-5 py-2 text-sm font-medium text-black transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSaving ? 'Guardando...' : 'Guardar opciones'}
-          </button>
-        ) : null}
-      </div>
+      <button
+        type="button"
+        onClick={addOption}
+        disabled={disabled}
+        className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-200 transition hover:border-white/20 hover:bg-white/8 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <Plus className="size-4" />
+        Agregar opcion
+      </button>
     </div>
   )
 }
 
 type OptionRowProps = {
-  option: DraftOption
-  onNameChange: (v: string) => void
-  onValuesChange: (v: string) => void
-  onValuesKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
+  option: DraftProductOption
+  disabled: boolean
+  onNameChange: (value: string) => void
+  onValuesChange: (value: string) => void
   onRemoveTag: (tag: string) => void
   onDelete: () => void
 }
 
 function OptionRow({
   option,
+  disabled,
   onNameChange,
   onValuesChange,
-  onValuesKeyDown,
   onRemoveTag,
   onDelete,
 }: OptionRowProps) {
@@ -190,34 +124,35 @@ function OptionRow({
         <GripVertical className="mt-2.5 size-4 shrink-0 text-neutral-600" />
 
         <div className="flex-1 space-y-3">
-          <div className="grid gap-3 sm:grid-cols-[1fr_2fr]">
+          <div className="grid gap-3 sm:grid-cols-[0.9fr_1.35fr]">
             <div>
               <Label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">
                 Nombre
               </Label>
               <Input
                 value={option.name}
-                onChange={(e) => onNameChange(e.target.value)}
+                onChange={(event) => onNameChange(event.target.value)}
                 placeholder="Ej: Talle"
                 maxLength={40}
-                className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-white placeholder:text-neutral-500"
+                disabled={disabled}
+                className="h-10 rounded-xl border-white/10 bg-white/5 text-sm text-white placeholder:text-neutral-500"
               />
             </div>
 
             <div>
               <Label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">
-                Valores{' '}
-                <span className="normal-case tracking-normal text-neutral-600">
-                  (separados por coma)
-                </span>
+                Valores
               </Label>
               <Input
                 value={option.valuesRaw}
-                onChange={(e) => onValuesChange(e.target.value)}
-                onKeyDown={onValuesKeyDown}
-                placeholder="Ej: S, M, L, XL"
-                className="h-9 rounded-xl border-white/10 bg-white/5 text-sm text-white placeholder:text-neutral-500"
+                onChange={(event) => onValuesChange(event.target.value)}
+                placeholder="Ej: S, M, L"
+                disabled={disabled}
+                className="h-10 rounded-xl border-white/10 bg-white/5 text-sm text-white placeholder:text-neutral-500"
               />
+              <p className="mt-1.5 text-[11px] text-neutral-500">
+                Separa cada valor con coma.
+              </p>
             </div>
           </div>
 
@@ -232,7 +167,8 @@ function OptionRow({
                   <button
                     type="button"
                     onClick={() => onRemoveTag(tag)}
-                    className="text-neutral-500 hover:text-red-400"
+                    disabled={disabled}
+                    className="text-neutral-500 transition hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
                     aria-label={`Eliminar ${tag}`}
                   >
                     <X className="size-3" />
@@ -246,8 +182,9 @@ function OptionRow({
         <button
           type="button"
           onClick={onDelete}
-          className="mt-1 rounded-full p-2 text-neutral-500 transition hover:bg-red-500/10 hover:text-red-400"
-          aria-label="Eliminar atributo"
+          disabled={disabled}
+          className="mt-1 rounded-full p-2 text-neutral-500 transition hover:bg-red-500/10 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+          aria-label="Eliminar opcion"
         >
           <Trash2 className="size-4" />
         </button>

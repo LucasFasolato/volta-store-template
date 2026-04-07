@@ -22,7 +22,7 @@ export default async function NuevoProductoPage() {
 
       <AdminPageHeader
         title="Nuevo producto"
-        description="Carga la informacion principal. Luego podras sumar imagenes y terminar de pulir la ficha."
+        description="Carga nombre, precio, portada y opciones en el mismo flujo. Lo avanzado queda guardado para despues."
       />
 
       <div className="max-w-4xl">

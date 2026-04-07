@@ -12,7 +12,6 @@ import {
   Settings,
   Store,
   Tag,
-  Upload,
 } from 'lucide-react'
 import { signOut } from '@/lib/actions/auth'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -31,7 +30,6 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/admin/contenido', label: 'Contenido', icon: FileText },
   { href: '/admin/productos', label: 'Productos', icon: Package },
   { href: '/admin/categorias', label: 'Categorias', icon: Tag },
-  { href: '/admin/importar', label: 'Importar CSV', icon: Upload },
   { href: '/admin/configuracion', label: 'Configuracion', icon: Settings },
 ]
 

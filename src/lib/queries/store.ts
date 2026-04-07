@@ -31,7 +31,9 @@ export async function getStoreBySlug(slug: string): Promise<StorePublicData | nu
       .select(PRODUCT_SELECT)
       .eq('store_id', store.id)
       .eq('is_active', true)
-      .order('sort_order'),
+      .order('sort_order')
+      .order('sort_order', { referencedTable: 'product_images' })
+      .order('sort_order', { referencedTable: 'product_options' }),
   ])
 
   if (!themeRes.data || !layoutRes.data || !contentRes.data) return null
@@ -57,6 +59,8 @@ export async function getAdminProducts(storeId: string) {
     .select(PRODUCT_SELECT)
     .eq('store_id', storeId)
     .order('sort_order')
+    .order('sort_order', { referencedTable: 'product_images' })
+    .order('sort_order', { referencedTable: 'product_options' })
   return (data ?? []) as ProductWithImages[]
 }
 
@@ -77,6 +81,8 @@ export async function getAdminProductById(storeId: string, productId: string) {
     .select(PRODUCT_SELECT)
     .eq('id', productId)
     .eq('store_id', storeId)
+    .order('sort_order', { referencedTable: 'product_images' })
+    .order('sort_order', { referencedTable: 'product_options' })
     .maybeSingle()
   return data as ProductWithImages | null
 }
@@ -89,6 +95,8 @@ export async function getProductBySlug(storeId: string, slug: string) {
     .eq('store_id', storeId)
     .eq('slug', slug)
     .eq('is_active', true)
+    .order('sort_order', { referencedTable: 'product_images' })
+    .order('sort_order', { referencedTable: 'product_options' })
     .maybeSingle()
   return data as ProductWithImages | null
 }

@@ -143,6 +143,7 @@ export async function uploadProductImage(productId: string, file: FormData) {
 
   const imageFile = file.get('image') as File | null
   if (!imageFile) return { error: 'No image provided' }
+  const makePrimary = file.get('makePrimary') === 'true'
 
   const ext = imageFile.name.split('.').pop()
   const path = `${user.id}/products/${productId}/${Date.now()}.${ext}`
@@ -155,10 +156,42 @@ export async function uploadProductImage(productId: string, file: FormData) {
 
   const { data: urlData } = supabase.storage.from('store-assets').getPublicUrl(path)
 
+  let sortOrder = 0
+
+  if (makePrimary) {
+    const { data: existingImages, error: existingImagesError } = await supabase
+      .from('product_images')
+      .select('id, sort_order')
+      .eq('product_id', productId)
+
+    if (existingImagesError) return { error: existingImagesError.message }
+
+    for (const image of existingImages ?? []) {
+      const { error: reorderError } = await supabase
+        .from('product_images')
+        .update({ sort_order: (image.sort_order ?? 0) + 1 })
+        .eq('id', image.id)
+        .eq('product_id', productId)
+
+      if (reorderError) return { error: reorderError.message }
+    }
+  } else {
+    const { data: lastImage, error: lastImageError } = await supabase
+      .from('product_images')
+      .select('sort_order')
+      .eq('product_id', productId)
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (lastImageError) return { error: lastImageError.message }
+    sortOrder = (lastImage?.sort_order ?? -1) + 1
+  }
+
   const { data: image, error: insertError } = await supabase
     .from('product_images')
-    .insert({ product_id: productId, url: urlData.publicUrl, sort_order: 0 })
-    .select('id, url')
+    .insert({ product_id: productId, url: urlData.publicUrl, sort_order: sortOrder })
+    .select('id, url, sort_order')
     .single()
 
   if (insertError) return { error: insertError.message }

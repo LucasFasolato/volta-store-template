@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useRef, useState } from 'react'
 import {
   AlertCircle,
@@ -569,12 +570,12 @@ function ImportResultView({
       )}
 
       <div className="flex gap-3">
-        <a
+        <Link
           href="/admin/productos"
           className="inline-flex items-center gap-2 rounded-full bg-emerald-400 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-emerald-300"
         >
           Ver productos
-        </a>
+        </Link>
         <button
           type="button"
           onClick={onReset}

@@ -33,7 +33,7 @@ export default async function EditProductoPage({
 
       <AdminPageHeader
         title={product.name}
-        description="Ajusta datos, imagenes y visibilidad sin perder el contexto del producto."
+        description="Edita lo esencial rapido y abre solo los detalles avanzados cuando realmente hagan falta."
       />
 
       <div className="max-w-4xl">
