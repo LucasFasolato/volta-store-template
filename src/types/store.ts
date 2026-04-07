@@ -9,9 +9,20 @@ export type Category = Database['public']['Tables']['categories']['Row']
 export type Product = Database['public']['Tables']['products']['Row']
 export type ProductImage = Database['public']['Tables']['product_images']['Row']
 
+// Selectable attribute group for a product (e.g., name="Talle", values=["S","M","L","XL"])
+export type ProductOption = {
+  id: string
+  product_id: string
+  name: string
+  values: string[]
+  sort_order: number
+  created_at: string
+}
+
 export type ProductWithImages = Product & {
   images: ProductImage[]
   category: Category | null
+  options: ProductOption[]
 }
 
 export type StorePublicData = {

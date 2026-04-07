@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ProductOptionsEditor } from '@/components/admin/ProductOptionsEditor'
 import {
   Select,
   SelectContent,
@@ -419,6 +420,28 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
           ))}
         </div>
       </section>
+
+      {/* Options editor — only available after product is created */}
+      {productId ? (
+        <section className="surface-panel premium-ring rounded-[28px] px-5 py-6 sm:px-6">
+          <div className="mb-5">
+            <h3 className="text-base font-semibold text-white">Opciones del producto</h3>
+            <p className="mt-1 text-sm text-neutral-400">
+              Configurá atributos como talle, color o medida. El cliente los elige antes de agregar al carrito.
+            </p>
+          </div>
+          <ProductOptionsEditor
+            productId={productId}
+            initialOptions={product?.options ?? []}
+          />
+        </section>
+      ) : (
+        <div className="rounded-[22px] border border-dashed border-white/8 bg-white/2 px-5 py-4">
+          <p className="text-sm text-neutral-500">
+            Guardá el producto primero para poder agregar opciones (talle, color, etc.).
+          </p>
+        </div>
+      )}
 
       {submitError ? <FormFeedback kind="error" message={submitError} /> : null}
 

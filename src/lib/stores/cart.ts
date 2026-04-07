@@ -4,11 +4,31 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export type CartItem = {
+  // Unique key per line: productId for simple products,
+  // productId + sorted option hash for items with options.
+  cartItemKey: string
   productId: string
   name: string
   price: number
   imageUrl: string | null
   quantity: number
+  selectedOptions?: Record<string, string>
+}
+
+/**
+ * Build a stable cart item key from productId + selected options.
+ * Products without options use productId alone.
+ */
+export function buildCartItemKey(
+  productId: string,
+  selectedOptions?: Record<string, string>,
+): string {
+  if (!selectedOptions || Object.keys(selectedOptions).length === 0) return productId
+  const hash = Object.entries(selectedOptions)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}=${v}`)
+    .join('|')
+  return `${productId}:${hash}`
 }
 
 type CartState = {
@@ -20,8 +40,8 @@ type CartState = {
 type CartActions = {
   setStoreSlug: (slug: string) => void
   addItem: (item: Omit<CartItem, 'quantity'>) => void
-  removeItem: (productId: string) => void
-  updateQuantity: (productId: string, quantity: number) => void
+  removeItem: (cartItemKey: string) => void
+  updateQuantity: (cartItemKey: string, quantity: number) => void
   clearCart: () => void
   openCart: () => void
   closeCart: () => void
@@ -39,7 +59,6 @@ export const useCartStore = create<CartState & CartActions>()(
 
       setStoreSlug: (slug) => {
         const current = get().storeSlug
-        // Clear cart when switching stores
         if (current && current !== slug) {
           set({ storeSlug: slug, items: [] })
         } else {
@@ -49,11 +68,11 @@ export const useCartStore = create<CartState & CartActions>()(
 
       addItem: (item) => {
         set((state) => {
-          const existing = state.items.find((i) => i.productId === item.productId)
+          const existing = state.items.find((i) => i.cartItemKey === item.cartItemKey)
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.productId === item.productId
+                i.cartItemKey === item.cartItemKey
                   ? { ...i, quantity: i.quantity + 1 }
                   : i,
               ),
@@ -63,20 +82,20 @@ export const useCartStore = create<CartState & CartActions>()(
         })
       },
 
-      removeItem: (productId) => {
+      removeItem: (cartItemKey) => {
         set((state) => ({
-          items: state.items.filter((i) => i.productId !== productId),
+          items: state.items.filter((i) => i.cartItemKey !== cartItemKey),
         }))
       },
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (cartItemKey, quantity) => {
         if (quantity < 1) {
-          get().removeItem(productId)
+          get().removeItem(cartItemKey)
           return
         }
         set((state) => ({
           items: state.items.map((i) =>
-            i.productId === productId ? { ...i, quantity } : i,
+            i.cartItemKey === cartItemKey ? { ...i, quantity } : i,
           ),
         }))
       },
@@ -92,6 +111,21 @@ export const useCartStore = create<CartState & CartActions>()(
     }),
     {
       name: 'volta-cart',
+      version: 2,
+      // Migrate old persisted data (v0/v1) that lacks cartItemKey
+      migrate: (persistedState, version) => {
+        if (version < 2) {
+          const old = persistedState as { storeSlug?: string | null; items?: Array<{ productId: string; cartItemKey?: string; [key: string]: unknown }> }
+          return {
+            storeSlug: old.storeSlug ?? null,
+            items: (old.items ?? []).map((item) => ({
+              ...item,
+              cartItemKey: item.cartItemKey ?? item.productId,
+            })),
+          }
+        }
+        return persistedState as CartState & CartActions
+      },
       partialize: (state) => ({
         storeSlug: state.storeSlug,
         items: state.items,

@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Minus, Plus, ShoppingBag, X } from 'lucide-react'
 import { COPY } from '@/data/system-copy'
-import { useCartStore } from '@/lib/stores/cart'
+import { buildCartItemKey, useCartStore } from '@/lib/stores/cart'
 import { formatCurrency } from '@/lib/utils/format'
 import type { ProductWithImages } from '@/types/store'
 
@@ -17,11 +17,19 @@ type ProductModalProps = {
 export function ProductModal({ product, onClose }: ProductModalProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const addItem = useCartStore((state) => state.addItem)
   const openCart = useCartStore((state) => state.openCart)
 
   const selectedImage = product.images?.[selectedImageIndex]
+  const sortedOptions = useMemo(
+    () => [...(product.options ?? [])].sort((a, b) => a.sort_order - b.sort_order),
+    [product.options],
+  )
+  const hasOptions = sortedOptions.length > 0
+  const allOptionsSelected =
+    !hasOptions || sortedOptions.every((opt) => !!selectedOptions[opt.name])
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
@@ -40,13 +48,24 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
     }
   }, [onClose])
 
+  function selectOption(optionName: string, value: string) {
+    setSelectedOptions((prev) => ({ ...prev, [optionName]: value }))
+  }
+
   function handleAddToCart() {
+    const cartItemKey = buildCartItemKey(product.id, hasOptions ? selectedOptions : undefined)
+    const nameWithOptions = hasOptions
+      ? `${product.name} (${Object.values(selectedOptions).join(' / ')})`
+      : product.name
+
     for (let index = 0; index < quantity; index += 1) {
       addItem({
+        cartItemKey,
         productId: product.id,
-        name: product.name,
+        name: nameWithOptions,
         price: product.price,
         imageUrl: product.images?.[0]?.url ?? null,
+        selectedOptions: hasOptions ? { ...selectedOptions } : undefined,
       })
     }
     openCart()
@@ -95,6 +114,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
           <div className="mx-auto mt-3 h-1.5 w-14 rounded-full sm:hidden" style={{ backgroundColor: 'var(--store-card-border)' }} />
 
           <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
+            {/* ── Image panel ── */}
             <div className="p-4 sm:p-5 lg:p-6">
               <div
                 className="relative aspect-[4/5] overflow-hidden"
@@ -184,6 +204,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
               ) : null}
             </div>
 
+            {/* ── Detail panel ── */}
             <div className="flex flex-col p-5 sm:p-6 lg:p-8">
               {product.category?.name ? (
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'var(--store-muted-text)' }}>
@@ -220,6 +241,61 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                 </p>
               )}
 
+              {/* ── Option selectors ── */}
+              {hasOptions ? (
+                <div className="mt-6 space-y-5">
+                  {sortedOptions.map((option) => (
+                    <div key={option.id}>
+                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>
+                        {option.name}
+                        {selectedOptions[option.name] ? (
+                          <span
+                            className="ml-2 font-normal normal-case tracking-normal"
+                            style={{ color: 'var(--store-primary)' }}
+                          >
+                            {selectedOptions[option.name]}
+                          </span>
+                        ) : (
+                          <span className="ml-2 font-normal normal-case tracking-normal opacity-50">
+                            elegir
+                          </span>
+                        )}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {option.values.map((value) => {
+                          const active = selectedOptions[option.name] === value
+                          return (
+                            <button
+                              key={value}
+                              type="button"
+                              onClick={() => selectOption(option.name, value)}
+                              className="rounded-full px-4 py-1.5 text-sm font-medium transition"
+                              style={
+                                active
+                                  ? {
+                                      backgroundColor: 'var(--store-primary)',
+                                      color: 'var(--store-primary-contrast)',
+                                      border: '1px solid var(--store-primary)',
+                                      boxShadow: '0 6px 18px color-mix(in srgb, var(--store-primary) 22%, transparent)',
+                                    }
+                                  : {
+                                      backgroundColor: 'color-mix(in srgb, var(--store-surface) 72%, transparent)',
+                                      color: 'var(--store-text)',
+                                      border: '1px solid var(--store-card-border)',
+                                    }
+                              }
+                            >
+                              {value}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {/* ── Quantity + total ── */}
               <div
                 className="mt-7 rounded-[calc(var(--store-card-radius)*0.84)] p-5"
                 style={{
@@ -261,15 +337,23 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
               </div>
 
               <div className="mt-auto pt-7">
+                {hasOptions && !allOptionsSelected ? (
+                  <p className="mb-3 text-center text-xs" style={{ color: 'var(--store-muted-text)' }}>
+                    Elegí todas las opciones para continuar.
+                  </p>
+                ) : null}
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="store-button inline-flex w-full items-center justify-center gap-2 px-6 py-4 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 active:translate-y-0"
+                  disabled={!allOptionsSelected}
+                  className="store-button inline-flex w-full items-center justify-center gap-2 px-6 py-4 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40"
                   style={{
                     background:
                       'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
                     color: 'var(--store-primary-contrast)',
-                    boxShadow: '0 18px 40px color-mix(in srgb, var(--store-primary) 24%, transparent)',
+                    boxShadow: allOptionsSelected
+                      ? '0 18px 40px color-mix(in srgb, var(--store-primary) 24%, transparent)'
+                      : 'none',
                   }}
                 >
                   <ShoppingBag className="size-4" />

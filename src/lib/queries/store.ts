@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import type { StorePublicData, AdminStoreData, ProductWithImages } from '@/types/store'
 import { getOwnerStoreData } from '@/lib/server/store-context'
 
+// Supabase nested select for products with all relations
+const PRODUCT_SELECT = '*, images:product_images(*), category:categories(*), options:product_options(*)' as const
+
 export async function getStoreBySlug(slug: string): Promise<StorePublicData | null> {
   const supabase = await createClient()
 
@@ -25,7 +28,7 @@ export async function getStoreBySlug(slug: string): Promise<StorePublicData | nu
       .order('sort_order'),
     supabase
       .from('products')
-      .select('*, images:product_images(*), category:categories(*)')
+      .select(PRODUCT_SELECT)
       .eq('store_id', store.id)
       .eq('is_active', true)
       .order('sort_order'),
@@ -51,7 +54,7 @@ export async function getAdminProducts(storeId: string) {
   const supabase = await createClient()
   const { data } = await supabase
     .from('products')
-    .select('*, images:product_images(*), category:categories(*)')
+    .select(PRODUCT_SELECT)
     .eq('store_id', storeId)
     .order('sort_order')
   return (data ?? []) as ProductWithImages[]
@@ -71,7 +74,7 @@ export async function getAdminProductById(storeId: string, productId: string) {
   const supabase = await createClient()
   const { data } = await supabase
     .from('products')
-    .select('*, images:product_images(*), category:categories(*)')
+    .select(PRODUCT_SELECT)
     .eq('id', productId)
     .eq('store_id', storeId)
     .maybeSingle()
@@ -82,7 +85,7 @@ export async function getProductBySlug(storeId: string, slug: string) {
   const supabase = await createClient()
   const { data } = await supabase
     .from('products')
-    .select('*, images:product_images(*), category:categories(*)')
+    .select(PRODUCT_SELECT)
     .eq('store_id', storeId)
     .eq('slug', slug)
     .eq('is_active', true)

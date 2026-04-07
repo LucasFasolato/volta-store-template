@@ -167,10 +167,10 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
                 <div className="space-y-3">
                   {items.map((item) => (
                     <CartItem
-                      key={item.productId}
+                      key={item.cartItemKey}
                       item={item}
-                      onUpdateQty={(quantity) => updateQuantity(item.productId, quantity)}
-                      onRemove={() => removeItem(item.productId)}
+                      onUpdateQty={(quantity) => updateQuantity(item.cartItemKey, quantity)}
+                      onRemove={() => removeItem(item.cartItemKey)}
                     />
                   ))}
                 </div>
@@ -244,10 +244,20 @@ function CartItem({
   onUpdateQty,
   onRemove,
 }: {
-  item: { productId: string; name: string; price: number; quantity: number; imageUrl: string | null }
+  item: {
+    cartItemKey: string
+    productId: string
+    name: string
+    price: number
+    quantity: number
+    imageUrl: string | null
+    selectedOptions?: Record<string, string>
+  }
   onUpdateQty: (quantity: number) => void
   onRemove: () => void
 }) {
+  const optionEntries = item.selectedOptions ? Object.entries(item.selectedOptions) : []
+
   return (
     <div
       className="rounded-[calc(var(--store-card-radius)*0.7)] p-3"
@@ -272,6 +282,25 @@ function CartItem({
           <p className="line-clamp-2 text-sm font-medium leading-5" style={{ color: 'var(--store-text)' }}>
             {item.name}
           </p>
+
+          {optionEntries.length > 0 ? (
+            <div className="mt-1.5 flex flex-wrap gap-1">
+              {optionEntries.map(([k, v]) => (
+                <span
+                  key={k}
+                  className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--store-primary) 10%, transparent)',
+                    color: 'var(--store-primary)',
+                    border: '1px solid color-mix(in srgb, var(--store-primary) 18%, transparent)',
+                  }}
+                >
+                  {k}: {v}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
           <div className="mt-2 flex items-center justify-between gap-3">
             <p className="text-sm font-semibold" style={{ color: 'var(--store-primary)' }}>
               {formatCurrency(item.price * item.quantity)}

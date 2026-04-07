@@ -2,14 +2,17 @@ import { COPY } from '@/data/system-copy'
 import { formatCurrency } from '@/lib/utils/format'
 
 export type CartItem = {
+  cartItemKey: string
   productId: string
   name: string
   price: number
   quantity: number
+  selectedOptions?: Record<string, string>
 }
 
 /**
  * Build the WhatsApp order message.
+ * Selected product options are appended as an indented line per item.
  */
 export function buildWhatsAppMessage(items: CartItem[]): string {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -21,6 +24,13 @@ export function buildWhatsAppMessage(items: CartItem[]): string {
     const lineTotal = formatCurrency(item.price * item.quantity)
     lines.push(`${index + 1}. ${item.name}`)
     lines.push(`   ${item.quantity} x ${formatCurrency(item.price)} = ${lineTotal}`)
+
+    if (item.selectedOptions && Object.keys(item.selectedOptions).length > 0) {
+      const opts = Object.entries(item.selectedOptions)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(' · ')
+      lines.push(`   → ${opts}`)
+    }
   })
 
   lines.push('')
