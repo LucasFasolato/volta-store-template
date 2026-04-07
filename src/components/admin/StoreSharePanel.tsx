@@ -1,12 +1,21 @@
 'use client'
 
 import Link from 'next/link'
-import { Copy, ExternalLink, MessageCircle, Sparkles } from 'lucide-react'
+import { Copy, ExternalLink, MessageCircle, Play, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import type { StoreLaunchPlan } from '@/lib/dashboard/store-launch'
+import type { ProductWithImages } from '@/types/store'
+import { buildCartItemKey } from '@/lib/stores/cart'
+import { buildWhatsAppUrl, type CartItem } from '@/lib/whatsapp/builder'
 import { Button } from '@/components/ui/button'
 
-export function StoreSharePanel({ plan }: { plan: StoreLaunchPlan }) {
+type StoreSharePanelProps = {
+  plan: StoreLaunchPlan
+  firstProduct: ProductWithImages | null
+  whatsapp: string
+}
+
+export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePanelProps) {
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(plan.publicUrl)
@@ -15,6 +24,42 @@ export function StoreSharePanel({ plan }: { plan: StoreLaunchPlan }) {
       toast.error('No pudimos copiar el enlace.')
     }
   }
+
+  function handleSimulate() {
+    if (!firstProduct || !whatsapp) return
+
+    // Build selected options using first value of each option group
+    const selectedOptions: Record<string, string> = {}
+    for (const opt of firstProduct.options ?? []) {
+      if (opt.values.length > 0) {
+        selectedOptions[opt.name] = opt.values[0]
+      }
+    }
+    const hasOptions = Object.keys(selectedOptions).length > 0
+    const cartItemKey = buildCartItemKey(
+      firstProduct.id,
+      hasOptions ? selectedOptions : undefined,
+    )
+    const productName = hasOptions
+      ? `${firstProduct.name} (${Object.values(selectedOptions).join(' / ')})`
+      : firstProduct.name
+
+    const items: CartItem[] = [
+      {
+        cartItemKey,
+        productId: firstProduct.id,
+        name: productName,
+        price: firstProduct.price,
+        quantity: 1,
+        selectedOptions: hasOptions ? selectedOptions : undefined,
+      },
+    ]
+
+    const url = buildWhatsAppUrl(whatsapp, items)
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  const canSimulate = !!(firstProduct && whatsapp)
 
   return (
     <section id="share-tools" className="admin-surface rounded-xl p-5 sm:p-6">
@@ -31,8 +76,8 @@ export function StoreSharePanel({ plan }: { plan: StoreLaunchPlan }) {
           {plan.state === 'ready'
             ? 'Copia el enlace, abre la tienda o enviala por WhatsApp en segundos.'
             : plan.state === 'almost_ready'
-              ? 'Puedes verla y preparar el enlace, pero conviene cerrar el ultimo tramo para compartirla con mas confianza.'
-              : 'Cuando completes estos puntos, compartirla va a ser mucho mas claro y profesional.'}
+              ? 'Puedes verla y preparar el enlace, pero conviene cerrar el último tramo para compartirla con más confianza.'
+              : 'Cuando completes estos puntos, compartirla va a ser mucho más claro y profesional.'}
         </p>
       </div>
 
@@ -74,6 +119,32 @@ export function StoreSharePanel({ plan }: { plan: StoreLaunchPlan }) {
                 <MessageCircle className="size-4" />
               </Link>
             </Button>
+          </div>
+
+          {/* ── Simulate purchase ─────────────────────────────────────────── */}
+          <div className="rounded-xl border border-emerald-300/14 bg-emerald-400/6 p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-emerald-300/20 bg-emerald-400/10">
+                <Play className="size-4 text-emerald-500 dark:text-emerald-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Simular una compra real</p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  {canSimulate
+                    ? `Vas a ver cómo llega un pedido de "${firstProduct?.name}" a tu WhatsApp. Así de simple.`
+                    : 'Agrega al menos un producto activo y configurá tu WhatsApp para probar.'}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleSimulate}
+                  disabled={!canSimulate}
+                  className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <MessageCircle className="size-3.5" />
+                  Probar checkout ahora
+                </button>
+              </div>
+            </div>
           </div>
 
           {plan.state === 'almost_ready' ? (

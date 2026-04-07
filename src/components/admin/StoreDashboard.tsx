@@ -8,6 +8,7 @@ import {
   Settings,
 } from 'lucide-react'
 import type { StoreLaunchPlan } from '@/lib/dashboard/store-launch'
+import type { ProductWithImages } from '@/types/store'
 import { StoreSharePanel } from '@/components/admin/StoreSharePanel'
 
 export function StoreDashboard({
@@ -15,11 +16,15 @@ export function StoreDashboard({
   storeName,
   activeProductCount,
   categoryCount,
+  firstProduct,
+  whatsapp,
 }: {
   plan: StoreLaunchPlan
   storeName: string
   activeProductCount: number
   categoryCount: number
+  firstProduct: ProductWithImages | null
+  whatsapp: string
 }) {
   const heroDone =
     plan.requiredItems.find((i) => i.id === 'hero-copy')?.status === 'done' &&
@@ -50,20 +55,20 @@ export function StoreDashboard({
 
   return (
     <div className="space-y-4 p-4 sm:p-5 lg:p-6">
-      {/* 1. Status — "you're ready" */}
+      {/* 1. Celebration hero */}
       <ReadyHero plan={plan} storeName={storeName} />
 
-      {/* 2. Share — primary action */}
-      <StoreSharePanel plan={plan} />
+      {/* 2. Share + simulate */}
+      <StoreSharePanel plan={plan} firstProduct={firstProduct} whatsapp={whatsapp} />
 
-      {/* 3. Stats — store snapshot */}
+      {/* 3. Stats snapshot */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {stats.map((stat) => (
           <StatCard key={stat.label} value={stat.value} label={stat.label} done={stat.done} />
         ))}
       </div>
 
-      {/* 4. Quick actions — management */}
+      {/* 4. Quick actions */}
       <QuickActionsSection />
     </div>
   )
@@ -71,36 +76,49 @@ export function StoreDashboard({
 
 function ReadyHero({ plan, storeName }: { plan: StoreLaunchPlan; storeName: string }) {
   return (
-    <section className="admin-surface relative overflow-hidden rounded-2xl px-6 py-7 sm:px-8 sm:py-8">
-      <div className="absolute inset-x-0 top-0 h-px bg-emerald-300/45" />
+    <section className="admin-surface relative overflow-hidden rounded-2xl px-6 py-8 sm:px-8 sm:py-10">
+      {/* Ambient glow top-right */}
       <div
-        className="absolute right-[-2rem] top-[-2rem] h-44 w-44 rounded-full bg-emerald-300/16 blur-3xl"
+        className="pointer-events-none absolute right-[-3rem] top-[-3rem] h-56 w-56 rounded-full bg-emerald-300/14 blur-[60px]"
         aria-hidden="true"
       />
+      {/* Ambient glow bottom-left */}
+      <div
+        className="pointer-events-none absolute bottom-[-2rem] left-[-2rem] h-40 w-40 rounded-full bg-emerald-500/8 blur-[50px]"
+        aria-hidden="true"
+      />
+      {/* Top highlight line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/50 to-transparent" />
 
       <div className="relative">
+        {/* Status pill */}
         <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1.5">
           <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
           <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
-            Lista para compartir
+            Lista para vender
           </span>
         </div>
 
-        <h1 className="mt-4 text-balance font-heading text-[1.75rem] font-semibold tracking-[-0.05em] text-foreground sm:text-[2.2rem]">
-          {storeName} esta en marcha.
+        {/* Headline */}
+        <h1 className="mt-5 text-balance font-heading text-[2rem] font-semibold tracking-[-0.05em] text-foreground sm:text-[2.5rem] sm:leading-[1.12]">
+          {storeName} ya puede
+          <br className="hidden sm:block" />
+          <span className="text-emerald-500 dark:text-emerald-400"> recibir pedidos.</span>
         </h1>
 
-        <p className="mt-2.5 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-[15px]">
-          Ya tenes lo necesario para mostrarla con confianza y empezar a recibir pedidos por WhatsApp.
+        {/* Subline */}
+        <p className="mt-3 max-w-xl text-sm leading-7 text-muted-foreground sm:text-[15px]">
+          Todo está configurado. Compartí el enlace, hacé que alguien entre y probá cómo llega el primer pedido por WhatsApp.
         </p>
 
+        {/* Public URL chip */}
         <Link
           href={plan.publicPath}
           target="_blank"
-          className="mt-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
+          className="mt-5 inline-flex items-center gap-2 rounded-full border border-border dark:border-white/10 bg-black/[0.04] dark:bg-white/5 px-4 py-2 text-sm transition hover:bg-black/[0.07] dark:hover:bg-white/8"
         >
-          <span className="font-mono text-[13px]">{plan.publicUrl}</span>
-          <ExternalLink className="size-3.5 shrink-0" />
+          <span className="font-mono text-[13px] text-muted-foreground">{plan.publicUrl}</span>
+          <ExternalLink className="size-3.5 shrink-0 text-muted-foreground" />
         </Link>
       </div>
     </section>

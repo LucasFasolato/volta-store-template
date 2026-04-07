@@ -1,15 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { Layers3, LayoutDashboard, Palette, Type } from 'lucide-react'
+import { Layers3, LayoutDashboard, Palette, Sparkles, Type } from 'lucide-react'
 import { LayoutForm } from '@/components/admin/LayoutForm'
+import { StylePresetsTab } from '@/components/admin/StylePresetsTab'
 import { ThemeForm, type ThemeSection } from '@/components/admin/ThemeForm'
 import { cn } from '@/lib/utils'
 import type { StoreLayout, StoreTheme } from '@/types/store'
 
-type AppTab = ThemeSection | 'secciones'
+type AppTab = ThemeSection | 'secciones' | 'estilos'
 
 const TABS: Array<{ value: AppTab; label: string; icon: React.ElementType }> = [
+  { value: 'estilos', label: 'Estilos', icon: Sparkles },
   { value: 'fuentes', label: 'Fuentes', icon: Type },
   { value: 'colores', label: 'Colores', icon: Palette },
   { value: 'layout', label: 'Diseño', icon: Layers3 },
@@ -19,11 +21,12 @@ const TABS: Array<{ value: AppTab; label: string; icon: React.ElementType }> = [
 type Props = {
   theme: StoreTheme
   layout: StoreLayout
+  storeSlug: string
 }
 
-export function AppearanceEditor({ theme, layout }: Props) {
-  const [tab, setTab] = useState<AppTab>('fuentes')
-  const isThemeTab = tab !== 'secciones'
+export function AppearanceEditor({ theme, layout, storeSlug }: Props) {
+  const [tab, setTab] = useState<AppTab>('estilos')
+  const isThemeTab = tab !== 'secciones' && tab !== 'estilos'
 
   return (
     <div className="space-y-4">
@@ -49,9 +52,11 @@ export function AppearanceEditor({ theme, layout }: Props) {
                   className={cn(
                     'flex items-center gap-1.5 rounded-[14px] px-3.5 py-2 text-sm font-medium transition duration-150',
                     active ? 'admin-surface-selected text-white' : 'text-neutral-400 hover:text-white',
+                    // Highlight the Estilos tab with a subtle emerald tint when active
+                    active && item.value === 'estilos' ? 'text-emerald-300' : '',
                   )}
                 >
-                  <Icon className="size-3.5 shrink-0" />
+                  <Icon className={cn('size-3.5 shrink-0', active && item.value === 'estilos' ? 'text-emerald-400' : '')} />
                   <span>{item.label}</span>
                 </button>
               )
@@ -61,8 +66,10 @@ export function AppearanceEditor({ theme, layout }: Props) {
       </div>
 
       {/* Editor content */}
-      {isThemeTab ? (
-        <ThemeForm theme={theme} activeSection={tab as ThemeSection} />
+      {tab === 'estilos' ? (
+        <StylePresetsTab />
+      ) : isThemeTab ? (
+        <ThemeForm theme={theme} activeSection={tab as ThemeSection} storeSlug={storeSlug} />
       ) : (
         <LayoutForm layout={layout} />
       )}

@@ -16,12 +16,17 @@ export default async function AdminPage() {
 
   // Mode B — store is ready: show operational dashboard
   if (plan.state === 'ready') {
+    const activeProducts = products.filter((p) => p.is_active)
+    const firstProduct = activeProducts[0] ?? null
+
     return (
       <StoreDashboard
         plan={plan}
         storeName={storeData.store.name}
-        activeProductCount={products.filter((p) => p.is_active).length}
+        activeProductCount={activeProducts.length}
         categoryCount={categories.length}
+        firstProduct={firstProduct}
+        whatsapp={storeData.store.whatsapp}
       />
     )
   }

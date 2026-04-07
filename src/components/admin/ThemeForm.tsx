@@ -29,6 +29,7 @@ export type ThemeSection = 'fuentes' | 'colores' | 'layout'
 type ThemeFormProps = {
   theme: StoreTheme
   activeSection: ThemeSection
+  storeSlug: string
 }
 
 type VisualOption = {
@@ -103,7 +104,7 @@ function colorLuminance(hex: string): number {
   return 0.299 * r + 0.587 * g + 0.114 * b
 }
 
-export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
+export function ThemeForm({ theme, activeSection, storeSlug }: ThemeFormProps) {
   const [saved, setSaved] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [systemMode, setSystemMode] = useState<'light' | 'dark'>('light')
@@ -216,32 +217,47 @@ export function ThemeForm({ theme, activeSection }: ThemeFormProps) {
     setThemeValue('heading_weight', preset.heading_weight as StoreThemeInput['heading_weight'])
   }
 
+  const storePublicPath = `/tienda/${storeSlug}`
+
   const visualModeHeader = (
     <div className="admin-surface rounded-[18px] px-3 py-2.5">
       <div className="flex items-center justify-between gap-2">
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
           Vista previa
         </p>
-        <div className="flex gap-1">
-          {[
-            { value: 'light', label: 'Claro' },
-            { value: 'auto', label: 'Auto' },
-            { value: 'dark', label: 'Oscuro' },
-          ].map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setThemeValue('visual_mode', option.value as StoreThemeInput['visual_mode'])}
-              className={cn(
-                'rounded-[10px] px-3 py-1 text-xs font-medium transition duration-150',
-                previewTheme.visual_mode === option.value
-                  ? 'admin-surface-selected text-white'
-                  : 'text-neutral-400 hover:text-white',
-              )}
-            >
-              {option.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-1.5">
+          <div className="flex gap-1">
+            {[
+              { value: 'light', label: 'Claro' },
+              { value: 'auto', label: 'Auto' },
+              { value: 'dark', label: 'Oscuro' },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setThemeValue('visual_mode', option.value as StoreThemeInput['visual_mode'])}
+                className={cn(
+                  'rounded-[10px] px-3 py-1 text-xs font-medium transition duration-150',
+                  previewTheme.visual_mode === option.value
+                    ? 'admin-surface-selected text-white'
+                    : 'text-neutral-400 hover:text-white',
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <a
+            href={storePublicPath}
+            target="_blank"
+            rel="noreferrer"
+            className="ml-1 flex items-center gap-1 rounded-[10px] border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-neutral-300 transition hover:border-white/20 hover:text-white"
+          >
+            Ver tienda
+            <svg className="size-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M2 10L10 2M10 2H4.5M10 2V7.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </a>
         </div>
       </div>
     </div>

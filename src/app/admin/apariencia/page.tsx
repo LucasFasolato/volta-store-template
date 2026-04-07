@@ -6,7 +6,11 @@ export default async function AparienciaPage() {
 
   return (
     <div className="p-4 sm:p-5 lg:p-6">
-      <AppearanceEditor theme={storeData.theme} layout={storeData.layout} />
+      <AppearanceEditor
+        theme={storeData.theme}
+        layout={storeData.layout}
+        storeSlug={storeData.store.slug}
+      />
     </div>
   )
 }
