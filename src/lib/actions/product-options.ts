@@ -49,7 +49,8 @@ export async function createProductOption(productId: string, input: ProductOptio
   const { supabase, store } = await requireProductOwnership(productId)
   const data = validated.data
 
-  const { data: option, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: option, error } = await (supabase as any)
     .from('product_options')
     .insert({
       product_id: productId,
@@ -77,7 +78,8 @@ export async function updateProductOption(
   const { supabase, store } = await requireProductOwnership(productId)
   const data = validated.data
 
-  const { data: option, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: option, error } = await (supabase as any)
     .from('product_options')
     .update({ name: data.name, values: data.values, sort_order: data.sort_order })
     .eq('id', optionId)
@@ -133,7 +135,8 @@ export async function replaceProductOptions(
   if (deleteError) return { error: { formErrors: [deleteError.message], fieldErrors: {} } }
 
   if (options.length > 0) {
-    const { error: insertError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: insertError } = await (supabase as any)
       .from('product_options')
       .insert(
         options.map((opt, i) => ({

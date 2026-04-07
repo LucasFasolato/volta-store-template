@@ -285,8 +285,10 @@ export async function applyThemePreset(presetId: string) {
     image_ratio: current.image_ratio as StoreThemeInput['image_ratio'],
     background_color_2: current.background_color_2 ?? null,
     background_direction: (current.background_direction ?? 'diagonal') as StoreThemeInput['background_direction'],
-    // Override with preset fields
-    ...preset.theme,
+    // Override with preset fields (cast to any: ThemePresetValues uses StoreTheme
+    // where enum fields are string; StoreThemeInput uses narrower literal unions)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...(preset.theme as any),
     // Sync font_family with body_font if preset sets it
     ...(preset.theme.body_font ? { font_family: preset.theme.body_font as StoreThemeInput['font_family'] } : {}),
   }
