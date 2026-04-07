@@ -34,7 +34,7 @@ export function StoreDashboard({
     {
       value: String(activeProductCount),
       label: activeProductCount === 1 ? 'producto activo' : 'productos activos',
-      done: activeProductCount >= 3,
+      done: activeProductCount >= 1,
     },
     {
       value: String(categoryCount),

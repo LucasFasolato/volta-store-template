@@ -1,6 +1,6 @@
-import type { AdminStoreData, Category, ProductWithImages } from '@/types/store'
-import { sanitizePhoneNumber } from '@/lib/utils/format'
-import { storeSlugSchema } from '@/lib/validations/store'
+import { DEFAULT_THEME } from '@/data/defaults'
+import { normalizeCardLayout } from '@/lib/utils/card-layout'
+import type { AdminStoreData, Category, ProductWithImages, StoreTheme } from '@/types/store'
 
 export type LaunchChecklistStatus = 'done' | 'missing' | 'recommended'
 export type StoreReadinessState = 'draft' | 'almost_ready' | 'ready'
@@ -41,7 +41,7 @@ export type StoreLaunchPlan = {
 }
 
 export type ActivationFlowStep = {
-  id: 'contact' | 'hero' | 'products' | 'categories' | 'trust'
+  id: 'hero' | 'products' | 'style'
   navLabel: string
   title: string
   description: string
@@ -84,6 +84,24 @@ function buildItem(input: {
   } satisfies LaunchChecklistItem
 }
 
+function hasSelectedStyle(theme: StoreTheme) {
+  return (
+    theme.primary_color !== DEFAULT_THEME.primary_color ||
+    theme.secondary_color !== DEFAULT_THEME.secondary_color ||
+    theme.accent_color !== DEFAULT_THEME.accent_color ||
+    theme.background_color !== DEFAULT_THEME.background_color ||
+    theme.surface_color !== DEFAULT_THEME.surface_color ||
+    theme.text_color !== DEFAULT_THEME.text_color ||
+    theme.visual_mode !== DEFAULT_THEME.visual_mode ||
+    theme.font_preset !== DEFAULT_THEME.font_preset ||
+    theme.heading_font !== DEFAULT_THEME.heading_font ||
+    theme.body_font !== DEFAULT_THEME.body_font ||
+    theme.card_style !== DEFAULT_THEME.card_style ||
+    normalizeCardLayout(theme.card_layout) !== normalizeCardLayout(DEFAULT_THEME.card_layout) ||
+    theme.button_style !== DEFAULT_THEME.button_style
+  )
+}
+
 export function buildStoreLaunchPlan({
   storeData,
   categories,
@@ -93,86 +111,69 @@ export function buildStoreLaunchPlan({
   categories: Category[]
   products: ProductWithImages[]
 }): StoreLaunchPlan {
-  const { store, content } = storeData
+  const { store, content, theme } = storeData
   const activeProducts = products.filter((product) => product.is_active)
-  const hasValidSlug = storeSlugSchema.safeParse(store.slug).success
-  const hasStoreName = store.name.trim().length >= 2
-  const hasWhatsapp = sanitizePhoneNumber(store.whatsapp).length >= 8
   const hasHeroTitle = content.hero_title.trim().length > 0
   const hasHeroSubtitle = content.hero_subtitle.trim().length > 0
   const hasHeroCopy = hasHeroTitle && hasHeroSubtitle
   const hasHeroImage = Boolean(content.hero_image_url)
-  const hasCategories = categories.length > 0
   const hasActiveProduct = activeProducts.length >= 1
+  const hasTemplate = hasSelectedStyle(theme)
+  const hasCategories = categories.length > 0
   const hasInstagram = Boolean(store.instagram?.trim())
   const hasAddress = Boolean(store.address?.trim())
   const hasHours = Boolean(store.hours?.trim())
 
   const requiredItems = [
     buildItem({
-      id: 'store-name',
-      done: hasStoreName,
-      title: 'Nombre del negocio',
-      description: 'Ayuda a que tu tienda se entienda desde el primer vistazo.',
-      href: '/admin/configuracion#section-identidad',
-      ctaLabel: 'Editar nombre',
-    }),
-    buildItem({
-      id: 'public-link',
-      done: hasValidSlug,
-      title: 'Enlace de tu tienda',
-      description: 'Es la direccion que vas a compartir con tus clientes.',
-      href: '/admin/configuracion#section-identidad',
-      ctaLabel: 'Revisar enlace',
-    }),
-    buildItem({
-      id: 'whatsapp',
-      done: hasWhatsapp,
-      title: 'WhatsApp listo para pedidos',
-      description: 'Sin este dato no pueden abrir la conversacion para comprar.',
-      href: '/admin/configuracion#section-contacto',
-      ctaLabel: 'Cargar WhatsApp',
-    }),
-    buildItem({
       id: 'hero-copy',
       done: hasHeroCopy,
-      title: 'Mensaje principal de la portada',
-      description: 'Explica rapido que vendes y por que vale la pena mirar tu catalogo.',
+      title: 'Titulo y subtitulo',
+      description: 'Completa el titulo y subtitulo para que la portada cuente rapido que vendes.',
       href: '/admin/contenido#section-copy',
       ctaLabel: 'Completar portada',
     }),
     buildItem({
       id: 'hero-image',
       done: hasHeroImage,
-      title: 'Imagen principal',
-      description: 'Agregar una imagen principal ayuda a que tu tienda se vea mas profesional.',
+      title: 'Imagen de portada',
+      description: 'Para completar este paso, subi una imagen de portada.',
       href: '/admin/contenido#section-hero-image',
       ctaLabel: 'Subir imagen',
-    }),
-    buildItem({
-      id: 'categories',
-      done: hasCategories,
-      title: 'Primera categoria',
-      description: 'Ordena el catalogo y hace mas facil encontrar lo que buscan.',
-      href: '/admin/categorias',
-      ctaLabel: 'Crear categoria',
     }),
     buildItem({
       id: 'products',
       done: hasActiveProduct,
       title: 'Tu primer producto',
-      description: 'Para continuar, agrega tu primer producto y deja la tienda lista para compartir.',
+      description: 'Para continuar, agrega al menos un producto activo con nombre y precio.',
       href: activeProducts.length > 0 ? '/admin/productos' : '/admin/productos/nuevo',
-      ctaLabel: activeProducts.length > 0 ? 'Ver productos' : 'Agregar primer producto',
+      ctaLabel: activeProducts.length > 0 ? 'Ver productos' : 'Agregar producto',
+    }),
+    buildItem({
+      id: 'style',
+      done: hasTemplate,
+      title: 'Estilo inicial',
+      description: 'Elige un preset visual para que la tienda se vea lista. Despues puedes cambiar todo.',
+      href: '/admin/apariencia',
+      ctaLabel: 'Elegir estilo',
     }),
   ]
 
   const recommendedItems = [
     buildItem({
+      id: 'categories',
+      done: hasCategories,
+      title: 'Categorias',
+      description: 'Ordenar el catalogo ayuda a recorrerlo mejor cuando tengas mas productos.',
+      href: '/admin/categorias',
+      ctaLabel: 'Crear categoria',
+      missingStatus: 'recommended',
+    }),
+    buildItem({
       id: 'instagram',
       done: hasInstagram,
       title: 'Instagram visible',
-      description: 'Suma respaldo social y ayuda a que te reconozcan mas rapido.',
+      description: 'Suma respaldo social y hace que tu negocio se vea mas confiable.',
       href: '/admin/configuracion#section-contacto',
       ctaLabel: 'Agregar Instagram',
       missingStatus: 'recommended',
@@ -181,7 +182,7 @@ export function buildStoreLaunchPlan({
       id: 'address',
       done: hasAddress,
       title: 'Direccion o zona',
-      description: 'Ubica mejor tu negocio y reduce dudas antes del primer mensaje.',
+      description: 'Ubica mejor tu negocio y despeja dudas antes del primer mensaje.',
       href: '/admin/configuracion#section-contexto',
       ctaLabel: 'Agregar direccion',
       missingStatus: 'recommended',
@@ -190,7 +191,7 @@ export function buildStoreLaunchPlan({
       id: 'hours',
       done: hasHours,
       title: 'Horarios de atencion',
-      description: 'Mostrar horarios puede generar mas confianza y ordenar mejor las consultas.',
+      description: 'Ayuda a ordenar mejor las consultas y dar mas claridad.',
       href: '/admin/configuracion#section-contexto',
       ctaLabel: 'Agregar horarios',
       missingStatus: 'recommended',
@@ -204,16 +205,9 @@ export function buildStoreLaunchPlan({
   const missingRequiredItems = requiredItems.filter((item) => item.status !== 'done')
   const missingRequiredCount = missingRequiredItems.length
   const blockers = missingRequiredItems.map((item) => item.title)
-  const hardBlockersMissing =
-    !hasStoreName ||
-    !hasValidSlug ||
-    !hasWhatsapp ||
-    !hasHeroCopy ||
-    !hasCategories ||
-    !hasActiveProduct
+  const hardBlockersMissing = !hasHeroCopy || !hasHeroImage || !hasActiveProduct || !hasTemplate
 
   let state: StoreReadinessState
-
   if (missingRequiredCount === 0) {
     state = 'ready'
   } else if (!hardBlockersMissing) {
@@ -224,24 +218,21 @@ export function buildStoreLaunchPlan({
 
   const stateCopy = {
     draft: {
-      stateLabel: 'Borrador',
-      headline: 'Todavia le faltan bases para compartirla',
-      summary: 'Completa lo esencial y tu tienda va a quedar mucho mas clara y confiable para quien llegue por primera vez.',
+      stateLabel: 'En activacion',
+      headline: 'Termina estos 3 pasos y tu tienda ya se va a sentir real',
+      summary: 'Primero deja bien la portada, agrega un producto y elige un estilo. Lo demas puede venir despues.',
     },
     almost_ready: {
       stateLabel: 'Casi lista',
-      headline: 'Te faltan algunos puntos para publicarla con confianza',
-      summary: 'La base ya esta armada. Ajusta lo que falta y vas a poder compartirla con mucha mas seguridad.',
+      headline: 'Te queda muy poco para mostrarla con confianza',
+      summary: 'La base ya esta. Cierra el ultimo paso y vas a poder abrir la tienda como algo listo para compartir.',
     },
     ready: {
       stateLabel: 'Lista para compartir',
-      headline: 'Tu tienda esta lista para compartir',
-      summary: 'Ya tienes lo necesario para mostrarla con confianza y empezar a recibir pedidos por WhatsApp.',
+      headline: 'Tu tienda ya esta lista para mostrarse',
+      summary: 'Portada, producto y estilo ya quedaron resueltos. Ahora puedes compartirla y empezar a recibir pedidos.',
     },
-  } satisfies Record<
-    StoreReadinessState,
-    { stateLabel: string; headline: string; summary: string }
-  >
+  } satisfies Record<StoreReadinessState, { stateLabel: string; headline: string; summary: string }>
 
   const { publicPath, publicUrl } = buildPublicUrl(store.slug)
   const shareMessage = `Hola! Te comparto mi tienda ${store.name}. Puedes verla aqui: ${publicUrl}`
@@ -293,59 +284,34 @@ export function buildStoreLaunchPlan({
 export function buildActivationFlowSteps(plan: StoreLaunchPlan): ActivationFlowStep[] {
   const stepDrafts = [
     {
-      id: 'contact',
-      navLabel: 'WhatsApp',
-      title: 'Conecta tu WhatsApp',
-      description: 'Sin este dato nadie puede escribirte para comprar. Es la pieza mas importante de toda la tienda.',
-      href: '/admin/configuracion#section-contacto',
-      ctaLabel: 'Cargar WhatsApp',
-      skipLabel: 'Seguir despues',
-      items: ['store-name', 'public-link', 'whatsapp'],
-      doneMessage: 'Ya pueden encontrarte y escribirte directamente.',
-    },
-    {
       id: 'hero',
       navLabel: 'Portada',
-      title: 'Arma tu portada',
-      description: 'Lo primero que ve un cliente cuando entra. Un buen mensaje y una imagen hacen que se quede y recorra el catalogo.',
+      title: 'Arma la portada de tu tienda',
+      description: 'Titulo, subtitulo e imagen obligatoria para que el primer vistazo tenga impacto.',
       href: '/admin/contenido#section-copy',
-      ctaLabel: 'Editar portada',
-      skipLabel: 'Seguir despues',
+      ctaLabel: 'Completar portada',
       items: ['hero-copy', 'hero-image'],
-      doneMessage: 'Tu portada ya transmite quien sos y que ofreces.',
+      doneMessage: 'La portada ya se ve clara y profesional.',
     },
     {
       id: 'products',
-      navLabel: 'Productos',
+      navLabel: 'Producto',
       title: 'Carga tu primer producto',
-      description: 'Con un producto real la tienda ya deja de ser demo y pasa a sentirse lista para compartir.',
+      description: 'Solo nombre y precio. Lo importante aca es que ya haya algo real para mostrar.',
       href: '/admin/productos/nuevo',
       ctaLabel: 'Agregar producto',
-      skipLabel: 'Seguir despues',
       items: ['products'],
-      doneMessage: 'Tu tienda ya tiene algo real para mostrar. Podes sumar mas cuando quieras.',
+      doneMessage: 'Tu tienda ya tiene algo concreto para vender.',
     },
     {
-      id: 'categories',
-      navLabel: 'Categorias',
-      title: 'Organiza el catalogo',
-      description: 'Las categorias hacen que encontrar algo sea rapido y claro. Con una sola ya alcanza para empezar.',
-      href: '/admin/categorias',
-      ctaLabel: 'Crear categoria',
-      skipLabel: 'Seguir despues',
-      items: ['categories'],
-      doneMessage: 'Tu tienda ya tiene estructura y es mucho mas facil de navegar.',
-    },
-    {
-      id: 'trust',
-      navLabel: 'Confianza',
-      title: 'Suma datos de confianza',
-      description: 'Instagram, direccion u horarios hacen que alguien que no te conoce confie mucho mas rapido antes de escribirte.',
-      href: '/admin/configuracion#section-contexto',
-      ctaLabel: 'Agregar informacion',
-      skipLabel: 'Dejar para despues',
-      items: ['instagram', 'address', 'hours'],
-      doneMessage: 'Tu negocio ya transmite mucha mas confianza.',
+      id: 'style',
+      navLabel: 'Estilo',
+      title: 'Elige un estilo inicial',
+      description: 'Selecciona un preset visual para que la tienda se vea lista. Despues puedes cambiar todo.',
+      href: '/admin/apariencia',
+      ctaLabel: 'Elegir estilo',
+      items: ['style'],
+      doneMessage: 'La tienda ya se ve lista para mostrarse.',
     },
   ] as const satisfies Array<{
     id: ActivationFlowStep['id']
@@ -354,7 +320,6 @@ export function buildActivationFlowSteps(plan: StoreLaunchPlan): ActivationFlowS
     description: string
     href: string
     ctaLabel: string
-    skipLabel?: string
     items: string[]
     doneMessage: string
   }>
@@ -362,8 +327,7 @@ export function buildActivationFlowSteps(plan: StoreLaunchPlan): ActivationFlowS
   const allItems = [...plan.requiredItems, ...plan.recommendedItems]
 
   const mappedSteps: ActivationFlowStep[] = stepDrafts.map((step) => {
-    const stepItemIds = step.items as readonly string[]
-    const stepItems = allItems.filter((item) => stepItemIds.includes(item.id))
+    const stepItems = allItems.filter((item) => (step.items as readonly string[]).includes(item.id))
     const doneCount = stepItems.filter((item) => item.status === 'done').length
     const totalCount = stepItems.length
     const isDone = totalCount > 0 && doneCount === totalCount
@@ -376,12 +340,11 @@ export function buildActivationFlowSteps(plan: StoreLaunchPlan): ActivationFlowS
       description: step.description,
       href: firstIncompleteItem?.href ?? step.href,
       ctaLabel: firstIncompleteItem?.ctaLabel ?? step.ctaLabel,
-      skipLabel: isDone ? undefined : step.skipLabel,
       status: isDone ? 'done' : 'upcoming',
       completionText: `${doneCount}/${totalCount}`,
       hint: firstIncompleteItem
         ? firstIncompleteItem.description
-        : 'Este paso ya esta listo y ayuda a que la tienda se vea mas completa.',
+        : 'Este paso ya esta listo y deja a la tienda un poco mas cerca de poder compartirse.',
       doneMessage: step.doneMessage,
     }
   })

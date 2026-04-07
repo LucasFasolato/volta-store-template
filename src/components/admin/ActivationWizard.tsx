@@ -1,29 +1,26 @@
 import Link from 'next/link'
 import { CheckCircle2 } from 'lucide-react'
 import type { ActivationFlowStep, StoreLaunchPlan } from '@/lib/dashboard/store-launch'
-import type { AdminStoreData, Category, ProductWithImages } from '@/types/store'
+import type { AdminStoreData, Category } from '@/types/store'
 import { cn } from '@/lib/utils'
-import { WizardStepContact } from './wizard/WizardStepContact'
 import { WizardStepHero } from './wizard/WizardStepHero'
 import { WizardStepProduct } from './wizard/WizardStepProduct'
-import { WizardStepCategory } from './wizard/WizardStepCategory'
-import { WizardStepTrust } from './wizard/WizardStepTrust'
+import { WizardStepStyle } from './wizard/WizardStepStyle'
 
 export function ActivationWizard({
   steps,
+  plan,
   storeData,
   categories,
   activeProductCount,
-  products,
 }: {
   steps: ActivationFlowStep[]
   plan: StoreLaunchPlan
   storeData: AdminStoreData
   categories: Category[]
   activeProductCount: number
-  products: ProductWithImages[]
 }) {
-  const currentIndex = steps.findIndex((s) => s.status === 'current')
+  const currentIndex = steps.findIndex((step) => step.status === 'current')
   const activeIndex = currentIndex === -1 ? steps.length - 1 : currentIndex
 
   return (
@@ -35,6 +32,7 @@ export function ActivationWizard({
           if (step.status === 'done') {
             return <DoneRow key={step.id} step={step} />
           }
+
           if (index === activeIndex) {
             return (
               <ActiveCard
@@ -45,10 +43,11 @@ export function ActivationWizard({
                 storeData={storeData}
                 categories={categories}
                 activeProductCount={activeProductCount}
-                products={products}
+                publicPath={plan.publicPath}
               />
             )
           }
+
           return <UpcomingRow key={step.id} step={step} stepNumber={index + 1} />
         })}
       </div>
@@ -71,10 +70,10 @@ function WizardHeader({
             Volta Admin
           </p>
           <h1 className="mt-1.5 font-heading text-[1.5rem] font-semibold tracking-[-0.04em] text-foreground sm:text-[1.75rem]">
-            Preparando tu tienda
+            Termina de activar tu tienda
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Completá cada paso para dejarla lista y compartirla con confianza.
+            Haz estos 3 pasos y la tienda ya se va a ver bien, tener algo real para vender y quedar lista para mostrarse.
           </p>
         </div>
         <div className="shrink-0 text-right">
@@ -84,7 +83,6 @@ function WizardHeader({
         </div>
       </div>
 
-      {/* Labeled step progress bar */}
       <div className="mt-5 flex gap-1">
         {steps.map((step, index) => (
           <div key={step.id} className="flex flex-1 flex-col gap-1.5">
@@ -145,7 +143,7 @@ function ActiveCard({
   storeData,
   categories,
   activeProductCount,
-  products,
+  publicPath,
 }: {
   step: ActivationFlowStep
   stepNumber: number
@@ -153,21 +151,18 @@ function ActiveCard({
   storeData: AdminStoreData
   categories: Category[]
   activeProductCount: number
-  products: ProductWithImages[]
+  publicPath: string
 }) {
   return (
     <section className="admin-surface relative overflow-hidden rounded-2xl p-6 sm:p-8">
-      {/* Emerald accent line */}
       <div className="absolute inset-x-0 top-0 h-px bg-emerald-300/45" />
-      {/* Ambient glow */}
       <div
         className="absolute right-[-2rem] top-[-2rem] h-44 w-44 rounded-full bg-emerald-300/10 blur-3xl"
         aria-hidden="true"
       />
 
       <div className="relative">
-        {/* Step badge */}
-        <div className="inline-flex items-center gap-2.5 rounded-full border border-border dark:border-white/10 bg-black/[0.04] dark:bg-white/6 px-3 py-1.5">
+        <div className="inline-flex items-center gap-2.5 rounded-full border border-border bg-black/[0.04] px-3 py-1.5 dark:border-white/10 dark:bg-white/6">
           <span className="flex size-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-black leading-none text-white">
             {stepNumber}
           </span>
@@ -176,30 +171,17 @@ function ActiveCard({
           </span>
         </div>
 
-        {/* Title */}
         <h2 className="mt-4 font-heading text-[1.55rem] font-semibold tracking-[-0.05em] text-foreground sm:text-[1.95rem]">
           {step.title}
         </h2>
+        <p className="mt-2 max-w-xl text-[15px] leading-7 text-muted-foreground">{step.hint}</p>
 
-        {/* Hint — specific item description */}
-        <p className="mt-2 max-w-xl text-[15px] leading-7 text-muted-foreground">
-          {step.hint}
-        </p>
-
-        {/* Inline form */}
         <div className="mt-7">
-          {step.id === 'contact' && <WizardStepContact store={storeData.store} />}
-          {step.id === 'hero' && <WizardStepHero content={storeData.content} />}
-          {step.id === 'products' && (
+          {step.id === 'hero' ? <WizardStepHero content={storeData.content} /> : null}
+          {step.id === 'products' ? (
             <WizardStepProduct categories={categories} activeProductCount={activeProductCount} />
-          )}
-          {step.id === 'categories' && (
-            <WizardStepCategory
-              products={products}
-              hasExistingCategories={categories.length > 0}
-            />
-          )}
-          {step.id === 'trust' && <WizardStepTrust store={storeData.store} />}
+          ) : null}
+          {step.id === 'style' ? <WizardStepStyle publicPath={publicPath} /> : null}
         </div>
       </div>
     </section>
@@ -215,7 +197,7 @@ function UpcomingRow({
 }) {
   return (
     <div className="admin-surface-muted flex items-center gap-3 rounded-xl px-4 py-3 opacity-40">
-      <div className="flex size-7 shrink-0 items-center justify-center rounded-full border border-border dark:border-white/10 text-xs font-bold text-muted-foreground">
+      <div className="flex size-7 shrink-0 items-center justify-center rounded-full border border-border text-xs font-bold text-muted-foreground dark:border-white/10">
         {stepNumber}
       </div>
       <p className="text-sm font-medium text-muted-foreground">{step.navLabel}</p>

@@ -1,16 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import {
-  AtSign,
-  ArrowRight,
-  CheckCircle2,
-  type LucideIcon,
-  MapPin,
-  MessageCircle,
-  Package,
-  Clock3,
-} from 'lucide-react'
+import { ArrowRight, CheckCircle2, Package, Sparkles } from 'lucide-react'
 import type { ActivationFlowStep } from '@/lib/dashboard/store-launch'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -47,7 +38,7 @@ export function ActivationStepCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-border dark:border-white/10 bg-black/[0.04] dark:bg-white/6 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground dark:text-neutral-200">
+              <span className="rounded-full border border-border bg-black/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground dark:border-white/10 dark:bg-white/6 dark:text-neutral-200">
                 Paso {stepNumber} de {totalSteps}
               </span>
               <span
@@ -56,8 +47,8 @@ export function ActivationStepCard({
                   isDone
                     ? 'border-emerald-300/20 bg-emerald-400/10 text-emerald-700 dark:text-emerald-100'
                     : isCurrent
-                      ? 'border-border dark:border-white/10 bg-black/[0.04] dark:bg-white/6 text-foreground dark:text-neutral-200'
-                      : 'border-border dark:border-white/8 bg-black/[0.03] dark:bg-white/4 text-muted-foreground dark:text-neutral-400',
+                      ? 'border-border bg-black/[0.04] text-foreground dark:border-white/10 dark:bg-white/6 dark:text-neutral-200'
+                      : 'border-border bg-black/[0.03] text-muted-foreground dark:border-white/8 dark:bg-white/4 dark:text-neutral-400',
                 )}
               >
                 {isDone ? 'Listo' : isCurrent ? 'Ahora' : 'Despues'}
@@ -72,12 +63,12 @@ export function ActivationStepCard({
             </p>
           </div>
 
-          <div className="shrink-0 rounded-md border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 px-3 py-1.5 text-xs font-medium text-muted-foreground">
+          <div className="shrink-0 rounded-md border border-border bg-black/[0.04] px-3 py-1.5 text-xs font-medium text-muted-foreground dark:border-white/8 dark:bg-white/4">
             {step.completionText}
           </div>
         </div>
 
-        <div className="rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-black/10 p-4">
+        <div className="rounded-lg border border-border bg-black/[0.04] p-4 dark:border-white/8 dark:bg-black/10">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -90,7 +81,9 @@ export function ActivationStepCard({
             <div
               className={cn(
                 'flex size-9 shrink-0 items-center justify-center rounded-lg',
-                isDone ? 'bg-emerald-400/12 text-emerald-700 dark:text-emerald-100' : 'bg-black/[0.06] dark:bg-white/8 text-muted-foreground dark:text-neutral-200',
+                isDone
+                  ? 'bg-emerald-400/12 text-emerald-700 dark:text-emerald-100'
+                  : 'bg-black/[0.06] text-muted-foreground dark:bg-white/8 dark:text-neutral-200',
               )}
             >
               <CheckCircle2 className="size-4" />
@@ -132,24 +125,10 @@ function StepPreview({
   stepId: ActivationFlowStep['id']
   isDone: boolean
 }) {
-  if (stepId === 'contact') {
-    return (
-      <div className="rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-3.5">
-        <div className="flex items-center justify-between rounded-lg border border-emerald-300/18 bg-[linear-gradient(135deg,rgba(46,230,166,0.18),rgba(111,243,223,0.08))] px-4 py-3">
-          <div>
-            <p className="text-[11px] text-black/70">Boton principal</p>
-            <p className="text-sm font-semibold text-black">Hablar por WhatsApp</p>
-          </div>
-          <MessageCircle className="size-5 text-black" />
-        </div>
-      </div>
-    )
-  }
-
   if (stepId === 'hero') {
     return (
-      <div className="rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-3.5">
-        <div className="rounded-lg border border-border dark:border-white/8 bg-[linear-gradient(135deg,rgba(0,0,0,0.04),rgba(0,0,0,0.02))] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-4">
+      <div className="rounded-lg border border-border bg-black/[0.04] p-3.5 dark:border-white/8 dark:bg-white/4">
+        <div className="rounded-lg border border-border bg-[linear-gradient(135deg,rgba(0,0,0,0.04),rgba(0,0,0,0.02))] p-4 dark:border-white/8 dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))]">
           <div className="mb-3 h-20 rounded-md bg-[linear-gradient(135deg,rgba(46,230,166,0.18),rgba(255,255,255,0.06))]" />
           <div className="space-y-2">
             <div className="h-3 w-32 rounded-full bg-black/[0.1] dark:bg-white/18" />
@@ -162,8 +141,8 @@ function StepPreview({
 
   if (stepId === 'products') {
     return (
-      <div className="rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-3.5">
-        <div className="flex items-center gap-3 rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-black/10 p-3">
+      <div className="rounded-lg border border-border bg-black/[0.04] p-3.5 dark:border-white/8 dark:bg-white/4">
+        <div className="flex items-center gap-3 rounded-lg border border-border bg-black/[0.04] p-3 dark:border-white/8 dark:bg-black/10">
           <div className="size-14 rounded-md bg-[linear-gradient(135deg,rgba(46,230,166,0.16),rgba(255,255,255,0.04))]" />
           <div className="min-w-0 flex-1 space-y-2">
             <div className="h-3 w-28 rounded-full bg-black/[0.1] dark:bg-white/18" />
@@ -176,59 +155,24 @@ function StepPreview({
     )
   }
 
-  if (stepId === 'categories') {
-    return (
-      <div className="rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-3.5">
-        <div className="flex flex-wrap gap-2">
-          {['Destacados', 'Nuevos', 'Regalos'].map((label) => (
-            <span
-              key={label}
-              className={cn(
-                'rounded-full border px-3 py-2 text-xs font-medium',
-                isDone
-                  ? 'border-emerald-300/18 bg-emerald-400/8 text-emerald-700 dark:text-emerald-100'
-                  : 'border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/6 text-muted-foreground',
-              )}
-            >
-              {label}
-            </span>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="rounded-lg border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-3.5">
+    <div className="rounded-lg border border-border bg-black/[0.04] p-3.5 dark:border-white/8 dark:bg-white/4">
       <div className="grid grid-cols-3 gap-2.5">
-        <TrustPill icon={AtSign} label="Instagram" active={isDone} />
-        <TrustPill icon={MapPin} label="Direccion" active={isDone} />
-        <TrustPill icon={Clock3} label="Horarios" active={isDone} />
+        {['Clasica', 'Visual', 'Compacta'].map((label) => (
+          <div
+            key={label}
+            className={cn(
+              'rounded-md border px-3 py-3 text-center',
+              isDone
+                ? 'border-emerald-300/18 bg-emerald-400/8 text-emerald-700 dark:text-emerald-100'
+                : 'border-border bg-black/[0.04] text-muted-foreground dark:border-white/8 dark:bg-black/10',
+            )}
+          >
+            <Sparkles className="mx-auto size-4" />
+            <p className="mt-2 text-[11px] font-medium">{label}</p>
+          </div>
+        ))}
       </div>
-    </div>
-  )
-}
-
-function TrustPill({
-  icon: Icon,
-  label,
-  active,
-}: {
-  icon: LucideIcon
-  label: string
-  active: boolean
-}) {
-  return (
-    <div
-      className={cn(
-        'rounded-md border px-3 py-3 text-center',
-        active
-          ? 'border-emerald-300/18 bg-emerald-400/8 text-emerald-700 dark:text-emerald-100'
-          : 'border-border dark:border-white/8 bg-black/[0.04] dark:bg-black/10 text-muted-foreground',
-      )}
-    >
-      <Icon className="mx-auto size-4" />
-      <p className="mt-2 text-[11px] font-medium">{label}</p>
     </div>
   )
 }

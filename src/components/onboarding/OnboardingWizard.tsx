@@ -3,19 +3,15 @@
 import { useSyncExternalStore, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, Check, Package2, Sparkles } from 'lucide-react'
+import { ArrowRight, Check } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { THEME_PRESETS } from '@/data/theme-presets'
 import { completeOnboarding } from '@/lib/actions/onboarding'
 import { cn } from '@/lib/utils'
 
-type Step = 1 | 2 | 3 | 4 | 5
+type Step = 1 | 2
 
-const STEP_LABELS = ['Nombre', 'WhatsApp', 'Producto', 'Estilo', 'Listo']
-const ONBOARDING_PRESETS = THEME_PRESETS.filter((preset) =>
-  ['minimal', 'fashion', 'organic'].includes(preset.id),
-)
+const STEP_LABELS = ['Nombre', 'WhatsApp']
 
 const slideVariants = {
   enter: (dir: 'forward' | 'back') => ({ x: dir === 'forward' ? 40 : -40, opacity: 0 }),
@@ -23,13 +19,7 @@ const slideVariants = {
   exit: (dir: 'forward' | 'back') => ({ x: dir === 'forward' ? -40 : 40, opacity: 0 }),
 }
 
-export function OnboardingWizard({
-  initialName,
-  hasActiveProduct,
-}: {
-  initialName: string
-  hasActiveProduct: boolean
-}) {
+export function OnboardingWizard({ initialName }: { initialName: string }) {
   const router = useRouter()
   const { resolvedTheme } = useTheme()
   const mounted = useSyncExternalStore(() => () => {}, () => true, () => false)
@@ -38,14 +28,10 @@ export function OnboardingWizard({
   const [direction, setDirection] = useState<'forward' | 'back'>('forward')
   const [storeName, setStoreName] = useState(initialName)
   const [whatsapp, setWhatsapp] = useState('')
-  const [firstProductName, setFirstProductName] = useState('')
-  const [firstProductPrice, setFirstProductPrice] = useState('')
-  const [selectedPreset, setSelectedPreset] = useState<string>('minimal')
   const [nameError, setNameError] = useState('')
   const [waError, setWaError] = useState('')
-  const [productError, setProductError] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const isDark = mounted ? resolvedTheme === 'dark' : false
 
@@ -54,84 +40,51 @@ export function OnboardingWizard({
       setNameError('El nombre debe tener al menos 2 caracteres')
       return false
     }
+
     setNameError('')
     return true
   }
 
   function validateStep2() {
-    const wa = whatsapp.trim()
-    if (!wa || wa.length < 8 || !/^\+?[0-9\s\-()]+$/.test(wa)) {
+    const value = whatsapp.trim()
+    if (!value || value.length < 8 || !/^\+?[0-9\s\-()]+$/.test(value)) {
       setWaError('Ingresa un numero valido. Ejemplo: +5491112345678')
       return false
     }
+
     setWaError('')
-    return true
-  }
-
-  function validateStep3() {
-    if (hasActiveProduct) {
-      setProductError('')
-      return true
-    }
-
-    const price = Number(firstProductPrice.replace(',', '.'))
-    if (!firstProductName.trim()) {
-      setProductError('Para continuar, agrega tu primer producto.')
-      return false
-    }
-    if (!Number.isFinite(price) || price <= 0) {
-      setProductError('Ingresa un precio valido para tu primer producto.')
-      return false
-    }
-
-    setProductError('')
     return true
   }
 
   function goNext() {
     if (step === 1 && !validateStep1()) return
-    if (step === 2 && !validateStep2()) return
-    if (step === 3 && !validateStep3()) return
     setDirection('forward')
-    setStep((current) => (current + 1) as Step)
+    setStep(2)
   }
 
   function goBack() {
     setDirection('back')
-    setStep((current) => (current - 1) as Step)
+    setStep(1)
   }
 
   async function handleFinish() {
+    if (!validateStep2()) return
+
     setIsSubmitting(true)
     setSubmitError('')
-
-    const previewWindow = window.open('', '_blank')
-    const firstProductPriceValue = Number(firstProductPrice.replace(',', '.'))
 
     const result = await completeOnboarding({
       storeName,
       whatsapp,
-      firstProductName: hasActiveProduct ? undefined : firstProductName,
-      firstProductPrice: hasActiveProduct ? undefined : firstProductPriceValue,
-      presetId: selectedPreset,
     })
 
     if (result.error) {
-      previewWindow?.close()
       setSubmitError(result.error)
       setIsSubmitting(false)
       return
     }
 
-    if (result.publicPath) {
-      if (previewWindow) {
-        previewWindow.location.href = result.publicPath
-      } else {
-        window.open(result.publicPath, '_blank')
-      }
-    }
-
-    router.push('/admin')
+    router.push('/onboarding/success')
   }
 
   const inputClass = (error: boolean) =>
@@ -173,15 +126,15 @@ export function OnboardingWizard({
       <main className="flex min-h-[calc(100vh-72px)] items-center justify-center px-4 py-10">
         <div className="w-full max-w-5xl">
           <div className="mb-10 flex items-center justify-center gap-3">
-            {([1, 2, 3, 4, 5] as Step[]).map((s) => (
-              <div key={s} className="flex items-center gap-3">
+            {([1, 2] as Step[]).map((currentStep) => (
+              <div key={currentStep} className="flex items-center gap-3">
                 <div className="flex flex-col items-center gap-1.5">
                   <div
                     className={cn(
                       'flex size-8 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300',
-                      s < step
+                      currentStep < step
                         ? 'bg-emerald-500 text-white'
-                        : s === step
+                        : currentStep === step
                           ? isDark
                             ? 'bg-emerald-400 text-black'
                             : 'bg-[#0f172a] text-white'
@@ -190,12 +143,12 @@ export function OnboardingWizard({
                             : 'bg-black/8 text-black/22',
                     )}
                   >
-                    {s < step ? <Check className="size-4" strokeWidth={2.5} /> : s}
+                    {currentStep < step ? <Check className="size-4" strokeWidth={2.5} /> : currentStep}
                   </div>
                   <span
                     className={cn(
                       'hidden text-[10px] font-medium sm:block',
-                      s === step
+                      currentStep === step
                         ? isDark
                           ? 'text-white/65'
                           : 'text-[#0f172a]/55'
@@ -204,17 +157,17 @@ export function OnboardingWizard({
                           : 'text-black/20',
                     )}
                   >
-                    {STEP_LABELS[s - 1]}
+                    {STEP_LABELS[currentStep - 1]}
                   </span>
                 </div>
-                {s < 5 && (
+                {currentStep < 2 ? (
                   <div
                     className={cn(
                       'mb-4 h-px w-12 transition-all duration-500',
-                      s < step ? 'bg-emerald-500' : isDark ? 'bg-white/10' : 'bg-black/10',
+                      currentStep < step ? 'bg-emerald-500' : isDark ? 'bg-white/10' : 'bg-black/10',
                     )}
                   />
-                )}
+                ) : null}
               </div>
             ))}
           </div>
@@ -237,14 +190,14 @@ export function OnboardingWizard({
                 exit="exit"
                 transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
               >
-                {step === 1 && (
+                {step === 1 ? (
                   <TwoCol
                     isDark={isDark}
                     left={
                       <StepCopy
                         isDark={isDark}
                         title={<>Como se llama<br />tu negocio?</>}
-                        body="Ese nombre va a vivir en tu tienda y en la portada inicial. Puedes cambiarlo despues."
+                        body="Solo necesitamos lo esencial para crearte la tienda y hacerte entrar rapido al producto."
                       />
                     }
                   >
@@ -254,11 +207,11 @@ export function OnboardingWizard({
                         autoFocus
                         type="text"
                         value={storeName}
-                        onChange={(e) => {
-                          setStoreName(e.target.value)
+                        onChange={(event) => {
+                          setStoreName(event.target.value)
                           if (nameError) setNameError('')
                         }}
-                        onKeyDown={(e) => e.key === 'Enter' && goNext()}
+                        onKeyDown={(event) => event.key === 'Enter' && goNext()}
                         placeholder="Tu negocio"
                         maxLength={48}
                         className={inputClass(!!nameError)}
@@ -266,20 +219,18 @@ export function OnboardingWizard({
                       {nameError ? (
                         <p className="text-xs text-red-400">{nameError}</p>
                       ) : (
-                        <p className={hintClass}>Tambien se va a usar como base del hero inicial</p>
+                        <p className={hintClass}>Esto es lo que van a ver primero cuando entres al admin y a tu tienda.</p>
                       )}
                     </div>
                   </TwoCol>
-                )}
-
-                {step === 2 && (
+                ) : (
                   <TwoCol
                     isDark={isDark}
                     left={
                       <StepCopy
                         isDark={isDark}
-                        title={<>Donde quieres<br />recibir pedidos?</>}
-                        body="Tus clientes te van a escribir aqui para comprar. Este dato activa el cierre por WhatsApp."
+                        title={<>A donde te van<br />a escribir?</>}
+                        body="Tu WhatsApp es la base del flujo de venta. Apenas lo cargues, te llevamos a terminar de activar la tienda."
                       />
                     }
                   >
@@ -289,204 +240,29 @@ export function OnboardingWizard({
                         autoFocus
                         type="tel"
                         value={whatsapp}
-                        onChange={(e) => {
-                          setWhatsapp(e.target.value)
+                        onChange={(event) => {
+                          setWhatsapp(event.target.value)
                           if (waError) setWaError('')
+                          if (submitError) setSubmitError('')
                         }}
-                        onKeyDown={(e) => e.key === 'Enter' && goNext()}
+                        onKeyDown={(event) => event.key === 'Enter' && handleFinish()}
                         placeholder="+54 9 11 1234 5678"
-                        className={inputClass(!!waError)}
+                        className={inputClass(!!waError || !!submitError)}
                       />
-                      {waError ? (
-                        <p className="text-xs text-red-400">{waError}</p>
+                      {waError || submitError ? (
+                        <p className="text-xs text-red-400">{waError || submitError}</p>
                       ) : (
-                        <p className={hintClass}>Sin esto no se puede terminar la activacion</p>
+                        <p className={hintClass}>Despues vas a terminar portada, producto y estilo dentro del admin.</p>
                       )}
                     </div>
                   </TwoCol>
-                )}
-
-                {step === 3 && (
-                  <TwoCol
-                    isDark={isDark}
-                    left={
-                      <StepCopy
-                        isDark={isDark}
-                        title={<>Tu primer producto<br />es obligatorio</>}
-                        body="Con un producto real la tienda ya se puede compartir. No hace falta cargar mas para terminar."
-                      />
-                    }
-                  >
-                    {hasActiveProduct ? (
-                      <div
-                        className={cn(
-                          'rounded-2xl border px-5 py-5',
-                          isDark ? 'border-emerald-400/20 bg-emerald-400/8' : 'border-emerald-500/20 bg-emerald-50',
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex size-11 items-center justify-center rounded-2xl bg-emerald-500 text-white">
-                            <Package2 className="size-5" />
-                          </div>
-                          <div>
-                            <p className={cn('text-sm font-semibold', isDark ? 'text-white' : 'text-[#0f172a]')}>
-                              Ya tienes tu primer producto
-                            </p>
-                            <p className={cn('mt-1 text-sm', isDark ? 'text-white/55' : 'text-[#64748b]')}>
-                              Puedes seguir. Si quieres, luego agregas mas desde Productos.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <div className="space-y-3">
-                          <label className={labelClass}>Nombre del producto</label>
-                          <input
-                            autoFocus
-                            type="text"
-                            value={firstProductName}
-                            onChange={(e) => {
-                              setFirstProductName(e.target.value)
-                              if (productError) setProductError('')
-                            }}
-                            placeholder="Ej: Remera clasica"
-                            maxLength={55}
-                            className={inputClass(!!productError)}
-                          />
-                        </div>
-
-                        <div className="space-y-3">
-                          <label className={labelClass}>Precio</label>
-                          <input
-                            type="text"
-                            inputMode="decimal"
-                            value={firstProductPrice}
-                            onChange={(e) => {
-                              setFirstProductPrice(e.target.value)
-                              if (productError) setProductError('')
-                            }}
-                            placeholder="25000"
-                            className={inputClass(!!productError)}
-                          />
-                        </div>
-
-                        {productError ? (
-                          <p className="text-xs text-red-400">{productError}</p>
-                        ) : (
-                          <p className={hintClass}>Solo nombre y precio. Lo demas lo puedes editar despues.</p>
-                        )}
-                      </div>
-                    )}
-                  </TwoCol>
-                )}
-
-                {step === 4 && (
-                  <TwoCol
-                    isDark={isDark}
-                    left={
-                      <StepCopy
-                        isDark={isDark}
-                        title={<>Elige un estilo<br />para arrancar</>}
-                        body="Despues puedes cambiar todo. Aqui solo estas marcando una direccion visual linda desde el minuto uno."
-                      />
-                    }
-                  >
-                    <div className="grid gap-3">
-                      {ONBOARDING_PRESETS.map((preset) => {
-                        const selected = selectedPreset === preset.id
-                        return (
-                          <button
-                            key={preset.id}
-                            type="button"
-                            onClick={() => setSelectedPreset(preset.id)}
-                            className={cn(
-                              'overflow-hidden rounded-2xl border text-left transition-all duration-150',
-                              selected
-                                ? isDark
-                                  ? 'border-emerald-400/35 bg-emerald-400/8'
-                                  : 'border-[#0f172a]/14 bg-[#0f172a]/3'
-                                : isDark
-                                  ? 'border-white/8 bg-white/[0.02] hover:border-white/16'
-                                  : 'border-black/8 bg-[#f8fafc] hover:border-black/14',
-                            )}
-                          >
-                            <div
-                              className="flex h-24 items-end gap-2 px-4 pb-3"
-                              style={{
-                                background: `linear-gradient(135deg, ${preset.previewColors[0]} 0%, ${preset.previewColors[1]}22 100%)`,
-                              }}
-                            >
-                              {[0, 1, 2].map((index) => (
-                                <div
-                                  key={index}
-                                  className="flex-1 rounded-[10px]"
-                                  style={{
-                                    height: index === 1 ? 44 : 34,
-                                    background: preset.previewColors[2],
-                                    opacity: 0.18 + index * 0.14,
-                                  }}
-                                />
-                              ))}
-                            </div>
-                            <div className="space-y-2 px-4 py-4">
-                              <div className="flex items-center justify-between gap-3">
-                                <p className={cn('text-sm font-semibold', isDark ? 'text-white' : 'text-[#0f172a]')}>
-                                  {preset.name}
-                                </p>
-                                {selected ? (
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/12 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-500">
-                                    <Sparkles className="size-3" />
-                                    Elegido
-                                  </span>
-                                ) : null}
-                              </div>
-                              <p className={cn('text-sm leading-6', isDark ? 'text-white/50' : 'text-[#64748b]')}>
-                                {preset.description}
-                              </p>
-                            </div>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </TwoCol>
-                )}
-
-                {step === 5 && (
-                  <div className="px-8 py-20 text-center sm:py-28">
-                    <div className="mx-auto mb-8 flex size-20 items-center justify-center rounded-3xl bg-emerald-500 shadow-[0_12px_32px_rgba(16,185,129,0.32)]">
-                      <Check className="size-10 text-white" strokeWidth={2.5} />
-                    </div>
-                    <h1
-                      className={cn(
-                        'text-3xl font-semibold tracking-tight sm:text-[2.25rem]',
-                        isDark ? 'text-white' : 'text-[#0f172a]',
-                      )}
-                    >
-                      Tu tienda ya esta lista
-                      <br />
-                      para mostrarse
-                    </h1>
-                    <p
-                      className={cn(
-                        'mx-auto mt-4 max-w-md text-base leading-relaxed',
-                        isDark ? 'text-white/50' : 'text-[#64748b]',
-                      )}
-                    >
-                      <span className={cn('font-semibold', isDark ? 'text-white/85' : 'text-[#0f172a]')}>
-                        {storeName}
-                      </span>{' '}
-                      va a abrir su tienda publica en una pestaña nueva para que veas el resultado real, y tu admin queda listo en esta.
-                    </p>
-                    {submitError ? <p className="mt-4 text-sm text-red-400">{submitError}</p> : null}
-                  </div>
                 )}
               </motion.div>
             </AnimatePresence>
           </div>
 
           <div className={cn('mt-6 flex items-center', step === 1 ? 'justify-end' : 'justify-between')}>
-            {step > 1 && (
+            {step > 1 ? (
               <button
                 onClick={goBack}
                 className={cn(
@@ -496,35 +272,33 @@ export function OnboardingWizard({
               >
                 ← Atras
               </button>
-            )}
+            ) : null}
 
-            <div className="flex items-center gap-4">
-              {step < 5 ? (
-                <button
-                  onClick={goNext}
-                  className={cn(
-                    'flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-150 active:scale-95',
-                    isDark ? 'bg-emerald-400 text-black hover:bg-emerald-300' : 'bg-[#0f172a] text-white hover:bg-[#1e293b]',
-                  )}
-                >
-                  Continuar
-                  <ArrowRight className="size-4" />
-                </button>
-              ) : (
-                <button
-                  onClick={handleFinish}
-                  disabled={isSubmitting}
-                  className={cn(
-                    'flex items-center gap-2 rounded-xl px-7 py-3 text-sm font-semibold transition-all duration-150 active:scale-95',
-                    isDark ? 'bg-emerald-400 text-black hover:bg-emerald-300' : 'bg-[#0f172a] text-white hover:bg-[#1e293b]',
-                    isSubmitting && 'cursor-not-allowed opacity-55',
-                  )}
-                >
-                  {isSubmitting ? 'Abriendo tu tienda...' : 'Ver mi tienda'}
-                  {!isSubmitting && <ArrowRight className="size-4" />}
-                </button>
-              )}
-            </div>
+            {step === 1 ? (
+              <button
+                onClick={goNext}
+                className={cn(
+                  'flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-150 active:scale-95',
+                  isDark ? 'bg-emerald-400 text-black hover:bg-emerald-300' : 'bg-[#0f172a] text-white hover:bg-[#1e293b]',
+                )}
+              >
+                Continuar
+                <ArrowRight className="size-4" />
+              </button>
+            ) : (
+              <button
+                onClick={handleFinish}
+                disabled={isSubmitting}
+                className={cn(
+                  'flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-150 active:scale-95',
+                  isDark ? 'bg-emerald-400 text-black hover:bg-emerald-300' : 'bg-[#0f172a] text-white hover:bg-[#1e293b]',
+                  isSubmitting ? 'cursor-not-allowed opacity-60' : '',
+                )}
+              >
+                {isSubmitting ? 'Creando tu tienda...' : 'Crear tienda'}
+                {!isSubmitting ? <ArrowRight className="size-4" /> : null}
+              </button>
+            )}
           </div>
         </div>
       </main>

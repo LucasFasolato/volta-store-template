@@ -17,30 +17,13 @@ export default async function OnboardingPage() {
   const supabase = await createClient()
   const { data: store } = await supabase
     .from('stores')
-    .select('id, name, whatsapp')
+    .select('name, whatsapp')
     .eq('owner_id', user.id)
-    .single()
+    .maybeSingle()
 
-  if (!store) {
-    redirect('/login')
-  }
-
-  const { count: activeProductCount } = await supabase
-    .from('products')
-    .select('id', { count: 'exact', head: true })
-    .eq('store_id', store.id)
-    .eq('is_active', true)
-
-  const hasActiveProduct = (activeProductCount ?? 0) >= 1
-
-  if (store?.whatsapp && hasActiveProduct) {
+  if (store?.whatsapp?.trim()) {
     redirect('/admin')
   }
 
-  return (
-    <OnboardingWizard
-      initialName={store?.name ?? ''}
-      hasActiveProduct={hasActiveProduct}
-    />
-  )
+  return <OnboardingWizard initialName={store?.name ?? ''} />
 }

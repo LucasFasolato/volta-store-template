@@ -2,33 +2,58 @@
 
 import { useState, useTransition } from 'react'
 import { CheckCircle2, Loader2 } from 'lucide-react'
+import { ImageUpload } from '@/components/admin/ImageUpload'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ImageUpload } from '@/components/admin/ImageUpload'
 import { updateStoreContent, uploadHeroImage } from '@/lib/actions/store'
+import { cn } from '@/lib/utils'
 import type { StoreContent } from '@/types/store'
 
 export function WizardStepHero({ content }: { content: StoreContent }) {
   const [title, setTitle] = useState(content.hero_title ?? '')
   const [subtitle, setSubtitle] = useState(content.hero_subtitle ?? '')
+  const [heroImageUrl, setHeroImageUrl] = useState(content.hero_image_url ?? null)
   const [error, setError] = useState<string | null>(null)
+  const [imageError, setImageError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  const hasImage = Boolean(content.hero_image_url)
   const canSave = title.trim().length > 0 && subtitle.trim().length > 0
+
+  async function handleUpload(formData: FormData) {
+    const result = await uploadHeroImage(formData)
+
+    if (result?.url) {
+      setHeroImageUrl(result.url)
+      setImageError(null)
+    }
+
+    if (result?.error) {
+      setImageError(result.error)
+    }
+
+    return result
+  }
 
   function handleSave() {
     setError(null)
+
+    if (!heroImageUrl) {
+      setImageError('Para completar este paso, subi una imagen de portada.')
+      return
+    }
+
     startTransition(async () => {
       const result = await updateStoreContent({
         hero_title: title.trim(),
         hero_subtitle: subtitle.trim(),
         support_text: content.support_text ?? '',
       })
+
       if (result?.error) {
         const fieldMsgs = Object.values(result.error.fieldErrors ?? {}).flat()
-        const msg = result.error.formErrors?.[0] ?? fieldMsgs[0] ?? 'Error al guardar.'
-        setError(msg)
+        const message = result.error.formErrors?.[0] ?? fieldMsgs[0] ?? 'Error al guardar.'
+        setError(message)
+        return
       }
     })
   }
@@ -39,25 +64,26 @@ export function WizardStepHero({ content }: { content: StoreContent }) {
         <div className="space-y-4">
           <div>
             <Label className="mb-1.5 block text-sm font-medium text-neutral-200">
-              Título principal
+              Titulo principal
             </Label>
             <Input
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(event) => setTitle(event.target.value)}
               placeholder="Ej: Ropa de diseño independiente"
               maxLength={45}
               disabled={isPending}
               className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
             />
           </div>
+
           <div>
             <Label className="mb-1.5 block text-sm font-medium text-neutral-200">
-              Subtítulo
+              Subtitulo
             </Label>
             <Input
               value={subtitle}
-              onChange={(e) => setSubtitle(e.target.value)}
-              placeholder="Ej: Hacemos pedidos a medida y enviamos a todo el país"
+              onChange={(event) => setSubtitle(event.target.value)}
+              placeholder="Ej: Hacemos pedidos a medida y enviamos a todo el pais"
               maxLength={110}
               disabled={isPending}
               className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
@@ -71,33 +97,33 @@ export function WizardStepHero({ content }: { content: StoreContent }) {
             disabled={isPending || !canSave}
             className="inline-flex h-11 items-center gap-2 rounded-full bg-[linear-gradient(135deg,#2ee6a6,#6ff3df)] px-6 text-sm font-semibold text-black shadow-[0_8px_20px_rgba(16,185,129,0.2)] transition hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <CheckCircle2 className="size-4" />
-            )}
-            {isPending ? 'Guardando...' : 'Guardar y continuar'}
+            {isPending ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
+            {isPending ? 'Guardando...' : 'Guardar portada'}
           </button>
-
-          {!hasImage && canSave ? (
-            <p className="text-xs text-neutral-500">
-              También subí una imagen de portada para completar este paso.
-            </p>
-          ) : null}
         </div>
 
-        <div className="w-full lg:w-[220px]">
+        <div className="w-full lg:w-[240px]">
           <Label className="mb-1.5 block text-sm font-medium text-neutral-200">
             Imagen de portada
           </Label>
-          <p className="mb-3 text-xs text-neutral-500">Mín. 800px · Ratio 16:9</p>
-          <ImageUpload
-            currentUrl={content.hero_image_url}
-            onUpload={uploadHeroImage}
-            fieldName="hero"
-            aspectHint="16:9"
-            label="Subir imagen"
-          />
+          <p className="mb-3 text-xs text-neutral-500">Min. 800px · Obligatoria · Ratio sugerido 16:9</p>
+          <div
+            className={cn(
+              'rounded-2xl border p-3 transition',
+              imageError
+                ? 'border-red-400/60 bg-red-400/5'
+                : 'border-border bg-black/[0.03] dark:border-white/8 dark:bg-white/[0.02]',
+            )}
+          >
+            <ImageUpload
+              currentUrl={heroImageUrl}
+              onUpload={handleUpload}
+              fieldName="hero"
+              aspectHint="16:9"
+              label="Subir imagen"
+            />
+          </div>
+          {imageError ? <p className="mt-2 text-xs text-red-400">{imageError}</p> : null}
         </div>
       </div>
     </div>
