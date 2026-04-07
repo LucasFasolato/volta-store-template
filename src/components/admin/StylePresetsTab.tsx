@@ -15,11 +15,10 @@ export function StylePresetsTab() {
     const result = await applyThemePreset(preset.id)
 
     if (result?.error) {
-      toast.error('No se pudo aplicar el estilo. Intentá de nuevo.')
+      toast.error('No se pudo aplicar el estilo. Intenta de nuevo.')
     } else {
       setAppliedId(preset.id)
-      toast.success(`Estilo "${preset.name}" aplicado. Podés personalizar cualquier detalle después.`)
-      // Reset after a moment to allow re-apply
+      toast.success(`Estilo "${preset.name}" aplicado. Puedes personalizar cualquier detalle despues.`)
       setTimeout(() => setAppliedId(null), 3000)
     }
 
@@ -28,15 +27,13 @@ export function StylePresetsTab() {
 
   return (
     <div className="space-y-5">
-      {/* Header note */}
       <div className="flex items-start gap-3 rounded-[18px] border border-white/8 bg-white/3 px-4 py-3.5">
         <Sparkles className="mt-0.5 size-4 shrink-0 text-emerald-400" />
         <p className="text-sm text-neutral-300">
-          Elegí un estilo base para arrancar. Podés cambiar colores, fuentes y detalles después desde las otras pestañas.
+          Elige un estilo base para arrancar. Puedes cambiar colores, fuentes y detalles despues desde las otras pestañas.
         </p>
       </div>
 
-      {/* Preset grid */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {THEME_PRESETS.map((preset) => (
           <PresetCard
@@ -65,13 +62,30 @@ function PresetCard({
 }) {
   const [c1, c2, c3] = preset.previewColors
   const isDark = preset.theme.visual_mode === 'dark'
+  const buttonStyle = justApplied
+    ? {
+        backgroundColor: 'rgba(52,211,153,0.15)',
+        color: isDark ? '#34d399' : '#047857',
+        border: '1px solid rgba(52,211,153,0.2)',
+      }
+    : isDark
+      ? {
+          backgroundColor: 'rgba(255,255,255,0.07)',
+          color: '#e5e5e5',
+          border: '1px solid rgba(255,255,255,0.08)',
+        }
+      : {
+          backgroundColor: '#0f172a',
+          color: '#ffffff',
+          border: '1px solid rgba(15,23,42,0.12)',
+          boxShadow: '0 10px 24px rgba(15,23,42,0.1)',
+        }
 
   return (
     <div
-      className="group relative flex flex-col overflow-hidden rounded-[22px] border border-white/8 transition duration-200 hover:border-white/16 hover:-translate-y-0.5"
+      className="group relative flex flex-col overflow-hidden rounded-[22px] border border-white/8 transition duration-200 hover:-translate-y-0.5 hover:border-white/16"
       style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
     >
-      {/* Visual preview strip */}
       <div
         className="relative h-28 w-full overflow-hidden"
         style={{
@@ -80,25 +94,24 @@ function PresetCard({
             : `linear-gradient(135deg, ${c1} 0%, color-mix(in srgb, ${c1} 92%, white 8%) 100%)`,
         }}
       >
-        {/* Simulated nav bar */}
-        <div
-          className="absolute inset-x-0 top-0 flex items-center justify-between px-4 pt-3"
-        >
+        <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 pt-3">
           <div className="h-2 w-10 rounded-full opacity-60" style={{ backgroundColor: isDark ? '#fff' : c3 }} />
           <div className="flex gap-1.5">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-1.5 w-5 rounded-full opacity-30" style={{ backgroundColor: isDark ? '#fff' : '#000' }} />
+              <div
+                key={i}
+                className="h-1.5 w-5 rounded-full opacity-30"
+                style={{ backgroundColor: isDark ? '#fff' : '#000' }}
+              />
             ))}
           </div>
         </div>
 
-        {/* Simulated hero text */}
         <div className="absolute left-4 top-8 space-y-1.5">
           <div className="h-3 w-20 rounded-full opacity-80" style={{ backgroundColor: isDark ? '#fff' : c3 }} />
           <div className="h-2 w-28 rounded-full opacity-40" style={{ backgroundColor: isDark ? '#fff' : '#000' }} />
         </div>
 
-        {/* Simulated product cards */}
         <div className="absolute bottom-2 left-4 right-4 flex gap-2">
           {[1, 2, 3].map((i) => (
             <div
@@ -114,16 +127,13 @@ function PresetCard({
           ))}
         </div>
 
-        {/* Color accent dot */}
         <div
           className="absolute right-4 top-4 size-5 rounded-full"
           style={{ backgroundColor: c3, boxShadow: `0 4px 12px ${c3}55` }}
         />
       </div>
 
-      {/* Info + action */}
       <div className="flex flex-1 flex-col p-4">
-        {/* Color swatches */}
         <div className="mb-3 flex items-center gap-1.5">
           {preset.previewColors.map((color, i) => (
             <span
@@ -140,7 +150,6 @@ function PresetCard({
         <p className="text-sm font-semibold text-white">{preset.name}</p>
         <p className="mt-1 text-xs leading-5 text-neutral-400">{preset.description}</p>
 
-        {/* Tags */}
         <div className="mt-2.5 flex flex-wrap gap-1">
           {preset.tags.slice(0, 3).map((tag) => (
             <span
@@ -157,11 +166,7 @@ function PresetCard({
           onClick={onApply}
           disabled={isApplying}
           className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[14px] py-2.5 text-sm font-semibold transition duration-150 disabled:cursor-not-allowed"
-          style={
-            justApplied
-              ? { backgroundColor: 'rgba(52,211,153,0.15)', color: '#34d399', border: '1px solid rgba(52,211,153,0.2)' }
-              : { backgroundColor: 'rgba(255,255,255,0.07)', color: '#e5e5e5', border: '1px solid rgba(255,255,255,0.08)' }
-          }
+          style={buttonStyle}
         >
           {justApplied ? (
             <>

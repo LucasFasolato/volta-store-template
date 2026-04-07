@@ -60,7 +60,7 @@ export const storeThemeSchema = z
     ui_density: z.enum(['compact', 'comfortable', 'spacious']),
     spacing_scale: z.enum(['tight', 'balanced', 'airy']),
     card_style: z.enum(['soft', 'sharp', 'glass']),
-    card_layout: z.enum(['grid', 'list']),
+    card_layout: z.enum(['grid', 'list', 'classic', 'visual', 'compact']),
     button_style: z.enum(['rounded', 'square', 'pill']),
     grid_columns: z.number().int().min(2).max(4),
     image_ratio: z.enum(['1:1', '4:5', '3:4', '16:9']),

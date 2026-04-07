@@ -104,7 +104,6 @@ export function buildStoreLaunchPlan({
   const hasHeroImage = Boolean(content.hero_image_url)
   const hasCategories = categories.length > 0
   const hasActiveProduct = activeProducts.length >= 1
-  const hasThreeActiveProducts = activeProducts.length >= 3
   const hasInstagram = Boolean(store.instagram?.trim())
   const hasAddress = Boolean(store.address?.trim())
   const hasHours = Boolean(store.hours?.trim())
@@ -160,11 +159,11 @@ export function buildStoreLaunchPlan({
     }),
     buildItem({
       id: 'products',
-      done: hasThreeActiveProducts,
-      title: 'Minimo de productos activos',
-      description: 'Con al menos tres productos la tienda se siente real y lista para compartir.',
+      done: hasActiveProduct,
+      title: 'Tu primer producto',
+      description: 'Para continuar, agrega tu primer producto y deja la tienda lista para compartir.',
       href: activeProducts.length > 0 ? '/admin/productos' : '/admin/productos/nuevo',
-      ctaLabel: 'Agregar productos',
+      ctaLabel: activeProducts.length > 0 ? 'Ver productos' : 'Agregar primer producto',
     }),
   ]
 
@@ -318,13 +317,13 @@ export function buildActivationFlowSteps(plan: StoreLaunchPlan): ActivationFlowS
     {
       id: 'products',
       navLabel: 'Productos',
-      title: 'Carga tus primeros productos',
-      description: 'Con al menos tres productos el catalogo se siente real y listo para que alguien lo recorra con ganas de comprar.',
+      title: 'Carga tu primer producto',
+      description: 'Con un producto real la tienda ya deja de ser demo y pasa a sentirse lista para compartir.',
       href: '/admin/productos/nuevo',
       ctaLabel: 'Agregar producto',
       skipLabel: 'Seguir despues',
       items: ['products'],
-      doneMessage: 'Tu catalogo ya empezo. Podes agregar mas cuando quieras.',
+      doneMessage: 'Tu tienda ya tiene algo real para mostrar. Podes sumar mas cuando quieras.',
     },
     {
       id: 'categories',

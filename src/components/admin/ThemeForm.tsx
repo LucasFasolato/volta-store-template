@@ -17,6 +17,7 @@ import {
 } from '@/data/defaults'
 import { COPY } from '@/data/system-copy'
 import { updateStoreTheme } from '@/lib/actions/store'
+import { normalizeCardLayout } from '@/lib/utils/card-layout'
 import { getAccessibleTextColor, getContrastRatio, withAlpha } from '@/lib/utils/color'
 import { buildThemeVars } from '@/lib/utils/theme'
 import { cn } from '@/lib/utils'
@@ -54,6 +55,12 @@ const CARD_OPTIONS: VisualOption[] = [
   { value: 'sharp', label: 'Firmes' },
   { value: 'glass', label: 'Cristal' },
 ]
+
+const CARD_LAYOUT_OPTIONS = [
+  { value: 'classic', label: 'Clasica', hint: 'Equilibrada y comercial' },
+  { value: 'visual', label: 'Visual', hint: 'Imagen primero y mas impacto' },
+  { value: 'compact', label: 'Compacta', hint: 'Mas directa y densa' },
+] as const
 
 const BUTTON_OPTIONS: VisualOption[] = [
   { value: 'rounded', label: 'Redondeados' },
@@ -296,7 +303,7 @@ export function ThemeForm({ theme, activeSection, storeSlug }: ThemeFormProps) {
               setThemeValue={setThemeValue}
             />
           }
-          preview={<DesignLivePreview previewThemeVars={previewThemeVars} columns={previewTheme.grid_columns} imageRatio={previewTheme.image_ratio} containerWidth={previewTheme.container_width} spacingScale={previewTheme.spacing_scale} />}
+          preview={<DesignLivePreview previewThemeVars={previewThemeVars} columns={previewTheme.grid_columns} imageRatio={previewTheme.image_ratio} containerWidth={previewTheme.container_width} spacingScale={previewTheme.spacing_scale} cardLayout={previewTheme.card_layout} />}
           previewHeader={visualModeHeader}
         />
       ) : null}
@@ -862,6 +869,77 @@ function HeroLayoutThumbnail({
   )
 }
 
+function CardLayoutThumbnail({
+  label,
+  hint,
+  isSelected,
+  onClick,
+  value,
+}: {
+  label: string
+  hint: string
+  isSelected: boolean
+  onClick: () => void
+  value: 'classic' | 'visual' | 'compact'
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'flex flex-col gap-2.5 rounded-[14px] p-2.5 text-left transition duration-150',
+        isSelected ? 'admin-surface-selected' : 'admin-button-soft',
+      )}
+    >
+      <div className="overflow-hidden rounded-[10px] border" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        {value === 'compact' ? (
+          <div className="space-y-1.5 p-2">
+            {[1, 2].map((item) => (
+              <div key={item} className="flex items-center gap-1.5 rounded-[8px] bg-white/[0.04] p-1.5">
+                <div className="size-8 rounded-[6px] bg-white/[0.12]" />
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="h-1.5 rounded-full bg-white/[0.16]" />
+                  <div className="h-1 w-2/3 rounded-full bg-white/[0.1]" />
+                </div>
+                <div className="h-5 w-8 rounded-full bg-white/[0.12]" />
+              </div>
+            ))}
+          </div>
+        ) : value === 'visual' ? (
+          <div className="grid grid-cols-2 gap-1.5 p-2">
+            {[1, 2].map((item) => (
+              <div key={item} className="overflow-hidden rounded-[8px] bg-white/[0.04]">
+                <div className="h-12 bg-white/[0.14]" />
+                <div className="space-y-1 p-1.5">
+                  <div className="h-1.5 rounded-full bg-white/[0.16]" />
+                  <div className="h-1 w-1/2 rounded-full bg-white/[0.1]" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-1.5 p-2">
+            {[1, 2].map((item) => (
+              <div key={item} className="overflow-hidden rounded-[8px] bg-white/[0.04]">
+                <div className="h-10 bg-white/[0.14]" />
+                <div className="space-y-1 p-1.5">
+                  <div className="h-1.5 rounded-full bg-white/[0.16]" />
+                  <div className="h-1 w-2/3 rounded-full bg-white/[0.1]" />
+                  <div className="h-4 w-8 rounded-full bg-white/[0.12]" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div>
+        <p className={cn('text-xs font-medium', isSelected ? 'text-white' : 'text-neutral-400')}>{label}</p>
+        <p className="mt-0.5 text-[10px] text-neutral-600">{hint}</p>
+      </div>
+    </button>
+  )
+}
+
 function LayoutControls({
   theme,
   setThemeValue,
@@ -870,6 +948,7 @@ function LayoutControls({
   setThemeValue: <K extends keyof StoreThemeInput>(name: K, value: StoreThemeInput[K]) => void
 }) {
   // Map container_width → closest hero layout option
+  const activeCardLayout = normalizeCardLayout(theme.card_layout)
   const activeLayout = theme.container_width === 'full'
     ? 'full'
     : theme.container_width === 'xl'
@@ -954,6 +1033,22 @@ function LayoutControls({
       </div>
 
       {/* ── Cards + Botones ── */}
+      <div>
+        <p className="mb-2 text-[11px] font-medium text-neutral-600">Modelo de card</p>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+          {CARD_LAYOUT_OPTIONS.map((option) => (
+            <CardLayoutThumbnail
+              key={option.value}
+              value={option.value}
+              label={option.label}
+              hint={option.hint}
+              isSelected={activeCardLayout === option.value}
+              onClick={() => setThemeValue('card_layout', option.value as StoreThemeInput['card_layout'])}
+            />
+          ))}
+        </div>
+      </div>
+
       <div className="grid gap-3 sm:grid-cols-2">
         <PillGroup
           title="Estilo de tarjetas"
@@ -1205,17 +1300,20 @@ function DesignLivePreview({
   imageRatio,
   containerWidth,
   spacingScale,
+  cardLayout,
 }: {
   previewThemeVars: React.CSSProperties
   columns: number
   imageRatio: string
   containerWidth: string
   spacingScale: string
+  cardLayout: string
 }) {
   const previewCount = columns === 4 ? 4 : columns === 3 ? 3 : 2
   const imageClass = imageRatio === '1:1' ? 'aspect-square' : imageRatio === '16:9' ? 'aspect-video' : imageRatio === '3:4' ? 'aspect-[3/4]' : 'aspect-[4/5]'
   const widthPercent = WIDTH_VISUAL[containerWidth] ?? '80%'
   const heroH = HERO_PREVIEW_HEIGHT[spacingScale] ?? 76
+  const activeCardLayout = normalizeCardLayout(cardLayout)
 
   return (
     <div className="admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
@@ -1276,11 +1374,24 @@ function DesignLivePreview({
         <div className="transition-all duration-300" style={{ width: widthPercent }}>
           <div className={`grid gap-2 ${previewCount === 4 ? 'grid-cols-4' : previewCount === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
             {Array.from({ length: previewCount }).map((_, index) => (
-              <div key={index} className="overflow-hidden rounded-[var(--store-card-radius)] border" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
-                <div className={`${imageClass} w-full`} style={{ background: 'linear-gradient(145deg, color-mix(in srgb, var(--store-accent) 22%, transparent), color-mix(in srgb, var(--store-secondary) 18%, transparent))' }} />
-                <div className="space-y-1.5 p-2">
+              <div
+                key={index}
+                className={`overflow-hidden rounded-[var(--store-card-radius)] border ${activeCardLayout === 'compact' ? 'flex items-center gap-2 p-2' : ''}`}
+                style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}
+              >
+                <div
+                  className={`${activeCardLayout === 'compact' ? 'w-[38%] shrink-0' : 'w-full'} ${imageClass}`}
+                  style={{ background: 'linear-gradient(145deg, color-mix(in srgb, var(--store-accent) 22%, transparent), color-mix(in srgb, var(--store-secondary) 18%, transparent))' }}
+                />
+                <div className={`space-y-1.5 ${activeCardLayout === 'compact' ? 'min-w-0 flex-1 py-1 pr-1' : 'p-2'}`}>
                   <div className="h-2 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.12) }} />
                   <div className="h-1.5 w-2/3 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.07) }} />
+                  {activeCardLayout === 'classic' ? (
+                    <div className="h-4 w-8 rounded-full" style={{ backgroundColor: withAlpha('#ffffff', 0.09) }} />
+                  ) : null}
+                  {activeCardLayout === 'visual' ? (
+                    <div className="h-5 w-10 rounded-full" style={{ backgroundColor: 'var(--store-primary)' }} />
+                  ) : null}
                 </div>
               </div>
             ))}

@@ -24,7 +24,7 @@ export const DEFAULT_THEME: Omit<ThemeInsert, 'store_id'> = {
   ui_density: 'comfortable',
   spacing_scale: 'balanced',
   card_style: 'soft',
-  card_layout: 'grid',
+  card_layout: 'classic',
   button_style: 'rounded',
   grid_columns: 2,
   image_ratio: '4:5',

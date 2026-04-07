@@ -12,9 +12,9 @@ type AppTab = ThemeSection | 'secciones' | 'estilos'
 
 const TABS: Array<{ value: AppTab; label: string; icon: React.ElementType }> = [
   { value: 'estilos', label: 'Estilos', icon: Sparkles },
-  { value: 'fuentes', label: 'Fuentes', icon: Type },
   { value: 'colores', label: 'Colores', icon: Palette },
   { value: 'layout', label: 'Diseño', icon: Layers3 },
+  { value: 'fuentes', label: 'Fuentes', icon: Type },
   { value: 'secciones', label: 'Secciones', icon: LayoutDashboard },
 ]
 
@@ -30,7 +30,6 @@ export function AppearanceEditor({ theme, layout, storeSlug }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Compact header + tab bar in one row */}
       <div className="flex items-center gap-4">
         <div className="shrink-0">
           <p className="admin-label">Volta Admin</p>
@@ -52,11 +51,15 @@ export function AppearanceEditor({ theme, layout, storeSlug }: Props) {
                   className={cn(
                     'flex items-center gap-1.5 rounded-[14px] px-3.5 py-2 text-sm font-medium transition duration-150',
                     active ? 'admin-surface-selected text-white' : 'text-neutral-400 hover:text-white',
-                    // Highlight the Estilos tab with a subtle emerald tint when active
                     active && item.value === 'estilos' ? 'text-emerald-300' : '',
                   )}
                 >
-                  <Icon className={cn('size-3.5 shrink-0', active && item.value === 'estilos' ? 'text-emerald-400' : '')} />
+                  <Icon
+                    className={cn(
+                      'size-3.5 shrink-0',
+                      active && item.value === 'estilos' ? 'text-emerald-400' : '',
+                    )}
+                  />
                   <span>{item.label}</span>
                 </button>
               )
@@ -65,7 +68,6 @@ export function AppearanceEditor({ theme, layout, storeSlug }: Props) {
         </div>
       </div>
 
-      {/* Editor content */}
       {tab === 'estilos' ? (
         <StylePresetsTab />
       ) : isThemeTab ? (

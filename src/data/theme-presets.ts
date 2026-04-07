@@ -34,6 +34,7 @@ export type ThemePresetValues = Partial<
     | 'visual_mode'
     | 'border_radius'
     | 'card_style'
+    | 'card_layout'
     | 'button_style'
     | 'font_preset'
     | 'heading_font'
@@ -78,6 +79,7 @@ export const THEME_PRESETS: ThemePreset[] = [
       visual_mode: 'light',
       border_radius: 'sm',
       card_style: 'sharp',
+      card_layout: 'classic',
       button_style: 'square',
       font_preset: 'minimal',
       heading_font: 'geist',
@@ -110,6 +112,7 @@ export const THEME_PRESETS: ThemePreset[] = [
       visual_mode: 'dark',
       border_radius: 'none',
       card_style: 'sharp',
+      card_layout: 'visual',
       button_style: 'square',
       font_preset: 'editorial',
       heading_font: 'plus-jakarta',
@@ -142,6 +145,7 @@ export const THEME_PRESETS: ThemePreset[] = [
       visual_mode: 'light',
       border_radius: 'full',
       card_style: 'soft',
+      card_layout: 'classic',
       button_style: 'pill',
       font_preset: 'elegant',
       heading_font: 'plus-jakarta',
@@ -176,6 +180,7 @@ export const THEME_PRESETS: ThemePreset[] = [
       visual_mode: 'light',
       border_radius: 'md',
       card_style: 'soft',
+      card_layout: 'visual',
       button_style: 'rounded',
       font_preset: 'elegant',
       heading_font: 'playfair',
@@ -210,6 +215,7 @@ export const THEME_PRESETS: ThemePreset[] = [
       visual_mode: 'dark',
       border_radius: 'lg',
       card_style: 'glass',
+      card_layout: 'visual',
       button_style: 'rounded',
       font_preset: 'tech',
       heading_font: 'manrope',
@@ -242,6 +248,7 @@ export const THEME_PRESETS: ThemePreset[] = [
       visual_mode: 'light',
       border_radius: 'lg',
       card_style: 'soft',
+      card_layout: 'compact',
       button_style: 'pill',
       font_preset: 'modern',
       heading_font: 'manrope',

@@ -9,7 +9,7 @@ import { createProduct, uploadProductImage } from '@/lib/actions/products'
 import { cn } from '@/lib/utils'
 import type { Category } from '@/types/store'
 
-const TARGET = 3
+const TARGET = 1
 
 export function WizardStepProduct({
   categories,
@@ -52,7 +52,7 @@ export function WizardStepProduct({
 
     const priceNum = parseFloat(price.replace(',', '.'))
     if (isNaN(priceNum) || priceNum <= 0) {
-      setError('Ingresá un precio válido mayor a 0.')
+      setError('Ingresa un precio valido mayor a 0.')
       return
     }
 
@@ -92,8 +92,7 @@ export function WizardStepProduct({
 
   return (
     <div className="space-y-5">
-      {/* Progress dots */}
-      <div className="flex items-center gap-3 rounded-xl border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/[0.03] px-4 py-3">
+      <div className="flex items-center gap-3 rounded-xl border border-border bg-black/[0.04] px-4 py-3 dark:border-white/8 dark:bg-white/[0.03]">
         <div className="flex gap-1.5">
           {Array.from({ length: TARGET }).map((_, i) => (
             <div
@@ -106,7 +105,7 @@ export function WizardStepProduct({
           ))}
         </div>
         <p className="text-sm font-medium text-foreground">
-          {activeProductCount} de {TARGET} productos activos
+          {Math.min(activeProductCount, TARGET)} de {TARGET} productos activos
         </p>
       </div>
 
@@ -118,7 +117,6 @@ export function WizardStepProduct({
       ) : null}
 
       <div className="grid gap-5 sm:grid-cols-[1fr_auto]">
-        {/* Form fields */}
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label className="mb-1.5 block text-sm font-medium text-neutral-200">
@@ -127,7 +125,7 @@ export function WizardStepProduct({
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Ej: Remera básica blanca"
+              placeholder="Ej: Remera basica blanca"
               disabled={isPending}
               className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
             />
@@ -149,7 +147,7 @@ export function WizardStepProduct({
           {categories.length > 0 ? (
             <div className="sm:col-span-2">
               <Label className="mb-1.5 block text-sm font-medium text-neutral-200">
-                Categoría <span className="text-neutral-500">(opcional)</span>
+                Categoria <span className="text-neutral-500">(opcional)</span>
               </Label>
               <select
                 value={categoryId}
@@ -157,7 +155,7 @@ export function WizardStepProduct({
                 disabled={isPending}
                 className="h-12 w-full rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
               >
-                <option value="">Sin categoría</option>
+                <option value="">Sin categoria</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
@@ -168,7 +166,6 @@ export function WizardStepProduct({
           ) : null}
         </div>
 
-        {/* Image picker */}
         <div className="sm:w-28">
           <Label className="mb-1.5 block text-sm font-medium text-neutral-200">
             Foto <span className="text-neutral-500">(opcional)</span>
@@ -205,7 +202,7 @@ export function WizardStepProduct({
           )}
           {!imagePreview ? (
             <p className="mt-2 text-[10px] leading-4 text-neutral-600">
-              Los productos con imagen venden mucho más
+              Los productos con imagen venden mucho mas
             </p>
           ) : null}
         </div>
@@ -218,17 +215,19 @@ export function WizardStepProduct({
         disabled={isPending || !canSave}
         className="inline-flex h-11 items-center gap-2 rounded-full bg-[linear-gradient(135deg,#2ee6a6,#6ff3df)] px-6 text-sm font-semibold text-black shadow-[0_8px_20px_rgba(16,185,129,0.2)] transition hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isPending ? (
-          <Loader2 className="size-4 animate-spin" />
-        ) : (
-          <Plus className="size-4" />
-        )}
+        {isPending ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
         {isPending
           ? 'Guardando...'
-          : remaining <= 1
-            ? 'Agregar último producto'
-            : `Agregar producto (${remaining} restantes)`}
+          : activeProductCount >= TARGET
+            ? 'Agregar otro producto'
+            : 'Agregar primer producto'}
       </button>
+
+      {remaining === 0 ? (
+        <p className="text-xs text-muted-foreground">
+          Ya cumpliste este paso. Si quieres, puedes sumar otro producto ahora mismo.
+        </p>
+      ) : null}
     </div>
   )
 }

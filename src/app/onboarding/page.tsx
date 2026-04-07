@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { requireAuthenticatedUser } from '@/lib/server/store-context'
-import { ensureOnboarding } from '@/lib/actions/onboarding'
-import { createClient } from '@/lib/supabase/server'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
+import { ensureOnboarding } from '@/lib/actions/onboarding'
+import { requireAuthenticatedUser } from '@/lib/server/store-context'
+import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: 'Configura tu tienda - Volta Store',
@@ -17,14 +17,30 @@ export default async function OnboardingPage() {
   const supabase = await createClient()
   const { data: store } = await supabase
     .from('stores')
-    .select('name, whatsapp')
+    .select('id, name, whatsapp')
     .eq('owner_id', user.id)
     .single()
 
-  // Already completed onboarding
-  if (store?.whatsapp) {
+  if (!store) {
+    redirect('/login')
+  }
+
+  const { count: activeProductCount } = await supabase
+    .from('products')
+    .select('id', { count: 'exact', head: true })
+    .eq('store_id', store.id)
+    .eq('is_active', true)
+
+  const hasActiveProduct = (activeProductCount ?? 0) >= 1
+
+  if (store?.whatsapp && hasActiveProduct) {
     redirect('/admin')
   }
 
-  return <OnboardingWizard initialName={store?.name ?? ''} />
+  return (
+    <OnboardingWizard
+      initialName={store?.name ?? ''}
+      hasActiveProduct={hasActiveProduct}
+    />
+  )
 }
