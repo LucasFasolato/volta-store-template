@@ -50,7 +50,17 @@ type CartActions = {
   getSubtotal: () => number
 }
 
-export const useCartStore = create<CartState & CartActions>()(
+export type CartStore = CartState & CartActions
+
+export function selectCartItemCount(state: CartStore) {
+  return state.items.reduce((sum, item) => sum + item.quantity, 0)
+}
+
+export function selectCartSubtotal(state: CartStore) {
+  return state.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+}
+
+export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       storeSlug: null,
@@ -105,9 +115,8 @@ export const useCartStore = create<CartState & CartActions>()(
       closeCart: () => set({ isOpen: false }),
       toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
 
-      getItemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
-      getSubtotal: () =>
-        get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+      getItemCount: () => selectCartItemCount(get()),
+      getSubtotal: () => selectCartSubtotal(get()),
     }),
     {
       name: 'volta-cart',
@@ -124,7 +133,7 @@ export const useCartStore = create<CartState & CartActions>()(
             })),
           }
         }
-        return persistedState as CartState & CartActions
+        return persistedState as CartStore
       },
       partialize: (state) => ({
         storeSlug: state.storeSlug,

@@ -2,12 +2,12 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { MessageCircle, ShoppingBag } from 'lucide-react'
-import { useCartStore } from '@/lib/stores/cart'
+import { selectCartItemCount, selectCartSubtotal, useCartStore } from '@/lib/stores/cart'
 import { formatCurrency } from '@/lib/utils/format'
 
 export function CartFloatingBar() {
-  const itemCount = useCartStore((state) => state.getItemCount())
-  const subtotal = useCartStore((state) => state.getSubtotal())
+  const itemCount = useCartStore(selectCartItemCount)
+  const subtotal = useCartStore(selectCartSubtotal)
   const toggleCart = useCartStore((state) => state.toggleCart)
 
   return (

@@ -1,8 +1,9 @@
 'use client'
 
+import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import { ArrowUpRight, ShoppingBag } from 'lucide-react'
-import { useCartStore } from '@/lib/stores/cart'
+import { selectCartItemCount, useCartStore } from '@/lib/stores/cart'
 import { cn } from '@/lib/utils'
 import type { Store } from '@/types/store'
 
@@ -12,9 +13,8 @@ type StoreNavProps = {
 }
 
 export function StoreNav({ store, containerClass }: StoreNavProps) {
-  const getItemCount = useCartStore((state) => state.getItemCount)
+  const count = useCartStore(selectCartItemCount)
   const toggleCart = useCartStore((state) => state.toggleCart)
-  const count = getItemCount()
 
   return (
     <>
@@ -105,17 +105,24 @@ export function StoreNav({ store, containerClass }: StoreNavProps) {
             >
               <ShoppingBag className="size-4" />
               <span className="hidden sm:block">Carrito</span>
-              {count > 0 ? (
-                <span
-                  className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1 py-0.5 text-[10px] font-bold"
-                  style={{
-                    backgroundColor: 'color-mix(in srgb, var(--store-primary-contrast) 86%, transparent)',
-                    color: 'var(--store-primary)',
-                  }}
-                >
-                  {count}
-                </span>
-              ) : null}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {count > 0 ? (
+                  <motion.span
+                    key={count}
+                    initial={{ scale: 0.4, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.4, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 560, damping: 22 }}
+                    className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1 py-0.5 text-[10px] font-bold"
+                    style={{
+                      backgroundColor: 'color-mix(in srgb, var(--store-primary-contrast) 86%, transparent)',
+                      color: 'var(--store-primary)',
+                    }}
+                  >
+                    {count}
+                  </motion.span>
+                ) : null}
+              </AnimatePresence>
             </button>
           </div>
         </div>
