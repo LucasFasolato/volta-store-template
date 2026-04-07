@@ -219,7 +219,8 @@ export async function importProductsFromCSV(rows: ImportRow[]): Promise<ImportRe
     // Attach options if present
     const options = parseOptionColumns(row)
     if (options.length > 0) {
-      await supabase.from('product_options').insert(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from('product_options').insert(
         options.map((opt, idx) => ({
           product_id: product.id,
           name: opt.name,

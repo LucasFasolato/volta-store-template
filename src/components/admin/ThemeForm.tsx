@@ -14,7 +14,6 @@ import {
   FONT_PRESETS,
   HEADING_WEIGHT_OPTIONS,
   IMAGE_RATIO_OPTIONS,
-  VISUAL_MODE_OPTIONS,
 } from '@/data/defaults'
 import { COPY } from '@/data/system-copy'
 import { updateStoreTheme } from '@/lib/actions/store'
@@ -72,14 +71,6 @@ const SPACING_OPTIONS: VisualOption[] = [
   { value: 'tight', label: 'Compacta' },
   { value: 'balanced', label: 'Balanceada' },
   { value: 'airy', label: 'Amplia' },
-]
-
-const WIDTH_OPTIONS: VisualOption[] = [
-  { value: 'sm', label: 'Estrecho' },
-  { value: 'md', label: 'Medio' },
-  { value: 'lg', label: 'Amplio' },
-  { value: 'xl', label: 'Grande' },
-  { value: 'full', label: 'Completo' },
 ]
 
 const GRID_OPTIONS: Array<{ value: number; label: string }> = [

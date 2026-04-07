@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
 import { requireAuthenticatedStoreContext } from '@/lib/server/store-context'
 
 const optionSchema = z.object({

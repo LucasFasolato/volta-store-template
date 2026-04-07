@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import { Moon, Monitor, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { cn } from '@/lib/utils'
@@ -20,11 +20,8 @@ const OPTIONS = [
  */
 export function ThemeToggle({ variant = 'pill' }: { variant?: Variant }) {
   const { theme, setTheme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  // useSyncExternalStore: client snapshot returns true (mounted), server snapshot false (prevents hydration mismatch)
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false)
 
   // Render a placeholder that matches final dimensions to avoid layout shift
   if (!mounted) {

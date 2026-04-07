@@ -11,7 +11,6 @@ import { WizardStepTrust } from './wizard/WizardStepTrust'
 
 export function ActivationWizard({
   steps,
-  plan,
   storeData,
   categories,
   activeProductCount,

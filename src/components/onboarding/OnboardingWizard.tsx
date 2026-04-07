@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, Check } from 'lucide-react'
@@ -29,7 +29,8 @@ const slideVariants = {
 export function OnboardingWizard({ initialName }: { initialName: string }) {
   const router = useRouter()
   const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  // useSyncExternalStore: client snapshot returns true (mounted), server snapshot false
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false)
 
   const [step, setStep] = useState<Step>(1)
   const [direction, setDirection] = useState<'forward' | 'back'>('forward')
@@ -40,10 +41,6 @@ export function OnboardingWizard({ initialName }: { initialName: string }) {
   const [waError, setWaError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   // Until mounted, fall back to light (matches defaultTheme) to avoid flash
   const isDark = mounted ? resolvedTheme === 'dark' : false
