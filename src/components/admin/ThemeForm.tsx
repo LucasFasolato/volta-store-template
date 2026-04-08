@@ -24,7 +24,7 @@ import { cn } from '@/lib/utils'
 import { storeThemeSchema, type StoreThemeInput } from '@/lib/validations/store'
 import type { StoreTheme } from '@/types/store'
 
-export type ThemeSection = 'fuentes' | 'colores' | 'layout'
+export type ThemeSection = 'fuentes' | 'colores' | 'layout' | 'productos'
 
 type ThemeFormProps = {
   theme: StoreTheme
@@ -57,9 +57,9 @@ const CARD_OPTIONS: VisualOption[] = [
 ]
 
 const CARD_LAYOUT_OPTIONS = [
-  { value: 'classic', label: 'Clasica', hint: 'Equilibrada y comercial' },
-  { value: 'visual', label: 'Visual', hint: 'Imagen primero y mas impacto' },
-  { value: 'compact', label: 'Compacta', hint: 'Mas directa y densa' },
+  { value: 'classic', label: 'Clásica',  hint: 'Imagen arriba, nombre y precio abajo' },
+  { value: 'visual',  label: 'Visual',   hint: 'Imagen dominante con texto superpuesto' },
+  { value: 'compact', label: 'Compacta', hint: 'Imagen lateral, lista densa' },
 ] as const
 
 const BUTTON_OPTIONS: VisualOption[] = [
@@ -218,27 +218,30 @@ export function ThemeForm({ theme, activeSection, storeSlug }: ThemeFormProps) {
   const storePublicPath = `/tienda/${storeSlug}`
 
   const visualModeHeader = (
-    <div className="admin-surface rounded-[18px] px-3 py-2.5">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
-          Vista previa
-        </p>
-        <div className="flex items-center gap-1.5">
-          <div className="flex gap-1">
+    <div className="admin-surface rounded-[18px] px-4 py-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="size-1.5 rounded-full bg-emerald-400/80" />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+            Preview en vivo
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-[10px] border border-white/[0.07] bg-white/[0.03] p-0.5">
             {[
               { value: 'light', label: 'Claro' },
-              { value: 'auto', label: 'Auto' },
-              { value: 'dark', label: 'Oscuro' },
+              { value: 'auto',  label: 'Auto' },
+              { value: 'dark',  label: 'Oscuro' },
             ].map((option) => (
               <button
                 key={option.value}
                 type="button"
                 onClick={() => setThemeValue('visual_mode', option.value as StoreThemeInput['visual_mode'])}
                 className={cn(
-                  'rounded-[10px] px-3 py-1 text-xs font-medium transition duration-150',
+                  'rounded-[8px] px-2.5 py-1 text-[11px] font-medium transition duration-150',
                   previewTheme.visual_mode === option.value
                     ? 'admin-surface-selected text-white'
-                    : 'text-neutral-400 hover:text-white',
+                    : 'text-neutral-500 hover:text-neutral-300',
                 )}
               >
                 {option.label}
@@ -249,7 +252,7 @@ export function ThemeForm({ theme, activeSection, storeSlug }: ThemeFormProps) {
             href={storePublicPath}
             target="_blank"
             rel="noreferrer"
-            className="ml-1 flex items-center gap-1 rounded-[10px] border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-neutral-300 transition hover:border-white/20 hover:text-white"
+            className="flex items-center gap-1.5 rounded-[10px] border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-medium text-neutral-300 transition hover:border-white/20 hover:text-white"
           >
             Ver tienda
             <svg className="size-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -295,6 +298,19 @@ export function ThemeForm({ theme, activeSection, storeSlug }: ThemeFormProps) {
         />
       ) : null}
 
+      {activeSection === 'productos' ? (
+        <EditorShell
+          controls={
+            <ProductsControls
+              theme={previewTheme}
+              setThemeValue={setThemeValue}
+            />
+          }
+          preview={<ProductCatalogPreview previewThemeVars={previewThemeVars} columns={previewTheme.grid_columns} imageRatio={previewTheme.image_ratio} cardLayout={previewTheme.card_layout} />}
+          previewHeader={visualModeHeader}
+        />
+      ) : null}
+
       {activeSection === 'layout' ? (
         <EditorShell
           controls={
@@ -328,9 +344,11 @@ function EditorShell({
   previewHeader?: React.ReactNode
 }) {
   return (
-    <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
-      <div className="admin-surface rounded-[24px] p-4 sm:p-5">{controls}</div>
-      <div className="space-y-2 xl:sticky xl:top-6 xl:self-start">
+    <section className="grid gap-4 xl:grid-cols-[340px_minmax(0,1fr)]">
+      {/* Controls sidebar — scrolls with the page */}
+      <div className="admin-surface rounded-[24px] p-5">{controls}</div>
+      {/* Preview — sticky, dominant right column */}
+      <div className="space-y-3 xl:sticky xl:top-6 xl:self-start">
         {previewHeader}
         {preview}
       </div>
@@ -869,74 +887,127 @@ function HeroLayoutThumbnail({
   )
 }
 
-function CardLayoutThumbnail({
-  label,
-  hint,
+// Full-width card layout option — larger, more visual than old thumbnail approach
+function CardLayoutOption({
+  option,
   isSelected,
   onClick,
-  value,
 }: {
-  label: string
-  hint: string
+  option: (typeof CARD_LAYOUT_OPTIONS)[number]
   isSelected: boolean
   onClick: () => void
-  value: 'classic' | 'visual' | 'compact'
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        'flex flex-col gap-2.5 rounded-[14px] p-2.5 text-left transition duration-150',
-        isSelected ? 'admin-surface-selected' : 'admin-button-soft',
+        'w-full overflow-hidden rounded-[16px] border text-left transition duration-150',
+        isSelected
+          ? 'border-emerald-400/30 bg-emerald-400/[0.06]'
+          : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.1] hover:bg-white/[0.04]',
       )}
     >
-      <div className="overflow-hidden rounded-[10px] border" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-        {value === 'compact' ? (
-          <div className="space-y-1.5 p-2">
-            {[1, 2].map((item) => (
-              <div key={item} className="flex items-center gap-1.5 rounded-[8px] bg-white/[0.04] p-1.5">
-                <div className="size-8 rounded-[6px] bg-white/[0.12]" />
-                <div className="min-w-0 flex-1 space-y-1">
-                  <div className="h-1.5 rounded-full bg-white/[0.16]" />
-                  <div className="h-1 w-2/3 rounded-full bg-white/[0.1]" />
-                </div>
-                <div className="h-5 w-8 rounded-full bg-white/[0.12]" />
-              </div>
-            ))}
-          </div>
-        ) : value === 'visual' ? (
-          <div className="grid grid-cols-2 gap-1.5 p-2">
-            {[1, 2].map((item) => (
-              <div key={item} className="overflow-hidden rounded-[8px] bg-white/[0.04]">
-                <div className="h-12 bg-white/[0.14]" />
-                <div className="space-y-1 p-1.5">
-                  <div className="h-1.5 rounded-full bg-white/[0.16]" />
-                  <div className="h-1 w-1/2 rounded-full bg-white/[0.1]" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-1.5 p-2">
-            {[1, 2].map((item) => (
-              <div key={item} className="overflow-hidden rounded-[8px] bg-white/[0.04]">
-                <div className="h-10 bg-white/[0.14]" />
-                <div className="space-y-1 p-1.5">
-                  <div className="h-1.5 rounded-full bg-white/[0.16]" />
-                  <div className="h-1 w-2/3 rounded-full bg-white/[0.1]" />
-                  <div className="h-4 w-8 rounded-full bg-white/[0.12]" />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+      {/* Realistic mini card preview */}
+      <div className="px-4 pb-3 pt-3.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <CardMiniPreview variant={option.value} isSelected={isSelected} />
       </div>
-      <div>
-        <p className={cn('text-xs font-medium', isSelected ? 'text-white' : 'text-neutral-400')}>{label}</p>
-        <p className="mt-0.5 text-[10px] text-neutral-600">{hint}</p>
+      {/* Label + description */}
+      <div className="flex items-center justify-between gap-3 px-4 py-3">
+        <div>
+          <p className={cn('text-sm font-semibold', isSelected ? 'text-white' : 'text-neutral-300')}>
+            {option.label}
+          </p>
+          <p className="mt-0.5 text-[11px] text-neutral-500">{option.hint}</p>
+        </div>
+        {isSelected ? (
+          <span className="inline-flex items-center rounded-full bg-emerald-400/12 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-400">
+            Activo
+          </span>
+        ) : null}
       </div>
     </button>
+  )
+}
+
+function CardMiniPreview({ variant, isSelected }: { variant: string; isSelected: boolean }) {
+  const imgBg = isSelected
+    ? 'linear-gradient(135deg, rgba(52,211,153,0.1), rgba(255,255,255,0.1))'
+    : 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04))'
+  const cardBg = isSelected ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.04)'
+  const border = isSelected ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.07)'
+  const textHi = isSelected ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.3)'
+  const textLo = isSelected ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.14)'
+  const price  = isSelected ? 'rgba(52,211,153,0.7)'   : 'rgba(255,255,255,0.22)'
+  const btn    = isSelected ? 'rgba(52,211,153,0.18)'  : 'rgba(255,255,255,0.08)'
+
+  if (variant === 'compact') {
+    return (
+      <div className="space-y-1.5">
+        {[1, 2].map((i) => (
+          <div
+            key={i}
+            className="flex items-center gap-2.5 overflow-hidden rounded-lg px-2 py-1.5"
+            style={{ background: cardBg, border: `1px solid ${border}` }}
+          >
+            <div className="size-9 shrink-0 rounded-md" style={{ background: imgBg }} />
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="h-1.5 rounded-full" style={{ background: textHi, width: '75%' }} />
+              <div className="h-1 rounded-full" style={{ background: textLo, width: '45%' }} />
+            </div>
+            <div className="shrink-0 space-y-1 text-right">
+              <div className="h-1.5 w-10 rounded-full" style={{ background: price }} />
+              <div className="h-4 w-10 rounded-full" style={{ background: btn }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (variant === 'visual') {
+    return (
+      <div className="grid grid-cols-2 gap-2">
+        {[1, 2].map((i) => (
+          <div
+            key={i}
+            className="relative overflow-hidden rounded-lg"
+            style={{ border: `1px solid ${border}` }}
+          >
+            <div className="aspect-[3/4]" style={{ background: imgBg }} />
+            <div
+              className="absolute inset-x-0 bottom-0 p-2"
+              style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)' }}
+            >
+              <div className="h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.65)', width: '80%' }} />
+              <div className="mt-1 h-1.5 rounded-full" style={{ background: price, width: '50%' }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // classic — vertical card, image top, info below
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {[1, 2].map((i) => (
+        <div
+          key={i}
+          className="overflow-hidden rounded-lg"
+          style={{ background: cardBg, border: `1px solid ${border}` }}
+        >
+          <div className="aspect-[4/3]" style={{ background: imgBg }} />
+          <div className="space-y-1.5 p-2">
+            <div className="h-1.5 rounded-full" style={{ background: textHi, width: '85%' }} />
+            <div className="flex items-center justify-between gap-1">
+              <div className="h-2 rounded-full" style={{ background: price, width: '48%' }} />
+              <div className="h-4 w-8 rounded-full" style={{ background: btn }} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -947,8 +1018,6 @@ function LayoutControls({
   theme: StoreTheme
   setThemeValue: <K extends keyof StoreThemeInput>(name: K, value: StoreThemeInput[K]) => void
 }) {
-  // Map container_width → closest hero layout option
-  const activeCardLayout = normalizeCardLayout(theme.card_layout)
   const activeLayout = theme.container_width === 'full'
     ? 'full'
     : theme.container_width === 'xl'
@@ -961,7 +1030,6 @@ function LayoutControls({
       <div className="space-y-4">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Portada</p>
 
-        {/* Layout de portada → container_width */}
         <div>
           <p className="mb-2 text-[11px] font-medium text-neutral-600">Composición del layout</p>
           <div className="grid grid-cols-3 gap-2">
@@ -978,7 +1046,6 @@ function LayoutControls({
           </div>
         </div>
 
-        {/* Altura del hero → spacing_scale */}
         <div>
           <p className="mb-2 text-[11px] font-medium text-neutral-600">Altura del hero</p>
           <div className="grid grid-cols-3 gap-2">
@@ -1016,66 +1083,30 @@ function LayoutControls({
         </div>
       </div>
 
-      {/* ── Grilla de productos ── */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <PillGroup
-          title="Columnas de productos"
-          options={GRID_OPTIONS.map((o) => ({ value: String(o.value), label: o.label }))}
-          selected={String(theme.grid_columns)}
-          onChange={(value) => setThemeValue('grid_columns', Number(value) as 2 | 3 | 4)}
-        />
-        <PillGroup
-          title="Densidad visual"
-          options={DENSITY_OPTIONS}
-          selected={theme.ui_density}
-          onChange={(value) => setThemeValue('ui_density', value as StoreThemeInput['ui_density'])}
-        />
-      </div>
-
-      {/* ── Cards + Botones ── */}
-      <div>
-        <p className="mb-2 text-[11px] font-medium text-neutral-600">Modelo de card</p>
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-          {CARD_LAYOUT_OPTIONS.map((option) => (
-            <CardLayoutThumbnail
-              key={option.value}
-              value={option.value}
-              label={option.label}
-              hint={option.hint}
-              isSelected={activeCardLayout === option.value}
-              onClick={() => setThemeValue('card_layout', option.value as StoreThemeInput['card_layout'])}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        <PillGroup
-          title="Estilo de tarjetas"
-          options={CARD_OPTIONS}
-          selected={theme.card_style}
-          onChange={(value) => setThemeValue('card_style', value as StoreThemeInput['card_style'])}
-        />
-        <PillGroup
-          title="Botones"
-          options={BUTTON_OPTIONS}
-          selected={theme.button_style}
-          onChange={(value) => setThemeValue('button_style', value as StoreThemeInput['button_style'])}
-        />
-      </div>
-
-      {/* ── Avanzado ── */}
-      <div className="admin-surface-muted rounded-[20px] p-4">
-        <p className="mb-3.5 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Avanzado</p>
-        <div className="grid gap-3.5 sm:grid-cols-2">
+      {/* ── Componentes ── */}
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Componentes</p>
+        <div className="grid gap-3 sm:grid-cols-2">
           <PillGroup
-            title="Ratio de imagen"
-            options={IMAGE_RATIO_OPTIONS.map((o) => ({ value: o.value, label: o.value }))}
-            selected={theme.image_ratio}
-            onChange={(value) => setThemeValue('image_ratio', value as StoreThemeInput['image_ratio'])}
+            title="Estilo de tarjetas"
+            options={CARD_OPTIONS}
+            selected={theme.card_style}
+            onChange={(value) => setThemeValue('card_style', value as StoreThemeInput['card_style'])}
           />
           <PillGroup
-            title="Redondeo global"
+            title="Botones"
+            options={BUTTON_OPTIONS}
+            selected={theme.button_style}
+            onChange={(value) => setThemeValue('button_style', value as StoreThemeInput['button_style'])}
+          />
+          <PillGroup
+            title="Densidad"
+            options={DENSITY_OPTIONS}
+            selected={theme.ui_density}
+            onChange={(value) => setThemeValue('ui_density', value as StoreThemeInput['ui_density'])}
+          />
+          <PillGroup
+            title="Redondeo"
             options={BORDER_RADIUS_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
             selected={theme.border_radius}
             onChange={(value) => setThemeValue('border_radius', value as StoreThemeInput['border_radius'])}
@@ -1291,6 +1322,184 @@ function ColorStoreMockup({
     </div>
   )
 }
+
+// ─── Products section ──────────────────────────────────────────────────────
+
+function ProductsControls({
+  theme,
+  setThemeValue,
+}: {
+  theme: StoreTheme
+  setThemeValue: <K extends keyof StoreThemeInput>(name: K, value: StoreThemeInput[K]) => void
+}) {
+  const activeCardLayout = normalizeCardLayout(theme.card_layout)
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">
+          Estilo de producto
+        </p>
+        <p className="mt-1 text-sm leading-5 text-neutral-500">
+          Cómo se ven las cards en tu tienda.
+        </p>
+      </div>
+
+      {/* Full-width card layout options */}
+      <div className="space-y-2">
+        {CARD_LAYOUT_OPTIONS.map((option) => (
+          <CardLayoutOption
+            key={option.value}
+            option={option}
+            isSelected={activeCardLayout === option.value}
+            onClick={() => setThemeValue('card_layout', option.value as StoreThemeInput['card_layout'])}
+          />
+        ))}
+      </div>
+
+      {/* Grid + ratio */}
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Grilla</p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <PillGroup
+            title="Columnas"
+            options={GRID_OPTIONS.map((o) => ({ value: String(o.value), label: o.label }))}
+            selected={String(theme.grid_columns)}
+            onChange={(value) => setThemeValue('grid_columns', Number(value) as 2 | 3 | 4)}
+          />
+          <PillGroup
+            title="Ratio de imagen"
+            options={IMAGE_RATIO_OPTIONS.map((o) => ({ value: o.value, label: o.value }))}
+            selected={theme.image_ratio}
+            onChange={(value) => setThemeValue('image_ratio', value as StoreThemeInput['image_ratio'])}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ProductCatalogPreview({
+  previewThemeVars,
+  columns,
+  imageRatio,
+  cardLayout,
+}: {
+  previewThemeVars: React.CSSProperties
+  columns: number
+  imageRatio: string
+  cardLayout: string
+}) {
+  const count = columns === 4 ? 4 : columns === 3 ? 3 : 2
+  const imageClass =
+    imageRatio === '1:1' ? 'aspect-square'
+    : imageRatio === '16:9' ? 'aspect-video'
+    : imageRatio === '3:4' ? 'aspect-[3/4]'
+    : 'aspect-[4/5]'
+  const activeCardLayout = normalizeCardLayout(cardLayout)
+
+  return (
+    <div className="admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
+      {/* Thin nav */}
+      <div
+        className="flex items-center justify-between px-4 py-2.5"
+        style={{ background: 'var(--store-nav-bg)', borderBottom: '1px solid var(--store-card-border)' }}
+      >
+        <div className="h-[5px] w-14 rounded-full" style={{ background: 'var(--store-text)', opacity: 0.4 }} />
+        <div className="flex items-center gap-2">
+          <div className="h-[4px] w-10 rounded-full" style={{ background: 'var(--store-text)', opacity: 0.2 }} />
+          <div className="h-[14px] w-10 rounded-[var(--store-button-radius)]" style={{ background: 'var(--store-primary)' }} />
+        </div>
+      </div>
+
+      {/* Category filter strip */}
+      <div
+        className="flex gap-2 overflow-hidden px-4 py-2.5"
+        style={{ borderBottom: '1px solid var(--store-card-border)', background: 'var(--store-bg-gradient)' }}
+      >
+        {(['Todo', 'Nuevo', 'Sale', 'Destacado'] as const).map((cat, i) => (
+          <span
+            key={cat}
+            className="shrink-0 rounded-full px-2.5 py-1 text-[9px] font-semibold"
+            style={
+              i === 0
+                ? { background: 'var(--store-primary)', color: 'var(--store-primary-contrast)' }
+                : { background: 'var(--store-card-background)', color: 'var(--store-muted-text)', border: '1px solid var(--store-card-border)' }
+            }
+          >
+            {cat}
+          </span>
+        ))}
+      </div>
+
+      {/* Product grid */}
+      <div className="p-4" style={{ background: 'var(--store-bg-gradient)' }}>
+        <div
+          className={`grid gap-2.5 transition-all duration-300 ${count === 4 ? 'grid-cols-4' : count === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}
+        >
+          {Array.from({ length: count }).map((_, index) => {
+            const imgGradient = 'linear-gradient(145deg, color-mix(in srgb, var(--store-accent) 20%, transparent), color-mix(in srgb, var(--store-secondary) 16%, transparent))'
+
+            if (activeCardLayout === 'visual') {
+              return (
+                <div
+                  key={index}
+                  className={`relative overflow-hidden rounded-[var(--store-card-radius)] border ${imageClass}`}
+                  style={{ borderColor: 'var(--store-card-border)', background: imgGradient }}
+                >
+                  <div
+                    className="absolute inset-x-0 bottom-0 p-2"
+                    style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.45), transparent)' }}
+                  >
+                    <div className="h-[5px] rounded-full" style={{ background: 'rgba(255,255,255,0.75)', width: '80%' }} />
+                    <div className="mt-1 h-[4px] rounded-full" style={{ background: 'var(--store-primary)', width: '50%' }} />
+                  </div>
+                </div>
+              )
+            }
+
+            if (activeCardLayout === 'compact') {
+              return (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 overflow-hidden rounded-[var(--store-card-radius)] border p-2"
+                  style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}
+                >
+                  <div className="aspect-square w-[36%] shrink-0 rounded-md" style={{ background: imgGradient }} />
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <div className="h-[5px] rounded-full" style={{ background: withAlpha('#ffffff', 0.16) }} />
+                    <div className="h-[4px] w-2/3 rounded-full" style={{ background: withAlpha('#ffffff', 0.09) }} />
+                    <div className="h-[7px] w-1/2 rounded-full" style={{ background: 'var(--store-primary)', opacity: 0.8 }} />
+                  </div>
+                </div>
+              )
+            }
+
+            // classic
+            return (
+              <div
+                key={index}
+                className="overflow-hidden rounded-[var(--store-card-radius)] border"
+                style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)', boxShadow: 'var(--store-card-shadow)' }}
+              >
+                <div className={`w-full ${imageClass}`} style={{ background: imgGradient }} />
+                <div className="space-y-1.5 p-2.5">
+                  <div className="h-[5px] rounded-full" style={{ background: withAlpha('#ffffff', 0.16), width: '85%' }} />
+                  <div className="flex items-center justify-between">
+                    <div className="h-[5px] w-1/2 rounded-full" style={{ background: 'var(--store-primary)', opacity: 0.8 }} />
+                    <div className="h-[12px] w-8 rounded-[var(--store-button-radius)]" style={{ background: withAlpha('#ffffff', 0.09) }} />
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Design section preview ─────────────────────────────────────────────────
 
 const HERO_PREVIEW_HEIGHT: Record<string, number> = { tight: 56, balanced: 76, airy: 96 }
 

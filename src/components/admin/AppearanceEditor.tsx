@@ -1,21 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { Layers3, LayoutDashboard, Palette, Sparkles, Type } from 'lucide-react'
+import { LayoutGrid, Layers3, Palette, Settings2, Sparkles, Type } from 'lucide-react'
 import { LayoutForm } from '@/components/admin/LayoutForm'
 import { StylePresetsTab } from '@/components/admin/StylePresetsTab'
 import { ThemeForm, type ThemeSection } from '@/components/admin/ThemeForm'
 import { cn } from '@/lib/utils'
 import type { StoreLayout, StoreTheme } from '@/types/store'
 
-type AppTab = ThemeSection | 'secciones' | 'estilos'
+type AppTab = ThemeSection | 'avanzado' | 'estilos'
 
 const TABS: Array<{ value: AppTab; label: string; icon: React.ElementType }> = [
-  { value: 'estilos', label: 'Estilos', icon: Sparkles },
-  { value: 'colores', label: 'Colores', icon: Palette },
-  { value: 'layout', label: 'Diseño', icon: Layers3 },
-  { value: 'fuentes', label: 'Fuentes', icon: Type },
-  { value: 'secciones', label: 'Secciones', icon: LayoutDashboard },
+  { value: 'estilos',   label: 'Estilos',   icon: Sparkles },
+  { value: 'colores',   label: 'Colores',   icon: Palette },
+  { value: 'productos', label: 'Productos', icon: LayoutGrid },
+  { value: 'layout',    label: 'Diseño',    icon: Layers3 },
+  { value: 'fuentes',   label: 'Fuentes',   icon: Type },
+  { value: 'avanzado',  label: 'Avanzado',  icon: Settings2 },
 ]
 
 type Props = {
@@ -26,7 +27,6 @@ type Props = {
 
 export function AppearanceEditor({ theme, layout, storeSlug }: Props) {
   const [tab, setTab] = useState<AppTab>('estilos')
-  const isThemeTab = tab !== 'secciones' && tab !== 'estilos'
 
   return (
     <div className="space-y-4">
@@ -39,7 +39,7 @@ export function AppearanceEditor({ theme, layout, storeSlug }: Props) {
         </div>
 
         <div className="ml-auto flex gap-1 overflow-x-auto">
-          <div className="admin-surface flex min-w-max gap-1 rounded-[20px] p-1.5">
+          <div className="admin-surface flex min-w-max gap-0.5 rounded-[20px] p-1.5">
             {TABS.map((item) => {
               const Icon = item.icon
               const active = tab === item.value
@@ -49,7 +49,7 @@ export function AppearanceEditor({ theme, layout, storeSlug }: Props) {
                   type="button"
                   onClick={() => setTab(item.value)}
                   className={cn(
-                    'flex items-center gap-1.5 rounded-[14px] px-3.5 py-2 text-sm font-medium transition duration-150',
+                    'flex items-center gap-1.5 rounded-[14px] px-3 py-2 text-sm font-medium transition duration-150',
                     active ? 'admin-surface-selected text-white' : 'text-neutral-400 hover:text-white',
                     active && item.value === 'estilos' ? 'text-emerald-300' : '',
                   )}
@@ -60,7 +60,7 @@ export function AppearanceEditor({ theme, layout, storeSlug }: Props) {
                       active && item.value === 'estilos' ? 'text-emerald-400' : '',
                     )}
                   />
-                  <span>{item.label}</span>
+                  <span className="hidden sm:inline">{item.label}</span>
                 </button>
               )
             })}
@@ -70,10 +70,10 @@ export function AppearanceEditor({ theme, layout, storeSlug }: Props) {
 
       {tab === 'estilos' ? (
         <StylePresetsTab />
-      ) : isThemeTab ? (
-        <ThemeForm theme={theme} activeSection={tab as ThemeSection} storeSlug={storeSlug} />
-      ) : (
+      ) : tab === 'avanzado' ? (
         <LayoutForm layout={layout} />
+      ) : (
+        <ThemeForm theme={theme} activeSection={tab as ThemeSection} storeSlug={storeSlug} />
       )}
     </div>
   )
