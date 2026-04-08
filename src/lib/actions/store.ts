@@ -225,10 +225,13 @@ export async function uploadHeroImage(formData: FormData) {
   if (uploadError) return { error: uploadError.message }
 
   const { data: urlData } = supabase.storage.from('store-assets').getPublicUrl(path)
+  // Append a version param so Next.js Image and browser never serve a stale cached copy
+  // when the same storage path is overwritten by a new upload.
+  const versionedUrl = `${urlData.publicUrl}?v=${Date.now()}`
 
   const { error: updateError } = await supabase
     .from('store_content')
-    .update({ hero_image_url: urlData.publicUrl })
+    .update({ hero_image_url: versionedUrl })
     .eq('store_id', store.id)
 
   if (updateError) return { error: updateError.message }
@@ -236,7 +239,7 @@ export async function uploadHeroImage(formData: FormData) {
   revalidatePath('/admin')
   revalidatePath('/admin/contenido')
   revalidatePath(`/tienda/${store.slug}`)
-  return { success: true, url: urlData.publicUrl }
+  return { success: true, url: versionedUrl }
 }
 
 /**
