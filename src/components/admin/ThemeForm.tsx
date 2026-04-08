@@ -30,6 +30,7 @@ type ThemeFormProps = {
   theme: StoreTheme
   activeSection: ThemeSection
   storeSlug: string
+  onNavigate?: (section: ThemeSection) => void
 }
 
 type VisualOption = {
@@ -102,7 +103,7 @@ function colorLuminance(hex: string): number {
   return 0.299 * r + 0.587 * g + 0.114 * b
 }
 
-export function ThemeForm({ theme, activeSection, storeSlug }: ThemeFormProps) {
+export function ThemeForm({ theme, activeSection, storeSlug, onNavigate }: ThemeFormProps) {
   const [saved, setSaved] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [systemMode, setSystemMode] = useState<'light' | 'dark'>('light')
@@ -293,7 +294,7 @@ export function ThemeForm({ theme, activeSection, storeSlug }: ThemeFormProps) {
               contrastPrimary={contrastPrimary}
             />
           }
-          preview={<ColorStoreMockup previewThemeVars={previewThemeVars} theme={previewTheme} />}
+          preview={<ColorStoreMockup previewThemeVars={previewThemeVars} theme={previewTheme} onNavigate={onNavigate} />}
           previewHeader={visualModeHeader}
         />
       ) : null}
@@ -306,7 +307,7 @@ export function ThemeForm({ theme, activeSection, storeSlug }: ThemeFormProps) {
               setThemeValue={setThemeValue}
             />
           }
-          preview={<ProductCatalogPreview previewThemeVars={previewThemeVars} columns={previewTheme.grid_columns} imageRatio={previewTheme.image_ratio} cardLayout={previewTheme.card_layout} />}
+          preview={<ProductCatalogPreview previewThemeVars={previewThemeVars} columns={previewTheme.grid_columns} imageRatio={previewTheme.image_ratio} cardLayout={previewTheme.card_layout} onNavigate={onNavigate} />}
           previewHeader={visualModeHeader}
         />
       ) : null}
@@ -319,7 +320,7 @@ export function ThemeForm({ theme, activeSection, storeSlug }: ThemeFormProps) {
               setThemeValue={setThemeValue}
             />
           }
-          preview={<DesignLivePreview previewThemeVars={previewThemeVars} columns={previewTheme.grid_columns} imageRatio={previewTheme.image_ratio} containerWidth={previewTheme.container_width} spacingScale={previewTheme.spacing_scale} cardLayout={previewTheme.card_layout} />}
+          preview={<DesignLivePreview previewThemeVars={previewThemeVars} columns={previewTheme.grid_columns} imageRatio={previewTheme.image_ratio} containerWidth={previewTheme.container_width} spacingScale={previewTheme.spacing_scale} cardLayout={previewTheme.card_layout} onNavigate={onNavigate} />}
           previewHeader={visualModeHeader}
         />
       ) : null}
@@ -353,6 +354,47 @@ function EditorShell({
         {preview}
       </div>
     </section>
+  )
+}
+
+function PreviewZone({
+  label,
+  target,
+  onNavigate,
+  children,
+}: {
+  label: string
+  target: ThemeSection
+  onNavigate?: (section: ThemeSection) => void
+  children: React.ReactNode
+}) {
+  const [hovered, setHovered] = useState(false)
+  if (!onNavigate) return <>{children}</>
+
+  return (
+    <div
+      className="relative cursor-pointer"
+      style={{
+        outline: hovered ? '2px solid rgba(52,211,153,0.5)' : '2px solid transparent',
+        outlineOffset: '-1px',
+        transition: 'outline-color 0.15s ease',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={() => onNavigate(target)}
+    >
+      {hovered ? (
+        <div className="pointer-events-none absolute inset-0 z-0 bg-emerald-400/[0.04]" />
+      ) : null}
+      {children}
+      {hovered ? (
+        <div className="pointer-events-none absolute bottom-1.5 left-1/2 z-10 -translate-x-1/2">
+          <span className="whitespace-nowrap rounded-full bg-emerald-400 px-2 py-0.5 text-[9px] font-bold text-black shadow-[0_2px_8px_rgba(52,211,153,0.4)]">
+            {label}
+          </span>
+        </div>
+      ) : null}
+    </div>
   )
 }
 
@@ -1169,9 +1211,11 @@ const HERO_CONTENT_WIDTH: Record<string, string> = {
 function ColorStoreMockup({
   previewThemeVars,
   theme,
+  onNavigate,
 }: {
   previewThemeVars: React.CSSProperties
   theme: StoreTheme
+  onNavigate?: (section: ThemeSection) => void
 }) {
   const heroContentWidth = HERO_CONTENT_WIDTH[theme.container_width] ?? '65%'
 
@@ -1208,6 +1252,7 @@ function ColorStoreMockup({
       </div>
 
       {/* Hero area — background always full width; content constrained by container_width */}
+      <PreviewZone label="Editar portada" target="layout" onNavigate={onNavigate}>
       <div
         className="pb-7 pt-8"
         style={{
@@ -1262,8 +1307,10 @@ function ColorStoreMockup({
           </div>
         </div>
       </div>
+      </PreviewZone>
 
       {/* Product cards */}
+      <PreviewZone label="Estilo de producto" target="productos" onNavigate={onNavigate}>
       <div className="grid grid-cols-2 gap-2.5 px-4 pb-4 pt-3">
         {[
           { label: 'Producto estrella', price: '$24.900' },
@@ -1296,6 +1343,7 @@ function ColorStoreMockup({
           </div>
         ))}
       </div>
+      </PreviewZone>
 
       {/* Footer strip */}
       <div
@@ -1384,11 +1432,13 @@ function ProductCatalogPreview({
   columns,
   imageRatio,
   cardLayout,
+  onNavigate,
 }: {
   previewThemeVars: React.CSSProperties
   columns: number
   imageRatio: string
   cardLayout: string
+  onNavigate?: (section: ThemeSection) => void
 }) {
   const count = columns === 4 ? 4 : columns === 3 ? 3 : 2
   const imageClass =
@@ -1401,6 +1451,7 @@ function ProductCatalogPreview({
   return (
     <div className="admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
       {/* Thin nav */}
+      <PreviewZone label="Colores" target="colores" onNavigate={onNavigate}>
       <div
         className="flex items-center justify-between px-4 py-2.5"
         style={{ background: 'var(--store-nav-bg)', borderBottom: '1px solid var(--store-card-border)' }}
@@ -1411,6 +1462,7 @@ function ProductCatalogPreview({
           <div className="h-[14px] w-10 rounded-[var(--store-button-radius)]" style={{ background: 'var(--store-primary)' }} />
         </div>
       </div>
+      </PreviewZone>
 
       {/* Category filter strip */}
       <div
@@ -1510,6 +1562,7 @@ function DesignLivePreview({
   containerWidth,
   spacingScale,
   cardLayout,
+  onNavigate,
 }: {
   previewThemeVars: React.CSSProperties
   columns: number
@@ -1517,6 +1570,7 @@ function DesignLivePreview({
   containerWidth: string
   spacingScale: string
   cardLayout: string
+  onNavigate?: (section: ThemeSection) => void
 }) {
   const previewCount = columns === 4 ? 4 : columns === 3 ? 3 : 2
   const imageClass = imageRatio === '1:1' ? 'aspect-square' : imageRatio === '16:9' ? 'aspect-video' : imageRatio === '3:4' ? 'aspect-[3/4]' : 'aspect-[4/5]'
@@ -1580,6 +1634,7 @@ function DesignLivePreview({
         </div>
 
         {/* Card grid constrained by container width */}
+        <PreviewZone label="Estilo de producto" target="productos" onNavigate={onNavigate}>
         <div className="transition-all duration-300" style={{ width: widthPercent }}>
           <div className={`grid gap-2 ${previewCount === 4 ? 'grid-cols-4' : previewCount === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
             {Array.from({ length: previewCount }).map((_, index) => (
@@ -1606,6 +1661,7 @@ function DesignLivePreview({
             ))}
           </div>
         </div>
+        </PreviewZone>
       </div>
     </div>
   )
