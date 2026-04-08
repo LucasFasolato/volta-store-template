@@ -20,7 +20,8 @@ export function WizardStepStyle({ publicPath }: { publicPath: string }) {
 
   function handleApply() {
     setError(null)
-    const previewWindow = window.open('', '_blank', 'noopener,noreferrer')
+    const loadingUrl = `/tienda-loading?target=${encodeURIComponent(publicPath)}`
+    const previewWindow = window.open(loadingUrl, '_blank', 'noopener,noreferrer')
 
     startTransition(async () => {
       const result = await applyThemePreset(selectedId)
@@ -33,7 +34,10 @@ export function WizardStepStyle({ publicPath }: { publicPath: string }) {
       }
 
       if (previewWindow) {
-        previewWindow.location.href = publicPath
+        previewWindow.postMessage(
+          { type: 'volta-store-ready', href: publicPath },
+          window.location.origin,
+        )
       } else {
         window.open(publicPath, '_blank', 'noopener,noreferrer')
       }
