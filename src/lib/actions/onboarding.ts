@@ -21,6 +21,8 @@ function generateSlugFromEmail(email: string): string {
 
 function buildInitialHeroContent(storeName: string) {
   return {
+    banner_mode: 'static' as const,
+    banner_speed: 'normal' as const,
     hero_title: storeName,
     hero_subtitle: `Descubri todo lo que tiene ${storeName} para ofrecerte.`,
     support_text: undefined,

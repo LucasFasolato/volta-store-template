@@ -372,9 +372,57 @@
   }
 }
 
+/* ── Preview live transitions ──────────────────────────────────
+   Applied to store mockup previews so color/theme changes feel
+   smooth instead of instant. Targets all descendant elements so
+   inline-style property changes (color, bg, border) interpolate.
+   Gradient backgrounds can't transition in CSS — they snap — but
+   solid-color properties (primary buttons, text, borders) animate.
+   ─────────────────────────────────────────────────────────────── */
+.preview-live * {
+  transition-property: color, background-color, border-color, box-shadow, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+
 @keyframes shimmer {
   100% {
     transform: translateX(100%);
+  }
+}
+
+@keyframes preview-glow-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+  35%  { box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.35); }
+  100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+}
+
+@keyframes store-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.store-marquee-track {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  animation: store-marquee var(--marquee-duration, 20s) linear infinite;
+  will-change: transform;
+}
+
+.store-marquee-track > * {
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .store-marquee-track {
+    animation: none;
+    transform: none;
   }
 }
 

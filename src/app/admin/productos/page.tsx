@@ -3,6 +3,7 @@ import { Download, Plus, Upload } from 'lucide-react'
 import { getAdminCategories, getAdminProducts } from '@/lib/queries/store'
 import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { CategoriasList } from '@/components/admin/CategoriasList'
 import { CsvImporter } from '@/components/admin/CsvImporter'
 import { ProductList } from '@/components/admin/ProductList'
 import { Button } from '@/components/ui/button'
@@ -19,7 +20,7 @@ export default async function ProductosPage() {
     <div className="p-4 sm:p-6 lg:p-10">
       <AdminPageHeader
         title="Productos"
-        description={`${products.length} producto${products.length !== 1 ? 's' : ''} en tu catalogo. Carga a mano o importa varios por CSV desde este mismo lugar.`}
+        description={`${products.length} producto${products.length !== 1 ? 's' : ''} en tu catalogo. Desde aqui tambien ordenas categorias para que el cliente entienda mejor tu oferta.`}
         action={
           <Button asChild className="rounded-full bg-emerald-400 text-black hover:bg-emerald-300">
             <Link href="/admin/productos/nuevo">
@@ -72,7 +73,29 @@ export default async function ProductosPage() {
         </details>
       </section>
 
-      <ProductList products={products} categories={categories} />
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
+        <div className="space-y-4">
+          <div className="admin-surface rounded-xl p-5 sm:p-6">
+            <p className="admin-label">Catalogo</p>
+            <h2 className="mt-2 text-xl font-semibold text-foreground">Todo lo que estas vendiendo hoy</h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Filtra por estado o categoria y entra directo a editar lo importante.
+            </p>
+          </div>
+          <ProductList products={products} categories={categories} />
+        </div>
+
+        <div id="categorias" className="space-y-4 xl:sticky xl:top-6 xl:self-start">
+          <div className="admin-surface rounded-xl p-5 sm:p-6">
+            <p className="admin-label">Categorias</p>
+            <h2 className="mt-2 text-xl font-semibold text-foreground">Ordena el catalogo sin salir de Productos</h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Sirven para agrupar colecciones, crear filtros y darle mas lectura a la tienda.
+            </p>
+          </div>
+          <CategoriasList categories={categories} />
+        </div>
+      </section>
     </div>
   )
 }

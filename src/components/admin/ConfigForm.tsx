@@ -144,53 +144,40 @@ export function ConfigForm({ store }: ConfigFormProps) {
   }
 
   return (
-    <div className="space-y-8">
-      <section className="admin-surface rounded-xl px-5 py-6 sm:px-6">
-        <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
-          <div>
-            <h3 className="text-lg font-semibold text-white">Logo del negocio</h3>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <section className="admin-surface rounded-xl p-6">
+        <div className="grid gap-4 md:grid-cols-3">
+          <InfoCard label="URL publica" value={`${baseUrl}/tienda/${currentSlug}`} />
+          <InfoCard label="WhatsApp" value={store.whatsapp || 'Pendiente'} />
+          <InfoCard label="Instagram" value={store.instagram ? `@${store.instagram}` : 'Opcional'} />
+        </div>
+      </section>
+
+      <section className="admin-surface rounded-xl p-6">
+        <SectionIntro
+          eyebrow="Seccion 1"
+          title="Lo esencial para que tu tienda funcione"
+          description="Nombre, logo y URL en un solo lugar para que tu marca sea clara desde el primer vistazo."
+        />
+
+        <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
+          <div className="admin-surface-muted rounded-xl p-5">
+            <h4 className="text-sm font-semibold text-white">Logo</h4>
             <p className="mt-2 text-sm leading-6 text-neutral-400">
-              Se muestra en la navegacion publica. Recomendado: fondo transparente, buen contraste y formato cuadrado.
+              Recomendado: fondo transparente, buen contraste y formato cuadrado.
             </p>
-            <div className="mt-5">
+            <div className="mt-5 max-w-[220px]">
               <ImageUpload
                 currentUrl={store.logo_url}
                 onUpload={uploadLogo}
                 fieldName="logo"
                 aspectHint="1:1"
                 label="Subir logo"
-                className="max-w-[220px]"
               />
             </div>
           </div>
 
-          <div className="admin-surface-muted rounded-lg p-5">
-            <p className="admin-label">Lo que ve tu cliente</p>
-            <h4 className="mt-3 text-xl font-semibold text-white">{store.name}</h4>
-            <p className="mt-2 text-sm leading-6 text-neutral-400">
-              Desde aca defines la identidad publica de la tienda: nombre, enlace, contacto y datos que transmiten confianza.
-            </p>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <InfoTile label="URL publica" value={`${baseUrl}/tienda/${currentSlug}`} />
-              <InfoTile label="WhatsApp" value={store.whatsapp || 'Pendiente'} />
-              <InfoTile label="Instagram" value={store.instagram ? `@${store.instagram}` : 'Opcional'} />
-              <InfoTile label="Horarios" value={store.hours || 'Opcional'} />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <section id="section-identidad" className="admin-surface rounded-xl px-5 py-6 sm:px-6">
-          <div className="mb-5">
-            <p className="admin-label">Identidad y enlace publico</p>
-            <h3 className="mt-3 text-xl font-semibold text-white">Lo esencial para que la tienda se entienda rapido</h3>
-            <p className="mt-2 text-sm leading-6 text-neutral-400">
-              Cambia nombre y URL con contexto claro. Antes de guardar ya sabes como quedara el enlace final.
-            </p>
-          </div>
-
-          <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="space-y-5">
             <div>
               <Label className="mb-2 block text-sm font-medium text-neutral-200">Nombre del negocio *</Label>
               <Input
@@ -203,13 +190,14 @@ export function ConfigForm({ store }: ConfigFormProps) {
             </div>
 
             <div>
-              <Label className="mb-2 block text-sm font-medium text-neutral-200">URL publica / slug *</Label>
+              <Label className="mb-2 block text-sm font-medium text-neutral-200">URL publica *</Label>
               <p className="mb-2 text-xs leading-5 text-neutral-500">
-                Usa minusculas, numeros y guiones. Evita cambiarlo seguido si ya compartiste el enlace.
+                Usa minusculas, numeros y guiones. Si ya la compartiste, mejor no cambiarla seguido.
               </p>
               <Input
                 {...register('slug', {
-                  onBlur: (event) => setValue('slug', slugify(event.target.value).slice(0, 48), { shouldDirty: true }),
+                  onBlur: (event) =>
+                    setValue('slug', slugify(event.target.value).slice(0, 48), { shouldDirty: true }),
                 })}
                 placeholder="atelier-norte"
                 aria-invalid={!!errors.slug || slugStatus.tone === 'error'}
@@ -217,17 +205,17 @@ export function ConfigForm({ store }: ConfigFormProps) {
               />
               {errors.slug ? <p className="mt-1.5 text-xs text-red-300">{errors.slug.message}</p> : null}
             </div>
-          </div>
 
-          <div className="mt-5 rounded-lg border border-white/8 bg-black/10 p-5">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0 flex-1">
-                <p className="admin-label">Preview de URL final</p>
-                <p className="mt-3 overflow-hidden text-ellipsis whitespace-nowrap break-all text-base font-semibold text-emerald-300 sm:whitespace-normal sm:[word-break:break-word]">
-                  {publicUrl}
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
+            <div className="rounded-xl border border-white/8 bg-black/10 p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                    Asi se ve tu enlace
+                  </p>
+                  <p className="mt-3 overflow-hidden text-ellipsis whitespace-nowrap text-base font-semibold text-emerald-300 sm:whitespace-normal sm:[word-break:break-word]">
+                    {publicUrl}
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={copyUrl}
@@ -236,120 +224,150 @@ export function ConfigForm({ store }: ConfigFormProps) {
                   <Copy className="size-4" />
                   {copied ? 'Copiada' : 'Copiar'}
                 </button>
-                <div className="flex size-11 items-center justify-center rounded-md bg-white/6">
-                  {slugStatus.tone === 'checking' ? (
-                    <Loader2 className="size-4 animate-spin text-emerald-200" />
-                  ) : slugStatus.tone === 'error' ? (
-                    <TriangleAlert className="size-4 text-amber-200" />
-                  ) : (
-                    <CheckCircle2 className="size-4 text-emerald-200" />
-                  )}
+              </div>
+
+              <div className="mt-4 rounded-lg border border-white/8 bg-white/4 px-4 py-3">
+                <div className="flex items-center gap-2 text-sm text-white">
+                  <Link2 className="size-4 text-emerald-300" />
+                  {slugStatus.message}
+                  <span className="ml-auto">
+                    {slugStatus.tone === 'checking' ? (
+                      <Loader2 className="size-4 animate-spin text-emerald-200" />
+                    ) : slugStatus.tone === 'error' ? (
+                      <TriangleAlert className="size-4 text-amber-200" />
+                    ) : (
+                      <CheckCircle2 className="size-4 text-emerald-200" />
+                    )}
+                  </span>
                 </div>
+                {slugChanged ? (
+                  <p className="mt-2 text-xs leading-5 text-amber-100/80">
+                    Si guardas este cambio, los links compartidos con el slug anterior pueden dejar de funcionar.
+                  </p>
+                ) : null}
               </div>
             </div>
-
-            <div className="mt-4 rounded-lg border border-white/8 bg-white/4 px-4 py-3">
-              <div className="flex items-center gap-2 text-sm text-white">
-                <Link2 className="size-4 text-emerald-300" />
-                {slugStatus.message}
-              </div>
-              {slugChanged ? (
-                <p className="mt-2 text-xs leading-5 text-amber-100/80">
-                  Si guardas este cambio, los links compartidos con el slug anterior pueden dejar de funcionar.
-                </p>
-              ) : null}
-            </div>
           </div>
-        </section>
-
-        <section id="section-contacto" className="admin-surface rounded-xl px-5 py-6 sm:px-6">
-          <div className="mb-5">
-            <p className="admin-label">Canales de contacto</p>
-            <h3 className="mt-3 text-xl font-semibold text-white">Como te encuentra y te escribe tu cliente</h3>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div>
-              <Label className="mb-2 block text-sm font-medium text-neutral-200">Numero de WhatsApp *</Label>
-              <p className="mb-2 text-xs text-neutral-500">
-                Este numero recibe los pedidos. Incluye codigo de pais y sin caracteres especiales extra.
-              </p>
-              <Input
-                {...register('whatsapp')}
-                placeholder="+5491112345678"
-                aria-invalid={!!errors.whatsapp}
-                className="h-12 rounded-md border-white/10 bg-white/5 font-mono text-white placeholder:text-neutral-500"
-              />
-              {errors.whatsapp ? (
-                <p className="mt-1.5 text-xs text-red-300">{errors.whatsapp.message}</p>
-              ) : (
-                <p className="mt-1.5 text-xs text-neutral-500">Ejemplo correcto: +5491112345678</p>
-              )}
-            </div>
-
-            <div>
-              <Label className="mb-2 block text-sm font-medium text-neutral-200">Instagram</Label>
-              <p className="mb-2 text-xs text-neutral-500">Opcional, pero suma marca y confianza social.</p>
-              <Input
-                {...register('instagram', {
-                  onBlur: (event) => setValue('instagram', sanitizeInstagramHandle(event.target.value)),
-                })}
-                placeholder="ateliernorte"
-                className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
-              />
-            </div>
-          </div>
-        </section>
-
-        <section id="section-contexto" className="admin-surface rounded-xl px-5 py-6 sm:px-6">
-          <div className="mb-5">
-            <p className="admin-label">Contexto y confianza</p>
-            <h3 className="mt-3 text-xl font-semibold text-white">Informacion que ayuda a comprar con menos dudas</h3>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div>
-              <Label className="mb-2 block text-sm font-medium text-neutral-200">Horarios</Label>
-              <Input
-                {...register('hours')}
-                placeholder="Lun a Vie 9 a 18 hs"
-                className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
-              />
-            </div>
-
-            <div>
-              <Label className="mb-2 block text-sm font-medium text-neutral-200">Direccion</Label>
-              <Input
-                {...register('address')}
-                placeholder="Av. Corrientes 1234, CABA"
-                className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
-              />
-            </div>
-          </div>
-        </section>
-
-        {submitError ? (
-          <FormFeedback kind="error" title="No pudimos guardar la configuracion" message={submitError} />
-        ) : null}
-        {!submitError && saved ? (
-          <FormFeedback
-            kind="success"
-            title="Configuracion guardada"
-            message="La tienda publica ya puede reflejar estos datos actualizados."
-          />
-        ) : null}
-
-        <div className="flex justify-end pt-1">
-          <SaveButton isLoading={isSubmitting} isSaved={saved} label="Guardar configuracion" />
         </div>
-      </form>
+      </section>
+
+      <section className="admin-surface rounded-xl p-6">
+        <SectionIntro
+          eyebrow="Seccion 2"
+          title="Como te encuentran y te escriben"
+          description="Estos canales aparecen en la tienda y ayudan a que el pedido llegue mas rapido."
+        />
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <Label className="mb-2 block text-sm font-medium text-neutral-200">WhatsApp *</Label>
+            <p className="mb-2 text-xs text-neutral-500">
+              Este numero recibe los pedidos. Incluye codigo de pais y evita caracteres extra.
+            </p>
+            <Input
+              {...register('whatsapp')}
+              placeholder="+5491112345678"
+              aria-invalid={!!errors.whatsapp}
+              className="h-12 rounded-md border-white/10 bg-white/5 font-mono text-white placeholder:text-neutral-500"
+            />
+            {errors.whatsapp ? (
+              <p className="mt-1.5 text-xs text-red-300">{errors.whatsapp.message}</p>
+            ) : (
+              <p className="mt-1.5 text-xs text-neutral-500">Ejemplo correcto: +5491112345678</p>
+            )}
+          </div>
+
+          <div>
+            <Label className="mb-2 block text-sm font-medium text-neutral-200">Instagram</Label>
+            <p className="mb-2 text-xs text-neutral-500">Opcional, pero suma marca y confianza social.</p>
+            <Input
+              {...register('instagram', {
+                onBlur: (event) => setValue('instagram', sanitizeInstagramHandle(event.target.value)),
+              })}
+              placeholder="ateliernorte"
+              className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="admin-surface rounded-xl p-6">
+        <SectionIntro
+          eyebrow="Seccion 3"
+          title="Informacion que ayuda a comprar"
+          description="Horarios, punto de retiro y una base preparada para sumar envios cuando quieras."
+        />
+
+        <div className="grid gap-5 lg:grid-cols-[1fr_1fr_0.9fr]">
+          <div>
+            <Label className="mb-2 block text-sm font-medium text-neutral-200">Horarios</Label>
+            <Input
+              {...register('hours')}
+              placeholder="Lun a Vie 9 a 18 hs"
+              className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+            />
+          </div>
+
+          <div>
+            <Label className="mb-2 block text-sm font-medium text-neutral-200">Punto de retiro / direccion</Label>
+            <Input
+              {...register('address')}
+              placeholder="Av. Corrientes 1234, CABA"
+              className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+            />
+          </div>
+
+          <div className="rounded-xl border border-dashed border-white/10 bg-white/4 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
+              Preparado para envios
+            </p>
+            <p className="mt-3 text-sm font-medium text-white">Proximo paso</p>
+            <p className="mt-2 text-sm leading-6 text-neutral-400">
+              Dejamos este bloque listo para sumar zonas, costos o tiempos de entrega mas adelante.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {submitError ? (
+        <FormFeedback kind="error" title="No pudimos guardar la configuracion" message={submitError} />
+      ) : null}
+      {!submitError && saved ? (
+        <FormFeedback
+          kind="success"
+          title="Configuracion guardada"
+          message="La tienda publica ya puede reflejar estos datos actualizados."
+        />
+      ) : null}
+
+      <div className="flex justify-end">
+        <SaveButton isLoading={isSubmitting} isSaved={saved} label="Guardar configuracion" />
+      </div>
+    </form>
+  )
+}
+
+function SectionIntro({
+  eyebrow,
+  title,
+  description,
+}: {
+  eyebrow: string
+  title: string
+  description: string
+}) {
+  return (
+    <div className="mb-6">
+      <p className="admin-label">{eyebrow}</p>
+      <h3 className="mt-3 text-xl font-semibold text-white">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-neutral-400">{description}</p>
     </div>
   )
 }
 
-function InfoTile({ label, value }: { label: string; value: string }) {
+function InfoCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="admin-surface-muted rounded-lg px-4 py-3">
+    <div className="admin-surface-muted rounded-xl px-4 py-4">
       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">{label}</p>
       <p className="mt-2 text-sm font-medium text-neutral-100">{value}</p>
     </div>

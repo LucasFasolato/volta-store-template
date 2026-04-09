@@ -1,14 +1,28 @@
 import { Clock3, MapPin, MessageCircle, Package, ShieldCheck, Zap } from 'lucide-react'
 import { sanitizePhoneNumber } from '@/lib/utils/format'
-import type { Store } from '@/types/store'
+import type { Store, StoreContent } from '@/types/store'
 
 type TrustItem = {
   icon: React.ElementType
   label: string
 }
 
-export function TrustBar({ store }: { store: Store }) {
+const SPEED_TO_DURATION: Record<string, string> = {
+  slow: '28s',
+  normal: '20s',
+  fast: '14s',
+}
+
+export function TrustBar({
+  store,
+  content,
+}: {
+  store: Store
+  content: Pick<StoreContent, 'banner_mode' | 'banner_speed'>
+}) {
   const phone = store.whatsapp ? sanitizePhoneNumber(store.whatsapp) : null
+  const isAnimated = content.banner_mode === 'animated'
+  const duration = SPEED_TO_DURATION[content.banner_speed] ?? SPEED_TO_DURATION.normal
 
   const items: TrustItem[] = [
     phone
@@ -38,35 +52,67 @@ export function TrustBar({ store }: { store: Store }) {
           'linear-gradient(180deg, color-mix(in srgb, var(--store-surface) 62%, transparent), color-mix(in srgb, var(--store-bg) 92%, transparent))',
       }}
     >
-      <div className="flex items-stretch overflow-x-auto">
-        <div className="mx-auto flex min-w-max items-stretch">
-          {display.map((item, index) => {
-            const Icon = item.icon
-            return (
-              <div
-                key={index}
-                className="flex items-center gap-2.5 px-5 py-4 sm:px-7 sm:py-5"
-                style={
-                  index < display.length - 1
-                    ? { borderRight: '1px solid var(--store-card-border)' }
-                    : undefined
-                }
-              >
-                <Icon
-                  className="size-4 shrink-0"
-                  style={{ color: 'var(--store-primary)' }}
-                />
-                <span
-                  className="whitespace-nowrap text-[12px] font-medium sm:text-[13px]"
-                  style={{ color: 'var(--store-soft-text)' }}
-                >
-                  {item.label}
-                </span>
-              </div>
-            )
-          })}
+      {isAnimated ? (
+        <div
+          className="overflow-hidden"
+          style={{
+            maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+          }}
+        >
+          <div
+            className="store-marquee-track"
+            style={{ ['--marquee-duration' as string]: duration }}
+          >
+            <TrustItemsRow items={display} />
+            <TrustItemsRow items={display} ariaHidden />
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex items-stretch overflow-x-auto">
+          <div className="mx-auto flex min-w-max items-stretch">
+            <TrustItemsRow items={display} staticRow />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function TrustItemsRow({
+  items,
+  ariaHidden = false,
+  staticRow = false,
+}: {
+  items: TrustItem[]
+  ariaHidden?: boolean
+  staticRow?: boolean
+}) {
+  return (
+    <div
+      aria-hidden={ariaHidden}
+      className={staticRow ? 'flex items-stretch' : 'flex shrink-0 items-stretch'}
+    >
+      {items.map((item, index) => {
+        const Icon = item.icon
+        return (
+          <div
+            key={`${item.label}-${index}-${ariaHidden ? 'ghost' : 'main'}`}
+            className="flex items-center gap-2.5 px-5 py-4 sm:px-7 sm:py-5"
+            style={{ borderRight: '1px solid var(--store-card-border)' }}
+          >
+            <Icon
+              className="size-4 shrink-0"
+              style={{ color: 'var(--store-primary)' }}
+            />
+            <span
+              className="whitespace-nowrap text-[12px] font-medium sm:text-[13px]"
+              style={{ color: 'var(--store-soft-text)' }}
+            >
+              {item.label}
+            </span>
+          </div>
+        )
+      })}
     </div>
   )
 }

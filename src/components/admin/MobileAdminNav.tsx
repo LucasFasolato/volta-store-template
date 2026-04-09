@@ -6,8 +6,8 @@ import { LayoutDashboard, Package, Palette, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const MOBILE_NAV = [
-  { href: '/admin', label: 'Inicio', icon: LayoutDashboard, exact: true },
-  { href: '/admin/apariencia', label: 'Diseno', icon: Palette },
+  { href: '/admin', label: 'Resumen', icon: LayoutDashboard, exact: true },
+  { href: '/admin/apariencia', label: 'Apariencia', icon: Palette },
   { href: '/admin/productos', label: 'Productos', icon: Package },
   { href: '/admin/configuracion', label: 'Config', icon: Settings },
 ]

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Contrast } from 'lucide-react'
+import { Contrast, Maximize2, Minimize2, Monitor, Smartphone } from 'lucide-react'
 import { toast } from 'sonner'
 import { FormFeedback } from '@/components/common/FormFeedback'
 import { SaveButton } from '@/components/common/SaveButton'
@@ -335,6 +335,8 @@ export function ThemeForm({ theme, activeSection, storeSlug, onNavigate }: Theme
   )
 }
 
+type PreviewDevice = 'desktop' | 'mobile'
+
 function EditorShell({
   controls,
   preview,
@@ -344,14 +346,80 @@ function EditorShell({
   preview: React.ReactNode
   previewHeader?: React.ReactNode
 }) {
+  const [focused, setFocused] = useState(false)
+  const [device,  setDevice]  = useState<PreviewDevice>('desktop')
+
   return (
-    <section className="grid gap-4 xl:grid-cols-[340px_minmax(0,1fr)]">
-      {/* Controls sidebar — scrolls with the page */}
-      <div className="admin-surface rounded-[24px] p-5">{controls}</div>
+    <section
+      className={cn(
+        'grid gap-4',
+        focused ? '' : 'xl:grid-cols-[340px_minmax(0,1fr)]',
+      )}
+    >
+      {/* Controls sidebar — hidden in focus mode */}
+      {!focused && (
+        <div className="admin-surface rounded-[24px] p-5">{controls}</div>
+      )}
+
       {/* Preview — sticky, dominant right column */}
       <div className="space-y-3 xl:sticky xl:top-6 xl:self-start">
         {previewHeader}
-        {preview}
+
+        {/* Preview device/focus controls */}
+        <div className="flex items-center justify-between px-0.5">
+          {/* Device toggle */}
+          <div className="flex rounded-[10px] border border-white/[0.07] bg-white/[0.03] p-0.5">
+            {([
+              { value: 'desktop' as const, Icon: Monitor,    label: 'Desktop' },
+              { value: 'mobile'  as const, Icon: Smartphone, label: 'Mobile'  },
+            ] as const).map(({ value, Icon, label }) => (
+              <button
+                key={value}
+                type="button"
+                title={label}
+                onClick={() => setDevice(value)}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 text-[11px] font-medium transition duration-150 active:scale-[0.96]',
+                  device === value
+                    ? 'admin-surface-selected text-white'
+                    : 'text-neutral-500 hover:text-neutral-300',
+                )}
+              >
+                <Icon className="size-3" />
+                <span className="hidden sm:inline">{label}</span>
+              </button>
+            ))}
+          </div>
+          {/* Focus toggle */}
+          <button
+            type="button"
+            title={focused ? 'Salir del modo foco' : 'Expandir preview'}
+            onClick={() => setFocused((f) => !f)}
+            className={cn(
+              'flex items-center gap-1.5 rounded-[10px] border px-2.5 py-1.5 text-[11px] font-medium transition duration-150 active:scale-[0.96]',
+              focused
+                ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300 hover:bg-emerald-400/15'
+                : 'border-white/10 bg-white/5 text-neutral-400 hover:border-white/20 hover:text-white',
+            )}
+          >
+            {focused ? <Minimize2 className="size-3" /> : <Maximize2 className="size-3" />}
+            <span className="hidden sm:inline">{focused ? 'Salir' : 'Expandir'}</span>
+          </button>
+        </div>
+
+        {/* Preview mockup with optional mobile frame */}
+        {device === 'mobile' ? (
+          <div className="flex justify-center">
+            <div
+              className="w-full overflow-hidden rounded-[32px] shadow-[0_0_0_6px_rgba(255,255,255,0.06),0_24px_60px_rgba(0,0,0,0.5)]"
+              style={{ maxWidth: 390 }}
+            >
+              {preview}
+            </div>
+          </div>
+        ) : (
+          preview
+        )}
       </div>
     </section>
   )
@@ -419,7 +487,7 @@ function SegmentGroup({
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              'rounded-[12px] px-2 py-2 text-xs font-medium transition duration-150',
+              'rounded-[12px] px-2 py-2 text-xs font-medium transition duration-150 active:scale-[0.94]',
               selected === option.value ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white',
             )}
           >
@@ -452,7 +520,7 @@ function PillGroup({
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              'rounded-[12px] px-3 py-1.5 text-xs font-medium transition duration-150',
+              'rounded-[12px] px-3 py-1.5 text-xs font-medium transition duration-150 active:scale-[0.94]',
               selected === option.value ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white',
             )}
           >
@@ -500,7 +568,7 @@ function FontRow({
       type="button"
       onClick={onClick}
       className={cn(
-        'flex w-full items-center gap-3 rounded-[14px] px-3 py-2 text-left transition duration-150',
+        'flex w-full items-center gap-3 rounded-[14px] px-3 py-2 text-left transition duration-150 active:scale-[0.98]',
         selected ? 'admin-surface-selected' : 'hover:bg-white/[0.06]',
       )}
     >
@@ -532,7 +600,7 @@ function FontsControls({
     <div className="space-y-5">
       {/* Presets */}
       <div>
-        <p className="mb-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Preset tipografico</p>
+        <p className="mb-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Combinación de fuentes</p>
         <div className="flex flex-wrap gap-1.5">
           {FONT_PRESETS.map((preset) => (
             <button
@@ -594,7 +662,7 @@ function FontsControls({
       {/* Fine controls */}
       <div className="grid grid-cols-3 gap-3">
         <SegmentGroup
-          title="Escala titulos"
+          title="Tamaño de títulos"
           options={SCALE_OPTIONS}
           selected={theme.heading_scale}
           onChange={(value) => setThemeValue('heading_scale', value as StoreThemeInput['heading_scale'])}
@@ -606,7 +674,7 @@ function FontsControls({
           onChange={(value) => setThemeValue('heading_weight', value as StoreThemeInput['heading_weight'])}
         />
         <SegmentGroup
-          title="Escala texto"
+          title="Tamaño de texto"
           options={BODY_SCALE_OPTIONS}
           selected={theme.body_scale}
           onChange={(value) => setThemeValue('body_scale', value as StoreThemeInput['body_scale'])}
@@ -700,10 +768,10 @@ function ColorsControls({
   return (
     <div className="space-y-3">
       {/* Básico: Color principal */}
-      <ColorSection title="Color principal">
+      <ColorSection title="Tu color de marca">
         <ColorRow
-          label="CTA, botones y precio destacado"
-          hint="El color más importante de tu tienda"
+          label="Botones, precios y acciones"
+          hint="Aparece en cada punto de decisión de la tienda"
           fieldName="primary_color"
           value={theme.primary_color}
           register={register}
@@ -944,10 +1012,10 @@ function CardLayoutOption({
       type="button"
       onClick={onClick}
       className={cn(
-        'w-full overflow-hidden rounded-[16px] border text-left transition duration-150',
+        'w-full overflow-hidden rounded-[16px] border text-left transition duration-200 active:scale-[0.99]',
         isSelected
           ? 'border-emerald-400/30 bg-emerald-400/[0.06]'
-          : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.1] hover:bg-white/[0.04]',
+          : 'border-white/[0.06] bg-white/[0.02] hover:-translate-y-0.5 hover:border-white/[0.12] hover:bg-white/[0.04] hover:shadow-[0_6px_20px_rgba(0,0,0,0.25)]',
       )}
     >
       {/* Realistic mini card preview */}
@@ -1127,10 +1195,10 @@ function LayoutControls({
 
       {/* ── Componentes ── */}
       <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Componentes</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Detalles de diseño</p>
         <div className="grid gap-3 sm:grid-cols-2">
           <PillGroup
-            title="Estilo de tarjetas"
+            title="Acabado de tarjetas"
             options={CARD_OPTIONS}
             selected={theme.card_style}
             onChange={(value) => setThemeValue('card_style', value as StoreThemeInput['card_style'])}
@@ -1161,7 +1229,7 @@ function LayoutControls({
 
 function TypographyLivePreview({ previewThemeVars }: { previewThemeVars: React.CSSProperties }) {
   return (
-    <div className="admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
+    <div className="preview-live admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
       <div className="border-b px-5 py-3" style={{ borderColor: 'var(--store-card-border)' }}>
         <p className="text-[9px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>Preview tipografico</p>
       </div>
@@ -1220,7 +1288,7 @@ function ColorStoreMockup({
   const heroContentWidth = HERO_CONTENT_WIDTH[theme.container_width] ?? '65%'
 
   return (
-    <div className="overflow-hidden rounded-[24px]" style={{ ...previewThemeVars, background: 'var(--store-bg-gradient)' }}>
+    <div className="preview-live overflow-hidden rounded-[24px]" style={{ ...previewThemeVars, background: 'var(--store-bg-gradient)' }}>
       {/* Nav strip */}
       <div
         className="flex items-center justify-between border-b px-4 py-2.5"
@@ -1449,7 +1517,7 @@ function ProductCatalogPreview({
   const activeCardLayout = normalizeCardLayout(cardLayout)
 
   return (
-    <div className="admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
+    <div className="preview-live admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
       {/* Thin nav */}
       <PreviewZone label="Colores" target="colores" onNavigate={onNavigate}>
       <div
@@ -1579,7 +1647,7 @@ function DesignLivePreview({
   const activeCardLayout = normalizeCardLayout(cardLayout)
 
   return (
-    <div className="admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
+    <div className="preview-live admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
       {/* Hero zone — height from spacing_scale, content width from container_width */}
       <div
         className="relative"

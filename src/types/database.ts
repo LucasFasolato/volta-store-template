@@ -202,6 +202,8 @@ export interface Database {
       }
       store_content: {
         Row: {
+          banner_mode: string
+          banner_speed: string
           id: string
           store_id: string
           hero_title: string
@@ -212,6 +214,8 @@ export interface Database {
           updated_at: string
         }
         Insert: {
+          banner_mode?: string
+          banner_speed?: string
           id?: string
           store_id: string
           hero_title?: string
@@ -222,6 +226,8 @@ export interface Database {
           updated_at?: string
         }
         Update: {
+          banner_mode?: string
+          banner_speed?: string
           hero_title?: string
           hero_subtitle?: string
           support_text?: string

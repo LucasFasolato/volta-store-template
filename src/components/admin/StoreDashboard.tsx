@@ -2,7 +2,6 @@ import Link from 'next/link'
 import {
   CheckCircle2,
   ExternalLink,
-  FileText,
   Package,
   Palette,
   Settings,
@@ -155,10 +154,10 @@ const QUICK_ACTIONS = [
     description: 'Suma al catalogo',
   },
   {
-    href: '/admin/contenido',
-    icon: FileText,
-    label: 'Editar portada',
-    description: 'Portada e imagen',
+    href: '/admin/apariencia?tab=contenido',
+    icon: Palette,
+    label: 'Portada y banner',
+    description: 'Copy, imagen y movimiento',
   },
   {
     href: '/admin/apariencia',

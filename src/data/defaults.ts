@@ -40,6 +40,8 @@ export const DEFAULT_LAYOUT: Omit<LayoutInsert, 'store_id'> = {
 }
 
 export const DEFAULT_CONTENT: Omit<ContentInsert, 'store_id'> = {
+  banner_mode: 'static',
+  banner_speed: 'normal',
   hero_title: 'Catálogo premium listo para vender por WhatsApp',
   hero_subtitle:
     'Una experiencia visual refinada para convertir visitas en pedidos reales con claridad, velocidad y confianza.',

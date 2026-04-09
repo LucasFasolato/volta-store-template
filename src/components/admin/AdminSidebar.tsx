@@ -4,14 +4,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   ExternalLink,
-  FileText,
   LayoutDashboard,
   LogOut,
   Package,
   Palette,
   Settings,
   Store,
-  Tag,
 } from 'lucide-react'
 import { signOut } from '@/lib/actions/auth'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -27,9 +25,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { href: '/admin', label: 'Resumen', icon: LayoutDashboard, exact: true },
   { href: '/admin/apariencia', label: 'Apariencia', icon: Palette },
-  { href: '/admin/contenido', label: 'Contenido', icon: FileText },
   { href: '/admin/productos', label: 'Productos', icon: Package },
-  { href: '/admin/categorias', label: 'Categorias', icon: Tag },
   { href: '/admin/configuracion', label: 'Configuracion', icon: Settings },
 ]
 
@@ -59,6 +55,24 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
               <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Admin</p>
             </div>
           </div>
+        </div>
+
+        <div className="admin-surface-selected mt-3 rounded-xl p-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">
+            Vista publica
+          </p>
+          <p className="mt-2 text-sm leading-6 text-neutral-200">
+            Mira tu tienda como la ve un cliente antes de compartirla.
+          </p>
+          <Link
+            href={`/tienda/${storeSlug}`}
+            target="_blank"
+            className="admin-button-primary mt-3 flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-semibold shadow-[0_18px_38px_rgba(16,185,129,0.22)] transition hover:shadow-[0_0_28px_rgba(52,211,153,0.38)]"
+          >
+            <Store className="size-4.5 shrink-0" />
+            <span className="flex-1">Ver tienda</span>
+            <ExternalLink className="size-4 shrink-0 opacity-80" />
+          </Link>
         </div>
 
         {/* Nav */}
@@ -95,16 +109,6 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
 
         {/* Footer */}
         <div className="space-y-1.5 border-t border-border pt-3">
-          <Link
-            href={`/tienda/${storeSlug}`}
-            target="_blank"
-            className="admin-surface-elevated flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm font-medium text-foreground transition duration-150 hover:brightness-105"
-          >
-            <Store className="size-4 shrink-0" />
-            <span className="flex-1">Ver tienda</span>
-            <ExternalLink className="size-3.5 text-muted-foreground" />
-          </Link>
-
           <ThemeToggle variant="sidebar" />
 
           <form action={signOut}>

@@ -1,7 +1,22 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { CheckCircle2, LayoutGrid, Layers3, Loader2, Palette, Settings2, Sparkles, Type } from 'lucide-react'
+import {
+  CheckCircle2,
+  FileText,
+  LayoutGrid,
+  Layers3,
+  Loader2,
+  Maximize2,
+  Minimize2,
+  Monitor,
+  Palette,
+  Settings2,
+  Smartphone,
+  Sparkles,
+  Type,
+} from 'lucide-react'
+import { ContentForm } from '@/components/admin/ContentForm'
 import { toast } from 'sonner'
 import { LayoutForm } from '@/components/admin/LayoutForm'
 import { ThemeForm, type ThemeSection } from '@/components/admin/ThemeForm'
@@ -9,12 +24,14 @@ import { THEME_PRESETS, type ThemePreset } from '@/data/theme-presets'
 import { applyThemePreset } from '@/lib/actions/store'
 import { buildThemeVars } from '@/lib/utils/theme'
 import { cn } from '@/lib/utils'
-import type { StoreLayout, StoreTheme } from '@/types/store'
+import type { Store, StoreContent, StoreLayout, StoreTheme } from '@/types/store'
 
-type AppTab = ThemeSection | 'avanzado' | 'estilos'
+type AppTab = ThemeSection | 'avanzado' | 'contenido' | 'estilos'
+type PreviewDevice = 'desktop' | 'mobile'
 
 const TABS: Array<{ value: AppTab; label: string; icon: React.ElementType }> = [
   { value: 'estilos',   label: 'Estilos',   icon: Sparkles },
+  { value: 'contenido', label: 'Portada',   icon: FileText },
   { value: 'colores',   label: 'Colores',   icon: Palette },
   { value: 'productos', label: 'Productos', icon: LayoutGrid },
   { value: 'layout',    label: 'Diseño',    icon: Layers3 },
@@ -23,13 +40,23 @@ const TABS: Array<{ value: AppTab; label: string; icon: React.ElementType }> = [
 ]
 
 type Props = {
+  content: StoreContent
   theme: StoreTheme
   layout: StoreLayout
+  store: Store
   storeSlug: string
+  initialTab?: AppTab
 }
 
-export function AppearanceEditor({ theme, layout, storeSlug }: Props) {
-  const [tab, setTab] = useState<AppTab>('estilos')
+export function AppearanceEditor({
+  content,
+  theme,
+  layout,
+  store,
+  storeSlug,
+  initialTab = 'estilos',
+}: Props) {
+  const [tab, setTab] = useState<AppTab>(initialTab)
 
   return (
     <div className="space-y-4">
@@ -52,7 +79,7 @@ export function AppearanceEditor({ theme, layout, storeSlug }: Props) {
                   type="button"
                   onClick={() => setTab(item.value)}
                   className={cn(
-                    'flex items-center gap-1.5 rounded-[14px] px-3 py-2 text-sm font-medium transition duration-150',
+                    'flex items-center gap-1.5 rounded-[14px] px-3 py-2 text-sm font-medium transition duration-150 active:scale-[0.96]',
                     active ? 'admin-surface-selected text-white' : 'text-neutral-400 hover:text-white',
                     active && item.value === 'estilos' ? 'text-emerald-300' : '',
                   )}
@@ -73,6 +100,8 @@ export function AppearanceEditor({ theme, layout, storeSlug }: Props) {
 
       {tab === 'estilos' ? (
         <EstilosEditorView theme={theme} storeSlug={storeSlug} />
+      ) : tab === 'contenido' ? (
+        <ContentForm content={content} store={store} />
       ) : tab === 'avanzado' ? (
         <AvanzadoEditorView layout={layout} />
       ) : (
@@ -87,15 +116,100 @@ export function AppearanceEditor({ theme, layout, storeSlug }: Props) {
   )
 }
 
-// ─── Estilos tab ─────────────────────────────────────────────────────────────
+// ─── Shared preview controls ──────────────────────────────────────────────────
+
+function DeviceToggle({
+  device,
+  onChange,
+}: {
+  device: PreviewDevice
+  onChange: (d: PreviewDevice) => void
+}) {
+  return (
+    <div className="flex rounded-[10px] border border-white/[0.07] bg-white/[0.03] p-0.5">
+      {([
+        { value: 'desktop' as const, Icon: Monitor,    label: 'Desktop' },
+        { value: 'mobile'  as const, Icon: Smartphone, label: 'Mobile'  },
+      ] as const).map(({ value, Icon, label }) => (
+        <button
+          key={value}
+          type="button"
+          title={label}
+          onClick={() => onChange(value)}
+          className={cn(
+            'flex items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 text-[11px] font-medium transition duration-150 active:scale-[0.96]',
+            device === value
+              ? 'admin-surface-selected text-white'
+              : 'text-neutral-500 hover:text-neutral-300',
+          )}
+        >
+          <Icon className="size-3" />
+          <span className="hidden sm:inline">{label}</span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function FocusButton({
+  focused,
+  onToggle,
+}: {
+  focused: boolean
+  onToggle: () => void
+}) {
+  return (
+    <button
+      type="button"
+      title={focused ? 'Salir del modo foco' : 'Modo foco: solo preview'}
+      onClick={onToggle}
+      className={cn(
+        'flex items-center gap-1.5 rounded-[10px] border px-2.5 py-1.5 text-[11px] font-medium transition duration-150 active:scale-[0.96]',
+        focused
+          ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300 hover:bg-emerald-400/15'
+          : 'border-white/10 bg-white/5 text-neutral-400 hover:border-white/20 hover:text-white',
+      )}
+    >
+      {focused ? <Minimize2 className="size-3" /> : <Maximize2 className="size-3" />}
+      <span className="hidden sm:inline">{focused ? 'Salir' : 'Expandir'}</span>
+    </button>
+  )
+}
+
+function PreviewWrapper({
+  device,
+  children,
+}: {
+  device: PreviewDevice
+  children: React.ReactNode
+}) {
+  if (device === 'mobile') {
+    return (
+      <div className="flex justify-center">
+        <div
+          className="w-full overflow-hidden rounded-[32px] shadow-[0_0_0_6px_rgba(255,255,255,0.06),0_24px_60px_rgba(0,0,0,0.5)]"
+          style={{ maxWidth: 390 }}
+        >
+          {children}
+        </div>
+      </div>
+    )
+  }
+  return <>{children}</>
+}
+
+// ─── Estilos tab ──────────────────────────────────────────────────────────────
 
 function EstilosEditorView({ theme, storeSlug }: { theme: StoreTheme; storeSlug: string }) {
-  const [applying, setApplying] = useState<string | null>(null)
+  const [applying, setApplying]   = useState<string | null>(null)
   const [appliedId, setAppliedId] = useState<string | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [focused,   setFocused]   = useState(false)
+  const [device,    setDevice]    = useState<PreviewDevice>('desktop')
+  const [glowing,   setGlowing]   = useState(false)
 
   const activePresetId = hoveredId ?? appliedId
-  const activePreset = THEME_PRESETS.find((p) => p.id === activePresetId)
+  const activePreset   = THEME_PRESETS.find((p) => p.id === activePresetId)
 
   const previewTheme: StoreTheme = useMemo(
     () =>
@@ -119,40 +233,49 @@ function EstilosEditorView({ theme, storeSlug }: { theme: StoreTheme; storeSlug:
       toast.error('No se pudo aplicar el estilo.')
     } else {
       setAppliedId(preset.id)
-      toast.success(`Estilo "${preset.name}" aplicado. Puedes personalizar cualquier detalle.`)
+      setGlowing(true)
+      setTimeout(() => setGlowing(false), 1200)
+      toast.success(`Estilo "${preset.name}" aplicado. Podés personalizar cualquier detalle.`)
     }
     setApplying(null)
   }
 
   return (
-    <section className="grid gap-4 xl:grid-cols-[340px_minmax(0,1fr)]">
-      {/* Preset sidebar */}
-      <div className="admin-surface rounded-[24px] p-3">
-        <div className="px-2 pb-2.5 pt-1.5">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">
-            Estilos predefinidos
-          </p>
-          <p className="mt-1 text-[11px] text-neutral-600">
-            Pasa el cursor para previsualizar. Elige una base y ajusta después.
-          </p>
+    <section
+      className={cn(
+        'grid gap-4',
+        focused ? '' : 'xl:grid-cols-[340px_minmax(0,1fr)]',
+      )}
+    >
+      {/* Preset sidebar — hidden in focus mode */}
+      {!focused && (
+        <div className="admin-surface rounded-[24px] p-3">
+          <div className="px-2 pb-2.5 pt-1.5">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">
+              Estilos predefinidos
+            </p>
+            <p className="mt-1 text-[11px] text-neutral-600">
+              Pasá el cursor para previsualizar. Elegí una base y ajustá después.
+            </p>
+          </div>
+          <div className="space-y-0.5">
+            {THEME_PRESETS.map((preset) => (
+              <PresetSidebarCard
+                key={preset.id}
+                preset={preset}
+                isApplying={applying === preset.id}
+                justApplied={appliedId === preset.id}
+                isHovered={hoveredId === preset.id}
+                onHover={() => setHoveredId(preset.id)}
+                onLeave={() => setHoveredId(null)}
+                onApply={() => handleApply(preset)}
+              />
+            ))}
+          </div>
         </div>
-        <div className="space-y-0.5">
-          {THEME_PRESETS.map((preset) => (
-            <PresetSidebarCard
-              key={preset.id}
-              preset={preset}
-              isApplying={applying === preset.id}
-              justApplied={appliedId === preset.id}
-              isHovered={hoveredId === preset.id}
-              onHover={() => setHoveredId(preset.id)}
-              onLeave={() => setHoveredId(null)}
-              onApply={() => handleApply(preset)}
-            />
-          ))}
-        </div>
-      </div>
+      )}
 
-      {/* Preview */}
+      {/* Preview column */}
       <div className="space-y-3 xl:sticky xl:top-6 xl:self-start">
         {/* Preview header */}
         <div className="admin-surface rounded-[18px] px-4 py-3">
@@ -163,7 +286,7 @@ function EstilosEditorView({ theme, storeSlug }: { theme: StoreTheme; storeSlug:
                 Preview en vivo
               </p>
               {activePreset ? (
-                <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 transition-all duration-200">
                   {activePreset.name}
                 </span>
               ) : (
@@ -174,7 +297,7 @@ function EstilosEditorView({ theme, storeSlug }: { theme: StoreTheme; storeSlug:
               href={`/tienda/${storeSlug}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 rounded-[10px] border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-medium text-neutral-300 transition hover:border-white/20 hover:text-white"
+              className="flex items-center gap-1.5 rounded-[10px] border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-medium text-neutral-300 transition hover:border-white/20 hover:text-white active:scale-[0.97]"
             >
               Ver tienda
               <svg className="size-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -184,8 +307,25 @@ function EstilosEditorView({ theme, storeSlug }: { theme: StoreTheme; storeSlug:
           </div>
         </div>
 
-        {/* Live mockup — reacts to hover */}
-        <PresetsStoreMockup previewVars={previewVars} theme={previewTheme} />
+        {/* Preview controls bar */}
+        <div className="flex items-center justify-between px-0.5">
+          <DeviceToggle device={device} onChange={setDevice} />
+          <FocusButton focused={focused} onToggle={() => setFocused((f) => !f)} />
+        </div>
+
+        {/* Mockup with optional glow ring on apply */}
+        <div
+          className="overflow-hidden rounded-[24px] transition-all duration-300"
+          style={
+            glowing
+              ? { animation: 'preview-glow-pulse 1.2s ease forwards' }
+              : undefined
+          }
+        >
+          <PreviewWrapper device={device}>
+            <PresetsStoreMockup previewVars={previewVars} />
+          </PreviewWrapper>
+        </div>
       </div>
     </section>
   )
@@ -208,24 +348,25 @@ function PresetSidebarCard({
   onLeave: () => void
   onApply: () => void
 }) {
-  const [c1, c2, c3] = preset.previewColors
+  const [c1, , c3] = preset.previewColors
   const isDark = preset.theme.visual_mode === 'dark'
 
   return (
     <div
       className={cn(
-        'flex cursor-pointer items-center gap-3 rounded-[16px] p-3 transition duration-150',
-        isHovered ? 'bg-white/[0.06]' : 'hover:bg-white/[0.04]',
+        'flex cursor-pointer items-center gap-3 rounded-[16px] p-3 transition duration-150 active:scale-[0.99]',
+        isHovered ? 'bg-white/[0.07]' : 'hover:bg-white/[0.04]',
+        justApplied ? 'ring-1 ring-emerald-400/20' : '',
       )}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
     >
-      {/* Color swatch mini */}
+      {/* Color swatch */}
       <div
-        className="size-10 shrink-0 overflow-hidden rounded-[10px]"
+        className="relative size-10 shrink-0 overflow-hidden rounded-[10px]"
         style={{
           background: isDark
-            ? `linear-gradient(135deg, ${c1}, ${c2}44)`
+            ? `linear-gradient(135deg, ${c1}cc, ${c1}33)`
             : `linear-gradient(135deg, ${c1}, color-mix(in srgb, ${c1} 88%, white 12%))`,
         }}
       >
@@ -252,7 +393,7 @@ function PresetSidebarCard({
         }}
         disabled={isApplying}
         className={cn(
-          'shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold transition duration-150 disabled:opacity-50',
+          'shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold transition duration-150 active:scale-[0.95] disabled:opacity-50',
           justApplied
             ? 'bg-emerald-400/15 text-emerald-300'
             : 'bg-white/[0.07] text-neutral-300 hover:bg-white/[0.12] hover:text-white',
@@ -278,14 +419,12 @@ function PresetSidebarCard({
 
 function PresetsStoreMockup({
   previewVars,
-  theme,
 }: {
   previewVars: React.CSSProperties
-  theme: StoreTheme
 }) {
   return (
     <div
-      className="overflow-hidden rounded-[24px] transition-all duration-300"
+      className="preview-live overflow-hidden rounded-[24px]"
       style={{ ...previewVars, background: 'var(--store-bg-gradient)' }}
     >
       {/* Nav */}
@@ -383,7 +522,7 @@ function PresetsStoreMockup({
         ))}
       </div>
 
-      {/* Footer strip */}
+      {/* Footer */}
       <div
         className="border-t px-5 py-3.5"
         style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-footer-bg-gradient)' }}
@@ -420,11 +559,11 @@ function AvanzadoEditorView({ layout }: { layout: StoreLayout }) {
 }
 
 const SECTIONS_META = [
-  { key: 'show_hero' as const,       label: 'Portada',          hint: 'Hero con imagen y CTA' },
-  { key: 'show_featured' as const,   label: 'Destacados',       hint: 'Selección curada al inicio' },
-  { key: 'show_categories' as const, label: 'Categorías',       hint: 'Filtros de navegación' },
-  { key: 'show_catalog' as const,    label: 'Catálogo',         hint: 'Grilla completa de productos' },
-  { key: 'show_footer' as const,     label: 'Footer',           hint: 'Contacto y datos al cierre' },
+  { key: 'show_hero' as const,       label: 'Portada',      hint: 'Hero con imagen y CTA' },
+  { key: 'show_featured' as const,   label: 'Destacados',   hint: 'Selección curada al inicio' },
+  { key: 'show_categories' as const, label: 'Categorías',   hint: 'Filtros de navegación' },
+  { key: 'show_catalog' as const,    label: 'Catálogo',     hint: 'Grilla completa de productos' },
+  { key: 'show_footer' as const,     label: 'Footer',       hint: 'Contacto y datos al cierre' },
 ]
 
 function SectionsDiagram({ layout }: { layout: StoreLayout }) {

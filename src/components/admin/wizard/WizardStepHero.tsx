@@ -44,6 +44,11 @@ export function WizardStepHero({ content }: { content: StoreContent }) {
 
     startTransition(async () => {
       const result = await updateStoreContent({
+        banner_mode: content.banner_mode === 'animated' ? 'animated' : 'static',
+        banner_speed:
+          content.banner_speed === 'slow' || content.banner_speed === 'fast'
+            ? content.banner_speed
+            : 'normal',
         hero_title: title.trim(),
         hero_subtitle: subtitle.trim(),
         support_text: content.support_text ?? '',

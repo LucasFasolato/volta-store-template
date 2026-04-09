@@ -26,6 +26,8 @@ export const storeConfigSchema = z.object({
 })
 
 export const storeContentSchema = z.object({
+  banner_mode: z.enum(['static', 'animated']),
+  banner_speed: z.enum(['slow', 'normal', 'fast']),
   hero_title: z
     .string()
     .max(CONTENT_LIMITS.hero_title, `Maximo ${CONTENT_LIMITS.hero_title} caracteres`)

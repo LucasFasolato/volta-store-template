@@ -130,6 +130,8 @@ export async function updateStoreContent(input: StoreContentInput) {
   const { error } = await supabase
     .from('store_content')
     .update({
+      banner_mode: validated.data.banner_mode,
+      banner_speed: validated.data.banner_speed,
       hero_title: validated.data.hero_title,
       hero_subtitle: validated.data.hero_subtitle,
       support_text: validated.data.support_text,
@@ -139,6 +141,7 @@ export async function updateStoreContent(input: StoreContentInput) {
   if (error) return { error: { formErrors: [error.message], fieldErrors: {} } }
 
   revalidatePath('/admin')
+  revalidatePath('/admin/apariencia')
   revalidatePath('/admin/contenido')
   revalidatePath(`/tienda/${store.slug}`)
   return { success: true }

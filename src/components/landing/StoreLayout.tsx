@@ -115,7 +115,7 @@ export function StoreLayout({
           <HeroSection content={content} store={store} containerClass={containerClass} />
         ) : null}
 
-        <TrustBar store={store} />
+        <TrustBar store={store} content={content} />
 
         {layout.show_featured && featuredProducts.length > 0 ? (
           <FeaturedSection
