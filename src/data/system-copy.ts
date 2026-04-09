@@ -20,7 +20,7 @@ export const COPY = {
   product: {
     viewProduct: 'Ver producto',
     featured: 'Productos destacados',
-    catalog: 'Catalogo',
+    catalog: 'Catálogo',
     allProducts: 'Todos los productos',
     noProducts: 'No hay productos disponibles por ahora.',
     backToStore: 'Volver a la tienda',

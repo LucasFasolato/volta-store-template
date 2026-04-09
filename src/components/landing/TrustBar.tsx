@@ -5,7 +5,6 @@ import type { Store } from '@/types/store'
 type TrustItem = {
   icon: React.ElementType
   label: string
-  accent?: boolean
 }
 
 export function TrustBar({ store }: { store: Store }) {
@@ -13,7 +12,7 @@ export function TrustBar({ store }: { store: Store }) {
 
   const items: TrustItem[] = [
     phone
-      ? { icon: MessageCircle, label: 'Atención por WhatsApp', accent: true }
+      ? { icon: MessageCircle, label: 'Atención por WhatsApp' }
       : { icon: Zap, label: 'Respuesta rápida' },
     store.hours
       ? { icon: Clock3, label: store.hours }
@@ -55,7 +54,7 @@ export function TrustBar({ store }: { store: Store }) {
               >
                 <Icon
                   className="size-4 shrink-0"
-                  style={{ color: item.accent ? '#25D366' : 'var(--store-primary)' }}
+                  style={{ color: 'var(--store-primary)' }}
                 />
                 <span
                   className="whitespace-nowrap text-[12px] font-medium sm:text-[13px]"

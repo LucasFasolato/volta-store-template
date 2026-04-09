@@ -218,7 +218,7 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
 
           <div className="mt-auto flex items-end justify-between gap-3 pt-4">
             <div>
-              <p className="text-base font-semibold tracking-tight" style={{ color: 'var(--store-text)' }}>
+              <p className="text-base font-semibold tracking-tight" style={{ color: 'var(--store-primary)' }}>
                 {formatCurrency(product.price)}
               </p>
               {discountPct ? (
@@ -372,7 +372,7 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
 
         <div className="mt-auto flex items-end justify-between gap-3 pt-4">
           <div>
-            <p className="text-base font-semibold tracking-tight sm:text-lg" style={{ color: 'var(--store-text)' }}>
+            <p className="text-base font-semibold tracking-tight sm:text-lg" style={{ color: 'var(--store-primary)' }}>
               {formatCurrency(product.price)}
             </p>
             {discountPct ? (

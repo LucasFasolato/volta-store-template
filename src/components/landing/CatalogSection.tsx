@@ -41,7 +41,7 @@ export function CatalogSection({
               className="text-[11px] font-semibold uppercase tracking-[0.22em]"
               style={{ color: 'var(--store-muted-text)' }}
             >
-              Catálogo
+              Todos los productos
             </p>
             <h2
               className="store-heading mt-3 text-3xl font-semibold tracking-tight sm:text-[2.2rem]"
@@ -50,17 +50,16 @@ export function CatalogSection({
               {COPY.product.catalog}
             </h2>
           </div>
-          <div
-            className="inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm"
+          <span
+            className="inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold tabular-nums"
             style={{
-              color: 'var(--store-soft-text)',
-              backgroundColor: 'color-mix(in srgb, var(--store-surface) 78%, transparent)',
-              border: '1px solid var(--store-card-border)',
+              color: 'var(--store-primary)',
+              backgroundColor: 'color-mix(in srgb, var(--store-primary) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--store-primary) 18%, transparent)',
             }}
           >
-            <span className="size-2 rounded-full" style={{ backgroundColor: 'var(--store-primary)' }} />
             {products.length} {products.length === 1 ? 'producto' : 'productos'}
-          </div>
+          </span>
         </div>
 
         {categories.length > 0 ? (
@@ -145,7 +144,7 @@ function CategoryPill({
     <button
       type="button"
       onClick={onClick}
-      className="whitespace-nowrap px-4 py-2.5 text-sm font-medium transition duration-200 active:scale-[0.98]"
+      className="whitespace-nowrap px-4 py-2.5 text-sm font-medium transition duration-200 active:scale-[0.97] hover:-translate-y-0.5"
       style={
         active
           ? {
@@ -158,7 +157,7 @@ function CategoryPill({
           : {
               borderRadius: 'var(--store-button-radius)',
               backgroundColor: 'color-mix(in srgb, var(--store-surface) 82%, transparent)',
-              color: 'var(--store-text)',
+              color: 'var(--store-soft-text)',
               border: '1px solid var(--store-card-border)',
             }
       }

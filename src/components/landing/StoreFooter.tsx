@@ -24,41 +24,43 @@ export function StoreFooter({ store, containerClass }: StoreFooterProps) {
         {/* WhatsApp CTA block */}
         {phone ? (
           <div
-            className="mb-12 flex flex-col gap-5 rounded-[calc(var(--store-card-radius)*0.9)] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+            className="mb-12 overflow-hidden rounded-[var(--store-card-radius)]"
             style={{
               background:
-                'linear-gradient(135deg, color-mix(in srgb, var(--store-surface) 72%, transparent), color-mix(in srgb, var(--store-bg) 90%, transparent))',
-              border: '1px solid var(--store-card-border)',
+                'linear-gradient(135deg, color-mix(in srgb, var(--store-primary) 8%, var(--store-surface)), color-mix(in srgb, var(--store-surface) 80%, var(--store-bg)))',
+              border: '1px solid color-mix(in srgb, var(--store-primary) 14%, var(--store-card-border))',
             }}
           >
-            <div>
-              <p
-                className="text-[11px] font-semibold uppercase tracking-[0.2em]"
-                style={{ color: 'var(--store-muted-text)' }}
+            <div className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+              <div>
+                <p
+                  className="text-[11px] font-semibold uppercase tracking-[0.2em]"
+                  style={{ color: 'var(--store-primary)' }}
+                >
+                  ¿Listo para pedir?
+                </p>
+                <p className="mt-2 text-lg font-semibold tracking-tight" style={{ color: 'var(--store-text)' }}>
+                  Escribinos directamente por WhatsApp.
+                </p>
+                <p className="mt-1 max-w-md text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+                  Te respondemos rápido con toda la info que necesitás para coordinar tu pedido.
+                </p>
+              </div>
+              <a
+                href={`https://wa.me/${phone}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex shrink-0 items-center gap-2.5 rounded-full px-7 py-4 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_44px_rgba(37,211,102,0.28)]"
+                style={{
+                  background: 'linear-gradient(145deg, #25D366, #1db954)',
+                  color: '#ffffff',
+                  boxShadow: '0 14px 32px rgba(37, 211, 102, 0.22)',
+                }}
               >
-                ¿Listo para pedir?
-              </p>
-              <p className="mt-2 text-base font-semibold" style={{ color: 'var(--store-text)' }}>
-                Escribinos directamente por WhatsApp.
-              </p>
-              <p className="mt-1 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
-                Te respondemos rápido con toda la info que necesitás.
-              </p>
+                <MessageCircle className="size-[1.1rem]" />
+                Pedir por WhatsApp
+              </a>
             </div>
-            <a
-              href={`https://wa.me/${phone}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center gap-2.5 rounded-full px-6 py-3.5 text-sm font-semibold transition duration-200 hover:-translate-y-0.5"
-              style={{
-                background: 'linear-gradient(145deg, #25D366, #1db954)',
-                color: '#ffffff',
-                boxShadow: '0 14px 32px rgba(37, 211, 102, 0.22)',
-              }}
-            >
-              <MessageCircle className="size-4" />
-              Pedir por WhatsApp
-            </a>
           </div>
         ) : null}
 
