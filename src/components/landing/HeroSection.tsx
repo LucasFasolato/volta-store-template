@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { ArrowUpRight, Clock3, MapPin, MessageCircle, Sparkles } from 'lucide-react'
+import { ArrowUpRight, Clock3, MapPin, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { sanitizePhoneNumber } from '@/lib/utils/format'
 import type { Store, StoreContent } from '@/types/store'
@@ -103,20 +103,6 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
         )}
       >
         <div className="max-w-4xl">
-          {content.support_text ? (
-            <p
-              className="mb-5 inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.24em]"
-              style={{
-                color: 'var(--store-secondary)',
-                backgroundColor: 'color-mix(in srgb, var(--store-secondary) 12%, transparent)',
-                border: '1px solid color-mix(in srgb, var(--store-secondary) 18%, transparent)',
-              }}
-            >
-              <Sparkles className="size-3" />
-              {content.support_text}
-            </p>
-          ) : null}
-
           <h1
             className="store-display max-w-3xl text-balance"
             style={{
