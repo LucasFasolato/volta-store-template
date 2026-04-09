@@ -22,8 +22,8 @@ function generateSlugFromEmail(email: string): string {
 function buildInitialHeroContent(storeName: string) {
   return {
     hero_title: storeName,
-    hero_subtitle: `Descubri ${storeName} y termina de personalizar tu tienda para empezar a vender por WhatsApp.`,
-    support_text: 'Tu tienda ya fue creada',
+    hero_subtitle: `Descubri todo lo que tiene ${storeName} para ofrecerte.`,
+    support_text: undefined,
   }
 }
 

@@ -6,6 +6,7 @@ import { CartSheet } from '@/components/cart/CartSheet'
 import { CatalogSection } from '@/components/landing/CatalogSection'
 import { FeaturedSection } from '@/components/landing/FeaturedSection'
 import { HeroSection } from '@/components/landing/HeroSection'
+import { HowItWorksSection } from '@/components/landing/HowItWorksSection'
 import { StoreFooter } from '@/components/landing/StoreFooter'
 import { StoreNav } from '@/components/landing/StoreNav'
 import { TrustBar } from '@/components/landing/TrustBar'
@@ -13,6 +14,8 @@ import { ProductModal } from '@/components/product/ProductModal'
 import { useCartStore } from '@/lib/stores/cart'
 import { buildThemeVars, CONTAINER_CLASS } from '@/lib/utils/theme'
 import type { ProductWithImages, StorePublicData } from '@/types/store'
+
+const DEFAULT_PAGE_SIZE = 12
 
 type StoreLayoutProps = {
   data: StorePublicData
@@ -30,6 +33,8 @@ export function StoreLayout({
     () => products.find((item) => item.slug === activeProduct) ?? null,
   )
   const [selectedCategory, setSelectedCategory] = useState<string | null>(activeCategory ?? null)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
   const [systemMode, setSystemMode] = useState<'light' | 'dark'>(
     () =>
       typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -58,12 +63,30 @@ export function StoreLayout({
   const themeVars = useMemo(() => buildThemeVars(theme, resolvedMode), [resolvedMode, theme])
 
   const featuredProducts = products.filter((product) => product.is_featured)
-  const filteredProducts = selectedCategory
-    ? products.filter((product) => {
-        const category = categories.find((item) => item.slug === selectedCategory)
-        return category ? product.category_id === category.id : true
-      })
-    : products
+
+  const filteredProducts = useMemo(
+    () =>
+      selectedCategory
+        ? products.filter((product) => {
+            const category = categories.find((item) => item.slug === selectedCategory)
+            return category ? product.category_id === category.id : true
+          })
+        : products,
+    [products, categories, selectedCategory],
+  )
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize))
+  const paginatedProducts = filteredProducts.slice((page - 1) * pageSize, page * pageSize)
+
+  function handleCategoryChange(slug: string | null) {
+    setSelectedCategory(slug)
+    setPage(1)
+  }
+
+  function handlePageSizeChange(size: number) {
+    setPageSize(size)
+    setPage(1)
+  }
 
   return (
     <div
@@ -87,11 +110,7 @@ export function StoreLayout({
 
       <StoreNav store={store} containerClass={containerClass} />
 
-      <main
-        id="main-content"
-        className="relative z-10 pb-24 sm:pb-10"
-        style={{ paddingTop: 'calc(var(--store-space-base) * 0.75rem)' }}
-      >
+      <main id="main-content" className="relative z-10 pb-24 sm:pb-10">
         {layout.show_hero ? (
           <HeroSection content={content} store={store} containerClass={containerClass} />
         ) : null}
@@ -109,16 +128,23 @@ export function StoreLayout({
 
         {layout.show_catalog ? (
           <CatalogSection
-            products={filteredProducts}
-            allProducts={products}
+            products={paginatedProducts}
+            totalFiltered={filteredProducts.length}
             categories={layout.show_categories ? categories : []}
             theme={theme}
             containerClass={containerClass}
             activeCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
+            onCategoryChange={handleCategoryChange}
             onSelectProduct={setSelectedProduct}
+            page={page}
+            pageSize={pageSize}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
           />
         ) : null}
+
+        <HowItWorksSection store={store} containerClass={containerClass} />
       </main>
 
       {layout.show_footer ? <StoreFooter store={store} containerClass={containerClass} /> : null}

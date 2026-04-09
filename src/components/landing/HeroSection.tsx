@@ -17,8 +17,8 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
 
   const hasImage = !!content.hero_image_url
 
+  // Only show address and hours — WhatsApp is communicated via the CTA button
   const trustChips = [
-    store.whatsapp ? { icon: MessageCircle, label: 'WhatsApp directo' } : null,
     store.address ? { icon: MapPin, label: store.address } : null,
     store.hours ? { icon: Clock3, label: store.hours } : null,
   ].filter(Boolean) as Array<{ icon: React.ElementType; label: string }>
@@ -187,7 +187,7 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
             )}
           </div>
 
-          {/* Trust chips */}
+          {/* Trust chips — address and hours only */}
           {trustChips.length > 0 ? (
             <div className="mt-7 flex flex-wrap gap-2">
               {trustChips.map((chip) => {
