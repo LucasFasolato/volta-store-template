@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { ensureOnboarding, needsOnboarding } from '@/lib/actions/onboarding'
 import { inferLoginErrorReason } from '@/lib/auth/login-feedback'
+import { safeGetUser } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
 
 function redirectToLogin(origin: string, params: { reason: string; provider?: string | null }) {
@@ -34,9 +35,7 @@ export async function GET(request: Request) {
 
   if (!code) {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { user } = await safeGetUser(supabase)
 
     if (user) {
       try {

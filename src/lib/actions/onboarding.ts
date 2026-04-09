@@ -5,6 +5,7 @@ import { z } from 'zod'
 import type { User } from '@supabase/supabase-js'
 import { DEFAULT_CONTENT, DEFAULT_LAYOUT, DEFAULT_THEME } from '@/data/defaults'
 import { getOwnerStoreIdentity } from '@/lib/server/store-context'
+import { safeGetUser } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
 
 function generateSlugFromEmail(email: string): string {
@@ -175,9 +176,7 @@ export async function completeOnboarding(data: {
   if (!waResult.success) return { error: waResult.error.errors[0].message }
 
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { user } = await safeGetUser(supabase)
 
   if (!user) return { error: 'No autorizado' }
 

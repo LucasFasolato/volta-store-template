@@ -2,6 +2,7 @@ import 'server-only'
 
 import { redirect } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
+import { safeGetUser } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
 import type { AdminStoreData, Store } from '@/types/store'
 
@@ -13,11 +14,13 @@ function formatLookupError(resource: string, message: string) {
 }
 
 async function getServerUser(supabase: ServerSupabaseClient): Promise<User | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const result = await safeGetUser(supabase)
 
-  return user
+  if (result.error) {
+    console.warn('Supabase auth getUser failed in server context.', result.error)
+  }
+
+  return result.user
 }
 
 export async function getAuthenticatedUser(
@@ -114,13 +117,13 @@ export async function requireAuthenticatedStoreContext(): Promise<{
   const user = await getServerUser(supabase)
 
   if (!user) {
-    throw new Error('Unauthorized')
+    redirect('/login')
   }
 
   const store = await getOwnerStoreIdentity(user.id, supabase)
 
   if (!store) {
-    throw new Error('Store not found')
+    redirect('/login')
   }
 
   return { supabase, user, store }
