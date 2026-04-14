@@ -538,29 +538,29 @@ function ContrastStat({ label, value }: { label: string; value: string }) {
   const passes = numeric >= 4.5
 
   return (
-    <div className="admin-surface-muted rounded-[18px] p-4">
-      <div className="flex items-start justify-between gap-3">
+    <div className="admin-surface-muted relative flex h-full min-h-[132px] flex-col rounded-[18px] p-4 pr-24">
+      <span
+        className={cn(
+          'absolute right-4 top-4 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]',
+          passes ? 'bg-emerald-400/12 text-emerald-200' : 'bg-amber-400/12 text-amber-200',
+        )}
+      >
+        {passes ? <Check className="size-3" /> : null}
+        {passes ? 'Correcto' : 'Revisar'}
+      </span>
+      <div className="space-y-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
+          <p className="pr-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
             {label}
           </p>
-          <p className="mt-2 text-[1.55rem] font-semibold leading-none text-white">{value}:1</p>
+          <p className="mt-2 text-[1.7rem] font-semibold leading-none text-white">{value}:1</p>
         </div>
-        <span
-          className={cn(
-            'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]',
-            passes ? 'bg-emerald-400/12 text-emerald-200' : 'bg-amber-400/12 text-amber-200',
-          )}
-        >
-          {passes ? <Check className="size-3" /> : null}
-          {passes ? 'Correcto' : 'Revisar'}
-        </span>
-      </div>
-      <div className="mt-3 flex items-center gap-1.5">
-        <Contrast className={cn('size-3.5', passes ? 'text-emerald-200' : 'text-amber-200')} />
-        <p className="text-xs text-neutral-400">
-          {passes ? 'Legibilidad bien resuelta.' : 'Conviene subir el contraste.'}
-        </p>
+        <div className="mt-auto flex items-center gap-1.5">
+          <Contrast className={cn('size-3.5', passes ? 'text-emerald-200' : 'text-amber-200')} />
+          <p className="text-xs text-neutral-400">
+            {passes ? 'Legibilidad bien resuelta.' : 'Conviene subir el contraste.'}
+          </p>
+        </div>
       </div>
     </div>
   )
@@ -740,11 +740,11 @@ function ColorRow({
   const lum = colorLuminance(value ?? '#888888')
   const ring = lum > 0.55 ? 'rgba(0,0,0,0.2)' : lum < 0.28 ? 'rgba(255,255,255,0.18)' : 'rgba(128,128,128,0.2)'
   return (
-    <div className="rounded-[16px] border border-white/[0.06] bg-black/10 px-3.5 py-3 transition duration-150 hover:border-white/[0.12] hover:bg-white/[0.04]">
-      <div className="grid items-center gap-3 sm:grid-cols-[minmax(0,1fr)_44px_116px]">
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-white">{label}</p>
-          {hint ? <p className="mt-0.5 text-[11px] text-neutral-500">{hint}</p> : null}
+    <div className="rounded-[16px] border border-white/[0.06] bg-black/10 px-3.5 py-3 transition duration-150 hover:border-white/[0.12] hover:bg-white/[0.04] focus-within:border-emerald-300/40 focus-within:bg-white/[0.05]">
+      <div className="grid grid-cols-[minmax(0,1fr)_44px_104px] items-center gap-x-3 gap-y-2.5">
+        <div className="min-w-0 self-center">
+          <p className="min-w-[132px] truncate whitespace-nowrap text-sm font-medium text-white">{label}</p>
+          {hint ? <p className="mt-0.5 text-[11px] leading-4 text-neutral-500">{hint}</p> : null}
         </div>
         <label className="group relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] transition hover:border-white/20">
           <input
@@ -761,7 +761,7 @@ function ColorRow({
         <Input
           {...register(fieldName)}
           spellCheck={false}
-          className="h-11 rounded-xl border-white/10 bg-black/10 px-3 font-mono text-xs uppercase text-white transition focus-visible:border-emerald-300/60 focus-visible:ring-emerald-300/20"
+          className="h-11 min-w-0 rounded-xl border-white/10 bg-black/10 px-3 font-mono text-xs uppercase text-white transition focus-visible:border-emerald-300/60 focus-visible:ring-emerald-300/20"
         />
       </div>
       {error ? <p className="mt-2 text-xs text-red-300">{error}</p> : null}
@@ -817,17 +817,17 @@ function ColorsControls({
 
       {/* Básico: Fondo */}
       <ColorSection title="Fondo de la tienda">
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 rounded-[16px] border border-white/[0.06] bg-black/10 p-3.5 md:grid-cols-2">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
               Tipo de fondo
             </p>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => toggleGradient(false)}
                 className={cn(
-                  'rounded-[12px] px-3.5 py-2 text-sm font-medium transition duration-150 active:scale-[0.97]',
+                  'min-w-0 whitespace-nowrap rounded-[12px] px-3 py-2 text-sm font-medium transition duration-150 active:scale-[0.97]',
                   !isGradient
                     ? 'admin-surface-selected text-white'
                     : 'admin-button-soft text-neutral-400 hover:text-white',
@@ -839,7 +839,7 @@ function ColorsControls({
                 type="button"
                 onClick={() => toggleGradient(true)}
                 className={cn(
-                  'rounded-[12px] px-3.5 py-2 text-sm font-medium transition duration-150 active:scale-[0.97]',
+                  'min-w-0 whitespace-nowrap rounded-[12px] px-3 py-2 text-sm font-medium transition duration-150 active:scale-[0.97]',
                   isGradient
                     ? 'admin-surface-selected text-white'
                     : 'admin-button-soft text-neutral-400 hover:text-white',
@@ -855,12 +855,12 @@ function ColorsControls({
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
                 Dirección
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setThemeValue('background_direction', 'diagonal')}
                   className={cn(
-                    'rounded-[12px] px-3.5 py-2 text-sm font-medium transition duration-150 active:scale-[0.97]',
+                    'min-w-0 whitespace-nowrap rounded-[12px] px-3 py-2 text-sm font-medium transition duration-150 active:scale-[0.97]',
                     (theme.background_direction ?? 'diagonal') === 'diagonal'
                       ? 'admin-surface-selected text-white'
                       : 'admin-button-soft text-neutral-400 hover:text-white',
@@ -872,7 +872,7 @@ function ColorsControls({
                   type="button"
                   onClick={() => setThemeValue('background_direction', 'vertical')}
                   className={cn(
-                    'rounded-[12px] px-3.5 py-2 text-sm font-medium transition duration-150 active:scale-[0.97]',
+                    'min-w-0 whitespace-nowrap rounded-[12px] px-3 py-2 text-sm font-medium transition duration-150 active:scale-[0.97]',
                     theme.background_direction === 'vertical'
                       ? 'admin-surface-selected text-white'
                       : 'admin-button-soft text-neutral-400 hover:text-white',
