@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { FormFeedback } from '@/components/common/FormFeedback'
 import { SaveButton } from '@/components/common/SaveButton'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   BORDER_RADIUS_OPTIONS,
   FONT_FAMILY_MAP,
@@ -500,7 +501,7 @@ function SegmentGroup({
   )
 }
 
-function PillGroup({
+function CompactSelectControl({
   title,
   options,
   selected,
@@ -512,23 +513,20 @@ function PillGroup({
   onChange: (value: string) => void
 }) {
   return (
-    <div>
-      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">{title}</p>
-      <div className="flex flex-wrap gap-1.5">
-        {options.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => onChange(option.value)}
-            className={cn(
-              'rounded-[12px] px-3 py-1.5 text-xs font-medium transition duration-150 active:scale-[0.94]',
-              selected === option.value ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white',
-            )}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+    <div className="rounded-[16px] border border-white/[0.06] bg-black/10 p-3">
+      <p className="mb-2 text-sm font-medium text-white">{title}</p>
+      <Select value={selected} onValueChange={onChange}>
+        <SelectTrigger className="h-11 w-full rounded-[14px] border-white/[0.08] bg-white/[0.03] px-3 text-sm text-white focus-visible:border-emerald-300/60 focus-visible:ring-emerald-300/20">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="border border-white/10 bg-[#111111] text-white">
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   )
 }
@@ -998,6 +996,14 @@ const HERO_LAYOUT_OPTIONS = [
   { value: 'lg', label: 'Centrada', hint: 'Más encuadrado', contentPercent: '58%' },
 ] as const
 
+const CONTENT_WIDTH_OPTIONS: VisualOption[] = [
+  { value: 'sm', label: 'Estrecho' },
+  { value: 'md', label: 'Medio' },
+  { value: 'lg', label: 'Balanceado' },
+  { value: 'xl', label: 'Amplio' },
+  { value: 'full', label: 'Completo' },
+]
+
 function HeroLayoutThumbnail({
   label,
   hint,
@@ -1240,94 +1246,117 @@ function LayoutControls({
       : 'lg'
 
   return (
-    <div className="space-y-5">
-      {/* ── Portada ── */}
-      <div className="space-y-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Portada</p>
-
-        <div>
-          <p className="mb-2 text-[11px] font-medium text-neutral-600">Composición del layout</p>
-          <div className="grid grid-cols-3 gap-2">
-            {HERO_LAYOUT_OPTIONS.map((opt) => (
-              <HeroLayoutThumbnail
-                key={opt.value}
-                label={opt.label}
-                hint={opt.hint}
-                isSelected={activeLayout === opt.value}
-                onClick={() => setThemeValue('container_width', opt.value as StoreThemeInput['container_width'])}
-                contentPercent={opt.contentPercent}
-              />
-            ))}
-          </div>
+    <div className="space-y-4">
+      <section className="admin-surface-muted rounded-[20px] p-4">
+        <div className="mb-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Portada y espacio</p>
         </div>
 
-        <div>
-          <p className="mb-2 text-[11px] font-medium text-neutral-600">Altura del hero</p>
-          <div className="grid grid-cols-3 gap-2">
-            {SPACING_OPTIONS.map((opt) => {
-              const isSelected = theme.spacing_scale === opt.value
-              const barH = HERO_HEIGHT_BARS[opt.value] ?? 62
-              return (
-                <button
+        <div className="space-y-4">
+          <div>
+            <p className="mb-2.5 text-sm font-semibold text-white">Composición del hero</p>
+            <div className="grid grid-cols-3 gap-2">
+              {HERO_LAYOUT_OPTIONS.map((opt) => (
+                <HeroLayoutThumbnail
                   key={opt.value}
-                  type="button"
-                  onClick={() => setThemeValue('spacing_scale', opt.value as StoreThemeInput['spacing_scale'])}
-                  className={cn(
-                    'flex flex-col items-center gap-2 rounded-[14px] py-3 text-center transition duration-150',
-                    isSelected ? 'admin-surface-selected' : 'admin-button-soft',
-                  )}
-                >
-                  <div className="flex w-10 items-end justify-center" style={{ height: 44 }}>
-                    <div
-                      className="w-full rounded-sm transition-all duration-300"
-                      style={{
-                        height: barH,
-                        background: isSelected
-                          ? 'linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.14))'
-                          : 'rgba(255,255,255,0.1)',
-                      }}
-                    />
-                  </div>
-                  <span className={cn('text-xs font-medium', isSelected ? 'text-white' : 'text-neutral-400')}>
-                    {opt.label}
-                  </span>
-                </button>
-              )
-            })}
+                  label={opt.label}
+                  hint={opt.hint}
+                  isSelected={activeLayout === opt.value}
+                  onClick={() => setThemeValue('container_width', opt.value as StoreThemeInput['container_width'])}
+                  contentPercent={opt.contentPercent}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-2.5 text-sm font-semibold text-white">Altura del hero</p>
+            <div className="grid grid-cols-3 gap-2">
+              {SPACING_OPTIONS.map((opt) => {
+                const isSelected = theme.spacing_scale === opt.value
+                const barH = HERO_HEIGHT_BARS[opt.value] ?? 62
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setThemeValue('spacing_scale', opt.value as StoreThemeInput['spacing_scale'])}
+                    className={cn(
+                      'flex flex-col items-center gap-2 rounded-[14px] py-3 text-center transition duration-150 active:scale-[0.98]',
+                      isSelected ? 'admin-surface-selected' : 'admin-button-soft',
+                    )}
+                  >
+                    <div className="flex w-10 items-end justify-center" style={{ height: 44 }}>
+                      <div
+                        className="w-full rounded-sm transition-all duration-300"
+                        style={{
+                          height: barH,
+                          background: isSelected
+                            ? 'linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.14))'
+                            : 'rgba(255,255,255,0.1)',
+                        }}
+                      />
+                    </div>
+                    <span className={cn('text-xs font-medium', isSelected ? 'text-white' : 'text-neutral-400')}>
+                      {opt.label}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* ── Componentes ── */}
-      <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Detalles de diseño</p>
+      </section>
+      <section className="admin-surface-muted rounded-[20px] p-4">
+        <div className="mb-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Tarjetas y botones</p>
+        </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          <PillGroup
-            title="Acabado de tarjetas"
+          <CompactSelectControl
+            title="Tarjetas"
             options={CARD_OPTIONS}
             selected={theme.card_style}
             onChange={(value) => setThemeValue('card_style', value as StoreThemeInput['card_style'])}
           />
-          <PillGroup
+          <CompactSelectControl
             title="Botones"
             options={BUTTON_OPTIONS}
             selected={theme.button_style}
             onChange={(value) => setThemeValue('button_style', value as StoreThemeInput['button_style'])}
           />
-          <PillGroup
+        </div>
+      </section>
+
+      <section className="admin-surface-muted rounded-[20px] p-4">
+        <div className="mb-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Densidad y ancho</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <CompactSelectControl
             title="Densidad"
             options={DENSITY_OPTIONS}
             selected={theme.ui_density}
             onChange={(value) => setThemeValue('ui_density', value as StoreThemeInput['ui_density'])}
           />
-          <PillGroup
-            title="Redondeo"
-            options={BORDER_RADIUS_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-            selected={theme.border_radius}
-            onChange={(value) => setThemeValue('border_radius', value as StoreThemeInput['border_radius'])}
+          <CompactSelectControl
+            title="Ancho del contenido"
+            options={CONTENT_WIDTH_OPTIONS}
+            selected={theme.container_width}
+            onChange={(value) => setThemeValue('container_width', value as StoreThemeInput['container_width'])}
           />
         </div>
-      </div>
+      </section>
+
+      <section className="admin-surface-muted rounded-[20px] p-4">
+        <div className="mb-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Ajustes finos</p>
+        </div>
+        <CompactSelectControl
+          title="Redondeo"
+          options={BORDER_RADIUS_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+          selected={theme.border_radius}
+          onChange={(value) => setThemeValue('border_radius', value as StoreThemeInput['border_radius'])}
+        />
+      </section>
     </div>
   )
 }
