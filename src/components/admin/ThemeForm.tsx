@@ -468,39 +468,6 @@ function PreviewZone({
   )
 }
 
-function SegmentGroup({
-  title,
-  options,
-  selected,
-  onChange,
-}: {
-  title: string
-  options: VisualOption[]
-  selected: string
-  onChange: (value: string) => void
-}) {
-  return (
-    <div>
-      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">{title}</p>
-      <div className="grid grid-cols-3 gap-1.5">
-        {options.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => onChange(option.value)}
-            className={cn(
-              'rounded-[12px] px-2 py-2 text-xs font-medium transition duration-150 active:scale-[0.94]',
-              selected === option.value ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white',
-            )}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 function CompactSelectControl({
   title,
   options,
@@ -582,21 +549,91 @@ function FontRow({
       type="button"
       onClick={onClick}
       className={cn(
-        'flex w-full items-center gap-3 rounded-[14px] px-3 py-2 text-left transition duration-150 active:scale-[0.98]',
-        selected ? 'admin-surface-selected' : 'hover:bg-white/[0.06]',
+        'grid w-full grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 rounded-[16px] border px-3 py-2.5 text-left transition duration-150 active:scale-[0.98]',
+        selected
+          ? 'border-emerald-300/35 bg-emerald-400/[0.06]'
+          : 'border-white/[0.06] bg-black/10 hover:border-white/[0.12] hover:bg-white/[0.04]',
       )}
     >
       <span
-        className="w-9 shrink-0 text-xl font-semibold leading-none text-white"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] border border-white/[0.06] bg-white/[0.03] text-[1.35rem] font-semibold leading-none text-white"
         style={{ fontFamily: FONT_FAMILY_MAP[value] }}
       >
         Aa
       </span>
-      <span className={cn('flex-1 text-sm', selected ? 'font-medium text-white' : 'text-neutral-300')}>
-        {label}
+      <span className="min-w-0">
+        <span className={cn('block truncate text-sm', selected ? 'font-medium text-white' : 'text-neutral-300')}>
+          {label}
+        </span>
+        <span className="mt-0.5 block text-[11px] text-neutral-500">{style}</span>
       </span>
-      <span className="text-[11px] text-neutral-500">{style}</span>
-      {selected ? <span className="size-1.5 shrink-0 rounded-full bg-emerald-400" /> : null}
+      <span
+        className={cn(
+          'inline-flex min-w-[68px] items-center justify-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]',
+          selected ? 'bg-emerald-400/12 text-emerald-300' : 'bg-white/[0.04] text-neutral-500',
+        )}
+      >
+        {selected ? 'Activa' : 'Elegir'}
+      </span>
+    </button>
+  )
+}
+
+function TypographyPresetCard({
+  preset,
+  selected,
+  onClick,
+}: {
+  preset: (typeof FONT_PRESETS)[number]
+  selected: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'rounded-[18px] border p-4 text-left transition duration-150 active:scale-[0.98]',
+        selected
+          ? 'border-emerald-300/40 bg-emerald-400/[0.07] shadow-[0_14px_32px_rgba(16,185,129,0.12)]'
+          : 'border-white/[0.06] bg-black/10 hover:border-white/[0.12] hover:bg-white/[0.04]',
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p
+            className={cn('text-lg leading-none', selected ? 'text-white' : 'text-neutral-200')}
+            style={{ fontFamily: FONT_FAMILY_MAP[preset.heading_font] }}
+          >
+            {preset.label}
+          </p>
+          <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-neutral-500">
+            {preset.heading_font} / {preset.body_font}
+          </p>
+        </div>
+        <span
+          className={cn(
+            'inline-flex rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]',
+            selected ? 'bg-emerald-400/12 text-emerald-300' : 'bg-white/[0.04] text-neutral-500',
+          )}
+        >
+          {selected ? 'Activa' : 'Preset'}
+        </span>
+      </div>
+      <div className="mt-4 rounded-[14px] border border-white/[0.05] bg-white/[0.03] p-3">
+        <p
+          className="text-xl leading-tight text-white"
+          style={{ fontFamily: FONT_FAMILY_MAP[preset.heading_font], fontWeight: preset.heading_weight === 'bold' ? 700 : preset.heading_weight === 'medium' ? 500 : 600 }}
+        >
+          Tu tienda destaca
+        </p>
+        <p
+          className="mt-2 text-sm text-neutral-400"
+          style={{ fontFamily: FONT_FAMILY_MAP[preset.body_font] }}
+        >
+          Una combinación lista para verse sólida desde el primer vistazo.
+        </p>
+      </div>
     </button>
   )
 }
@@ -611,35 +648,29 @@ function FontsControls({
   setThemeValue: <K extends keyof StoreThemeInput>(name: K, value: StoreThemeInput[K]) => void
 }) {
   return (
-    <div className="space-y-5">
-      {/* Presets */}
-      <div>
-        <p className="mb-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Combinación de fuentes</p>
-        <div className="flex flex-wrap gap-1.5">
+    <div className="space-y-4">
+      <section className="admin-surface-muted rounded-[20px] p-4">
+        <div className="mb-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Combinación de fuentes</p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {FONT_PRESETS.map((preset) => (
-            <button
+            <TypographyPresetCard
               key={preset.value}
-              type="button"
+              preset={preset}
+              selected={theme.font_preset === preset.value}
               onClick={() => applyPreset(preset.value as StoreThemeInput['font_preset'])}
-              className={cn(
-                'rounded-[14px] px-3.5 py-2 text-sm font-medium transition duration-150',
-                theme.font_preset === preset.value
-                  ? 'admin-surface-selected text-white'
-                  : 'admin-button-soft text-neutral-400 hover:text-white',
-              )}
-              style={{ fontFamily: FONT_FAMILY_MAP[preset.heading_font] }}
-            >
-              {preset.label}
-            </button>
+            />
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* Font pickers */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div>
-          <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Fuente de titulos</p>
-          <div className="space-y-0.5">
+      <section className="grid gap-4 xl:grid-cols-2">
+        <div className="admin-surface-muted rounded-[20px] p-4">
+          <div className="mb-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Fuente de títulos</p>
+          </div>
+          <div className="space-y-2">
             {FONT_OPTIONS.map((option) => (
               <FontRow
                 key={`h-${option.value}`}
@@ -653,9 +684,11 @@ function FontsControls({
           </div>
         </div>
 
-        <div>
-          <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Fuente de texto</p>
-          <div className="space-y-0.5">
+        <div className="admin-surface-muted rounded-[20px] p-4">
+          <div className="mb-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Fuente de texto</p>
+          </div>
+          <div className="space-y-2">
             {FONT_OPTIONS.map((option) => (
               <FontRow
                 key={`b-${option.value}`}
@@ -671,29 +704,33 @@ function FontsControls({
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Fine controls */}
-      <div className="grid grid-cols-3 gap-3">
-        <SegmentGroup
-          title="Tamaño de títulos"
-          options={SCALE_OPTIONS}
-          selected={theme.heading_scale}
-          onChange={(value) => setThemeValue('heading_scale', value as StoreThemeInput['heading_scale'])}
-        />
-        <SegmentGroup
-          title="Peso"
-          options={HEADING_WEIGHT_OPTIONS.map((item) => ({ value: item.value, label: item.label }))}
-          selected={theme.heading_weight}
-          onChange={(value) => setThemeValue('heading_weight', value as StoreThemeInput['heading_weight'])}
-        />
-        <SegmentGroup
-          title="Tamaño de texto"
-          options={BODY_SCALE_OPTIONS}
-          selected={theme.body_scale}
-          onChange={(value) => setThemeValue('body_scale', value as StoreThemeInput['body_scale'])}
-        />
-      </div>
+      <section className="admin-surface-muted rounded-[20px] p-4">
+        <div className="mb-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-500">Escala y peso</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <CompactSelectControl
+            title="Títulos"
+            options={SCALE_OPTIONS}
+            selected={theme.heading_scale}
+            onChange={(value) => setThemeValue('heading_scale', value as StoreThemeInput['heading_scale'])}
+          />
+          <CompactSelectControl
+            title="Peso"
+            options={HEADING_WEIGHT_OPTIONS.map((item) => ({ value: item.value, label: item.label }))}
+            selected={theme.heading_weight}
+            onChange={(value) => setThemeValue('heading_weight', value as StoreThemeInput['heading_weight'])}
+          />
+          <CompactSelectControl
+            title="Texto"
+            options={BODY_SCALE_OPTIONS}
+            selected={theme.body_scale}
+            onChange={(value) => setThemeValue('body_scale', value as StoreThemeInput['body_scale'])}
+          />
+        </div>
+      </section>
     </div>
   )
 }
@@ -1362,38 +1399,80 @@ function LayoutControls({
 }
 
 function TypographyLivePreview({ previewThemeVars }: { previewThemeVars: React.CSSProperties }) {
+  const typographySignature = [
+    previewThemeVars['--store-heading-font' as keyof React.CSSProperties],
+    previewThemeVars['--store-body-font' as keyof React.CSSProperties],
+    previewThemeVars['--store-heading-scale' as keyof React.CSSProperties],
+    previewThemeVars['--store-body-scale' as keyof React.CSSProperties],
+    previewThemeVars['--store-heading-weight' as keyof React.CSSProperties],
+  ].join('|')
+
   return (
-    <div className="preview-live admin-surface-elevated overflow-hidden rounded-[24px]" style={previewThemeVars}>
-      <div className="border-b px-5 py-3" style={{ borderColor: 'var(--store-card-border)' }}>
+    <div
+      key={typographySignature}
+      className="preview-live admin-surface-elevated overflow-hidden rounded-[24px]"
+      style={{ ...previewThemeVars, animation: 'preview-glow-pulse 320ms ease' }}
+    >
+      <div className="border-b px-5 py-3 transition-[border-color] duration-300" style={{ borderColor: 'var(--store-card-border)' }}>
         <p className="text-[9px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>Preview tipografico</p>
       </div>
 
-      {/* Side-by-side font specimens */}
-      <div className="grid grid-cols-2 gap-px border-b" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-border)' }}>
-        <div className="px-4 py-4" style={{ background: 'var(--store-bg-gradient)' }}>
-          <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Titulos</p>
-          <p className="store-heading text-5xl leading-none" style={{ color: 'var(--store-text)' }}>Aa</p>
-          <p className="store-heading mt-1.5 text-sm tracking-normal" style={{ color: 'var(--store-muted-text)' }}>Bb Cc 123</p>
-        </div>
-        <div className="px-4 py-4" style={{ background: 'var(--store-bg-gradient)' }}>
-          <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Texto</p>
-          <p className="store-body text-5xl leading-none" style={{ color: 'var(--store-text)' }}>Aa</p>
-          <p className="store-body mt-1.5 text-sm" style={{ color: 'var(--store-muted-text)' }}>Bb Cc 123</p>
+      <div className="border-b px-5 py-5 transition-[background-color,border-color] duration-300" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-bg-gradient)' }}>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
+          Volta Journal
+        </p>
+        <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+          <div>
+            <p className="store-heading text-[2.6rem] leading-[0.92] tracking-[-0.03em] transition-colors duration-300" style={{ color: 'var(--store-text)' }}>
+              Tipografía con presencia y claridad.
+            </p>
+            <p className="store-body mt-4 max-w-[44ch] text-[15px] leading-7 transition-colors duration-300" style={{ color: 'var(--store-soft-text)' }}>
+              El título marca el tono. El texto sostiene la lectura. Acá ves cómo trabajan juntos antes de publicar tu tienda.
+            </p>
+          </div>
+          <div className="rounded-[var(--store-card-radius)] border p-4 transition-[background-color,border-color,box-shadow] duration-300" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)', boxShadow: 'var(--store-card-shadow)' }}>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
+              Muestra
+            </p>
+            <p className="store-heading mt-3 text-2xl leading-tight transition-colors duration-300" style={{ color: 'var(--store-text)' }}>
+              Títulos
+            </p>
+            <p className="store-body mt-2 text-sm leading-6 transition-colors duration-300" style={{ color: 'var(--store-soft-text)' }}>
+              Una jerarquía clara ayuda a vender mejor y se siente más profesional desde el primer vistazo.
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Content sample */}
-      <div className="space-y-3 px-5 py-5">
-        <h4 className="store-heading text-4xl leading-tight" style={{ color: 'var(--store-text)' }}>
-          Tu tienda, premium
-        </h4>
-        <p className="store-body text-sm leading-6" style={{ color: 'var(--store-soft-text)', fontSize: 'calc(0.875rem * var(--store-body-scale))' }}>
-          Productos con estilo, precio claro y entrega rapida.
-        </p>
-        <div className="rounded-[var(--store-card-radius)] border px-4 py-3" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)' }}>
-          <p className="store-heading text-lg" style={{ color: 'var(--store-text)' }}>Titulo de producto</p>
-          <p className="store-body mt-1 text-xs leading-5" style={{ color: 'var(--store-soft-text)' }}>Descripcion breve del articulo en esta fuente.</p>
-          <p className="store-heading mt-2 text-base font-semibold" style={{ color: 'var(--store-primary)' }}>$12.900</p>
+      <div className="grid gap-px border-b transition-[background-color,border-color] duration-300 md:grid-cols-2" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-border)' }}>
+        <div className="px-5 py-4" style={{ background: 'var(--store-bg-gradient)' }}>
+          <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Titulos</p>
+          <p className="store-heading text-5xl leading-none transition-colors duration-300" style={{ color: 'var(--store-text)' }}>Aa</p>
+          <p className="store-heading mt-2 text-sm tracking-normal transition-colors duration-300" style={{ color: 'var(--store-muted-text)' }}>Bb Cc 123</p>
+        </div>
+        <div className="px-5 py-4" style={{ background: 'var(--store-bg-gradient)' }}>
+          <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Texto</p>
+          <p className="store-body text-5xl leading-none transition-colors duration-300" style={{ color: 'var(--store-text)' }}>Aa</p>
+          <p className="store-body mt-2 text-sm transition-colors duration-300" style={{ color: 'var(--store-muted-text)' }}>Bb Cc 123</p>
+        </div>
+      </div>
+
+      <div className="grid gap-3 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_220px]">
+        <div>
+          <h4 className="store-heading text-[2rem] leading-tight transition-colors duration-300" style={{ color: 'var(--store-text)' }}>
+            Tu tienda, premium
+          </h4>
+          <p className="store-body mt-3 max-w-[52ch] text-sm leading-7 transition-colors duration-300" style={{ color: 'var(--store-soft-text)', fontSize: 'calc(0.875rem * var(--store-body-scale))' }}>
+            Productos con estilo, precio claro y una lectura cómoda para que cada visita entienda rápido qué estás vendiendo.
+          </p>
+        </div>
+        <div className="rounded-[var(--store-card-radius)] border px-4 py-4 transition-[background-color,border-color,box-shadow] duration-300" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-card-background)', boxShadow: 'var(--store-card-shadow)' }}>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Producto</p>
+          <p className="store-heading mt-3 text-lg transition-colors duration-300" style={{ color: 'var(--store-text)' }}>Titulo de producto</p>
+          <p className="store-body mt-2 text-xs leading-6 transition-colors duration-300" style={{ color: 'var(--store-soft-text)' }}>
+            Descripcion breve del articulo con una lectura clara y aire suficiente.
+          </p>
+          <p className="store-heading mt-3 text-base font-semibold transition-colors duration-300" style={{ color: 'var(--store-primary)' }}>$12.900</p>
         </div>
       </div>
     </div>
