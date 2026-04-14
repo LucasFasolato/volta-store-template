@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Contrast, Maximize2, Minimize2, Monitor, Smartphone } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Contrast, Maximize2, Minimize2, Monitor, Smartphone } from 'lucide-react'
 import { toast } from 'sonner'
 import { FormFeedback } from '@/components/common/FormFeedback'
 import { SaveButton } from '@/components/common/SaveButton'
+import { Input } from '@/components/ui/input'
 import {
   BORDER_RADIUS_OPTIONS,
   FONT_FAMILY_MAP,
@@ -534,17 +535,32 @@ function PillGroup({
 
 function ContrastStat({ label, value }: { label: string; value: string }) {
   const numeric = Number(value)
+  const passes = numeric >= 4.5
+
   return (
-    <div className="admin-surface-muted rounded-[16px] p-3">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">{label}</p>
-        <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]', numeric >= 4.5 ? 'bg-emerald-400/12 text-emerald-200' : 'bg-amber-400/12 text-amber-200')}>
-          {numeric >= 4.5 ? 'OK' : 'Revisar'}
+    <div className="admin-surface-muted rounded-[18px] p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
+            {label}
+          </p>
+          <p className="mt-2 text-[1.55rem] font-semibold leading-none text-white">{value}:1</p>
+        </div>
+        <span
+          className={cn(
+            'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]',
+            passes ? 'bg-emerald-400/12 text-emerald-200' : 'bg-amber-400/12 text-amber-200',
+          )}
+        >
+          {passes ? <Check className="size-3" /> : null}
+          {passes ? 'Correcto' : 'Revisar'}
         </span>
       </div>
-      <div className="mt-2 flex items-center gap-1.5">
-        <Contrast className="size-3.5 text-emerald-200" />
-        <p className="text-base font-semibold text-white">{value}:1</p>
+      <div className="mt-3 flex items-center gap-1.5">
+        <Contrast className={cn('size-3.5', passes ? 'text-emerald-200' : 'text-amber-200')} />
+        <p className="text-xs text-neutral-400">
+          {passes ? 'Legibilidad bien resuelta.' : 'Conviene subir el contraste.'}
+        </p>
       </div>
     </div>
   )
@@ -684,12 +700,23 @@ function FontsControls({
   )
 }
 
-function ColorSection({ title, children }: { title: string; children: React.ReactNode }) {
+function ColorSection({
+  title,
+  description,
+  children,
+}: {
+  title: string
+  description?: string
+  children: React.ReactNode
+}) {
   return (
-    <div className="admin-surface-muted rounded-[18px] px-4 py-3">
-      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">{title}</p>
-      <div className="divide-y divide-white/[0.06]">{children}</div>
-    </div>
+    <section className="admin-surface-muted rounded-[20px] px-4 py-4">
+      <div className="mb-3">
+        <p className="text-sm font-semibold text-white">{title}</p>
+        {description ? <p className="mt-1 text-sm text-neutral-400">{description}</p> : null}
+      </div>
+      <div className="space-y-2.5">{children}</div>
+    </section>
   )
 }
 
@@ -713,26 +740,31 @@ function ColorRow({
   const lum = colorLuminance(value ?? '#888888')
   const ring = lum > 0.55 ? 'rgba(0,0,0,0.2)' : lum < 0.28 ? 'rgba(255,255,255,0.18)' : 'rgba(128,128,128,0.2)'
   return (
-    <div className="flex items-center gap-3 py-2.5">
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-white">{label}</p>
-        {hint ? <p className="text-[11px] text-neutral-500">{hint}</p> : null}
-      </div>
-      <label className="relative shrink-0 cursor-pointer">
-        <input
-          type="color"
-          value={value ?? '#000000'}
-          onChange={(e) => onColorChange(e.target.value)}
-          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-          tabIndex={-1}
+    <div className="rounded-[16px] border border-white/[0.06] bg-black/10 px-3.5 py-3 transition duration-150 hover:border-white/[0.12] hover:bg-white/[0.04]">
+      <div className="grid items-center gap-3 sm:grid-cols-[minmax(0,1fr)_44px_116px]">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-white">{label}</p>
+          {hint ? <p className="mt-0.5 text-[11px] text-neutral-500">{hint}</p> : null}
+        </div>
+        <label className="group relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] transition hover:border-white/20">
+          <input
+            type="color"
+            value={value ?? '#000000'}
+            onChange={(e) => onColorChange(e.target.value)}
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+          />
+          <span
+            className="block size-6 rounded-full transition group-focus-within:ring-2 group-focus-within:ring-emerald-300/60"
+            style={{ backgroundColor: value, boxShadow: `0 0 0 1.5px ${ring}` }}
+          />
+        </label>
+        <Input
+          {...register(fieldName)}
+          spellCheck={false}
+          className="h-11 rounded-xl border-white/10 bg-black/10 px-3 font-mono text-xs uppercase text-white transition focus-visible:border-emerald-300/60 focus-visible:ring-emerald-300/20"
         />
-        <span className="block size-6 rounded-full" style={{ backgroundColor: value, boxShadow: `0 0 0 1.5px ${ring}` }} />
-      </label>
-      <input
-        {...register(fieldName)}
-        className="w-24 rounded-[10px] border border-white/10 bg-black/10 px-2.5 py-1.5 font-mono text-xs text-white"
-      />
-      {error ? <p className="mt-0.5 text-xs text-red-300">{error}</p> : null}
+      </div>
+      {error ? <p className="mt-2 text-xs text-red-300">{error}</p> : null}
     </div>
   )
 }
@@ -755,7 +787,7 @@ function ColorsControls({
   contrastPrimary: string
 }) {
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const isGradient = !!(theme.background_color_2)
+  const isGradient = !!theme.background_color_2
 
   function toggleGradient(on: boolean) {
     if (on) {
@@ -766,12 +798,15 @@ function ColorsControls({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Básico: Color principal */}
-      <ColorSection title="Tu color de marca">
+      <ColorSection
+        title="Tu color de marca"
+        description="Botones, precios y acciones principales."
+      >
         <ColorRow
-          label="Botones, precios y acciones"
-          hint="Aparece en cada punto de decisión de la tienda"
+          label="Botones y acciones"
+          hint="Es el color que más se nota en la tienda."
           fieldName="primary_color"
           value={theme.primary_color}
           register={register}
@@ -782,24 +817,75 @@ function ColorsControls({
 
       {/* Básico: Fondo */}
       <ColorSection title="Fondo de la tienda">
-        <div className="flex gap-1 py-2.5">
-          <button
-            type="button"
-            onClick={() => toggleGradient(false)}
-            className={cn('rounded-[10px] px-3 py-1.5 text-xs font-medium transition duration-150', !isGradient ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white')}
-          >
-            Sólido
-          </button>
-          <button
-            type="button"
-            onClick={() => toggleGradient(true)}
-            className={cn('rounded-[10px] px-3 py-1.5 text-xs font-medium transition duration-150', isGradient ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white')}
-          >
-            Degradado
-          </button>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
+              Tipo de fondo
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => toggleGradient(false)}
+                className={cn(
+                  'rounded-[12px] px-3.5 py-2 text-sm font-medium transition duration-150 active:scale-[0.97]',
+                  !isGradient
+                    ? 'admin-surface-selected text-white'
+                    : 'admin-button-soft text-neutral-400 hover:text-white',
+                )}
+              >
+                Sólido
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleGradient(true)}
+                className={cn(
+                  'rounded-[12px] px-3.5 py-2 text-sm font-medium transition duration-150 active:scale-[0.97]',
+                  isGradient
+                    ? 'admin-surface-selected text-white'
+                    : 'admin-button-soft text-neutral-400 hover:text-white',
+                )}
+              >
+                Degradado
+              </button>
+            </div>
+          </div>
+
+          {isGradient ? (
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
+                Dirección
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setThemeValue('background_direction', 'diagonal')}
+                  className={cn(
+                    'rounded-[12px] px-3.5 py-2 text-sm font-medium transition duration-150 active:scale-[0.97]',
+                    (theme.background_direction ?? 'diagonal') === 'diagonal'
+                      ? 'admin-surface-selected text-white'
+                      : 'admin-button-soft text-neutral-400 hover:text-white',
+                  )}
+                >
+                  Diagonal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setThemeValue('background_direction', 'vertical')}
+                  className={cn(
+                    'rounded-[12px] px-3.5 py-2 text-sm font-medium transition duration-150 active:scale-[0.97]',
+                    theme.background_direction === 'vertical'
+                      ? 'admin-surface-selected text-white'
+                      : 'admin-button-soft text-neutral-400 hover:text-white',
+                  )}
+                >
+                  Vertical
+                </button>
+              </div>
+            </div>
+          ) : null}
         </div>
         <ColorRow
-          label={isGradient ? 'Color inicio' : 'Color de fondo'}
+          label={isGradient ? 'Color inicio' : 'Fondo de la tienda'}
           fieldName="background_color"
           value={theme.background_color}
           register={register}
@@ -807,61 +893,65 @@ function ColorsControls({
           error={errors.background_color?.message}
         />
         {isGradient ? (
-          <>
-            <ColorRow
-              label="Color final"
-              fieldName="background_color_2"
-              value={theme.background_color_2 ?? '#000000'}
-              register={register}
-              onColorChange={(v) => setThemeValue('background_color_2', v)}
-              error={errors.background_color_2?.message}
-            />
-            <div className="flex gap-1.5 py-2.5">
-              <button
-                type="button"
-                onClick={() => setThemeValue('background_direction', 'diagonal')}
-                className={cn('rounded-[10px] px-3 py-1.5 text-xs font-medium transition duration-150', (theme.background_direction ?? 'diagonal') === 'diagonal' ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white')}
-              >
-                ↗ Diagonal
-              </button>
-              <button
-                type="button"
-                onClick={() => setThemeValue('background_direction', 'vertical')}
-                className={cn('rounded-[10px] px-3 py-1.5 text-xs font-medium transition duration-150', theme.background_direction === 'vertical' ? 'admin-surface-selected text-white' : 'admin-button-soft text-neutral-400 hover:text-white')}
-              >
-                ↕ Vertical
-              </button>
-            </div>
-          </>
+          <ColorRow
+            label="Color final"
+            fieldName="background_color_2"
+            value={theme.background_color_2 ?? '#000000'}
+            register={register}
+            onColorChange={(v) => setThemeValue('background_color_2', v)}
+            error={errors.background_color_2?.message}
+          />
         ) : null}
       </ColorSection>
 
-      {/* Advanced toggle */}
       <button
         type="button"
-        onClick={() => setShowAdvanced((v) => !v)}
-        className="flex w-full items-center gap-2 rounded-[14px] px-3 py-2 text-xs font-semibold text-neutral-500 transition hover:text-neutral-300"
+        onClick={() => setShowAdvanced((value) => !value)}
+        className="admin-surface-muted flex w-full items-center gap-3 rounded-[18px] px-4 py-3 text-sm font-medium text-neutral-300 transition duration-150 hover:border-white/[0.1] hover:bg-white/[0.05] active:scale-[0.99]"
       >
-        <span className="flex-1 text-left uppercase tracking-[0.16em]">Por componente</span>
-        <span className="text-neutral-600">{showAdvanced ? '↑ Ocultar' : '↓ Personalización avanzada'}</span>
+        <div className="flex-1 text-left">
+          <p className="text-sm font-semibold text-white">Más opciones de color</p>
+          <p className="mt-0.5 text-xs text-neutral-500">
+            Texto, tarjetas, acentos y detalles secundarios.
+          </p>
+        </div>
+        {showAdvanced ? (
+          <ChevronUp className="size-4 text-neutral-400" />
+        ) : (
+          <ChevronDown className="size-4 text-neutral-400" />
+        )}
       </button>
 
       {showAdvanced ? (
-        <>
-          {/* Tarjetas y productos */}
-          <ColorSection title="Tarjetas y productos">
+        <div className="space-y-3">
+          <ColorSection title="Texto">
             <ColorRow
-              label="Fondo de cards"
-              hint="Superficie detrás de cada producto"
+              label="Texto principal"
+              hint="Títulos y contenido principal."
+              fieldName="text_color"
+              value={theme.text_color}
+              register={register}
+              onColorChange={(v) => setThemeValue('text_color', v as StoreThemeInput['text_color'])}
+              error={errors.text_color?.message}
+            />
+          </ColorSection>
+
+          <ColorSection title="Tarjetas">
+            <ColorRow
+              label="Tarjetas y productos"
+              hint="Superficie de cards y zonas elevadas."
               fieldName="surface_color"
               value={theme.surface_color}
               register={register}
               onColorChange={(v) => setThemeValue('surface_color', v as StoreThemeInput['surface_color'])}
               error={errors.surface_color?.message}
             />
+          </ColorSection>
+
+          <ColorSection title="Acentos">
             <ColorRow
-              label="Precio / Badge"
-              hint="Color de precios y etiquetas destacadas"
+              label="Precios y acentos"
+              hint="Precios, badges y puntos de destaque."
               fieldName="accent_color"
               value={theme.accent_color}
               register={register}
@@ -870,20 +960,10 @@ function ColorsControls({
             />
           </ColorSection>
 
-          {/* Texto y destaque */}
-          <ColorSection title="Texto y destaque">
+          <ColorSection title="Otros detalles">
             <ColorRow
-              label="Texto principal"
-              hint="Títulos, nav, cards y footer"
-              fieldName="text_color"
-              value={theme.text_color}
-              register={register}
-              onColorChange={(v) => setThemeValue('text_color', v as StoreThemeInput['text_color'])}
-              error={errors.text_color?.message}
-            />
-            <ColorRow
-              label="Destaque / botón secundario"
-              hint="Subtítulos, badges y acción alternativa"
+              label="Secundario"
+              hint="Etiquetas, estados y acción alternativa."
               fieldName="secondary_color"
               value={theme.secondary_color}
               register={register}
@@ -891,35 +971,20 @@ function ColorsControls({
               error={errors.secondary_color?.message}
             />
           </ColorSection>
-
-          {/* Auto-derived info */}
-          <div className="admin-surface-muted space-y-2 rounded-[16px] px-4 py-3.5">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">Derivados automáticamente</p>
-            {[
-              { label: 'Fondo de navegación', from: 'fondo general + transparencia' },
-              { label: 'Fondo de footer', from: 'fondo + superficie de cards' },
-              { label: 'Texto sobre botones', from: 'contraste calculado del color principal' },
-              { label: 'Bordes y sombras', from: 'texto + opacidad ajustada' },
-            ].map((item) => (
-              <div key={item.label} className="flex items-start gap-2.5">
-                <span className="mt-px shrink-0 rounded-full bg-white/[0.07] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-neutral-600">
-                  Auto
-                </span>
-                <p className="text-[11px] text-neutral-500">
-                  <span className="font-medium text-neutral-400">{item.label}</span>
-                  <span className="ml-1.5">← {item.from}</span>
-                </p>
-              </div>
-            ))}
-          </div>
-        </>
+        </div>
       ) : null}
 
-      {/* Contraste */}
+      <div>
+        <p className="text-sm font-semibold text-white">Contraste</p>
+        <p className="mt-1 text-sm text-neutral-400">
+          Te muestra rápido si la lectura y los botones quedan claros.
+        </p>
+      </div>
+
       <div className="grid gap-2.5 sm:grid-cols-3">
         <ContrastStat label="Texto / fondo" value={contrastTextOnBg} />
-        <ContrastStat label="Texto / tarjeta" value={contrastTextOnSurface} />
-        <ContrastStat label="CTA" value={contrastPrimary} />
+        <ContrastStat label="Texto / tarjetas" value={contrastTextOnSurface} />
+        <ContrastStat label="Botones y acciones" value={contrastPrimary} />
       </div>
     </div>
   )
@@ -1286,12 +1351,33 @@ function ColorStoreMockup({
   onNavigate?: (section: ThemeSection) => void
 }) {
   const heroContentWidth = HERO_CONTENT_WIDTH[theme.container_width] ?? '65%'
+  const colorSignature = [
+    theme.primary_color,
+    theme.background_color,
+    theme.background_color_2 ?? 'solid',
+    theme.background_direction ?? 'diagonal',
+    theme.text_color,
+    theme.surface_color,
+    theme.accent_color,
+    theme.secondary_color,
+  ].join('|')
 
   return (
-    <div className="preview-live overflow-hidden rounded-[24px]" style={{ ...previewThemeVars, background: 'var(--store-bg-gradient)' }}>
+    <div
+      key={colorSignature}
+      className={cn(
+        'preview-live overflow-hidden rounded-[24px] transition-[box-shadow,transform] duration-300',
+        'shadow-[0_0_0_1px_rgba(110,231,183,0.22),0_18px_48px_rgba(16,185,129,0.16)]',
+      )}
+      style={{
+        ...previewThemeVars,
+        background: 'var(--store-bg-gradient)',
+        animation: 'preview-glow-pulse 320ms ease',
+      }}
+    >
       {/* Nav strip */}
       <div
-        className="flex items-center justify-between border-b px-4 py-2.5"
+        className="flex items-center justify-between border-b px-4 py-2.5 transition-[background-color,border-color] duration-300"
         style={{
           borderColor: 'var(--store-card-border)',
           background: 'var(--store-nav-bg)',
@@ -1300,16 +1386,16 @@ function ColorStoreMockup({
       >
         <div className="flex items-center gap-2">
           <div
-            className="size-5 rounded-[6px]"
+            className="size-5 rounded-[6px] transition-[background] duration-300"
             style={{ background: 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-accent) 50%, var(--store-primary) 50%))' }}
           />
-          <span className="store-heading text-sm font-semibold" style={{ color: 'var(--store-text)' }}>
+          <span className="store-heading text-sm font-semibold transition-colors duration-300" style={{ color: 'var(--store-text)' }}>
             Mi Tienda
           </span>
         </div>
         <button
           type="button"
-          className="rounded-[var(--store-button-radius)] px-3 py-1.5 text-[10px] font-semibold"
+          className="rounded-[var(--store-button-radius)] px-3 py-1.5 text-[10px] font-semibold transition-[background,color,box-shadow] duration-300"
           style={{
             background: 'linear-gradient(135deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
             color: 'var(--store-primary-contrast)',
@@ -1322,7 +1408,7 @@ function ColorStoreMockup({
       {/* Hero area — background always full width; content constrained by container_width */}
       <PreviewZone label="Editar portada" target="layout" onNavigate={onNavigate}>
       <div
-        className="pb-7 pt-8"
+        className="pb-7 pt-8 transition-[background] duration-300"
         style={{
           background:
             'radial-gradient(circle at top right, color-mix(in srgb, var(--store-accent) 12%, transparent), transparent 52%), radial-gradient(circle at left 70%, color-mix(in srgb, var(--store-secondary) 13%, transparent), transparent 42%), var(--store-bg-gradient)',
@@ -1334,7 +1420,7 @@ function ColorStoreMockup({
           style={{ width: heroContentWidth, transition: 'width 0.3s ease' }}
         >
           <span
-            className="inline-flex rounded-full px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em]"
+            className="inline-flex rounded-full px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em] transition-[background-color,border-color,color] duration-300"
             style={{
               color: 'var(--store-secondary)',
               backgroundColor: 'color-mix(in srgb, var(--store-secondary) 10%, transparent)',
@@ -1343,16 +1429,16 @@ function ColorStoreMockup({
           >
             Coleccion
           </span>
-          <h4 className="store-heading mt-2.5 text-2xl leading-tight" style={{ color: 'var(--store-text)' }}>
+          <h4 className="store-heading mt-2.5 text-2xl leading-tight transition-colors duration-300" style={{ color: 'var(--store-text)' }}>
             Tu tienda, premium.
           </h4>
-          <p className="mt-1.5 text-[11px] leading-5" style={{ color: 'var(--store-soft-text)' }}>
+          <p className="mt-1.5 text-[11px] leading-5 transition-colors duration-300" style={{ color: 'var(--store-soft-text)' }}>
             Contraste, color y personalidad desde el primer scroll.
           </p>
           <div className="mt-4 flex gap-2">
             <button
               type="button"
-              className="rounded-[var(--store-button-radius)] px-4 py-2 text-[11px] font-semibold"
+              className="rounded-[var(--store-button-radius)] px-4 py-2 text-[11px] font-semibold transition-[background,color,box-shadow] duration-300"
               style={{
                 background: 'linear-gradient(135deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
                 color: 'var(--store-primary-contrast)',
@@ -1363,7 +1449,7 @@ function ColorStoreMockup({
             </button>
             <button
               type="button"
-              className="rounded-[var(--store-button-radius)] border px-4 py-2 text-[11px] font-medium"
+              className="rounded-[var(--store-button-radius)] border px-4 py-2 text-[11px] font-medium transition-[background-color,border-color,color] duration-300"
               style={{
                 borderColor: 'var(--store-border-strong)',
                 color: 'var(--store-text)',
@@ -1386,7 +1472,7 @@ function ColorStoreMockup({
         ].map((product) => (
           <div
             key={product.label}
-            className="overflow-hidden rounded-[var(--store-card-radius)] border"
+            className="overflow-hidden rounded-[var(--store-card-radius)] border transition-[background-color,border-color,box-shadow] duration-300"
             style={{
               borderColor: 'var(--store-card-border)',
               background: 'var(--store-card-background)',
@@ -1394,17 +1480,17 @@ function ColorStoreMockup({
             }}
           >
             <div
-              className="aspect-[4/5]"
+              className="aspect-[4/5] transition-[background] duration-300"
               style={{
                 background:
                   'linear-gradient(145deg, color-mix(in srgb, var(--store-accent) 18%, transparent), color-mix(in srgb, var(--store-secondary) 14%, transparent))',
               }}
             />
             <div className="p-2.5">
-              <p className="store-heading text-xs font-semibold" style={{ color: 'var(--store-text)' }}>
+              <p className="store-heading text-xs font-semibold transition-colors duration-300" style={{ color: 'var(--store-text)' }}>
                 {product.label}
               </p>
-              <p className="mt-1 text-xs font-semibold" style={{ color: 'var(--store-primary)' }}>
+              <p className="mt-1 text-xs font-semibold transition-colors duration-300" style={{ color: 'var(--store-primary)' }}>
                 {product.price}
               </p>
             </div>
@@ -1415,23 +1501,23 @@ function ColorStoreMockup({
 
       {/* Footer strip */}
       <div
-        className="border-t px-5 py-4"
+        className="border-t px-5 py-4 transition-[background-color,border-color] duration-300"
         style={{
           borderColor: 'var(--store-card-border)',
           background: 'var(--store-footer-bg-gradient)',
         }}
       >
         <div className="flex items-center justify-between">
-          <p className="store-heading text-sm font-semibold" style={{ color: 'var(--store-text)' }}>
+          <p className="store-heading text-sm font-semibold transition-colors duration-300" style={{ color: 'var(--store-text)' }}>
             Mi Tienda
           </p>
           <div className="flex gap-1.5">
-            <div className="size-2 rounded-full" style={{ backgroundColor: 'var(--store-primary)' }} />
-            <div className="size-2 rounded-full" style={{ backgroundColor: 'var(--store-accent)' }} />
-            <div className="size-2 rounded-full" style={{ backgroundColor: 'var(--store-secondary)' }} />
+            <div className="size-2 rounded-full transition-colors duration-300" style={{ backgroundColor: 'var(--store-primary)' }} />
+            <div className="size-2 rounded-full transition-colors duration-300" style={{ backgroundColor: 'var(--store-accent)' }} />
+            <div className="size-2 rounded-full transition-colors duration-300" style={{ backgroundColor: 'var(--store-secondary)' }} />
           </div>
         </div>
-        <p className="mt-1 text-[10px]" style={{ color: 'var(--store-muted-text)' }}>
+        <p className="mt-1 text-[10px] transition-colors duration-300" style={{ color: 'var(--store-muted-text)' }}>
           Powered by Volta Store
         </p>
       </div>
