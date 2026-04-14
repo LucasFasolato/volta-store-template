@@ -1,13 +1,17 @@
 import Link from 'next/link'
 import {
+  ArrowUpRight,
   CheckCircle2,
-  ExternalLink,
+  ImageIcon,
   Package,
   Palette,
   Settings,
+  Shapes,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import type { StoreLaunchPlan } from '@/lib/dashboard/store-launch'
 import type { ProductWithImages } from '@/types/store'
+import { AdminDashboardHero } from '@/components/admin/AdminDashboardHero'
 import { StoreSharePanel } from '@/components/admin/StoreSharePanel'
 
 export function StoreDashboard({
@@ -26,123 +30,144 @@ export function StoreDashboard({
   whatsapp: string
 }) {
   const heroDone =
-    plan.requiredItems.find((i) => i.id === 'hero-copy')?.status === 'done' &&
-    plan.requiredItems.find((i) => i.id === 'hero-image')?.status === 'done'
-
-  const stats: { value: string; label: string; done: boolean }[] = [
-    {
-      value: String(activeProductCount),
-      label: activeProductCount === 1 ? 'producto activo' : 'productos activos',
-      done: activeProductCount >= 1,
-    },
-    {
-      value: String(categoryCount),
-      label: categoryCount === 1 ? 'categoria' : 'categorias',
-      done: categoryCount >= 1,
-    },
-    {
-      value: heroDone ? 'Lista' : 'Incompleta',
-      label: 'Portada',
-      done: !!heroDone,
-    },
-    {
-      value: `${plan.completedRecommendedCount}/${plan.totalRecommendedCount}`,
-      label: 'Confianza',
-      done: plan.completedRecommendedCount > 0,
-    },
-  ]
+    plan.requiredItems.find((item) => item.id === 'hero-copy')?.status === 'done' &&
+    plan.requiredItems.find((item) => item.id === 'hero-image')?.status === 'done'
 
   return (
-    <div className="space-y-4 p-4 sm:p-5 lg:p-6">
-      {/* 1. Celebration hero */}
-      <ReadyHero plan={plan} storeName={storeName} />
-
-      {/* 2. Share + simulate */}
-      <StoreSharePanel plan={plan} firstProduct={firstProduct} whatsapp={whatsapp} />
-
-      {/* 3. Stats snapshot */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {stats.map((stat) => (
-          <StatCard key={stat.label} value={stat.value} label={stat.label} done={stat.done} />
-        ))}
-      </div>
-
-      {/* 4. Quick actions */}
+    <div className="space-y-5 p-4 sm:p-5 lg:space-y-6 lg:p-6">
+      <AdminDashboardHero plan={plan} storeName={storeName} />
+      <StoreStatusSection
+        activeProductCount={activeProductCount}
+        categoryCount={categoryCount}
+        heroDone={heroDone}
+        confidenceValue={`${plan.completedRecommendedCount}/${plan.totalRecommendedCount}`}
+        confidenceStarted={plan.completedRecommendedCount > 0}
+      />
       <QuickActionsSection />
+      <StoreSharePanel plan={plan} firstProduct={firstProduct} whatsapp={whatsapp} />
     </div>
   )
 }
 
-function ReadyHero({ plan, storeName }: { plan: StoreLaunchPlan; storeName: string }) {
+function StoreStatusSection({
+  activeProductCount,
+  categoryCount,
+  heroDone,
+  confidenceValue,
+  confidenceStarted,
+}: {
+  activeProductCount: number
+  categoryCount: number
+  heroDone: boolean
+  confidenceValue: string
+  confidenceStarted: boolean
+}) {
   return (
-    <section className="admin-surface relative overflow-hidden rounded-2xl px-6 py-8 sm:px-8 sm:py-10">
-      {/* Ambient glow top-right */}
-      <div
-        className="pointer-events-none absolute right-[-3rem] top-[-3rem] h-56 w-56 rounded-full bg-emerald-300/14 blur-[60px]"
-        aria-hidden="true"
-      />
-      {/* Ambient glow bottom-left */}
-      <div
-        className="pointer-events-none absolute bottom-[-2rem] left-[-2rem] h-40 w-40 rounded-full bg-emerald-500/8 blur-[50px]"
-        aria-hidden="true"
-      />
-      {/* Top highlight line */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/50 to-transparent" />
-
-      <div className="relative">
-        {/* Status pill */}
-        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1.5">
-          <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
-            Lista para vender
-          </span>
-        </div>
-
-        {/* Headline */}
-        <h1 className="mt-5 text-balance font-heading text-[2rem] font-semibold tracking-[-0.05em] text-foreground sm:text-[2.5rem] sm:leading-[1.12]">
-          {storeName} ya puede
-          <br className="hidden sm:block" />
-          <span className="text-emerald-500 dark:text-emerald-400"> recibir pedidos.</span>
-        </h1>
-
-        {/* Subline */}
-        <p className="mt-3 max-w-xl text-sm leading-7 text-muted-foreground sm:text-[15px]">
-          Todo está configurado. Compartí el enlace, hacé que alguien entre y probá cómo llega el primer pedido por WhatsApp.
+    <section className="space-y-4">
+      <div className="space-y-1">
+        <p className="admin-label">Estado de la tienda</p>
+        <h2 className="text-xl font-semibold text-foreground sm:text-2xl">
+          La foto general de tu tienda
+        </h2>
+        <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+          En un vistazo puedes ver si la base comercial esta lista para recibir trafico
+          y pedidos.
         </p>
+      </div>
 
-        {/* Public URL chip */}
-        <Link
-          href={plan.publicPath}
-          target="_blank"
-          className="mt-5 inline-flex items-center gap-2 rounded-full border border-border dark:border-white/10 bg-black/[0.04] dark:bg-white/5 px-4 py-2 text-sm transition hover:bg-black/[0.07] dark:hover:bg-white/8"
-        >
-          <span className="font-mono text-[13px] text-muted-foreground">{plan.publicUrl}</span>
-          <ExternalLink className="size-3.5 shrink-0 text-muted-foreground" />
-        </Link>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <StatusCard
+          icon={Package}
+          label="Productos activos"
+          value={String(activeProductCount)}
+          status={activeProductCount > 0 ? 'Listo' : 'Pendiente'}
+          detail={
+            activeProductCount > 0
+              ? 'Tu catalogo ya tiene productos visibles para vender.'
+              : 'Agrega al menos un producto para activar el catalogo.'
+          }
+          done={activeProductCount > 0}
+        />
+        <StatusCard
+          icon={Shapes}
+          label="Categorias"
+          value={String(categoryCount)}
+          status={categoryCount > 0 ? 'Listo' : 'Opcional'}
+          detail={
+            categoryCount > 0
+              ? 'Ordenan mejor la tienda y aceleran el recorrido.'
+              : 'Todavia puedes sumar categorias sin romper el layout.'
+          }
+          done={categoryCount > 0}
+        />
+        <StatusCard
+          icon={ImageIcon}
+          label="Portada"
+          value={heroDone ? 'Lista' : 'No lista'}
+          status={heroDone ? 'Completa' : 'Falta'}
+          detail={
+            heroDone
+              ? 'La primera impresion de la tienda ya esta resuelta.'
+              : 'Completa copy e imagen para cerrar la portada.'
+          }
+          done={heroDone}
+        />
+        <StatusCard
+          icon={CheckCircle2}
+          label="Confianza"
+          value={confidenceValue}
+          status={confidenceStarted ? 'Progreso' : 'Inicial'}
+          detail="Mas contexto visible genera mas confianza antes del primer mensaje."
+          done={confidenceStarted}
+        />
       </div>
     </section>
   )
 }
 
-function StatCard({
-  value,
+function StatusCard({
+  icon: Icon,
   label,
+  value,
+  status,
+  detail,
   done,
 }: {
-  value: string
+  icon: LucideIcon
   label: string
+  value: string
+  status: string
+  detail: string
   done: boolean
 }) {
   return (
-    <div className="admin-surface rounded-xl p-4">
-      <div className="flex items-center justify-between gap-1">
-        <p className="truncate text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+    <article className="admin-surface flex min-h-[176px] flex-col rounded-2xl p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex size-10 items-center justify-center rounded-xl bg-black/[0.04] text-muted-foreground dark:bg-white/[0.05]">
+          <Icon className="size-4" />
+        </div>
+        <span
+          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${
+            done
+              ? 'border-emerald-300/20 bg-emerald-400/10 text-emerald-700 dark:text-emerald-300'
+              : 'border-border bg-black/[0.04] text-muted-foreground dark:border-white/10 dark:bg-white/[0.04]'
+          }`}
+        >
+          {status}
+        </span>
+      </div>
+
+      <div className="mt-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
           {label}
         </p>
-        {done && <CheckCircle2 className="size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />}
+        <p className="mt-2 text-[1.8rem] font-semibold leading-none tracking-[-0.04em] text-foreground">
+          {value}
+        </p>
       </div>
-      <p className="mt-2 text-xl font-semibold tabular-nums text-foreground">{value}</p>
-    </div>
+
+      <p className="mt-auto pt-5 text-sm leading-6 text-muted-foreground">{detail}</p>
+    </article>
   )
 }
 
@@ -151,47 +176,65 @@ const QUICK_ACTIONS = [
     href: '/admin/productos/nuevo',
     icon: Package,
     label: 'Agregar producto',
-    description: 'Suma al catalogo',
+    description: 'Carga algo nuevo para ampliar el catalogo.',
   },
   {
     href: '/admin/apariencia?tab=contenido',
-    icon: Palette,
+    icon: ImageIcon,
     label: 'Portada y banner',
-    description: 'Copy, imagen y movimiento',
+    description: 'Ajusta la primera impresion visual de la tienda.',
   },
   {
     href: '/admin/apariencia',
     icon: Palette,
     label: 'Apariencia',
-    description: 'Colores y estilo',
+    description: 'Edita colores, estilo y look general.',
   },
   {
     href: '/admin/configuracion',
     icon: Settings,
     label: 'Configuracion',
-    description: 'Datos del negocio',
+    description: 'Actualiza datos del negocio y contacto.',
   },
-] as const
+] as const satisfies ReadonlyArray<{
+  href: string
+  icon: LucideIcon
+  label: string
+  description: string
+}>
 
 function QuickActionsSection() {
   return (
-    <section className="admin-surface rounded-xl p-5 sm:p-6">
-      <p className="admin-label">Acciones rapidas</p>
-      <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="space-y-4">
+      <div className="space-y-1">
+        <p className="admin-label">Acciones rapidas</p>
+        <h2 className="text-xl font-semibold text-foreground sm:text-2xl">
+          Lo que probablemente quieras hacer ahora
+        </h2>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {QUICK_ACTIONS.map((action) => {
           const Icon = action.icon
+
           return (
             <Link
               key={action.href}
               href={action.href}
-              className="group admin-surface-muted flex items-center gap-3 rounded-xl p-3.5 transition duration-150 hover:-translate-y-0.5"
+              className="group admin-surface flex min-h-[152px] flex-col rounded-2xl p-4 transition duration-200 hover:-translate-y-0.5 hover:border-white/12 hover:bg-white/[0.04] sm:p-5"
             >
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-black/[0.05] dark:bg-white/6 text-muted-foreground transition-colors group-hover:text-foreground">
-                <Icon className="size-4" />
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex size-11 items-center justify-center rounded-xl bg-black/[0.04] text-muted-foreground transition-colors group-hover:text-foreground dark:bg-white/[0.05]">
+                  <Icon className="size-4" />
+                </div>
+                <ArrowUpRight className="size-4 text-muted-foreground transition group-hover:text-foreground" />
               </div>
-              <div className="min-w-0">
+
+              <div className="mt-auto pt-8">
                 <p className="text-sm font-medium text-foreground">{action.label}</p>
-                <p className="text-[11px] text-muted-foreground">{action.description}</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {action.description}
+                </p>
               </div>
             </Link>
           )

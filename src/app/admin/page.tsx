@@ -13,17 +13,18 @@ export default async function AdminPage() {
   ])
 
   const plan = buildStoreLaunchPlan({ storeData, categories, products })
+  const activeProducts = products.filter((product) => product.is_active)
+  const activeProductCount = activeProducts.length
 
-  // Mode B — store is ready: show operational dashboard
+  // Mode B - store is ready: show operational dashboard
   if (plan.state === 'ready') {
-    const activeProducts = products.filter((p) => p.is_active)
     const firstProduct = activeProducts[0] ?? null
 
     return (
       <StoreDashboard
         plan={plan}
         storeName={storeData.store.name}
-        activeProductCount={activeProducts.length}
+        activeProductCount={activeProductCount}
         categoryCount={categories.length}
         firstProduct={firstProduct}
         whatsapp={storeData.store.whatsapp}
@@ -31,9 +32,8 @@ export default async function AdminPage() {
     )
   }
 
-  // Mode A — store in progress: show inline activation wizard
+  // Mode A - store in progress: show inline activation wizard
   const steps = buildActivationFlowSteps(plan)
-  const activeProductCount = products.filter((p) => p.is_active).length
 
   return (
     <ActivationWizard
