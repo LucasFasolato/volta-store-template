@@ -101,82 +101,80 @@ export function ContentForm({ content, store }: ContentFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <section className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
-        <div className="space-y-4 xl:sticky xl:top-6 xl:self-start">
-          <div className="admin-surface rounded-xl p-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <section className="grid gap-4 xl:grid-cols-[420px_minmax(0,1fr)] xl:items-start">
+        <div className="xl:sticky xl:top-6 xl:self-start">
+          <section className="admin-surface rounded-xl p-4 sm:p-5">
             <p className="admin-label">Imagen principal</p>
-            <h3 className="mt-3 text-xl font-semibold text-white">Lo primero que entra por los ojos</h3>
-            <p className="mt-2 text-sm leading-6 text-neutral-400">
-              Sube una imagen clara, bien recortada y lista para vender desde la primera pantalla.
-            </p>
-            <div className="mt-5">
+            <div className="mt-3">
               <ImageUpload
                 currentUrl={content.hero_image_url}
                 onUpload={uploadHeroImage}
                 fieldName="hero"
                 aspectHint="16:9"
-                label="Subir imagen principal"
+                label="Subir imagen"
                 className="max-w-none"
               />
             </div>
-          </div>
-
-          <div className="admin-surface-muted rounded-xl p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
-              Este bloque toma datos reales
-            </p>
-            <div className="mt-4 space-y-3 text-sm text-neutral-300">
-              <InfoLine label="WhatsApp" value={store.whatsapp || 'Pendiente'} />
-              <InfoLine label="Instagram" value={store.instagram ? `@${store.instagram}` : 'Opcional'} />
-              <InfoLine label="Horarios" value={store.hours || 'Opcional'} />
-              <InfoLine label="Direccion" value={store.address || 'Opcional'} />
-            </div>
-          </div>
+          </section>
         </div>
 
-        <div className="space-y-6">
-          <section className="admin-surface rounded-xl p-6">
-            <div className="mb-6">
-              <p className="admin-label">Portada</p>
-              <h3 className="mt-3 text-xl font-semibold text-white">El mensaje principal que ayuda a vender</h3>
-              <p className="mt-2 text-sm leading-6 text-neutral-400">
-                Aqui ajustas titulo, subtitulo y texto corto superior sin salir de Apariencia.
-              </p>
+        <div className="space-y-5">
+          <section className="admin-surface rounded-xl p-4 sm:p-5">
+            <div className="mb-4">
+              <p className="admin-label">Contenido</p>
             </div>
 
-            <div className="space-y-6">
-              <FieldBlock label="Texto corto arriba del titulo" current={supportText.length} max={CONTENT_LIMITS.support_text}>
+            <div className="space-y-4">
+              <FieldBlock
+                label="Etiqueta (opcional)"
+                current={supportText.length}
+                max={CONTENT_LIMITS.support_text}
+              >
                 <Input
                   {...register('support_text')}
-                  placeholder="Pedidos por WhatsApp · Envio o retiro"
+                  placeholder="Pedidos por WhatsApp / Envio o retiro"
                   aria-invalid={!!errors.support_text}
-                  className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+                  className="h-11 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
                   maxLength={CONTENT_LIMITS.support_text}
                 />
-                {errors.support_text ? <p className="mt-1.5 text-xs text-red-300">{errors.support_text.message}</p> : null}
+                {errors.support_text ? (
+                  <p className="mt-1.5 text-xs text-red-300">{errors.support_text.message}</p>
+                ) : null}
               </FieldBlock>
 
-              <FieldBlock label="Titulo principal" current={heroTitle.length} max={CONTENT_LIMITS.hero_title}>
+              <FieldBlock
+                label="Titulo principal"
+                current={heroTitle.length}
+                max={CONTENT_LIMITS.hero_title}
+              >
                 <Input
                   {...register('hero_title')}
                   placeholder="Nueva coleccion disponible"
                   aria-invalid={!!errors.hero_title}
-                  className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+                  className="h-11 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
                   maxLength={CONTENT_LIMITS.hero_title}
                 />
-                {errors.hero_title ? <p className="mt-1.5 text-xs text-red-300">{errors.hero_title.message}</p> : null}
+                {errors.hero_title ? (
+                  <p className="mt-1.5 text-xs text-red-300">{errors.hero_title.message}</p>
+                ) : null}
               </FieldBlock>
 
-              <FieldBlock label="Subtitulo" current={heroSubtitle.length} max={CONTENT_LIMITS.hero_subtitle}>
+              <FieldBlock
+                label="Subtitulo"
+                current={heroSubtitle.length}
+                max={CONTENT_LIMITS.hero_subtitle}
+              >
                 <Textarea
                   {...register('hero_subtitle')}
                   placeholder="Explica rapido que vendes y por que es facil comprarte."
                   aria-invalid={!!errors.hero_subtitle}
-                  className="min-h-32 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+                  className="min-h-24 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
                   maxLength={CONTENT_LIMITS.hero_subtitle}
                 />
-                {errors.hero_subtitle ? <p className="mt-1.5 text-xs text-red-300">{errors.hero_subtitle.message}</p> : null}
+                {errors.hero_subtitle ? (
+                  <p className="mt-1.5 text-xs text-red-300">{errors.hero_subtitle.message}</p>
+                ) : null}
               </FieldBlock>
             </div>
           </section>
@@ -184,9 +182,12 @@ export function ContentForm({ content, store }: ContentFormProps) {
           <section className="admin-surface rounded-xl p-6">
             <div className="mb-6">
               <p className="admin-label">Banner inferior</p>
-              <h3 className="mt-3 text-xl font-semibold text-white">Mensajes de confianza con opcion estatica o animada</h3>
+              <h3 className="mt-3 text-xl font-semibold text-white">
+                Mensajes de confianza con opcion estatica o animada
+              </h3>
               <p className="mt-2 text-sm leading-6 text-neutral-400">
-                El banner usa datos del negocio y frases de compra para reforzar claridad y credibilidad.
+                El banner usa datos del negocio y frases de compra para reforzar claridad y
+                credibilidad.
               </p>
             </div>
 
@@ -205,10 +206,17 @@ export function ContentForm({ content, store }: ContentFormProps) {
                         : 'border-white/8 bg-white/4 hover:border-white/14 hover:bg-white/6',
                     )}
                   >
-                    <p className={cn('text-sm font-semibold', active ? 'text-emerald-200' : 'text-white')}>
+                    <p
+                      className={cn(
+                        'text-sm font-semibold',
+                        active ? 'text-emerald-200' : 'text-white',
+                      )}
+                    >
                       {option.title}
                     </p>
-                    <p className="mt-2 text-sm leading-6 text-neutral-400">{option.description}</p>
+                    <p className="mt-2 text-sm leading-6 text-neutral-400">
+                      {option.description}
+                    </p>
                   </button>
                 )
               })}
@@ -269,20 +277,35 @@ export function ContentForm({ content, store }: ContentFormProps) {
             <div className="mt-5 rounded-2xl border border-white/8 bg-white/4 p-4">
               <p className="text-sm font-medium text-white">Que mensajes aparecen ahi</p>
               <p className="mt-2 text-sm leading-6 text-neutral-400">
-                WhatsApp, horarios y direccion salen de Configuracion. Los textos de confianza se completan solos para mantener la tienda clara.
+                WhatsApp, horarios y direccion salen de Configuracion. Los textos de confianza se
+                completan solos para mantener la tienda clara.
               </p>
             </div>
           </section>
         </div>
       </section>
 
-      {submitError ? <FormFeedback kind="error" title="No pudimos guardar la portada" message={submitError} /> : null}
+      {submitError ? (
+        <FormFeedback
+          kind="error"
+          title="No pudimos guardar la portada"
+          message={submitError}
+        />
+      ) : null}
       {!submitError && saved ? (
-        <FormFeedback kind="success" title="Portada guardada" message="La tienda publica ya refleja el nuevo mensaje y el comportamiento del banner." />
+        <FormFeedback
+          kind="success"
+          title="Portada guardada"
+          message="La tienda publica ya refleja el nuevo mensaje y el comportamiento del banner."
+        />
       ) : null}
 
       <div className="flex justify-end">
-        <SaveButton isLoading={isSubmitting} isSaved={saved} label="Guardar apariencia de portada" />
+        <SaveButton
+          isLoading={isSubmitting}
+          isSaved={saved}
+          label="Guardar apariencia de portada"
+        />
       </div>
     </form>
   )
@@ -301,20 +324,11 @@ function FieldBlock({
 }) {
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="mb-2.5 flex items-center justify-between gap-3">
         <Label className="text-sm font-medium text-neutral-200">{label}</Label>
         <CharCounter current={current} max={max} />
       </div>
       {children}
-    </div>
-  )
-}
-
-function InfoLine({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-white/6 bg-white/4 px-4 py-3">
-      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">{label}</span>
-      <span className="text-right text-sm text-neutral-100">{value}</span>
     </div>
   )
 }
