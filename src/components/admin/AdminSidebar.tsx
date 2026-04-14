@@ -57,17 +57,14 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
           </div>
         </div>
 
-        <div className="admin-surface-selected mt-3 rounded-xl p-3">
+        <div className="admin-surface-selected mt-2.5 rounded-xl p-3">
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">
             Vista publica
-          </p>
-          <p className="mt-2 text-sm leading-6 text-neutral-200">
-            Mira tu tienda como la ve un cliente antes de compartirla.
           </p>
           <Link
             href={`/tienda/${storeSlug}`}
             target="_blank"
-            className="admin-button-primary mt-3 flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-semibold shadow-[0_18px_38px_rgba(16,185,129,0.22)] transition hover:shadow-[0_0_28px_rgba(52,211,153,0.38)]"
+            className="admin-button-primary mt-2.5 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold shadow-[0_18px_38px_rgba(16,185,129,0.22)] transition hover:shadow-[0_0_28px_rgba(52,211,153,0.38)]"
           >
             <Store className="size-4.5 shrink-0" />
             <span className="flex-1">Ver tienda</span>
@@ -76,7 +73,7 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
         </div>
 
         {/* Nav */}
-        <nav className="mt-4 flex-1 space-y-1">
+        <nav className="mt-3.5 flex-1 space-y-1">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon
             const active = isActive(item)

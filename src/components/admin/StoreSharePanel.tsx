@@ -78,7 +78,7 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
   const canSimulate = !!(firstProduct && whatsapp)
 
   return (
-    <section id="share-tools" className="admin-surface rounded-[24px] p-5 sm:p-6">
+    <section id="share-tools" className="admin-surface rounded-[24px] p-4 sm:p-6">
       <div>
         <p className="admin-label">Compartir tienda</p>
         <h2 className="mt-2 text-xl font-semibold text-foreground sm:text-2xl">
@@ -86,31 +86,31 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
         </h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           {plan.state === 'ready'
-            ? 'Copia el enlace, abrela al instante o compartela por WhatsApp sin salir del panel.'
+            ? 'Copia el enlace, abrela o compartela por WhatsApp.'
             : plan.state === 'almost_ready'
-              ? 'Puedes verla y dejar listo el enlace, pero conviene cerrar el ultimo tramo para compartirla con mas confianza.'
+              ? 'Puedes verla y dejar listo el enlace, pero conviene cerrar el ultimo tramo.'
               : 'Cuando completes estos puntos, compartirla va a ser mucho mas claro y profesional.'}
         </p>
       </div>
 
       {plan.shareEnabled ? (
-        <div className="mt-5 space-y-4">
+        <div className="mt-4 space-y-3.5 sm:mt-5 sm:space-y-4">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Enlace publico
             </p>
-            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_168px]">
+            <div className="grid gap-2.5 sm:grid-cols-[minmax(0,1fr)_168px] sm:gap-3">
               <Input
                 value={publicUrl}
                 readOnly
                 aria-label="URL publica de la tienda"
-                className="h-12 rounded-xl border-border bg-black/[0.04] px-4 font-mono text-sm text-foreground dark:border-white/10 dark:bg-white/[0.04]"
+                className="h-11 rounded-xl border-border bg-black/[0.04] px-3.5 font-mono text-sm text-foreground dark:border-white/10 dark:bg-white/[0.04] sm:h-12 sm:px-4"
               />
               <Button
                 type="button"
                 onClick={handleCopy}
                 size="lg"
-                className="h-12 rounded-xl bg-[linear-gradient(135deg,#2ee6a6,#72f6df)] px-4 text-slate-950 hover:brightness-105"
+                className="h-11 rounded-xl bg-[linear-gradient(135deg,#2ee6a6,#72f6df)] px-4 text-slate-950 hover:brightness-105 sm:h-12"
               >
                 {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
                 {copied ? 'Copiado' : 'Copiar'}
@@ -118,8 +118,8 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Button asChild size="lg" className="h-12 rounded-xl px-4">
+          <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
+            <Button asChild size="lg" className="h-11 rounded-xl px-4 sm:h-12">
               <Link href={publicPath} target="_blank" rel="noreferrer">
                 <ExternalLink className="size-4" />
                 Abrir tienda
@@ -130,7 +130,7 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
               asChild
               variant="outline"
               size="lg"
-              className="h-12 rounded-xl border-border bg-black/[0.04] px-4 text-foreground hover:bg-black/[0.07] dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:hover:bg-white/[0.08]"
+              className="h-11 rounded-xl border-border bg-black/[0.04] px-4 text-foreground hover:bg-black/[0.07] dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:hover:bg-white/[0.08] sm:h-12"
             >
               <Link href={plan.whatsappShareUrl} target="_blank" rel="noreferrer">
                 <MessageCircle className="size-4" />
@@ -139,9 +139,9 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
             </Button>
           </div>
 
-          <div className="rounded-2xl border border-emerald-300/14 bg-emerald-400/6 p-4 sm:p-5">
-            <div className="flex items-start gap-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-emerald-300/20 bg-emerald-400/10">
+          <div className="rounded-2xl border border-emerald-300/14 bg-emerald-400/6 p-3.5 sm:p-5">
+            <div className="flex items-start gap-2.5 sm:gap-3">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-emerald-300/20 bg-emerald-400/10 sm:size-9">
                 <Play className="size-4 text-emerald-500 dark:text-emerald-400" />
               </div>
               <div className="flex-1">
@@ -157,7 +157,7 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
                   size="sm"
                   onClick={handleSimulate}
                   disabled={!canSimulate}
-                  className="mt-3 h-9 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-4 text-xs font-semibold text-emerald-700 hover:bg-emerald-400/15 hover:text-emerald-800 dark:text-emerald-200 dark:hover:text-white"
+                  className="mt-2.5 h-8.5 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-400/15 hover:text-emerald-800 dark:text-emerald-200 dark:hover:text-white sm:mt-3 sm:h-9 sm:px-4"
                 >
                   <MessageCircle className="size-3.5" />
                   Probar checkout
@@ -192,7 +192,7 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
           ) : null}
         </div>
       ) : (
-        <div className="mt-5 rounded-xl border border-border bg-black/[0.04] p-4 dark:border-white/8 dark:bg-white/4">
+        <div className="mt-4 rounded-xl border border-border bg-black/[0.04] p-4 dark:border-white/8 dark:bg-white/4 sm:mt-5">
           <p className="text-sm font-medium text-foreground">Primero cierra estos puntos</p>
           <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
             {plan.blockers.slice(0, 3).map((blocker) => (
