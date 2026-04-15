@@ -40,6 +40,7 @@ export interface Database {
           address: string | null
           hours: string | null
           logo_url: string | null
+          status: 'draft' | 'published'
           is_active: boolean
           created_at: string
           updated_at: string
@@ -54,6 +55,7 @@ export interface Database {
           address?: string | null
           hours?: string | null
           logo_url?: string | null
+          status?: 'draft' | 'published'
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -66,6 +68,7 @@ export interface Database {
           address?: string | null
           hours?: string | null
           logo_url?: string | null
+          status?: 'draft' | 'published'
           is_active?: boolean
           updated_at?: string
         }

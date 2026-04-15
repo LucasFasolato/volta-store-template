@@ -119,6 +119,7 @@ async function createStoreForOwner(user: User) {
         slug,
         name: storeName,
         whatsapp: '',
+        status: 'draft',
       })
       .select('id, slug')
       .single()
