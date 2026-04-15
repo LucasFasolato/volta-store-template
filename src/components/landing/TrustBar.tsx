@@ -1,5 +1,5 @@
-import { Clock3, MapPin, MessageCircle, Package, ShieldCheck, Zap } from 'lucide-react'
-import { sanitizePhoneNumber } from '@/lib/utils/format'
+import { AtSign, Clock3, MapPin, MessageCircle, Package, Rows3, ShieldCheck } from 'lucide-react'
+import { sanitizeInstagramHandle, sanitizePhoneNumber } from '@/lib/utils/format'
 import type { Store, StoreContent } from '@/types/store'
 
 type TrustItem = {
@@ -16,30 +16,27 @@ const SPEED_TO_DURATION: Record<string, string> = {
 export function TrustBar({
   store,
   content,
+  productCount,
+  categoryCount,
 }: {
   store: Store
   content: Pick<StoreContent, 'banner_mode' | 'banner_speed'>
+  productCount: number
+  categoryCount: number
 }) {
   const phone = store.whatsapp ? sanitizePhoneNumber(store.whatsapp) : null
+  const instagram = store.instagram ? sanitizeInstagramHandle(store.instagram) : null
   const isAnimated = content.banner_mode === 'animated'
   const duration = SPEED_TO_DURATION[content.banner_speed] ?? SPEED_TO_DURATION.normal
 
   const items: TrustItem[] = [
-    phone
-      ? { icon: MessageCircle, label: 'Atención por WhatsApp' }
-      : { icon: Zap, label: 'Respuesta rápida' },
-    store.hours
-      ? { icon: Clock3, label: store.hours }
-      : { icon: Zap, label: 'Respuesta rápida' },
+    phone ? { icon: MessageCircle, label: 'Compra directa por WhatsApp' } : { icon: ShieldCheck, label: 'Compra directa al negocio' },
+    { icon: Package, label: `${productCount} ${productCount === 1 ? 'producto disponible' : 'productos disponibles'}` },
+    categoryCount > 1 ? { icon: Rows3, label: `${categoryCount} categorias para explorar` } : null,
+    store.hours ? { icon: Clock3, label: store.hours } : null,
     store.address ? { icon: MapPin, label: store.address } : null,
-    { icon: ShieldCheck, label: 'Pedido directo al vendedor' },
-    { icon: Package, label: 'Consultá envíos y retiro' },
-  ].filter((item, index, arr) => {
-    if (!item) return false
-    // dedupe Zap if both whatsapp and hours are missing
-    if (item.icon === Zap && arr.findIndex((i) => i?.icon === Zap) !== index) return false
-    return true
-  }) as TrustItem[]
+    instagram ? { icon: AtSign, label: `Instagram @${instagram}` } : null,
+  ].filter(Boolean) as TrustItem[]
 
   const display = items.slice(0, 5)
 
@@ -55,14 +52,9 @@ export function TrustBar({
       {isAnimated ? (
         <div
           className="overflow-hidden"
-          style={{
-            maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
-          }}
+          style={{ maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)' }}
         >
-          <div
-            className="store-marquee-track"
-            style={{ ['--marquee-duration' as string]: duration }}
-          >
+          <div className="store-marquee-track" style={{ ['--marquee-duration' as string]: duration }}>
             <TrustItemsRow items={display} />
             <TrustItemsRow items={display} ariaHidden />
           </div>
@@ -88,10 +80,7 @@ function TrustItemsRow({
   staticRow?: boolean
 }) {
   return (
-    <div
-      aria-hidden={ariaHidden}
-      className={staticRow ? 'flex items-stretch' : 'flex shrink-0 items-stretch'}
-    >
+    <div aria-hidden={ariaHidden} className={staticRow ? 'flex items-stretch' : 'flex shrink-0 items-stretch'}>
       {items.map((item, index) => {
         const Icon = item.icon
         return (
@@ -100,10 +89,7 @@ function TrustItemsRow({
             className="flex items-center gap-2.5 px-5 py-4 sm:px-7 sm:py-5"
             style={{ borderRight: '1px solid var(--store-card-border)' }}
           >
-            <Icon
-              className="size-4 shrink-0"
-              style={{ color: 'var(--store-primary)' }}
-            />
+            <Icon className="size-4 shrink-0" style={{ color: 'var(--store-primary)' }} />
             <span
               className="whitespace-nowrap text-[12px] font-medium sm:text-[13px]"
               style={{ color: 'var(--store-soft-text)' }}

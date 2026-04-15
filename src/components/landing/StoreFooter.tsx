@@ -1,4 +1,4 @@
-import { AtSign, Clock, MapPin, MessageCircle } from 'lucide-react'
+import { AtSign, Clock, MapPin, MessageCircle, Package, Rows3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { sanitizeInstagramHandle, sanitizePhoneNumber } from '@/lib/utils/format'
 import type { Store } from '@/types/store'
@@ -6,9 +6,16 @@ import type { Store } from '@/types/store'
 type StoreFooterProps = {
   store: Store
   containerClass: string
+  productCount: number
+  categoryCount: number
 }
 
-export function StoreFooter({ store, containerClass }: StoreFooterProps) {
+export function StoreFooter({
+  store,
+  containerClass,
+  productCount,
+  categoryCount,
+}: StoreFooterProps) {
   const phone = store.whatsapp ? sanitizePhoneNumber(store.whatsapp) : null
   const instagram = store.instagram ? sanitizeInstagramHandle(store.instagram) : null
 
@@ -21,7 +28,6 @@ export function StoreFooter({ store, containerClass }: StoreFooterProps) {
       }}
     >
       <div className={cn('mx-auto px-4 py-12 sm:px-6 sm:py-16', containerClass)}>
-        {/* WhatsApp CTA block */}
         {phone ? (
           <div
             className="mb-12 overflow-hidden rounded-[var(--store-card-radius)]"
@@ -37,13 +43,13 @@ export function StoreFooter({ store, containerClass }: StoreFooterProps) {
                   className="text-[11px] font-semibold uppercase tracking-[0.2em]"
                   style={{ color: 'var(--store-primary)' }}
                 >
-                  ¿Listo para pedir?
+                  Cierre directo
                 </p>
                 <p className="mt-2 text-lg font-semibold tracking-tight" style={{ color: 'var(--store-text)' }}>
-                  Escribinos directamente por WhatsApp.
+                  Cuando estes listo, envias el pedido por WhatsApp.
                 </p>
                 <p className="mt-1 max-w-md text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
-                  Te respondemos rápido con toda la info que necesitás para coordinar tu pedido.
+                  El negocio confirma disponibilidad, pago y entrega en una sola conversacion.
                 </p>
               </div>
               <a
@@ -64,8 +70,7 @@ export function StoreFooter({ store, containerClass }: StoreFooterProps) {
           </div>
         ) : null}
 
-        {/* Three-column grid */}
-        <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.9fr_0.85fr]">
           <div>
             <p
               className="text-[11px] font-semibold uppercase tracking-[0.22em]"
@@ -77,41 +82,36 @@ export function StoreFooter({ store, containerClass }: StoreFooterProps) {
               className="store-heading mt-3 text-2xl font-semibold tracking-tight sm:text-[2rem]"
               style={{ color: 'var(--store-text)' }}
             >
-              Pedí directo, sin intermediarios.
+              Una tienda pensada para elegir rapido y comprar directo.
             </h2>
             <p
               className="mt-4 max-w-xl text-sm leading-7 sm:text-[15px]"
               style={{ color: 'var(--store-soft-text)' }}
             >
-              Tu pedido va directo al vendedor por WhatsApp. Sin cargos extra ni pasos innecesarios.
+              {productCount} {productCount === 1 ? 'producto visible' : 'productos visibles'}
+              {categoryCount > 1 ? ` en ${categoryCount} categorias` : ''}. Todo el cierre se coordina con datos reales del negocio.
             </p>
           </div>
 
           <FooterColumn title="Contacto">
             {phone ? (
-              <FooterLink
-                href={`https://wa.me/${phone}`}
-                icon={<MessageCircle className="size-4" />}
-                label="WhatsApp"
-              />
+              <FooterLink href={`https://wa.me/${phone}`} icon={<MessageCircle className="size-4" />} label="WhatsApp" />
             ) : null}
             {instagram ? (
-              <FooterLink
-                href={`https://instagram.com/${instagram}`}
-                icon={<AtSign className="size-4" />}
-                label={`@${instagram}`}
-              />
+              <FooterLink href={`https://instagram.com/${instagram}`} icon={<AtSign className="size-4" />} label={`@${instagram}`} />
             ) : null}
-            {store.address ? (
-              <FooterRow icon={<MapPin className="size-4" />}>{store.address}</FooterRow>
-            ) : null}
+            {store.address ? <FooterRow icon={<MapPin className="size-4" />}>{store.address}</FooterRow> : null}
+            {store.hours ? <FooterRow icon={<Clock className="size-4" />}>{store.hours}</FooterRow> : null}
           </FooterColumn>
 
-          {store.hours ? (
-            <FooterColumn title="Atención">
-              <FooterRow icon={<Clock className="size-4" />}>{store.hours}</FooterRow>
-            </FooterColumn>
-          ) : null}
+          <FooterColumn title="Compra">
+            <FooterRow icon={<Package className="size-4" />}>
+              Armas el pedido en el carrito y lo envias cuando quieras.
+            </FooterRow>
+            <FooterRow icon={<Rows3 className="size-4" />}>
+              Explora el catalogo y coordina envio o retiro directamente con el negocio.
+            </FooterRow>
+          </FooterColumn>
         </div>
 
         <div
@@ -122,7 +122,7 @@ export function StoreFooter({ store, containerClass }: StoreFooterProps) {
           }}
         >
           <span>Powered by Volta Store</span>
-          <span>Catálogo premium con cierre conversacional</span>
+          <span>Catalogo operativo con cierre conversacional</span>
         </div>
       </div>
     </footer>

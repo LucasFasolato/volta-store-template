@@ -10,7 +10,8 @@ import {
 } from '@/lib/storefront/view'
 import { cn } from '@/lib/utils'
 import { GRID_COLS_CLASS } from '@/lib/utils/theme'
-import type { Category, ProductWithImages, StoreTheme } from '@/types/store'
+import { sanitizePhoneNumber } from '@/lib/utils/format'
+import type { Category, ProductWithImages, Store, StoreTheme } from '@/types/store'
 
 type CatalogSectionProps = {
   products: ProductWithImages[]
@@ -21,6 +22,8 @@ type CatalogSectionProps = {
   pathname: string
   routeState: StorefrontRouteState
   totalPages: number
+  store: Store
+  catalogSize: 'small' | 'medium' | 'large'
 }
 
 export function CatalogSection({
@@ -32,9 +35,19 @@ export function CatalogSection({
   pathname,
   routeState,
   totalPages,
+  store,
+  catalogSize,
 }: CatalogSectionProps) {
-  const gridClass = GRID_COLS_CLASS[theme.grid_columns] ?? GRID_COLS_CLASS[2]
+  const gridClass = getCatalogGridClass(theme.grid_columns, totalFiltered, catalogSize)
   const activeCategoryName = categories.find((category) => category.slug === routeState.activeCategory)?.name
+  const whatsappHref = store.whatsapp ? `https://wa.me/${sanitizePhoneNumber(store.whatsapp)}` : null
+  const catalogIntro = routeState.activeCategory
+    ? `Estas viendo ${activeCategoryName ?? 'una categoria'} con foco en productos listos para pedir.`
+    : catalogSize === 'small'
+      ? 'Todo el catalogo entra en una sola vista para que elijas rapido y pases al pedido.'
+      : catalogSize === 'medium'
+        ? 'Recorre el catalogo, agrega al carrito y cierra la compra por WhatsApp cuando quieras.'
+        : 'Una vista mas amplia para comparar productos y avanzar al pedido sin perder contexto.'
 
   return (
     <section id="catalogo" className="py-[var(--store-space-section)]">
@@ -45,7 +58,7 @@ export function CatalogSection({
               className="text-[11px] font-semibold uppercase tracking-[0.22em]"
               style={{ color: 'var(--store-muted-text)' }}
             >
-              Todos los productos
+              {catalogSize === 'small' && !routeState.activeCategory ? 'Compra directa' : 'Todos los productos'}
             </p>
             <h2
               className="store-heading mt-3 text-3xl font-semibold tracking-tight sm:text-[2.2rem]"
@@ -53,17 +66,37 @@ export function CatalogSection({
             >
               {COPY.product.catalog}
             </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+              {catalogIntro}
+            </p>
           </div>
-          <span
-            className="inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold tabular-nums"
-            style={{
-              color: 'var(--store-primary)',
-              backgroundColor: 'color-mix(in srgb, var(--store-primary) 10%, transparent)',
-              border: '1px solid color-mix(in srgb, var(--store-primary) 18%, transparent)',
-            }}
-          >
-            {totalFiltered} {totalFiltered === 1 ? 'producto' : 'productos'}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className="inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold tabular-nums"
+              style={{
+                color: 'var(--store-primary)',
+                backgroundColor: 'color-mix(in srgb, var(--store-primary) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--store-primary) 18%, transparent)',
+              }}
+            >
+              {totalFiltered} {totalFiltered === 1 ? 'producto' : 'productos'}
+            </span>
+            {whatsappHref ? (
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-semibold transition hover:-translate-y-0.5"
+                style={{
+                  borderColor: 'var(--store-card-border)',
+                  color: 'var(--store-text)',
+                  backgroundColor: 'color-mix(in srgb, var(--store-surface) 72%, transparent)',
+                }}
+              >
+                Consultar por WhatsApp
+              </a>
+            ) : null}
+          </div>
         </div>
 
         {categories.length > 0 ? (
@@ -141,6 +174,48 @@ export function CatalogSection({
                 />
               ))}
             </div>
+
+            {catalogSize === 'small' && !routeState.activeCategory ? (
+              <div
+                className="mt-8 rounded-[var(--store-card-radius)] border p-5 sm:p-6"
+                style={{
+                  borderColor: 'var(--store-card-border)',
+                  background: 'var(--store-card-background)',
+                  boxShadow: 'var(--store-card-shadow)',
+                }}
+              >
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p
+                      className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+                      style={{ color: 'var(--store-muted-text)' }}
+                    >
+                      Siguiente paso
+                    </p>
+                    <p className="mt-2 text-lg font-semibold tracking-tight" style={{ color: 'var(--store-text)' }}>
+                      {whatsappHref
+                        ? 'Elige productos, sumalos al carrito y envia el pedido por WhatsApp.'
+                        : 'Explora el catalogo y usa los datos del negocio para avanzar con la compra.'}
+                    </p>
+                  </div>
+                  {whatsappHref ? (
+                    <a
+                      href={whatsappHref}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="store-button inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold transition duration-200 hover:-translate-y-0.5"
+                      style={{
+                        background: 'linear-gradient(145deg, #25D366, #1db954)',
+                        color: '#ffffff',
+                        boxShadow: '0 14px 32px rgba(37, 211, 102, 0.22)',
+                      }}
+                    >
+                      Consultar por WhatsApp
+                    </a>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
 
             {(totalPages > 1 || totalFiltered > PAGE_SIZE_OPTIONS[0]) ? (
               <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
@@ -257,6 +332,24 @@ export function CatalogSection({
       </div>
     </section>
   )
+}
+
+function getCatalogGridClass(
+  gridColumns: number,
+  totalFiltered: number,
+  catalogSize: 'small' | 'medium' | 'large',
+) {
+  if (catalogSize === 'small') {
+    if (totalFiltered === 1) return 'grid-cols-1'
+    if (totalFiltered === 2) return 'grid-cols-1 sm:grid-cols-2'
+    return 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3'
+  }
+
+  if (catalogSize === 'medium' && gridColumns === 4) {
+    return GRID_COLS_CLASS[3]
+  }
+
+  return GRID_COLS_CLASS[gridColumns] ?? GRID_COLS_CLASS[2]
 }
 
 function PageNumbers({

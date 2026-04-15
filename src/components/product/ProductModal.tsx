@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Check, Minus, Plus, ShoppingBag, X } from 'lucide-react'
+import { Check, MessageCircle, Minus, Plus, ShoppingBag, X } from 'lucide-react'
 import { COPY } from '@/data/system-copy'
 import { buildCartItemKey, useCartStore } from '@/lib/stores/cart'
 import { formatCurrency } from '@/lib/utils/format'
@@ -11,10 +11,12 @@ import type { ProductWithImages } from '@/types/store'
 
 type ProductModalProps = {
   product: ProductWithImages
+  storeName: string
+  whatsapp: string
   onClose: () => void
 }
 
-export function ProductModal({ product, onClose }: ProductModalProps) {
+export function ProductModal({ product, storeName, whatsapp, onClose }: ProductModalProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
@@ -30,6 +32,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   const hasOptions = sortedOptions.length > 0
   const allOptionsSelected =
     !hasOptions || sortedOptions.every((opt) => !!selectedOptions[opt.name])
+  const hasWhatsapp = whatsapp.trim().length > 0
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
@@ -65,6 +68,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
         selectedOptions: hasOptions ? { ...selectedOptions } : undefined,
       })
     }
+
     openCart()
     onClose()
   }
@@ -80,7 +84,6 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
         aria-modal="true"
         aria-labelledby="product-modal-title"
       >
-        {/* Backdrop */}
         <motion.button
           type="button"
           initial={{ opacity: 0 }}
@@ -95,7 +98,6 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
           aria-label="Cerrar detalle del producto"
         />
 
-        {/* Modal panel */}
         <motion.div
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -110,7 +112,6 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
             boxShadow: 'var(--store-shadow)',
           }}
         >
-          {/* Handle bar — mobile only */}
           <div className="flex shrink-0 justify-center pb-1 pt-3 sm:hidden">
             <div
               className="h-1.5 w-14 rounded-full"
@@ -118,10 +119,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
             />
           </div>
 
-          {/* Body: stacked on mobile, two-column on desktop */}
           <div className="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[1.05fr_0.95fr]">
-
-            {/* ── Image panel ── */}
             <div className="shrink-0 p-4 sm:p-5 lg:overflow-y-auto lg:p-6">
               <div
                 className="relative aspect-[5/4] w-full overflow-hidden lg:aspect-[4/5]"
@@ -187,7 +185,6 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                 </button>
               </div>
 
-              {/* Thumbnails */}
               {product.images && product.images.length > 1 ? (
                 <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
                   {product.images.map((image, index) => (
@@ -214,12 +211,10 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
               ) : null}
             </div>
 
-            {/* ── Detail panel: scrollable content + sticky CTA ── */}
             <div
               className="flex min-h-0 flex-col border-t lg:border-l lg:border-t-0"
               style={{ borderColor: 'var(--store-card-border)' }}
             >
-              {/* Scrollable details */}
               <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6 lg:px-8 lg:py-8">
                 {product.category?.name ? (
                   <p
@@ -238,7 +233,6 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                   {product.name}
                 </h2>
 
-                {/* Price */}
                 <div className="mt-4 flex flex-wrap items-end gap-3">
                   <span
                     className="text-3xl font-semibold tracking-tight sm:text-[2rem]"
@@ -247,13 +241,15 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                     {formatCurrency(product.price)}
                   </span>
                   {product.compare_price && product.compare_price > product.price ? (
-                    <span className="pb-0.5 text-base line-through" style={{ color: 'var(--store-muted-text)' }}>
+                    <span
+                      className="pb-0.5 text-base line-through"
+                      style={{ color: 'var(--store-muted-text)' }}
+                    >
                       {formatCurrency(product.compare_price)}
                     </span>
                   ) : null}
                 </div>
 
-                {/* Description */}
                 {product.description ? (
                   <p
                     className="mt-5 text-sm leading-7 sm:text-[15px]"
@@ -267,7 +263,37 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                   </p>
                 )}
 
-                {/* ── Option selectors ── */}
+                <div
+                  className="mt-5 flex items-start gap-3 rounded-3xl px-4 py-4"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--store-primary) 8%, var(--store-surface) 92%)',
+                    border: '1px solid color-mix(in srgb, var(--store-primary) 18%, var(--store-card-border) 82%)',
+                  }}
+                >
+                  <div
+                    className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-2xl"
+                    style={{
+                      backgroundColor: 'color-mix(in srgb, var(--store-primary) 16%, transparent)',
+                      color: 'var(--store-primary)',
+                    }}
+                  >
+                    <MessageCircle className="size-4" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <p
+                      className="text-[11px] font-semibold uppercase tracking-[0.2em]"
+                      style={{ color: 'var(--store-muted-text)' }}
+                    >
+                      Compra directa
+                    </p>
+                    <p className="text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+                      {hasWhatsapp
+                        ? `Agrega este producto al carrito y envia tu pedido directo a ${storeName} por WhatsApp para coordinar entrega, retiro o cualquier duda.`
+                        : `Revisa los detalles de ${storeName} y usa el carrito para preparar tu pedido con toda la informacion del producto.`}
+                    </p>
+                  </div>
+                </div>
+
                 {hasOptions ? (
                   <div className="mt-7 space-y-6">
                     {sortedOptions.map((option) => {
@@ -312,11 +338,13 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                                           backgroundColor: 'var(--store-primary)',
                                           color: 'var(--store-primary-contrast)',
                                           border: '2px solid var(--store-primary)',
-                                          boxShadow: '0 6px 18px color-mix(in srgb, var(--store-primary) 22%, transparent)',
+                                          boxShadow:
+                                            '0 6px 18px color-mix(in srgb, var(--store-primary) 22%, transparent)',
                                           transform: 'scale(1.04)',
                                         }
                                       : {
-                                          backgroundColor: 'color-mix(in srgb, var(--store-surface) 72%, transparent)',
+                                          backgroundColor:
+                                            'color-mix(in srgb, var(--store-surface) 72%, transparent)',
                                           color: 'var(--store-text)',
                                           border: '2px solid var(--store-card-border)',
                                         }
@@ -333,7 +361,6 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                   </div>
                 ) : null}
 
-                {/* ── Quantity ── */}
                 <div className="mt-7">
                   <p
                     className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
@@ -366,7 +393,9 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                     {quantity > 1 ? (
                       <div
                         className="rounded-lg px-3 py-2 text-right"
-                        style={{ backgroundColor: 'color-mix(in srgb, var(--store-primary) 8%, transparent)' }}
+                        style={{
+                          backgroundColor: 'color-mix(in srgb, var(--store-primary) 8%, transparent)',
+                        }}
                       >
                         <p
                           className="text-[10px] font-semibold uppercase tracking-[0.16em]"
@@ -386,7 +415,6 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                 </div>
               </div>
 
-              {/* ── Sticky CTA footer ── */}
               <div
                 className="shrink-0 border-t px-5 pb-5 pt-4 lg:px-8"
                 style={{
@@ -400,7 +428,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                     className="mb-3 text-center text-xs"
                     style={{ color: 'var(--store-muted-text)' }}
                   >
-                    Elegí todas las opciones para continuar
+                    Elegi todas las opciones para continuar
                   </p>
                 ) : null}
 
@@ -413,7 +441,9 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                     background: allOptionsSelected
                       ? 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))'
                       : 'color-mix(in srgb, var(--store-surface) 80%, transparent)',
-                    color: allOptionsSelected ? 'var(--store-primary-contrast)' : 'var(--store-muted-text)',
+                    color: allOptionsSelected
+                      ? 'var(--store-primary-contrast)'
+                      : 'var(--store-muted-text)',
                     boxShadow: allOptionsSelected
                       ? '0 18px 40px color-mix(in srgb, var(--store-primary) 24%, transparent)'
                       : 'none',
@@ -430,7 +460,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                   ) : (
                     <>
                       <Check className="size-4 opacity-40" />
-                      Elegí todas las opciones
+                      Elegi todas las opciones
                     </>
                   )}
                 </button>

@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { ArrowUpRight, Clock3, MapPin, MessageCircle } from 'lucide-react'
+import { ArrowUpRight, Clock3, MapPin, MessageCircle, Package, Rows3, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { sanitizePhoneNumber } from '@/lib/utils/format'
 import type { Store, StoreContent } from '@/types/store'
@@ -8,27 +8,37 @@ type HeroSectionProps = {
   content: StoreContent
   store: Store
   containerClass: string
+  productCount: number
+  categoryCount: number
+  featuredCount: number
 }
 
-export function HeroSection({ content, store, containerClass }: HeroSectionProps) {
-  const whatsappHref = store.whatsapp
-    ? `https://wa.me/${sanitizePhoneNumber(store.whatsapp)}`
-    : '#catalogo'
-
+export function HeroSection({
+  content,
+  store,
+  containerClass,
+  productCount,
+  categoryCount,
+  featuredCount,
+}: HeroSectionProps) {
+  const whatsappHref = store.whatsapp ? `https://wa.me/${sanitizePhoneNumber(store.whatsapp)}` : '#catalogo'
   const hasImage = !!content.hero_image_url
+  const primaryCtaLabel = productCount > 0 ? 'Explorar productos' : 'Ver catalogo'
 
-  // Only show address and hours — WhatsApp is communicated via the CTA button
   const trustChips = [
+    {
+      icon: Package,
+      label: `${productCount} ${productCount === 1 ? 'producto listo para pedir' : 'productos listos para pedir'}`,
+    },
+    categoryCount > 1 ? { icon: Rows3, label: `${categoryCount} categorias` } : null,
+    featuredCount > 0 ? { icon: Sparkles, label: `${featuredCount} destacados` } : null,
     store.address ? { icon: MapPin, label: store.address } : null,
     store.hours ? { icon: Clock3, label: store.hours } : null,
   ].filter(Boolean) as Array<{ icon: React.ElementType; label: string }>
 
   return (
     <section
-      className={cn(
-        'relative flex flex-col overflow-hidden',
-        hasImage ? 'justify-end' : 'justify-center',
-      )}
+      className={cn('relative flex flex-col overflow-hidden', hasImage ? 'justify-end' : 'justify-center')}
       style={{
         minHeight: 'var(--store-hero-height)',
         background: hasImage
@@ -41,7 +51,6 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
             ].join(', '),
       }}
     >
-      {/* Background */}
       {hasImage ? (
         <>
           <div className="absolute inset-0">
@@ -53,7 +62,6 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
               priority
             />
           </div>
-          {/* Bottom-heavy gradient for legibility */}
           <div
             className="absolute inset-0"
             style={{
@@ -64,7 +72,6 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
         </>
       ) : (
         <>
-          {/* Subtle grid lines */}
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.035]"
             style={{
@@ -73,7 +80,6 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
               backgroundSize: '72px 72px',
             }}
           />
-          {/* Decorative concentric rings */}
           <div
             className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
             aria-hidden="true"
@@ -94,7 +100,6 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
         </>
       )}
 
-      {/* Content */}
       <div
         className={cn(
           'relative z-10 mx-auto w-full px-4 sm:px-6',
@@ -103,6 +108,20 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
         )}
       >
         <div className="max-w-4xl">
+          {content.support_text ? (
+            <span
+              className="inline-flex rounded-full px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.2em]"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--store-surface) 58%, transparent)',
+                color: 'var(--store-secondary)',
+                border: '1px solid var(--store-card-border)',
+                backdropFilter: 'blur(14px)',
+              }}
+            >
+              {content.support_text}
+            </span>
+          ) : null}
+
           <h1
             className="store-display max-w-3xl text-balance"
             style={{
@@ -110,13 +129,14 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
               fontSize: 'clamp(2.6rem, 6.5vw, 6rem)',
               lineHeight: '1.06',
               letterSpacing: '-0.03em',
+              marginTop: content.support_text ? '1.25rem' : undefined,
             }}
           >
             {content.hero_title}
           </h1>
 
           <p
-            className="mt-5 max-w-xl leading-8"
+            className="mt-5 max-w-2xl leading-8"
             style={{
               color: 'var(--store-soft-text)',
               fontSize: 'calc(1.05rem * var(--store-body-scale))',
@@ -125,7 +145,6 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
             {content.hero_subtitle}
           </p>
 
-          {/* CTA buttons */}
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <a
               href="#catalogo"
@@ -137,7 +156,7 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
                 boxShadow: '0 18px 44px color-mix(in srgb, var(--store-primary) 26%, transparent)',
               }}
             >
-              Ver catálogo
+              {primaryCtaLabel}
               <ArrowUpRight className="ml-2 size-4" />
             </a>
 
@@ -146,15 +165,17 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
                 href={whatsappHref}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="store-button inline-flex items-center justify-center gap-2 px-8 text-sm font-semibold transition duration-200 hover:-translate-y-0.5"
+                className="store-button inline-flex items-center justify-center gap-2 border px-8 text-sm font-semibold transition duration-200 hover:-translate-y-0.5"
                 style={{
-                  background: 'linear-gradient(135deg, #25D366, #1db954)',
-                  color: '#ffffff',
-                  boxShadow: '0 16px 40px rgba(37, 211, 102, 0.2)',
+                  borderColor: 'color-mix(in srgb, #25D366 26%, var(--store-card-border))',
+                  backgroundColor: 'color-mix(in srgb, var(--store-surface) 66%, transparent)',
+                  color: 'var(--store-text)',
+                  boxShadow: '0 16px 40px color-mix(in srgb, var(--store-primary) 10%, transparent)',
+                  backdropFilter: 'blur(16px)',
                 }}
               >
                 <MessageCircle className="size-4" />
-                Hablar por WhatsApp
+                Comprar por WhatsApp
               </a>
             ) : (
               <a
@@ -173,7 +194,12 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
             )}
           </div>
 
-          {/* Trust chips — address and hours only */}
+          <p className="mt-4 max-w-2xl text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+            {store.whatsapp
+              ? 'Explora el catalogo, agrega al carrito y envia el pedido por WhatsApp cuando estes listo.'
+              : 'Explora el catalogo y usa los datos visibles del negocio para consultar disponibilidad.'}
+          </p>
+
           {trustChips.length > 0 ? (
             <div className="mt-7 flex flex-wrap gap-2">
               {trustChips.map((chip) => {
@@ -189,10 +215,7 @@ export function HeroSection({ content, store, containerClass }: HeroSectionProps
                       backdropFilter: 'blur(14px)',
                     }}
                   >
-                    <Icon
-                      className="size-3.5 shrink-0"
-                      style={{ color: 'var(--store-primary)' }}
-                    />
+                    <Icon className="size-3.5 shrink-0" style={{ color: 'var(--store-primary)' }} />
                     {chip.label}
                   </span>
                 )

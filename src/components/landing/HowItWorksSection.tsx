@@ -6,30 +6,31 @@ const STEPS = [
   {
     number: '01',
     icon: ShoppingBag,
-    title: 'Elegís tus productos',
-    description: 'Explorá el catálogo, sumá lo que te gusta y armá tu pedido.',
+    title: 'Exploras y eliges',
+    description: 'Recorres el catalogo, sumas productos y dejas listo el pedido.',
   },
   {
     number: '02',
     icon: MessageCircle,
-    title: 'Enviás el pedido por WhatsApp',
-    description: 'Con un toque mandás tu selección directo al vendedor.',
+    title: 'Envias por WhatsApp',
+    description: 'El pedido va directo al negocio para confirmar disponibilidad y precio final.',
   },
   {
     number: '03',
     icon: Package,
-    title: 'Coordinás pago y entrega',
-    description: 'Acordás forma de pago y envío o retiro en un solo chat.',
+    title: 'Coordinas entrega o retiro',
+    description: 'Cierras pago, envio o retiro en la misma conversacion.',
   },
 ]
 
 type HowItWorksSectionProps = {
   store: Store
   containerClass: string
+  productCount: number
 }
 
-export function HowItWorksSection({ store, containerClass }: HowItWorksSectionProps) {
-  if (!store.whatsapp) return null
+export function HowItWorksSection({ store, containerClass, productCount }: HowItWorksSectionProps) {
+  if (!store.whatsapp || productCount <= 4) return null
 
   return (
     <section className="py-[var(--store-space-section)]">
@@ -41,24 +42,26 @@ export function HowItWorksSection({ store, containerClass }: HowItWorksSectionPr
             'linear-gradient(180deg, color-mix(in srgb, var(--store-surface) 55%, transparent), color-mix(in srgb, var(--store-bg) 94%, transparent))',
         }}
       >
-        <div className={cn('mx-auto px-4 py-14 sm:px-6 sm:py-16', containerClass)}>
+        <div className={cn('mx-auto px-4 py-12 sm:px-6 sm:py-14', containerClass)}>
           <div className="mb-10 text-center">
             <p
               className="text-[11px] font-semibold uppercase tracking-[0.24em]"
               style={{ color: 'var(--store-muted-text)' }}
             >
-              Simple y directo
+              Compra sin vueltas
             </p>
             <h2
               className="store-heading mt-3 text-2xl font-semibold tracking-tight sm:text-3xl"
               style={{ color: 'var(--store-text)' }}
             >
-              ¿Cómo comprás?
+              Asi compras en esta tienda
             </h2>
+            <p className="mt-3 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+              El catalogo te ayuda a elegir rapido y el cierre sucede directo con el negocio.
+            </p>
           </div>
 
           <div className="relative grid gap-6 sm:grid-cols-3">
-            {/* Connector line — desktop only */}
             <div
               className="pointer-events-none absolute left-0 right-0 top-[2.1rem] hidden h-px sm:block"
               style={{
@@ -72,7 +75,6 @@ export function HowItWorksSection({ store, containerClass }: HowItWorksSectionPr
               const Icon = step.icon
               return (
                 <div key={step.number} className="relative flex flex-col items-center text-center">
-                  {/* Icon circle */}
                   <div
                     className="relative z-10 mb-5 flex size-[4.25rem] items-center justify-center rounded-full"
                     style={{
@@ -82,10 +84,7 @@ export function HowItWorksSection({ store, containerClass }: HowItWorksSectionPr
                       boxShadow: '0 8px 24px color-mix(in srgb, var(--store-primary) 10%, transparent)',
                     }}
                   >
-                    <Icon
-                      className="size-5"
-                      style={{ color: 'var(--store-primary)' }}
-                    />
+                    <Icon className="size-5" style={{ color: 'var(--store-primary)' }} />
                   </div>
 
                   <span

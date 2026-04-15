@@ -31,7 +31,12 @@ export function StoreInteractiveShell({
       <StoreThemeAutoSync storeRootId={storeRootId} theme={theme} />
       <StoreCartClient storeSlug={storeSlug} storeName={storeName} whatsapp={whatsapp} />
       {selectedProduct ? (
-        <StoreProductModalClient closeHref={closeModalHref} product={selectedProduct} />
+        <StoreProductModalClient
+          closeHref={closeModalHref}
+          product={selectedProduct}
+          storeName={storeName}
+          whatsapp={whatsapp}
+        />
       ) : null}
     </>
   )
@@ -40,15 +45,21 @@ export function StoreInteractiveShell({
 function StoreProductModalClient({
   closeHref,
   product,
+  storeName,
+  whatsapp,
 }: {
   closeHref: string
   product: ProductWithImages
+  storeName: string
+  whatsapp: string
 }) {
   const router = useRouter()
 
   return (
     <ProductModal
       product={product}
+      storeName={storeName}
+      whatsapp={whatsapp}
       onClose={() => router.replace(closeHref, { scroll: false })}
     />
   )

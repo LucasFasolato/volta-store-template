@@ -6,6 +6,7 @@ import { HowItWorksSection } from '@/components/landing/HowItWorksSection'
 import { StoreFooter } from '@/components/landing/StoreFooter'
 import { StoreNav } from '@/components/landing/StoreNav'
 import { TrustBar } from '@/components/landing/TrustBar'
+import { TrustBlocks } from '@/components/landing/TrustBlocks'
 import { buildStorefrontHref, type StorefrontViewModel } from '@/lib/storefront/view'
 import { buildThemeVars, CONTAINER_CLASS } from '@/lib/utils/theme'
 import type { StorePublicData } from '@/types/store'
@@ -18,6 +19,13 @@ type StoreLayoutProps = {
 
 export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
   const { store, theme, layout, content, categories } = data
+  const productCount = data.products.length
+  const categoryCount = categories.length
+  const featuredCount = view.featuredProducts.length
+  const smallCatalog = productCount <= 4
+  const mediumCatalog = productCount > 4 && productCount <= 12
+  const showFeaturedSection = layout.show_featured && featuredCount > 0 && productCount > 5
+  const showHowItWorks = Boolean(store.whatsapp) && !smallCatalog
   const containerClass = CONTAINER_CLASS[theme.container_width] ?? CONTAINER_CLASS.lg
   const resolvedMode: 'light' | 'dark' = theme.visual_mode === 'dark' ? 'dark' : 'light'
   const themeVars = buildThemeVars(theme, resolvedMode)
@@ -49,22 +57,38 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
         }}
       />
 
-      <StoreNav store={store} containerClass={containerClass} />
+      <StoreNav store={store} containerClass={containerClass} productCount={productCount} />
 
       <main id="main-content" className="relative z-10 pb-24 sm:pb-10">
         {layout.show_hero ? (
-          <HeroSection content={content} store={store} containerClass={containerClass} />
+          <HeroSection
+            content={content}
+            store={store}
+            containerClass={containerClass}
+            productCount={productCount}
+            categoryCount={categoryCount}
+            featuredCount={featuredCount}
+          />
         ) : null}
 
-        <TrustBar store={store} content={content} />
+        <TrustBar store={store} content={content} productCount={productCount} categoryCount={categoryCount} />
 
-        {layout.show_featured && view.featuredProducts.length > 0 ? (
+        <TrustBlocks
+          store={store}
+          productCount={productCount}
+          categoryCount={categoryCount}
+          featuredCount={featuredCount}
+          containerClass={containerClass}
+        />
+
+        {showFeaturedSection ? (
           <FeaturedSection
             products={view.featuredProducts}
             pathname={pathname}
             routeState={view}
             theme={theme}
             containerClass={containerClass}
+            productCount={productCount}
           />
         ) : null}
 
@@ -78,13 +102,28 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
             pathname={pathname}
             routeState={view}
             totalPages={view.totalPages}
+            store={store}
+            catalogSize={smallCatalog ? 'small' : mediumCatalog ? 'medium' : 'large'}
           />
         ) : null}
 
-        <HowItWorksSection store={store} containerClass={containerClass} />
+        {showHowItWorks ? (
+          <HowItWorksSection
+            store={store}
+            containerClass={containerClass}
+            productCount={productCount}
+          />
+        ) : null}
       </main>
 
-      {layout.show_footer ? <StoreFooter store={store} containerClass={containerClass} /> : null}
+      {layout.show_footer ? (
+        <StoreFooter
+          store={store}
+          containerClass={containerClass}
+          productCount={productCount}
+          categoryCount={categoryCount}
+        />
+      ) : null}
 
       <StoreInteractiveShell
         closeModalHref={closeModalHref}

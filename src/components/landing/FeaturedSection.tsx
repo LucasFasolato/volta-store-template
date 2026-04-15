@@ -11,6 +11,7 @@ type FeaturedSectionProps = {
   routeState: StorefrontRouteState
   theme: StoreTheme
   containerClass: string
+  productCount: number
 }
 
 export function FeaturedSection({
@@ -19,6 +20,7 @@ export function FeaturedSection({
   routeState,
   theme,
   containerClass,
+  productCount,
 }: FeaturedSectionProps) {
   if (products.length === 0) return null
 
@@ -31,7 +33,7 @@ export function FeaturedSection({
               className="text-[11px] font-semibold uppercase tracking-[0.22em]"
               style={{ color: 'var(--store-muted-text)' }}
             >
-              Seleccion curada
+              Para comprar mas rapido
             </p>
             <h2
               className="store-heading mt-3 text-3xl font-semibold tracking-tight sm:text-[2.2rem]"
@@ -39,6 +41,11 @@ export function FeaturedSection({
             >
               {COPY.product.featured}
             </h2>
+            <p className="mt-2 max-w-xl text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+              {productCount <= 8
+                ? 'Una seleccion breve para que encuentres algo rapido y sigas directo al catalogo.'
+                : 'Arranca por aqui si quieres ver opciones clave antes de recorrer todo el catalogo.'}
+            </p>
           </div>
 
           <a

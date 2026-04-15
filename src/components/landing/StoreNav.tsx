@@ -7,9 +7,12 @@ import type { Store } from '@/types/store'
 type StoreNavProps = {
   store: Store
   containerClass: string
+  productCount: number
 }
 
-export function StoreNav({ store, containerClass }: StoreNavProps) {
+export function StoreNav({ store, containerClass, productCount }: StoreNavProps) {
+  const productLabel = `${productCount} ${productCount === 1 ? 'producto listo para pedir' : 'productos listos para pedir'}`
+
   return (
     <>
       <a
@@ -69,7 +72,7 @@ export function StoreNav({ store, containerClass }: StoreNavProps) {
                 className="mt-0.5 hidden truncate text-[10px] font-semibold uppercase tracking-[0.2em] sm:block"
                 style={{ color: 'var(--store-muted-text)' }}
               >
-                Catalogo y checkout por WhatsApp
+                {productLabel}
               </p>
             </div>
           </div>
@@ -84,7 +87,7 @@ export function StoreNav({ store, containerClass }: StoreNavProps) {
                 backgroundColor: 'color-mix(in srgb, var(--store-surface) 82%, transparent)',
               }}
             >
-              Ver catalogo
+              Ver productos
               <ArrowUpRight className="size-3.5" />
             </a>
 

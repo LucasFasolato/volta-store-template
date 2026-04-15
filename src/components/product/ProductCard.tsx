@@ -77,7 +77,7 @@ export function ProductCard({ product, productHref, theme }: ProductCardProps) {
 
   const cardModel = normalizeCardLayout(theme.card_layout)
   const summary = product.short_description || (hasOptions ? product.options!.map((option) => option.name).join(' / ') : null)
-  const buttonLabel = hasOptions ? 'Elegir' : 'Agregar'
+  const buttonLabel = hasOptions ? 'Ver opciones' : 'Agregar'
 
   const actionButton = (
     <button
@@ -311,7 +311,7 @@ export function ProductCard({ product, productHref, theme }: ProductCardProps) {
                 </p>
               ) : (
                 <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
-                  {hasOptions ? 'Con opciones' : 'Listo para pedir'}
+                  {hasOptions ? 'Personalizable' : 'Listo para pedir'}
                 </p>
               )}
             </div>
