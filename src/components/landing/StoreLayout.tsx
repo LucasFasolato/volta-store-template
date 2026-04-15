@@ -1,5 +1,6 @@
 import { StoreInteractiveShell } from '@/components/landing/StoreInteractiveShell'
 import { CatalogSection } from '@/components/landing/CatalogSection'
+import { CompactTrustSection } from '@/components/landing/CompactTrustSection'
 import { FeaturedSection } from '@/components/landing/FeaturedSection'
 import { HeroSection } from '@/components/landing/HeroSection'
 import { HowItWorksSection } from '@/components/landing/HowItWorksSection'
@@ -7,6 +8,7 @@ import { StoreFooter } from '@/components/landing/StoreFooter'
 import { StoreNav } from '@/components/landing/StoreNav'
 import { TrustBar } from '@/components/landing/TrustBar'
 import { TrustBlocks } from '@/components/landing/TrustBlocks'
+import { getStorefrontDensityMode } from '@/components/landing/storefront-density'
 import { buildStorefrontHref, type StorefrontViewModel } from '@/lib/storefront/view'
 import { buildThemeVars, CONTAINER_CLASS } from '@/lib/utils/theme'
 import type { StorePublicData } from '@/types/store'
@@ -22,10 +24,11 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
   const productCount = data.products.length
   const categoryCount = categories.length
   const featuredCount = view.featuredProducts.length
-  const smallCatalog = productCount <= 4
-  const mediumCatalog = productCount > 4 && productCount <= 12
-  const showFeaturedSection = layout.show_featured && featuredCount > 0 && productCount > 5
-  const showHowItWorks = Boolean(store.whatsapp) && !smallCatalog
+  const densityMode = getStorefrontDensityMode(productCount)
+  const showCompactTrust = densityMode === 'small'
+  const showFeaturedSection =
+    layout.show_featured && featuredCount > 0 && densityMode !== 'small' && productCount > 5
+  const showHowItWorks = Boolean(store.whatsapp) && densityMode !== 'small'
   const containerClass = CONTAINER_CLASS[theme.container_width] ?? CONTAINER_CLASS.lg
   const resolvedMode: 'light' | 'dark' = theme.visual_mode === 'dark' ? 'dark' : 'light'
   const themeVars = buildThemeVars(theme, resolvedMode)
@@ -57,7 +60,12 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
         }}
       />
 
-      <StoreNav store={store} containerClass={containerClass} productCount={productCount} />
+      <StoreNav
+        store={store}
+        containerClass={containerClass}
+        productCount={productCount}
+        densityMode={densityMode}
+      />
 
       <main id="main-content" className="relative z-10 pb-24 sm:pb-10">
         {layout.show_hero ? (
@@ -68,18 +76,28 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
             productCount={productCount}
             categoryCount={categoryCount}
             featuredCount={featuredCount}
+            densityMode={densityMode}
           />
         ) : null}
 
-        <TrustBar store={store} content={content} productCount={productCount} categoryCount={categoryCount} />
+        {densityMode !== 'small' ? (
+          <TrustBar
+            store={store}
+            content={content}
+            productCount={productCount}
+            categoryCount={categoryCount}
+          />
+        ) : null}
 
-        <TrustBlocks
-          store={store}
-          productCount={productCount}
-          categoryCount={categoryCount}
-          featuredCount={featuredCount}
-          containerClass={containerClass}
-        />
+        {densityMode !== 'small' ? (
+          <TrustBlocks
+            store={store}
+            productCount={productCount}
+            categoryCount={categoryCount}
+            featuredCount={featuredCount}
+            containerClass={containerClass}
+          />
+        ) : null}
 
         {showFeaturedSection ? (
           <FeaturedSection
@@ -103,7 +121,16 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
             routeState={view}
             totalPages={view.totalPages}
             store={store}
-            catalogSize={smallCatalog ? 'small' : mediumCatalog ? 'medium' : 'large'}
+            catalogSize={densityMode}
+          />
+        ) : null}
+
+        {showCompactTrust ? (
+          <CompactTrustSection
+            store={store}
+            productCount={productCount}
+            categoryCount={categoryCount}
+            containerClass={containerClass}
           />
         ) : null}
 

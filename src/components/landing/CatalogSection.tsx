@@ -38,6 +38,7 @@ export function CatalogSection({
   store,
   catalogSize,
 }: CatalogSectionProps) {
+  const isSmallCatalog = catalogSize === 'small'
   const gridClass = getCatalogGridClass(theme.grid_columns, totalFiltered, catalogSize)
   const activeCategoryName = categories.find((category) => category.slug === routeState.activeCategory)?.name
   const whatsappHref = store.whatsapp ? `https://wa.me/${sanitizePhoneNumber(store.whatsapp)}` : null
@@ -50,9 +51,15 @@ export function CatalogSection({
         : 'Una vista mas amplia para comparar productos y avanzar al pedido sin perder contexto.'
 
   return (
-    <section id="catalogo" className="py-[var(--store-space-section)]">
+    <section
+      id="catalogo"
+      className={cn(
+        'pb-[var(--store-space-section)]',
+        isSmallCatalog ? 'pt-8 sm:pt-10' : 'pt-[var(--store-space-section)]',
+      )}
+    >
       <div className={cn('mx-auto px-4 sm:px-6', containerClass)}>
-        <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className={cn('flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between', isSmallCatalog ? 'mb-6' : 'mb-8')}>
           <div>
             <p
               className="text-[11px] font-semibold uppercase tracking-[0.22em]"
@@ -61,7 +68,10 @@ export function CatalogSection({
               {catalogSize === 'small' && !routeState.activeCategory ? 'Compra directa' : 'Todos los productos'}
             </p>
             <h2
-              className="store-heading mt-3 text-3xl font-semibold tracking-tight sm:text-[2.2rem]"
+              className={cn(
+                'store-heading mt-3 font-semibold tracking-tight',
+                isSmallCatalog ? 'text-[2rem] sm:text-[2.1rem]' : 'text-3xl sm:text-[2.2rem]',
+              )}
               style={{ color: 'var(--store-text)' }}
             >
               {COPY.product.catalog}
@@ -100,7 +110,7 @@ export function CatalogSection({
         </div>
 
         {categories.length > 0 ? (
-          <div className="-mx-4 mb-8 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+          <div className={cn('-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0', isSmallCatalog ? 'mb-6' : 'mb-8')}>
             <CategoryPill
               label="Todos"
               href={buildStorefrontHref(pathname, {
@@ -159,7 +169,7 @@ export function CatalogSection({
           />
         ) : (
           <>
-            <div className={cn('grid gap-5 sm:gap-6', gridClass)}>
+            <div className={cn('grid', isSmallCatalog ? 'gap-4 sm:gap-5' : 'gap-5 sm:gap-6', gridClass)}>
               {products.map((product) => (
                 <ProductCard
                   key={product.id}

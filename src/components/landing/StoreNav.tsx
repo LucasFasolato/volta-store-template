@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { ArrowUpRight } from 'lucide-react'
 import { StoreNavCartButton } from '@/components/landing/StoreNavCartButton'
+import type { StorefrontDensityMode } from '@/components/landing/storefront-density'
 import { cn } from '@/lib/utils'
 import type { Store } from '@/types/store'
 
@@ -8,9 +9,11 @@ type StoreNavProps = {
   store: Store
   containerClass: string
   productCount: number
+  densityMode: StorefrontDensityMode
 }
 
-export function StoreNav({ store, containerClass, productCount }: StoreNavProps) {
+export function StoreNav({ store, containerClass, productCount, densityMode }: StoreNavProps) {
+  const isSmallCatalog = densityMode === 'small'
   const productLabel = `${productCount} ${productCount === 1 ? 'producto listo para pedir' : 'productos listos para pedir'}`
 
   return (
@@ -32,7 +35,8 @@ export function StoreNav({ store, containerClass, productCount }: StoreNavProps)
       >
         <div
           className={cn(
-            'mx-auto flex min-h-[4.75rem] items-center justify-between gap-4 px-4 py-3 sm:px-6',
+            'mx-auto flex items-center justify-between gap-4 px-4 sm:px-6',
+            isSmallCatalog ? 'min-h-[4.25rem] py-2.5' : 'min-h-[4.75rem] py-3',
             containerClass,
           )}
         >

@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { ArrowUpRight, Clock3, MapPin, MessageCircle, Package, Rows3, Sparkles } from 'lucide-react'
+import type { StorefrontDensityMode } from '@/components/landing/storefront-density'
 import { cn } from '@/lib/utils'
 import { sanitizePhoneNumber } from '@/lib/utils/format'
 import type { Store, StoreContent } from '@/types/store'
@@ -11,6 +12,7 @@ type HeroSectionProps = {
   productCount: number
   categoryCount: number
   featuredCount: number
+  densityMode: StorefrontDensityMode
 }
 
 export function HeroSection({
@@ -20,9 +22,11 @@ export function HeroSection({
   productCount,
   categoryCount,
   featuredCount,
+  densityMode,
 }: HeroSectionProps) {
   const whatsappHref = store.whatsapp ? `https://wa.me/${sanitizePhoneNumber(store.whatsapp)}` : '#catalogo'
   const hasImage = !!content.hero_image_url
+  const isSmallCatalog = densityMode === 'small'
   const primaryCtaLabel = productCount > 0 ? 'Explorar productos' : 'Ver catalogo'
 
   const trustChips = [
@@ -34,13 +38,15 @@ export function HeroSection({
     featuredCount > 0 ? { icon: Sparkles, label: `${featuredCount} destacados` } : null,
     store.address ? { icon: MapPin, label: store.address } : null,
     store.hours ? { icon: Clock3, label: store.hours } : null,
-  ].filter(Boolean) as Array<{ icon: React.ElementType; label: string }>
+  ]
+    .filter(Boolean)
+    .slice(0, isSmallCatalog ? 3 : 5) as Array<{ icon: React.ElementType; label: string }>
 
   return (
     <section
       className={cn('relative flex flex-col overflow-hidden', hasImage ? 'justify-end' : 'justify-center')}
       style={{
-        minHeight: 'var(--store-hero-height)',
+        minHeight: isSmallCatalog ? 'clamp(22rem, 68vh, 32rem)' : 'var(--store-hero-height)',
         background: hasImage
           ? undefined
           : [
@@ -104,10 +110,16 @@ export function HeroSection({
         className={cn(
           'relative z-10 mx-auto w-full px-4 sm:px-6',
           containerClass,
-          hasImage ? 'pb-14 pt-20 sm:pb-20 sm:pt-24' : 'py-20 sm:py-28',
+          hasImage
+            ? isSmallCatalog
+              ? 'pb-10 pt-16 sm:pb-12 sm:pt-20'
+              : 'pb-14 pt-20 sm:pb-20 sm:pt-24'
+            : isSmallCatalog
+              ? 'py-14 sm:py-16'
+              : 'py-20 sm:py-28',
         )}
       >
-        <div className="max-w-4xl">
+        <div className={cn('max-w-4xl', isSmallCatalog ? 'max-w-3xl' : '')}>
           {content.support_text ? (
             <span
               className="inline-flex rounded-full px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.2em]"
@@ -126,10 +138,10 @@ export function HeroSection({
             className="store-display max-w-3xl text-balance"
             style={{
               color: 'var(--store-text)',
-              fontSize: 'clamp(2.6rem, 6.5vw, 6rem)',
+              fontSize: isSmallCatalog ? 'clamp(2.2rem, 6vw, 4.4rem)' : 'clamp(2.6rem, 6.5vw, 6rem)',
               lineHeight: '1.06',
               letterSpacing: '-0.03em',
-              marginTop: content.support_text ? '1.25rem' : undefined,
+              marginTop: content.support_text ? (isSmallCatalog ? '1rem' : '1.25rem') : undefined,
             }}
           >
             {content.hero_title}
@@ -139,13 +151,13 @@ export function HeroSection({
             className="mt-5 max-w-2xl leading-8"
             style={{
               color: 'var(--store-soft-text)',
-              fontSize: 'calc(1.05rem * var(--store-body-scale))',
+              fontSize: isSmallCatalog ? 'calc(0.98rem * var(--store-body-scale))' : 'calc(1.05rem * var(--store-body-scale))',
             }}
           >
             {content.hero_subtitle}
           </p>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <div className={cn('flex flex-col gap-3 sm:flex-row sm:flex-wrap', isSmallCatalog ? 'mt-6' : 'mt-8')}>
             <a
               href="#catalogo"
               className="store-button inline-flex items-center justify-center px-8 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 hover:opacity-95"
@@ -194,14 +206,14 @@ export function HeroSection({
             )}
           </div>
 
-          <p className="mt-4 max-w-2xl text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+          <p className={cn('max-w-2xl text-sm leading-6', isSmallCatalog ? 'mt-3' : 'mt-4')} style={{ color: 'var(--store-soft-text)' }}>
             {store.whatsapp
               ? 'Explora el catalogo, agrega al carrito y envia el pedido por WhatsApp cuando estes listo.'
               : 'Explora el catalogo y usa los datos visibles del negocio para consultar disponibilidad.'}
           </p>
 
           {trustChips.length > 0 ? (
-            <div className="mt-7 flex flex-wrap gap-2">
+            <div className={cn('flex flex-wrap gap-2', isSmallCatalog ? 'mt-5' : 'mt-7')}>
               {trustChips.map((chip) => {
                 const Icon = chip.icon
                 return (
