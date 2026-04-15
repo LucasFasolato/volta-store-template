@@ -98,8 +98,8 @@ export function CatalogSection({
             }
             description={
               activeCategoryName
-                ? 'Probá quitando el filtro o agregá productos a esta categoría desde el admin.'
-                : 'Cuando cargues productos activos aparecerán aquí con portada, precio y acceso rápido al pedido.'
+                ? COPY.product.noProductsInCategoryDescription
+                : COPY.product.noProductsDescription
             }
             action={
               activeCategory ? (
@@ -113,7 +113,7 @@ export function CatalogSection({
                     color: 'var(--store-primary-contrast)',
                   }}
                 >
-                  Ver todos los productos
+                  Volver al catalogo
                 </button>
               ) : undefined
             }

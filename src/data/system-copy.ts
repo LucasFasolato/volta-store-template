@@ -14,15 +14,22 @@ export const COPY = {
     checkout: 'Pedir por WhatsApp',
     continueShopping: 'Seguir comprando',
     remove: 'Eliminar',
+    checkoutUnavailable: 'Los pedidos por WhatsApp no estan disponibles en este momento.',
     item: 'articulo',
     items: 'articulos',
   },
   product: {
     viewProduct: 'Ver producto',
     featured: 'Productos destacados',
-    catalog: 'Catálogo',
+    catalog: 'Catalogo',
     allProducts: 'Todos los productos',
-    noProducts: 'No hay productos disponibles por ahora.',
+    noProducts: 'Estamos preparando el catalogo.',
+    noProductsDescription:
+      'Pronto vas a encontrar productos, precios y opciones para comprar por WhatsApp.',
+    noProductsInCategoryDescription:
+      'Prueba explorando otras secciones o vuelve al catalogo completo.',
+    modalFallbackDescription:
+      'Agregalo al carrito y seguimos la compra por WhatsApp con disponibilidad, opciones y entrega.',
     backToStore: 'Volver a la tienda',
     shareProduct: 'Compartir producto',
   },

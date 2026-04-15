@@ -238,7 +238,7 @@ export function CartSheet({ whatsapp, storeName }: CartSheetProps) {
 
                 {!whatsapp ? (
                   <p className="mt-3 text-center text-xs" style={{ color: 'var(--store-muted-text)' }}>
-                    Configura un numero de WhatsApp en el admin para habilitar pedidos.
+                    {COPY.cart.checkoutUnavailable}
                   </p>
                 ) : null}
 

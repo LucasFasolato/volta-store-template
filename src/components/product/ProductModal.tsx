@@ -263,7 +263,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                   </p>
                 ) : (
                   <p className="mt-5 text-sm leading-7" style={{ color: 'var(--store-muted-text)' }}>
-                    Este producto se gestiona por pedido directo. Agregalo al carrito y continuá la conversación por WhatsApp.
+                    {COPY.product.modalFallbackDescription}
                   </p>
                 )}
 
