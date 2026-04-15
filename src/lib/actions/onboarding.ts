@@ -204,7 +204,6 @@ export async function completeOnboarding(data: {
 
   revalidatePath('/admin')
   revalidatePath('/onboarding')
-  revalidatePath('/onboarding/success')
   revalidatePath(`/tienda/${store.slug}`)
 
   return { success: true }

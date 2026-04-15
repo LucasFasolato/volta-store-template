@@ -6,8 +6,8 @@ import { requireAuthenticatedUser } from '@/lib/server/store-context'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
-  title: 'Configura tu tienda - Volta Store',
-  description: 'Configura tu tienda en menos de un minuto',
+  title: 'Empieza a activar tu tienda - Volta Store',
+  description: 'Completa lo esencial y entra al panel de activacion de tu tienda.',
 }
 
 export default async function OnboardingPage() {

@@ -135,9 +135,9 @@ function buildStateCopy(plan: StorePublicationSnapshot) {
   }
 
   return {
-    stateLabel: 'En borrador',
-    headline: 'Todavia falta cerrar lo minimo para publicar con confianza',
-    summary: 'Completa lo esencial primero. Cuando la base este lista, vas a poder publicarla sin improvisar.',
+    stateLabel: 'En activacion',
+    headline: 'Tu tienda ya esta adentro. Ahora falta cerrar la base para publicar',
+    summary: 'Ya resolviste el ingreso inicial. Sigue este orden para completar lo esencial, ver la preview y dejarla lista para vender.',
   }
 }
 

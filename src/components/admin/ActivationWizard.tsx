@@ -64,13 +64,13 @@ function WizardHeader({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-500 dark:text-emerald-300/80">
-            Volta Admin
+            Activacion guiada
           </p>
           <h1 className="mt-1.5 font-heading text-[1.5rem] font-semibold tracking-[-0.04em] text-foreground sm:text-[1.75rem]">
-            Termina de activar tu tienda
+            Sigue este camino para poder publicar
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Completa estos pasos y vas a destrabar una tienda publicable, clara y lista para vender por WhatsApp.
+            Cada paso resuelve una decision concreta y te acerca a una tienda clara, publicable y lista para vender por WhatsApp.
           </p>
         </div>
         <div className="shrink-0 text-right">

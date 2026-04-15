@@ -4,6 +4,7 @@ import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
 import { ActivationWizard } from '@/components/admin/ActivationWizard'
 import { PublishGate } from '@/components/admin/PublishGate'
 import { StoreDashboard } from '@/components/admin/StoreDashboard'
+import { StoreReadinessSummary } from '@/components/admin/StoreReadinessSummary'
 
 export default async function AdminPage() {
   const { storeData } = await requireAuthenticatedAdminStore()
@@ -17,7 +18,7 @@ export default async function AdminPage() {
   const activeProducts = products.filter((product) => product.is_active)
   const activeProductCount = activeProducts.length
 
-  if (plan.state !== 'draft') {
+  if (plan.isPublished) {
     const firstProduct = activeProducts[0] ?? null
 
     return (
@@ -36,13 +37,16 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-4 p-3.5 sm:p-5 lg:space-y-5 lg:p-6">
+      <StoreReadinessSummary plan={plan} />
       <PublishGate plan={plan} />
-      <ActivationWizard
-        steps={steps}
-        storeData={storeData}
-        categories={categories}
-        activeProductCount={activeProductCount}
-      />
+      {plan.missingRequiredCount > 0 ? (
+        <ActivationWizard
+          steps={steps}
+          storeData={storeData}
+          categories={categories}
+          activeProductCount={activeProductCount}
+        />
+      ) : null}
     </div>
   )
 }

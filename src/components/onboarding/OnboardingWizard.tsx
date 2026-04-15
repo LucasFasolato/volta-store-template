@@ -84,7 +84,7 @@ export function OnboardingWizard({ initialName }: { initialName: string }) {
       return
     }
 
-    router.push('/onboarding/success')
+    router.replace('/admin')
   }
 
   const inputClass = (error: boolean) =>
@@ -197,7 +197,7 @@ export function OnboardingWizard({ initialName }: { initialName: string }) {
                       <StepCopy
                         isDark={isDark}
                         title={<>Como se llama<br />tu negocio?</>}
-                        body="Solo necesitamos lo esencial para crearte la tienda y hacerte entrar rapido al producto."
+                        body="Solo necesitamos lo esencial para entrar rapido al panel de activacion y mostrarte que falta para vender."
                       />
                     }
                   >
@@ -230,7 +230,7 @@ export function OnboardingWizard({ initialName }: { initialName: string }) {
                       <StepCopy
                         isDark={isDark}
                         title={<>A donde te van<br />a escribir?</>}
-                        body="Tu WhatsApp es la base del flujo de venta. Apenas lo cargues, te llevamos a terminar de activar la tienda."
+                        body="Tu WhatsApp es la base del flujo de venta. Apenas lo cargues, te llevamos al admin para seguir activando la tienda."
                       />
                     }
                   >
@@ -252,7 +252,7 @@ export function OnboardingWizard({ initialName }: { initialName: string }) {
                       {waError || submitError ? (
                         <p className="text-xs text-red-400">{waError || submitError}</p>
                       ) : (
-                        <p className={hintClass}>Despues vas a terminar portada, producto y estilo dentro del admin.</p>
+                        <p className={hintClass}>Despues vas a ver que ya quedo listo, que falta y cual es el siguiente paso para publicar.</p>
                       )}
                     </div>
                   </TwoCol>
@@ -295,7 +295,7 @@ export function OnboardingWizard({ initialName }: { initialName: string }) {
                   isSubmitting ? 'cursor-not-allowed opacity-60' : '',
                 )}
               >
-                {isSubmitting ? 'Creando tu tienda...' : 'Crear tienda'}
+                {isSubmitting ? 'Entrando al panel...' : 'Entrar al panel de activacion'}
                 {!isSubmitting ? <ArrowRight className="size-4" /> : null}
               </button>
             )}
