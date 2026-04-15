@@ -1,7 +1,8 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Check, ShoppingBag } from 'lucide-react'
 import { COPY } from '@/data/system-copy'
 import { useCartStore } from '@/lib/stores/cart'
@@ -11,11 +12,12 @@ import type { ProductWithImages, StoreTheme } from '@/types/store'
 
 type ProductCardProps = {
   product: ProductWithImages
+  productHref: string
   theme: StoreTheme
-  onClick: () => void
 }
 
-export function ProductCard({ product, theme, onClick }: ProductCardProps) {
+export function ProductCard({ product, productHref, theme }: ProductCardProps) {
+  const router = useRouter()
   const addItem = useCartStore((state) => state.addItem)
   const coverImage = product.images?.[0]
   const hasOptions = (product.options?.length ?? 0) > 0
@@ -27,10 +29,20 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
       ? Math.round((1 - product.price / product.compare_price) * 100)
       : null
 
+  useEffect(() => {
+    return () => {
+      if (addedTimer.current) clearTimeout(addedTimer.current)
+    }
+  }, [])
+
+  function openProduct() {
+    router.push(productHref, { scroll: false })
+  }
+
   function handleAddToCart(event: React.MouseEvent<HTMLButtonElement>) {
     event.stopPropagation()
     if (hasOptions) {
-      onClick()
+      openProduct()
       return
     }
 
@@ -50,7 +62,7 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
   function handleKeyDown(event: React.KeyboardEvent<HTMLElement>) {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      onClick()
+      openProduct()
     }
   }
 
@@ -180,7 +192,7 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
       <article
         role="button"
         tabIndex={0}
-        onClick={onClick}
+        onClick={openProduct}
         onKeyDown={handleKeyDown}
         className="store-card group flex h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         style={{ outlineColor: 'var(--store-primary)' }}
@@ -239,7 +251,7 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
       <article
         role="button"
         tabIndex={0}
-        onClick={onClick}
+        onClick={openProduct}
         onKeyDown={handleKeyDown}
         className="store-card group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         style={{ outlineColor: 'var(--store-primary)' }}
@@ -314,7 +326,7 @@ export function ProductCard({ product, theme, onClick }: ProductCardProps) {
     <article
       role="button"
       tabIndex={0}
-      onClick={onClick}
+      onClick={openProduct}
       onKeyDown={handleKeyDown}
       className="store-card group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1.5 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
       style={{ outlineColor: 'var(--store-primary)' }}

@@ -1,9 +1,6 @@
-'use client'
-
-import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
-import { ArrowUpRight, ShoppingBag } from 'lucide-react'
-import { selectCartItemCount, useCartStore } from '@/lib/stores/cart'
+import { ArrowUpRight } from 'lucide-react'
+import { StoreNavCartButton } from '@/components/landing/StoreNavCartButton'
 import { cn } from '@/lib/utils'
 import type { Store } from '@/types/store'
 
@@ -13,9 +10,6 @@ type StoreNavProps = {
 }
 
 export function StoreNav({ store, containerClass }: StoreNavProps) {
-  const count = useCartStore(selectCartItemCount)
-  const toggleCart = useCartStore((state) => state.toggleCart)
-
   return (
     <>
       <a
@@ -33,8 +27,12 @@ export function StoreNav({ store, containerClass }: StoreNavProps) {
           background: 'var(--store-nav-bg)',
         }}
       >
-        <div className={cn('mx-auto flex min-h-[4.75rem] items-center justify-between gap-4 px-4 py-3 sm:px-6', containerClass)}>
-          {/* Brand */}
+        <div
+          className={cn(
+            'mx-auto flex min-h-[4.75rem] items-center justify-between gap-4 px-4 py-3 sm:px-6',
+            containerClass,
+          )}
+        >
           <div className="flex min-w-0 items-center gap-3">
             {store.logo_url ? (
               <div
@@ -71,12 +69,11 @@ export function StoreNav({ store, containerClass }: StoreNavProps) {
                 className="mt-0.5 hidden truncate text-[10px] font-semibold uppercase tracking-[0.2em] sm:block"
                 style={{ color: 'var(--store-muted-text)' }}
               >
-                Catálogo y checkout por WhatsApp
+                Catalogo y checkout por WhatsApp
               </p>
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
             <a
               href="#catalogo"
@@ -87,43 +84,11 @@ export function StoreNav({ store, containerClass }: StoreNavProps) {
                 backgroundColor: 'color-mix(in srgb, var(--store-surface) 82%, transparent)',
               }}
             >
-              Ver catálogo
+              Ver catalogo
               <ArrowUpRight className="size-3.5" />
             </a>
 
-            <button
-              type="button"
-              onClick={toggleCart}
-              className="store-button relative inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 active:translate-y-0"
-              style={{
-                background:
-                  'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
-                color: 'var(--store-primary-contrast)',
-                boxShadow: '0 14px 34px color-mix(in srgb, var(--store-primary) 22%, transparent)',
-              }}
-              aria-label="Ver carrito"
-            >
-              <ShoppingBag className="size-4" />
-              <span className="hidden sm:block">Carrito</span>
-              <AnimatePresence mode="popLayout" initial={false}>
-                {count > 0 ? (
-                  <motion.span
-                    key={count}
-                    initial={{ scale: 0.4, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.4, opacity: 0 }}
-                    transition={{ type: 'spring', stiffness: 560, damping: 22 }}
-                    className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1 py-0.5 text-[10px] font-bold"
-                    style={{
-                      backgroundColor: 'color-mix(in srgb, var(--store-primary-contrast) 86%, transparent)',
-                      color: 'var(--store-primary)',
-                    }}
-                  >
-                    {count}
-                  </motion.span>
-                ) : null}
-              </AnimatePresence>
-            </button>
+            <StoreNavCartButton />
           </div>
         </div>
       </nav>

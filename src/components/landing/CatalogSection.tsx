@@ -1,14 +1,16 @@
-'use client'
-
+import Link from 'next/link'
 import { ChevronLeft, ChevronRight, SearchX } from 'lucide-react'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ProductCard } from '@/components/product/ProductCard'
 import { COPY } from '@/data/system-copy'
+import {
+  PAGE_SIZE_OPTIONS,
+  buildStorefrontHref,
+  type StorefrontRouteState,
+} from '@/lib/storefront/view'
 import { cn } from '@/lib/utils'
 import { GRID_COLS_CLASS } from '@/lib/utils/theme'
 import type { Category, ProductWithImages, StoreTheme } from '@/types/store'
-
-const PAGE_SIZE_OPTIONS = [8, 12, 24] as const
 
 type CatalogSectionProps = {
   products: ProductWithImages[]
@@ -16,14 +18,9 @@ type CatalogSectionProps = {
   categories: Category[]
   theme: StoreTheme
   containerClass: string
-  activeCategory: string | null
-  onCategoryChange: (slug: string | null) => void
-  onSelectProduct: (product: ProductWithImages) => void
-  page: number
-  pageSize: number
+  pathname: string
+  routeState: StorefrontRouteState
   totalPages: number
-  onPageChange: (page: number) => void
-  onPageSizeChange: (size: number) => void
 }
 
 export function CatalogSection({
@@ -32,17 +29,12 @@ export function CatalogSection({
   categories,
   theme,
   containerClass,
-  activeCategory,
-  onCategoryChange,
-  onSelectProduct,
-  page,
-  pageSize,
+  pathname,
+  routeState,
   totalPages,
-  onPageChange,
-  onPageSizeChange,
 }: CatalogSectionProps) {
   const gridClass = GRID_COLS_CLASS[theme.grid_columns] ?? GRID_COLS_CLASS[2]
-  const activeCategoryName = categories.find((category) => category.slug === activeCategory)?.name
+  const activeCategoryName = categories.find((category) => category.slug === routeState.activeCategory)?.name
 
   return (
     <section id="catalogo" className="py-[var(--store-space-section)]">
@@ -76,13 +68,25 @@ export function CatalogSection({
 
         {categories.length > 0 ? (
           <div className="-mx-4 mb-8 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
-            <CategoryPill label="Todos" active={!activeCategory} onClick={() => onCategoryChange(null)} />
+            <CategoryPill
+              label="Todos"
+              href={buildStorefrontHref(pathname, {
+                category: null,
+                page: 1,
+                pageSize: routeState.pageSize,
+              })}
+              active={!routeState.activeCategory}
+            />
             {categories.map((category) => (
               <CategoryPill
                 key={category.id}
                 label={category.name}
-                active={activeCategory === category.slug}
-                onClick={() => onCategoryChange(category.slug)}
+                href={buildStorefrontHref(pathname, {
+                  category: category.slug,
+                  page: 1,
+                  pageSize: routeState.pageSize,
+                })}
+                active={routeState.activeCategory === category.slug}
               />
             ))}
           </div>
@@ -102,10 +106,10 @@ export function CatalogSection({
                 : COPY.product.noProductsDescription
             }
             action={
-              activeCategory ? (
-                <button
-                  type="button"
-                  onClick={() => onCategoryChange(null)}
+              routeState.activeCategory ? (
+                <Link
+                  href={buildStorefrontHref(pathname, { pageSize: routeState.pageSize })}
+                  scroll={false}
                   className="store-button px-5 py-3 text-sm font-semibold transition duration-200 hover:-translate-y-0.5"
                   style={{
                     background:
@@ -114,7 +118,7 @@ export function CatalogSection({
                   }}
                 >
                   Volver al catalogo
-                </button>
+                </Link>
               ) : undefined
             }
             className="border-0"
@@ -127,85 +131,123 @@ export function CatalogSection({
                 <ProductCard
                   key={product.id}
                   product={product}
+                  productHref={buildStorefrontHref(pathname, {
+                    category: routeState.activeCategory,
+                    page: routeState.page,
+                    pageSize: routeState.pageSize,
+                    product: product.slug,
+                  })}
                   theme={theme}
-                  onClick={() => onSelectProduct(product)}
                 />
               ))}
             </div>
 
-            {/* Pagination toolbar */}
             {(totalPages > 1 || totalFiltered > PAGE_SIZE_OPTIONS[0]) ? (
               <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-                {/* Page size selector */}
                 <div className="flex items-center gap-2">
-                  <span
-                    className="text-[12px] font-medium"
-                    style={{ color: 'var(--store-muted-text)' }}
-                  >
+                  <span className="text-[12px] font-medium" style={{ color: 'var(--store-muted-text)' }}>
                     Mostrar
                   </span>
                   <div className="flex gap-1.5">
                     {PAGE_SIZE_OPTIONS.map((size) => (
-                      <button
+                      <Link
                         key={size}
-                        type="button"
-                        onClick={() => onPageSizeChange(size)}
-                        className="min-w-[2.5rem] px-3 py-1.5 text-[12px] font-semibold transition duration-200 active:scale-95"
+                        href={buildStorefrontHref(pathname, {
+                          category: routeState.activeCategory,
+                          page: 1,
+                          pageSize: size,
+                        })}
+                        scroll={false}
+                        className="min-w-[2.5rem] px-3 py-1.5 text-center text-[12px] font-semibold transition duration-200 active:scale-95"
                         style={{
                           borderRadius: 'var(--store-button-radius)',
-                          ...(pageSize === size
+                          ...(routeState.pageSize === size
                             ? {
                                 background:
                                   'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 72%, black 28%))',
                                 color: 'var(--store-primary-contrast)',
                               }
                             : {
-                                backgroundColor: 'color-mix(in srgb, var(--store-surface) 82%, transparent)',
+                                backgroundColor:
+                                  'color-mix(in srgb, var(--store-surface) 82%, transparent)',
                                 color: 'var(--store-soft-text)',
                                 border: '1px solid var(--store-card-border)',
                               }),
                         }}
                       >
                         {size}
-                      </button>
+                      </Link>
                     ))}
                   </div>
                 </div>
 
-                {/* Page navigation */}
                 {totalPages > 1 ? (
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onPageChange(page - 1)}
-                      disabled={page === 1}
-                      className="flex size-9 items-center justify-center rounded-full transition duration-200 disabled:opacity-30 hover:not-disabled:-translate-y-0.5 active:scale-95"
-                      style={{
-                        backgroundColor: 'color-mix(in srgb, var(--store-surface) 82%, transparent)',
-                        color: 'var(--store-text)',
-                        border: '1px solid var(--store-card-border)',
-                      }}
-                      aria-label="Página anterior"
-                    >
-                      <ChevronLeft className="size-4" />
-                    </button>
+                    {routeState.page > 1 ? (
+                      <Link
+                        href={buildStorefrontHref(pathname, {
+                          category: routeState.activeCategory,
+                          page: routeState.page - 1,
+                          pageSize: routeState.pageSize,
+                        })}
+                        scroll={false}
+                        className="flex size-9 items-center justify-center rounded-full transition duration-200 hover:-translate-y-0.5 active:scale-95"
+                        style={{
+                          backgroundColor: 'color-mix(in srgb, var(--store-surface) 82%, transparent)',
+                          color: 'var(--store-text)',
+                          border: '1px solid var(--store-card-border)',
+                        }}
+                        aria-label="Pagina anterior"
+                      >
+                        <ChevronLeft className="size-4" />
+                      </Link>
+                    ) : (
+                      <span
+                        className="flex size-9 items-center justify-center rounded-full opacity-30"
+                        style={{
+                          backgroundColor: 'color-mix(in srgb, var(--store-surface) 82%, transparent)',
+                          color: 'var(--store-text)',
+                          border: '1px solid var(--store-card-border)',
+                        }}
+                        aria-hidden="true"
+                      >
+                        <ChevronLeft className="size-4" />
+                      </span>
+                    )}
 
-                    <PageNumbers page={page} totalPages={totalPages} onPageChange={onPageChange} />
+                    <PageNumbers pathname={pathname} routeState={routeState} totalPages={totalPages} />
 
-                    <button
-                      type="button"
-                      onClick={() => onPageChange(page + 1)}
-                      disabled={page === totalPages}
-                      className="flex size-9 items-center justify-center rounded-full transition duration-200 disabled:opacity-30 hover:not-disabled:-translate-y-0.5 active:scale-95"
-                      style={{
-                        backgroundColor: 'color-mix(in srgb, var(--store-surface) 82%, transparent)',
-                        color: 'var(--store-text)',
-                        border: '1px solid var(--store-card-border)',
-                      }}
-                      aria-label="Página siguiente"
-                    >
-                      <ChevronRight className="size-4" />
-                    </button>
+                    {routeState.page < totalPages ? (
+                      <Link
+                        href={buildStorefrontHref(pathname, {
+                          category: routeState.activeCategory,
+                          page: routeState.page + 1,
+                          pageSize: routeState.pageSize,
+                        })}
+                        scroll={false}
+                        className="flex size-9 items-center justify-center rounded-full transition duration-200 hover:-translate-y-0.5 active:scale-95"
+                        style={{
+                          backgroundColor: 'color-mix(in srgb, var(--store-surface) 82%, transparent)',
+                          color: 'var(--store-text)',
+                          border: '1px solid var(--store-card-border)',
+                        }}
+                        aria-label="Pagina siguiente"
+                      >
+                        <ChevronRight className="size-4" />
+                      </Link>
+                    ) : (
+                      <span
+                        className="flex size-9 items-center justify-center rounded-full opacity-30"
+                        style={{
+                          backgroundColor: 'color-mix(in srgb, var(--store-surface) 82%, transparent)',
+                          color: 'var(--store-text)',
+                          border: '1px solid var(--store-card-border)',
+                        }}
+                        aria-hidden="true"
+                      >
+                        <ChevronRight className="size-4" />
+                      </span>
+                    )}
                   </div>
                 ) : null}
               </div>
@@ -218,21 +260,24 @@ export function CatalogSection({
 }
 
 function PageNumbers({
-  page,
+  pathname,
+  routeState,
   totalPages,
-  onPageChange,
 }: {
-  page: number
+  pathname: string
+  routeState: StorefrontRouteState
   totalPages: number
-  onPageChange: (p: number) => void
 }) {
-  // Build visible page list: always first + last, current ± 1, with ellipsis
-  const pages: (number | 'ellipsis')[] = []
+  const pages: Array<number | 'ellipsis'> = []
   const delta = 1
 
-  for (let i = 1; i <= totalPages; i++) {
-    if (i === 1 || i === totalPages || (i >= page - delta && i <= page + delta)) {
-      pages.push(i)
+  for (let index = 1; index <= totalPages; index += 1) {
+    if (
+      index === 1 ||
+      index === totalPages ||
+      (index >= routeState.page - delta && index <= routeState.page + delta)
+    ) {
+      pages.push(index)
     } else if (pages[pages.length - 1] !== 'ellipsis') {
       pages.push('ellipsis')
     }
@@ -247,16 +292,20 @@ function PageNumbers({
             className="px-1 text-[13px]"
             style={{ color: 'var(--store-muted-text)' }}
           >
-            …
+            ...
           </span>
         ) : (
-          <button
+          <Link
             key={item}
-            type="button"
-            onClick={() => onPageChange(item)}
+            href={buildStorefrontHref(pathname, {
+              category: routeState.activeCategory,
+              page: item,
+              pageSize: routeState.pageSize,
+            })}
+            scroll={false}
             className="flex size-9 items-center justify-center rounded-full text-[13px] font-semibold transition duration-200 active:scale-95"
             style={
-              item === page
+              item === routeState.page
                 ? {
                     background:
                       'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 72%, black 28%))',
@@ -268,11 +317,11 @@ function PageNumbers({
                     color: 'var(--store-soft-text)',
                   }
             }
-            aria-label={`Ir a página ${item}`}
-            aria-current={item === page ? 'page' : undefined}
+            aria-label={`Ir a pagina ${item}`}
+            aria-current={item === routeState.page ? 'page' : undefined}
           >
             {item}
-          </button>
+          </Link>
         ),
       )}
     </div>
@@ -281,17 +330,17 @@ function PageNumbers({
 
 function CategoryPill({
   label,
+  href,
   active,
-  onClick,
 }: {
   label: string
+  href: string
   active: boolean
-  onClick: () => void
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
+    <Link
+      href={href}
+      scroll={false}
       className="whitespace-nowrap px-4 py-2.5 text-sm font-medium transition duration-200 active:scale-[0.97] hover:-translate-y-0.5"
       style={
         active
@@ -311,6 +360,6 @@ function CategoryPill({
       }
     >
       {label}
-    </button>
+    </Link>
   )
 }

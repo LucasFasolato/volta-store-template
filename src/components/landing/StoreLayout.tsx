@@ -1,8 +1,4 @@
-'use client'
-
-import { useEffect, useMemo, useState } from 'react'
-import { CartFloatingBar } from '@/components/cart/CartFloatingBar'
-import { CartSheet } from '@/components/cart/CartSheet'
+import { StoreInteractiveShell } from '@/components/landing/StoreInteractiveShell'
 import { CatalogSection } from '@/components/landing/CatalogSection'
 import { FeaturedSection } from '@/components/landing/FeaturedSection'
 import { HeroSection } from '@/components/landing/HeroSection'
@@ -10,86 +6,31 @@ import { HowItWorksSection } from '@/components/landing/HowItWorksSection'
 import { StoreFooter } from '@/components/landing/StoreFooter'
 import { StoreNav } from '@/components/landing/StoreNav'
 import { TrustBar } from '@/components/landing/TrustBar'
-import { ProductModal } from '@/components/product/ProductModal'
-import { useCartStore } from '@/lib/stores/cart'
+import { buildStorefrontHref, type StorefrontViewModel } from '@/lib/storefront/view'
 import { buildThemeVars, CONTAINER_CLASS } from '@/lib/utils/theme'
-import type { ProductWithImages, StorePublicData } from '@/types/store'
-
-const DEFAULT_PAGE_SIZE = 12
+import type { StorePublicData } from '@/types/store'
 
 type StoreLayoutProps = {
   data: StorePublicData
-  activeCategory?: string
-  activeProduct?: string
+  pathname: string
+  view: StorefrontViewModel
 }
 
-export function StoreLayout({
-  data,
-  activeCategory,
-  activeProduct,
-}: StoreLayoutProps) {
-  const { store, theme, layout, content, categories, products } = data
-  const [selectedProduct, setSelectedProduct] = useState<ProductWithImages | null>(
-    () => products.find((item) => item.slug === activeProduct) ?? null,
-  )
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(activeCategory ?? null)
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
-  const [systemMode, setSystemMode] = useState<'light' | 'dark'>(
-    () =>
-      typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light',
-  )
+export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
+  const { store, theme, layout, content, categories } = data
   const containerClass = CONTAINER_CLASS[theme.container_width] ?? CONTAINER_CLASS.lg
-  const setStoreSlug = useCartStore((state) => state.setStoreSlug)
-
-  useEffect(() => {
-    setStoreSlug(store.slug)
-  }, [store.slug, setStoreSlug])
-
-  useEffect(() => {
-    if (theme.visual_mode !== 'auto') return
-
-    const media = window.matchMedia('(prefers-color-scheme: dark)')
-    const sync = () => setSystemMode(media.matches ? 'dark' : 'light')
-    media.addEventListener('change', sync)
-    return () => media.removeEventListener('change', sync)
-  }, [theme.visual_mode])
-
-  const resolvedMode: 'light' | 'dark' =
-    theme.visual_mode === 'auto' ? systemMode : theme.visual_mode === 'dark' ? 'dark' : 'light'
-
-  const themeVars = useMemo(() => buildThemeVars(theme, resolvedMode), [resolvedMode, theme])
-
-  const featuredProducts = products.filter((product) => product.is_featured)
-
-  const filteredProducts = useMemo(
-    () =>
-      selectedCategory
-        ? products.filter((product) => {
-            const category = categories.find((item) => item.slug === selectedCategory)
-            return category ? product.category_id === category.id : true
-          })
-        : products,
-    [products, categories, selectedCategory],
-  )
-
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize))
-  const paginatedProducts = filteredProducts.slice((page - 1) * pageSize, page * pageSize)
-
-  function handleCategoryChange(slug: string | null) {
-    setSelectedCategory(slug)
-    setPage(1)
-  }
-
-  function handlePageSizeChange(size: number) {
-    setPageSize(size)
-    setPage(1)
-  }
+  const resolvedMode: 'light' | 'dark' = theme.visual_mode === 'dark' ? 'dark' : 'light'
+  const themeVars = buildThemeVars(theme, resolvedMode)
+  const closeModalHref = buildStorefrontHref(pathname, {
+    category: view.activeCategory,
+    page: view.page,
+    pageSize: view.pageSize,
+  })
+  const storeRootId = `store-shell-${store.slug}`
 
   return (
     <div
+      id={storeRootId}
       className="store-shell store-body"
       data-store-mode={theme.visual_mode}
       style={{
@@ -117,30 +58,26 @@ export function StoreLayout({
 
         <TrustBar store={store} content={content} />
 
-        {layout.show_featured && featuredProducts.length > 0 ? (
+        {layout.show_featured && view.featuredProducts.length > 0 ? (
           <FeaturedSection
-            products={featuredProducts}
+            products={view.featuredProducts}
+            pathname={pathname}
+            routeState={view}
             theme={theme}
             containerClass={containerClass}
-            onSelectProduct={setSelectedProduct}
           />
         ) : null}
 
         {layout.show_catalog ? (
           <CatalogSection
-            products={paginatedProducts}
-            totalFiltered={filteredProducts.length}
+            products={view.paginatedProducts}
+            totalFiltered={view.filteredProducts.length}
             categories={layout.show_categories ? categories : []}
             theme={theme}
             containerClass={containerClass}
-            activeCategory={selectedCategory}
-            onCategoryChange={handleCategoryChange}
-            onSelectProduct={setSelectedProduct}
-            page={page}
-            pageSize={pageSize}
-            totalPages={totalPages}
-            onPageChange={setPage}
-            onPageSizeChange={handlePageSizeChange}
+            pathname={pathname}
+            routeState={view}
+            totalPages={view.totalPages}
           />
         ) : null}
 
@@ -149,12 +86,15 @@ export function StoreLayout({
 
       {layout.show_footer ? <StoreFooter store={store} containerClass={containerClass} /> : null}
 
-      {selectedProduct ? (
-        <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
-      ) : null}
-
-      <CartSheet whatsapp={store.whatsapp} storeName={store.name} />
-      <CartFloatingBar />
+      <StoreInteractiveShell
+        closeModalHref={closeModalHref}
+        selectedProduct={view.selectedProduct}
+        storeName={store.name}
+        storeRootId={storeRootId}
+        storeSlug={store.slug}
+        theme={theme}
+        whatsapp={store.whatsapp}
+      />
     </div>
   )
 }
