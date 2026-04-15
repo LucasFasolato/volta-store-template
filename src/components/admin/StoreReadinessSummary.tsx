@@ -2,8 +2,8 @@ import type { ElementType } from 'react'
 import Link from 'next/link'
 import {
   ArrowRight,
-  CheckCircle2,
   CircleDashed,
+  Globe,
   Sparkles,
 } from 'lucide-react'
 import type { StoreLaunchPlan } from '@/lib/dashboard/store-launch'
@@ -46,7 +46,7 @@ export function StoreReadinessSummary({ plan }: { plan: StoreLaunchPlan }) {
                 tone.ctaClass,
               )}
             >
-              {plan.state === 'ready' ? 'Compartir tienda' : plan.nextBestAction.label}
+              {plan.isPublished ? 'Compartir tienda' : plan.nextBestAction.label}
               <ArrowRight className="size-4" />
             </Link>
           </div>
@@ -57,8 +57,8 @@ export function StoreReadinessSummary({ plan }: { plan: StoreLaunchPlan }) {
             label="Puntos esenciales"
             value={`${plan.completedRequiredCount} de ${plan.totalRequiredCount}`}
             detail={
-              plan.state === 'ready'
-                ? 'Todo lo necesario ya esta listo para compartir.'
+              plan.canPublish
+                ? 'Todo lo necesario ya esta listo para publicar.'
                 : `${plan.missingRequiredCount} punto${plan.missingRequiredCount === 1 ? '' : 's'} por completar.`
             }
           />
@@ -122,7 +122,7 @@ const readinessTone = {
     progressClass: 'bg-[linear-gradient(90deg,rgba(115,115,115,0.9),rgba(212,212,212,0.6))]',
     glowClass: 'bg-white/8',
   },
-  almost_ready: {
+  ready: {
     Icon: Sparkles,
     badgeClass: 'border-amber-300/20 bg-amber-400/10 text-amber-100',
     ctaClass:
@@ -131,8 +131,8 @@ const readinessTone = {
     progressClass: 'bg-[linear-gradient(90deg,rgba(251,191,36,0.95),rgba(251,146,60,0.7))]',
     glowClass: 'bg-amber-300/16',
   },
-  ready: {
-    Icon: CheckCircle2,
+  published: {
+    Icon: Globe,
     badgeClass: 'border-emerald-300/20 bg-emerald-400/10 text-emerald-100',
     ctaClass:
       'border-emerald-300/24 bg-[linear-gradient(135deg,rgba(46,230,166,0.22),rgba(111,243,223,0.12))] hover:bg-[linear-gradient(135deg,rgba(46,230,166,0.28),rgba(111,243,223,0.16))]',

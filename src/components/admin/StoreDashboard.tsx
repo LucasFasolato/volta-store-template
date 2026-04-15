@@ -12,6 +12,7 @@ import type { LucideIcon } from 'lucide-react'
 import type { StoreLaunchPlan } from '@/lib/dashboard/store-launch'
 import type { ProductWithImages } from '@/types/store'
 import { AdminDashboardHero } from '@/components/admin/AdminDashboardHero'
+import { PublishGate } from '@/components/admin/PublishGate'
 import { StoreSharePanel } from '@/components/admin/StoreSharePanel'
 
 export function StoreDashboard({
@@ -36,6 +37,7 @@ export function StoreDashboard({
   return (
     <div className="space-y-4 p-3.5 sm:p-5 lg:space-y-5 lg:p-6">
       <AdminDashboardHero plan={plan} storeName={storeName} />
+      <PublishGate plan={plan} />
       <StoreStatusSection
         activeProductCount={activeProductCount}
         categoryCount={categoryCount}

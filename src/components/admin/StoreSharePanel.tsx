@@ -22,6 +22,9 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
   const copyTimeoutRef = useRef<number | null>(null)
   const publicUrl = plan.publicUrl.trim() || 'https://tu-tienda.com/tienda'
   const publicPath = plan.publicPath.trim() || '#'
+  const canSimulate = !!(firstProduct && whatsapp)
+  const isPublished = plan.isPublished
+  const isReadyToPublish = plan.publication.isReadyToPublish
 
   async function handleCopy() {
     try {
@@ -75,8 +78,6 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
-  const canSimulate = !!(firstProduct && whatsapp)
-
   return (
     <section id="share-tools" className="admin-surface rounded-[24px] p-4 sm:p-6">
       <div>
@@ -85,15 +86,15 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
           La forma mas simple de verla y compartirla
         </h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          {plan.state === 'ready'
+          {isPublished
             ? 'Copia el enlace, abrela o compartela por WhatsApp.'
-            : plan.state === 'almost_ready'
-              ? 'Puedes verla y dejar listo el enlace, pero conviene cerrar el ultimo tramo.'
+            : isReadyToPublish
+              ? 'La tienda ya esta lista, pero todavia no esta publicada. Puedes revisar la vista previa y publicarla cuando quieras.'
               : 'Cuando completes estos puntos, compartirla va a ser mucho mas claro y profesional.'}
         </p>
       </div>
 
-      {plan.shareEnabled ? (
+      {isPublished ? (
         <div className="mt-4 space-y-3.5 sm:mt-5 sm:space-y-4">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -139,57 +140,54 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
             </Button>
           </div>
 
-          <div className="rounded-2xl border border-emerald-300/14 bg-emerald-400/6 p-3.5 sm:p-5">
-            <div className="flex items-start gap-2.5 sm:gap-3">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-emerald-300/20 bg-emerald-400/10 sm:size-9">
-                <Play className="size-4 text-emerald-500 dark:text-emerald-400" />
+          <SimulationCard
+            canSimulate={canSimulate}
+            firstProduct={firstProduct}
+            onSimulate={handleSimulate}
+          />
+        </div>
+      ) : isReadyToPublish ? (
+        <div className="mt-4 space-y-3.5 sm:mt-5 sm:space-y-4">
+          <div className="rounded-2xl border border-emerald-300/16 bg-emerald-400/6 p-4 sm:p-5">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-400/12 text-emerald-600 dark:text-emerald-300">
+                <Sparkles className="size-4" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">Simular una compra real</p>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                  {canSimulate
-                    ? `Vas a ver como llega un pedido de "${firstProduct?.name}" a tu WhatsApp.`
-                    : 'Agrega al menos un producto activo y configura tu WhatsApp para probar.'}
+                <p className="text-sm font-semibold text-foreground">Lista para publicar</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  Solo vos puedes ver esta URL mientras la tienda siga en borrador. Publicala para empezar a compartirla de verdad.
                 </p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleSimulate}
-                  disabled={!canSimulate}
-                  className="mt-2.5 h-8.5 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-400/15 hover:text-emerald-800 dark:text-emerald-200 dark:hover:text-white sm:mt-3 sm:h-9 sm:px-4"
-                >
-                  <MessageCircle className="size-3.5" />
-                  Probar checkout
-                </Button>
               </div>
             </div>
           </div>
 
-          {plan.state === 'almost_ready' ? (
-            <div className="rounded-xl border border-amber-300/18 bg-amber-400/8 p-4 text-sm leading-6 text-amber-700 dark:text-amber-50">
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-amber-300/12 text-amber-600 dark:text-amber-100">
-                  <Sparkles className="size-4" />
-                </div>
-                <div>
-                  <p className="font-medium text-amber-700 dark:text-amber-100">
-                    Ultimo empujon antes de compartirla con total confianza
-                  </p>
-                  <p className="mt-1 text-amber-700/80 dark:text-amber-100/80">
-                    Completa {plan.nextBestAction.title.toLowerCase()} y la tienda va a quedar
-                    mucho mas redonda.
-                  </p>
-                  <Link
-                    href={plan.nextBestAction.href}
-                    className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-amber-700 transition hover:text-amber-900 dark:text-amber-100 dark:hover:text-white"
-                  >
-                    {plan.nextBestAction.label}
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ) : null}
+          <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
+            <Button asChild size="lg" className="h-11 rounded-xl px-4 sm:h-12">
+              <Link href={publicPath} target="_blank" rel="noreferrer">
+                <ExternalLink className="size-4" />
+                Ver vista previa
+              </Link>
+            </Button>
+
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="h-11 rounded-xl border-border bg-black/[0.04] px-4 text-foreground hover:bg-black/[0.07] dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:hover:bg-white/[0.08] sm:h-12"
+            >
+              <Link href="#publish-gate">
+                <Sparkles className="size-4" />
+                Publicar ahora
+              </Link>
+            </Button>
+          </div>
+
+          <SimulationCard
+            canSimulate={canSimulate}
+            firstProduct={firstProduct}
+            onSimulate={handleSimulate}
+          />
         </div>
       ) : (
         <div className="mt-4 rounded-xl border border-border bg-black/[0.04] p-4 dark:border-white/8 dark:bg-white/4 sm:mt-5">
@@ -212,5 +210,44 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
         </div>
       )}
     </section>
+  )
+}
+
+function SimulationCard({
+  canSimulate,
+  firstProduct,
+  onSimulate,
+}: {
+  canSimulate: boolean
+  firstProduct: ProductWithImages | null
+  onSimulate: () => void
+}) {
+  return (
+    <div className="rounded-2xl border border-emerald-300/14 bg-emerald-400/6 p-3.5 sm:p-5">
+      <div className="flex items-start gap-2.5 sm:gap-3">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-emerald-300/20 bg-emerald-400/10 sm:size-9">
+          <Play className="size-4 text-emerald-500 dark:text-emerald-400" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-foreground">Simular una compra real</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            {canSimulate
+              ? `Vas a ver como llega un pedido de "${firstProduct?.name}" a tu WhatsApp.`
+              : 'Agrega al menos un producto activo y configura tu WhatsApp para probar.'}
+          </p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onSimulate}
+            disabled={!canSimulate}
+            className="mt-2.5 h-8.5 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-400/15 hover:text-emerald-800 dark:text-emerald-200 dark:hover:text-white sm:mt-3 sm:h-9 sm:px-4"
+          >
+            <MessageCircle className="size-3.5" />
+            Probar checkout
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }

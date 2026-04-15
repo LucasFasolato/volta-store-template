@@ -1,21 +1,19 @@
 import Link from 'next/link'
 import { CheckCircle2 } from 'lucide-react'
-import type { ActivationFlowStep, StoreLaunchPlan } from '@/lib/dashboard/store-launch'
+import type { ActivationFlowStep } from '@/lib/dashboard/store-launch'
 import type { AdminStoreData, Category } from '@/types/store'
 import { cn } from '@/lib/utils'
+import { WizardStepContact } from './wizard/WizardStepContact'
 import { WizardStepHero } from './wizard/WizardStepHero'
 import { WizardStepProduct } from './wizard/WizardStepProduct'
-import { WizardStepStyle } from './wizard/WizardStepStyle'
 
 export function ActivationWizard({
   steps,
-  plan,
   storeData,
   categories,
   activeProductCount,
 }: {
   steps: ActivationFlowStep[]
-  plan: StoreLaunchPlan
   storeData: AdminStoreData
   categories: Category[]
   activeProductCount: number
@@ -24,7 +22,7 @@ export function ActivationWizard({
   const activeIndex = currentIndex === -1 ? steps.length - 1 : currentIndex
 
   return (
-    <div className="space-y-2.5 p-4 sm:p-5 lg:p-6">
+    <div className="space-y-2.5">
       <WizardHeader steps={steps} activeIndex={activeIndex} />
 
       <div className="space-y-2">
@@ -43,7 +41,6 @@ export function ActivationWizard({
                 storeData={storeData}
                 categories={categories}
                 activeProductCount={activeProductCount}
-                publicPath={plan.publicPath}
               />
             )
           }
@@ -73,7 +70,7 @@ function WizardHeader({
             Termina de activar tu tienda
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Haz estos 3 pasos y la tienda ya se va a ver bien, tener algo real para vender y quedar lista para mostrarse.
+            Completa estos pasos y vas a destrabar una tienda publicable, clara y lista para vender por WhatsApp.
           </p>
         </div>
         <div className="shrink-0 text-right">
@@ -106,7 +103,7 @@ function WizardHeader({
                     : 'text-muted-foreground/40',
               )}
             >
-              {step.status === 'done' ? '✓ ' : ''}
+              {step.status === 'done' ? 'OK ' : ''}
               {step.navLabel}
             </span>
           </div>
@@ -143,7 +140,6 @@ function ActiveCard({
   storeData,
   categories,
   activeProductCount,
-  publicPath,
 }: {
   step: ActivationFlowStep
   stepNumber: number
@@ -151,7 +147,6 @@ function ActiveCard({
   storeData: AdminStoreData
   categories: Category[]
   activeProductCount: number
-  publicPath: string
 }) {
   return (
     <section className="admin-surface relative overflow-hidden rounded-2xl p-6 sm:p-8">
@@ -177,11 +172,11 @@ function ActiveCard({
         <p className="mt-2 max-w-xl text-[15px] leading-7 text-muted-foreground">{step.hint}</p>
 
         <div className="mt-7">
+          {step.id === 'contact' ? <WizardStepContact store={storeData.store} /> : null}
           {step.id === 'hero' ? <WizardStepHero content={storeData.content} /> : null}
           {step.id === 'products' ? (
             <WizardStepProduct categories={categories} activeProductCount={activeProductCount} />
           ) : null}
-          {step.id === 'style' ? <WizardStepStyle publicPath={publicPath} /> : null}
         </div>
       </div>
     </section>

@@ -1,9 +1,10 @@
 import { DEFAULT_THEME } from '@/data/defaults'
+import { evaluateStorePublicationState, type StorePublicationSnapshot } from '@/lib/store/publication'
 import { normalizeCardLayout } from '@/lib/utils/card-layout'
 import type { AdminStoreData, Category, ProductWithImages, StoreTheme } from '@/types/store'
 
 export type LaunchChecklistStatus = 'done' | 'missing' | 'recommended'
-export type StoreReadinessState = 'draft' | 'almost_ready' | 'ready'
+export type StoreReadinessState = 'draft' | 'ready' | 'published'
 
 export type LaunchChecklistItem = {
   id: string
@@ -16,6 +17,7 @@ export type LaunchChecklistItem = {
 
 export type StoreLaunchPlan = {
   state: StoreReadinessState
+  status: AdminStoreData['store']['status']
   stateLabel: string
   headline: string
   summary: string
@@ -28,6 +30,10 @@ export type StoreLaunchPlan = {
   requiredCompletionPercent: number
   missingRequiredCount: number
   shareEnabled: boolean
+  previewEnabled: boolean
+  canPublish: boolean
+  isPublished: boolean
+  publication: StorePublicationSnapshot
   publicPath: string
   publicUrl: string
   whatsappShareUrl: string
@@ -41,7 +47,7 @@ export type StoreLaunchPlan = {
 }
 
 export type ActivationFlowStep = {
-  id: 'hero' | 'products' | 'style'
+  id: 'contact' | 'hero' | 'products'
   navLabel: string
   title: string
   description: string
@@ -102,6 +108,38 @@ function hasSelectedStyle(theme: StoreTheme) {
   )
 }
 
+function buildStateCopy(plan: StorePublicationSnapshot) {
+  if (plan.state === 'published') {
+    if (plan.canPublish) {
+      return {
+        stateLabel: 'Publicada',
+        headline: 'Tu tienda ya esta publicada y lista para recibir pedidos',
+        summary: 'El enlace ya funciona para otras personas. Ahora toca compartirlo y seguir puliendo detalles comerciales.',
+      }
+    }
+
+    return {
+      stateLabel: 'Publicada con alertas',
+      headline: 'La tienda sigue publicada, pero conviene reforzar lo esencial',
+      summary: 'No la apagamos para no cortar ventas, pero hay puntos clave que deberias completar para sostener una buena primera impresion.',
+    }
+  }
+
+  if (plan.state === 'ready') {
+    return {
+      stateLabel: 'Lista para publicar',
+      headline: 'Tu tienda ya esta lista para publicarse',
+      summary: 'Solo falta publicarla para que cualquiera pueda verla y empezar a mandarte pedidos por WhatsApp.',
+    }
+  }
+
+  return {
+    stateLabel: 'En borrador',
+    headline: 'Todavia falta cerrar lo minimo para publicar con confianza',
+    summary: 'Completa lo esencial primero. Cuando la base este lista, vas a poder publicarla sin improvisar.',
+  }
+}
+
 export function buildStoreLaunchPlan({
   storeData,
   categories,
@@ -111,61 +149,44 @@ export function buildStoreLaunchPlan({
   categories: Category[]
   products: ProductWithImages[]
 }): StoreLaunchPlan {
-  const { store, content, theme } = storeData
-  const activeProducts = products.filter((product) => product.is_active)
-  const hasHeroTitle = content.hero_title.trim().length > 0
-  const hasHeroSubtitle = content.hero_subtitle.trim().length > 0
-  const hasHeroCopy = hasHeroTitle && hasHeroSubtitle
-  const hasHeroImage = Boolean(content.hero_image_url)
-  const hasActiveProduct = activeProducts.length >= 1
-  const hasTemplate = hasSelectedStyle(theme)
+  const { store, theme } = storeData
+  const publication = evaluateStorePublicationState({ storeData, products })
+  const { readiness } = publication
   const hasCategories = categories.length > 0
   const hasInstagram = Boolean(store.instagram?.trim())
   const hasAddress = Boolean(store.address?.trim())
   const hasHours = Boolean(store.hours?.trim())
+  const hasTemplate = hasSelectedStyle(theme)
 
-  const requiredItems = [
+  const requiredItems = readiness.checks.map((check) =>
     buildItem({
-      id: 'hero-copy',
-      done: hasHeroCopy,
-      title: 'Titulo y subtitulo',
-      description: 'Completa el titulo y subtitulo para que la portada cuente rapido que vendes.',
-      href: '/admin/contenido#section-copy',
-      ctaLabel: 'Completar portada',
+      id: check.key,
+      done: check.passed,
+      title: check.label,
+      description: check.detail,
+      href: check.href,
+      ctaLabel: check.ctaLabel,
     }),
-    buildItem({
-      id: 'hero-image',
-      done: hasHeroImage,
-      title: 'Imagen de portada',
-      description: 'Para completar este paso, subi una imagen de portada.',
-      href: '/admin/contenido#section-hero-image',
-      ctaLabel: 'Subir imagen',
-    }),
-    buildItem({
-      id: 'products',
-      done: hasActiveProduct,
-      title: 'Tu primer producto',
-      description: 'Para continuar, agrega al menos un producto activo con nombre y precio.',
-      href: activeProducts.length > 0 ? '/admin/productos' : '/admin/productos/nuevo',
-      ctaLabel: activeProducts.length > 0 ? 'Ver productos' : 'Agregar producto',
-    }),
+  )
+
+  const recommendedItems = [
     buildItem({
       id: 'style',
       done: hasTemplate,
       title: 'Estilo inicial',
-      description: 'Elige un preset visual para que la tienda se vea lista. Despues puedes cambiar todo.',
+      description: hasTemplate
+        ? 'La tienda ya tiene una base visual definida.'
+        : 'Elige un preset visual para que la tienda se vea mas redonda antes de compartirla fuerte.',
       href: '/admin/apariencia',
       ctaLabel: 'Elegir estilo',
+      missingStatus: 'recommended',
     }),
-  ]
-
-  const recommendedItems = [
     buildItem({
       id: 'categories',
       done: hasCategories,
       title: 'Categorias',
       description: 'Ordenar el catalogo ayuda a recorrerlo mejor cuando tengas mas productos.',
-      href: '/admin/categorias',
+      href: '/admin/productos#categorias',
       ctaLabel: 'Crear categoria',
       missingStatus: 'recommended',
     }),
@@ -174,7 +195,7 @@ export function buildStoreLaunchPlan({
       done: hasInstagram,
       title: 'Instagram visible',
       description: 'Suma respaldo social y hace que tu negocio se vea mas confiable.',
-      href: '/admin/configuracion#section-contacto',
+      href: '/admin/configuracion',
       ctaLabel: 'Agregar Instagram',
       missingStatus: 'recommended',
     }),
@@ -183,7 +204,7 @@ export function buildStoreLaunchPlan({
       done: hasAddress,
       title: 'Direccion o zona',
       description: 'Ubica mejor tu negocio y despeja dudas antes del primer mensaje.',
-      href: '/admin/configuracion#section-contexto',
+      href: '/admin/configuracion',
       ctaLabel: 'Agregar direccion',
       missingStatus: 'recommended',
     }),
@@ -192,7 +213,7 @@ export function buildStoreLaunchPlan({
       done: hasHours,
       title: 'Horarios de atencion',
       description: 'Ayuda a ordenar mejor las consultas y dar mas claridad.',
-      href: '/admin/configuracion#section-contexto',
+      href: '/admin/configuracion',
       ctaLabel: 'Agregar horarios',
       missingStatus: 'recommended',
     }),
@@ -205,35 +226,7 @@ export function buildStoreLaunchPlan({
   const missingRequiredItems = requiredItems.filter((item) => item.status !== 'done')
   const missingRequiredCount = missingRequiredItems.length
   const blockers = missingRequiredItems.map((item) => item.title)
-  const hardBlockersMissing = !hasHeroCopy || !hasHeroImage || !hasActiveProduct || !hasTemplate
-
-  let state: StoreReadinessState
-  if (missingRequiredCount === 0) {
-    state = 'ready'
-  } else if (!hardBlockersMissing) {
-    state = 'almost_ready'
-  } else {
-    state = 'draft'
-  }
-
-  const stateCopy = {
-    draft: {
-      stateLabel: 'En activacion',
-      headline: 'Termina estos 3 pasos y tu tienda ya se va a sentir real',
-      summary: 'Primero deja bien la portada, agrega un producto y elige un estilo. Lo demas puede venir despues.',
-    },
-    almost_ready: {
-      stateLabel: 'Casi lista',
-      headline: 'Te queda muy poco para mostrarla con confianza',
-      summary: 'La base ya esta. Cierra el ultimo paso y vas a poder abrir la tienda como algo listo para compartir.',
-    },
-    ready: {
-      stateLabel: 'Lista para compartir',
-      headline: 'Tu tienda ya esta lista para mostrarse',
-      summary: 'Portada, producto y estilo ya quedaron resueltos. Ahora puedes compartirla y empezar a recibir pedidos.',
-    },
-  } satisfies Record<StoreReadinessState, { stateLabel: string; headline: string; summary: string }>
-
+  const stateCopy = buildStateCopy(publication)
   const { publicPath, publicUrl } = buildPublicUrl(store.slug)
   const shareMessage = `Hola! Te comparto mi tienda ${store.name}. Puedes verla aqui: ${publicUrl}`
   const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`
@@ -246,23 +239,30 @@ export function buildStoreLaunchPlan({
         label: firstMissingRequired.ctaLabel,
         title: firstMissingRequired.title,
       }
-    : firstRecommended
+    : publication.isReadyToPublish
       ? {
-          href: firstRecommended.href,
-          label: firstRecommended.ctaLabel,
-          title: firstRecommended.title,
+          href: '#publish-gate',
+          label: 'Publicar tienda',
+          title: 'Publicar tienda',
         }
-      : {
-          href: '#share-tools',
-          label: 'Compartir tienda',
-          title: 'Tu tienda ya esta lista',
-        }
+      : firstRecommended
+        ? {
+            href: firstRecommended.href,
+            label: firstRecommended.ctaLabel,
+            title: firstRecommended.title,
+          }
+        : {
+            href: '#share-tools',
+            label: 'Compartir tienda',
+            title: 'Tu tienda ya esta publicada',
+          }
 
   return {
-    state,
-    stateLabel: stateCopy[state].stateLabel,
-    headline: stateCopy[state].headline,
-    summary: stateCopy[state].summary,
+    state: publication.state,
+    status: store.status,
+    stateLabel: stateCopy.stateLabel,
+    headline: stateCopy.headline,
+    summary: stateCopy.summary,
     requiredItems,
     recommendedItems,
     completedRequiredCount,
@@ -271,7 +271,11 @@ export function buildStoreLaunchPlan({
     totalRecommendedCount,
     requiredCompletionPercent: Math.round((completedRequiredCount / totalRequiredCount) * 100),
     missingRequiredCount,
-    shareEnabled: state !== 'draft',
+    shareEnabled: publication.isPublished,
+    previewEnabled: true,
+    canPublish: publication.canPublish,
+    isPublished: publication.isPublished,
+    publication,
     publicPath,
     publicUrl,
     whatsappShareUrl,
@@ -284,11 +288,21 @@ export function buildStoreLaunchPlan({
 export function buildActivationFlowSteps(plan: StoreLaunchPlan): ActivationFlowStep[] {
   const stepDrafts = [
     {
+      id: 'contact',
+      navLabel: 'Negocio',
+      title: 'Ajusta los datos con los que te van a encontrar',
+      description: 'Nombre, enlace publico y WhatsApp son la base para publicar sin friccion.',
+      href: '/admin/configuracion',
+      ctaLabel: 'Completar negocio',
+      items: ['brand-name', 'slug', 'whatsapp'],
+      doneMessage: 'El negocio ya tiene identidad clara y un canal listo para vender.',
+    },
+    {
       id: 'hero',
       navLabel: 'Portada',
-      title: 'Arma la portada de tu tienda',
-      description: 'Titulo, subtitulo e imagen obligatoria para que el primer vistazo tenga impacto.',
-      href: '/admin/contenido#section-copy',
+      title: 'Arma una portada que explique que vendes',
+      description: 'Titulo, subtitulo e imagen para que el primer vistazo ya se sienta serio.',
+      href: '/admin/apariencia?tab=contenido',
       ctaLabel: 'Completar portada',
       items: ['hero-copy', 'hero-image'],
       doneMessage: 'La portada ya se ve clara y profesional.',
@@ -296,22 +310,12 @@ export function buildActivationFlowSteps(plan: StoreLaunchPlan): ActivationFlowS
     {
       id: 'products',
       navLabel: 'Producto',
-      title: 'Carga tu primer producto',
-      description: 'Solo nombre y precio. Lo importante aca es que ya haya algo real para mostrar.',
+      title: 'Carga un producto completo y publicable',
+      description: 'Necesitas al menos un producto activo con precio e imagen.',
       href: '/admin/productos/nuevo',
       ctaLabel: 'Agregar producto',
-      items: ['products'],
-      doneMessage: 'Tu tienda ya tiene algo concreto para vender.',
-    },
-    {
-      id: 'style',
-      navLabel: 'Estilo',
-      title: 'Elige un estilo inicial',
-      description: 'Selecciona un preset visual para que la tienda se vea lista. Despues puedes cambiar todo.',
-      href: '/admin/apariencia',
-      ctaLabel: 'Elegir estilo',
-      items: ['style'],
-      doneMessage: 'La tienda ya se ve lista para mostrarse.',
+      items: ['active-product', 'product-image', 'product-price'],
+      doneMessage: 'Tu tienda ya tiene algo concreto y vendible para mostrar.',
     },
   ] as const satisfies Array<{
     id: ActivationFlowStep['id']
@@ -344,7 +348,7 @@ export function buildActivationFlowSteps(plan: StoreLaunchPlan): ActivationFlowS
       completionText: `${doneCount}/${totalCount}`,
       hint: firstIncompleteItem
         ? firstIncompleteItem.description
-        : 'Este paso ya esta listo y deja a la tienda un poco mas cerca de poder compartirse.',
+        : 'Este paso ya esta listo y deja a la tienda mucho mas cerca de poder publicarse.',
       doneMessage: step.doneMessage,
     }
   })

@@ -5,7 +5,6 @@ import { CheckCircle2, Loader2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateStoreConfig } from '@/lib/actions/store'
-import { slugify } from '@/lib/utils/format'
 import type { Store } from '@/types/store'
 
 export function WizardStepContact({ store }: { store: Store }) {
@@ -17,12 +16,11 @@ export function WizardStepContact({ store }: { store: Store }) {
   function handleSave() {
     setError(null)
     const trimmedName = name.trim() || store.name
-    const derivedSlug = slugify(trimmedName).slice(0, 48) || store.slug
 
     startTransition(async () => {
       const result = await updateStoreConfig({
         name: trimmedName,
-        slug: derivedSlug,
+        slug: store.slug,
         whatsapp: whatsapp.trim(),
         instagram: store.instagram,
         address: store.address,

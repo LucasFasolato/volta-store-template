@@ -2,6 +2,7 @@ import { buildActivationFlowSteps, buildStoreLaunchPlan } from '@/lib/dashboard/
 import { getAdminCategories, getAdminProducts } from '@/lib/queries/store'
 import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
 import { ActivationWizard } from '@/components/admin/ActivationWizard'
+import { PublishGate } from '@/components/admin/PublishGate'
 import { StoreDashboard } from '@/components/admin/StoreDashboard'
 
 export default async function AdminPage() {
@@ -16,8 +17,7 @@ export default async function AdminPage() {
   const activeProducts = products.filter((product) => product.is_active)
   const activeProductCount = activeProducts.length
 
-  // Mode B - store is ready: show operational dashboard
-  if (plan.state === 'ready') {
+  if (plan.state !== 'draft') {
     const firstProduct = activeProducts[0] ?? null
 
     return (
@@ -32,16 +32,17 @@ export default async function AdminPage() {
     )
   }
 
-  // Mode A - store in progress: show inline activation wizard
   const steps = buildActivationFlowSteps(plan)
 
   return (
-    <ActivationWizard
-      steps={steps}
-      plan={plan}
-      storeData={storeData}
-      categories={categories}
-      activeProductCount={activeProductCount}
-    />
+    <div className="space-y-4 p-3.5 sm:p-5 lg:space-y-5 lg:p-6">
+      <PublishGate plan={plan} />
+      <ActivationWizard
+        steps={steps}
+        storeData={storeData}
+        categories={categories}
+        activeProductCount={activeProductCount}
+      />
+    </div>
   )
 }
