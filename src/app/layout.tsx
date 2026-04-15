@@ -2,12 +2,8 @@ import type { Metadata } from 'next'
 import {
   Geist,
   Geist_Mono,
-  Inter,
-  Manrope,
   Playfair_Display,
   Plus_Jakarta_Sans,
-  Poppins,
-  Space_Grotesk,
 } from 'next/font/google'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/ThemeProvider'
@@ -25,18 +21,6 @@ const geistMono = Geist_Mono({
   display: 'swap',
 })
 
-const inter = Inter({
-  variable: '--font-inter',
-  subsets: ['latin'],
-  display: 'swap',
-})
-
-const manrope = Manrope({
-  variable: '--font-manrope',
-  subsets: ['latin'],
-  display: 'swap',
-})
-
 const plusJakarta = Plus_Jakarta_Sans({
   variable: '--font-plus-jakarta',
   subsets: ['latin'],
@@ -45,19 +29,6 @@ const plusJakarta = Plus_Jakarta_Sans({
 
 const playfair = Playfair_Display({
   variable: '--font-playfair',
-  subsets: ['latin'],
-  display: 'swap',
-})
-
-const poppins = Poppins({
-  variable: '--font-poppins',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-})
-
-const spaceGrotesk = Space_Grotesk({
-  variable: '--font-space-grotesk',
   subsets: ['latin'],
   display: 'swap',
 })
@@ -74,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${manrope.variable} ${plusJakarta.variable} ${playfair.variable} ${poppins.variable} ${spaceGrotesk.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable} ${plusJakarta.variable} ${playfair.variable}`}
       suppressHydrationWarning
     >
       <body className="font-sans">

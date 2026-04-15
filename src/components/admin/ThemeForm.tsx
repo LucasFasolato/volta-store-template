@@ -16,6 +16,7 @@ import {
   FONT_PRESETS,
   HEADING_WEIGHT_OPTIONS,
   IMAGE_RATIO_OPTIONS,
+  normalizeThemeFontSelection,
 } from '@/data/defaults'
 import { COPY } from '@/data/system-copy'
 import { updateStoreTheme } from '@/lib/actions/store'
@@ -108,6 +109,7 @@ export function ThemeForm({ theme, activeSection, onNavigate }: ThemeFormProps) 
   const [saved, setSaved] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [systemMode, setSystemMode] = useState<'light' | 'dark'>('light')
+  const normalizedTheme = useMemo(() => normalizeThemeFontSelection(theme), [theme])
 
   const {
     handleSubmit,
@@ -118,31 +120,31 @@ export function ThemeForm({ theme, activeSection, onNavigate }: ThemeFormProps) 
   } = useForm<StoreThemeInput>({
     resolver: zodResolver(storeThemeSchema),
     defaultValues: {
-      primary_color: theme.primary_color,
-      secondary_color: theme.secondary_color,
-      accent_color: theme.accent_color,
-      background_color: theme.background_color,
-      surface_color: theme.surface_color,
-      text_color: theme.text_color,
-      visual_mode: theme.visual_mode as StoreThemeInput['visual_mode'],
-      border_radius: theme.border_radius as StoreThemeInput['border_radius'],
-      container_width: theme.container_width as StoreThemeInput['container_width'],
-      font_preset: theme.font_preset as StoreThemeInput['font_preset'],
-      heading_font: theme.heading_font as StoreThemeInput['heading_font'],
-      body_font: theme.body_font as StoreThemeInput['body_font'],
-      font_family: theme.font_family as StoreThemeInput['font_family'],
-      heading_scale: theme.heading_scale as StoreThemeInput['heading_scale'],
-      heading_weight: theme.heading_weight as StoreThemeInput['heading_weight'],
-      body_scale: theme.body_scale as StoreThemeInput['body_scale'],
-      ui_density: theme.ui_density as StoreThemeInput['ui_density'],
-      spacing_scale: theme.spacing_scale as StoreThemeInput['spacing_scale'],
-      card_style: theme.card_style as StoreThemeInput['card_style'],
-      card_layout: theme.card_layout as StoreThemeInput['card_layout'],
-      button_style: theme.button_style as StoreThemeInput['button_style'],
-      grid_columns: theme.grid_columns,
-      image_ratio: theme.image_ratio as StoreThemeInput['image_ratio'],
-      background_color_2: theme.background_color_2 ?? null,
-      background_direction: (theme.background_direction ?? 'diagonal') as StoreThemeInput['background_direction'],
+      primary_color: normalizedTheme.primary_color,
+      secondary_color: normalizedTheme.secondary_color,
+      accent_color: normalizedTheme.accent_color,
+      background_color: normalizedTheme.background_color,
+      surface_color: normalizedTheme.surface_color,
+      text_color: normalizedTheme.text_color,
+      visual_mode: normalizedTheme.visual_mode as StoreThemeInput['visual_mode'],
+      border_radius: normalizedTheme.border_radius as StoreThemeInput['border_radius'],
+      container_width: normalizedTheme.container_width as StoreThemeInput['container_width'],
+      font_preset: normalizedTheme.font_preset as StoreThemeInput['font_preset'],
+      heading_font: normalizedTheme.heading_font as StoreThemeInput['heading_font'],
+      body_font: normalizedTheme.body_font as StoreThemeInput['body_font'],
+      font_family: normalizedTheme.font_family as StoreThemeInput['font_family'],
+      heading_scale: normalizedTheme.heading_scale as StoreThemeInput['heading_scale'],
+      heading_weight: normalizedTheme.heading_weight as StoreThemeInput['heading_weight'],
+      body_scale: normalizedTheme.body_scale as StoreThemeInput['body_scale'],
+      ui_density: normalizedTheme.ui_density as StoreThemeInput['ui_density'],
+      spacing_scale: normalizedTheme.spacing_scale as StoreThemeInput['spacing_scale'],
+      card_style: normalizedTheme.card_style as StoreThemeInput['card_style'],
+      card_layout: normalizedTheme.card_layout as StoreThemeInput['card_layout'],
+      button_style: normalizedTheme.button_style as StoreThemeInput['button_style'],
+      grid_columns: normalizedTheme.grid_columns,
+      image_ratio: normalizedTheme.image_ratio as StoreThemeInput['image_ratio'],
+      background_color_2: normalizedTheme.background_color_2 ?? null,
+      background_direction: (normalizedTheme.background_direction ?? 'diagonal') as StoreThemeInput['background_direction'],
     },
   })
 
@@ -160,12 +162,12 @@ export function ThemeForm({ theme, activeSection, onNavigate }: ThemeFormProps) 
   const previewTheme = useMemo(
     () =>
       ({
-        ...theme,
+        ...normalizedTheme,
         ...values,
-        font_family: values?.body_font ?? theme.body_font,
-        grid_columns: values?.grid_columns ?? theme.grid_columns,
+        font_family: values?.body_font ?? normalizedTheme.body_font,
+        grid_columns: values?.grid_columns ?? normalizedTheme.grid_columns,
       }) as StoreTheme,
-    [theme, values],
+    [normalizedTheme, values],
   )
 
   const resolvedMode =

@@ -48,14 +48,38 @@ export const DEFAULT_CONTENT: Omit<ContentInsert, 'store_id'> = {
   support_text: 'Atencion personal / Envios o retiro coordinado',
 }
 
+export const FONT_FAMILY_ALIASES = {
+  geist: 'geist',
+  inter: 'geist',
+  manrope: 'plus-jakarta',
+  'plus-jakarta': 'plus-jakarta',
+  playfair: 'playfair',
+  poppins: 'plus-jakarta',
+  'space-grotesk': 'plus-jakarta',
+} as const
+
+export type CanonicalFontFamily = (typeof FONT_FAMILY_ALIASES)[keyof typeof FONT_FAMILY_ALIASES]
+
+export function normalizeFontFamily(value: string | null | undefined): CanonicalFontFamily {
+  if (!value) return 'geist'
+  return FONT_FAMILY_ALIASES[value as keyof typeof FONT_FAMILY_ALIASES] ?? 'geist'
+}
+
+export function normalizeThemeFontSelection<
+  T extends { heading_font: string; body_font: string; font_family: string },
+>(theme: T): T {
+  return {
+    ...theme,
+    heading_font: normalizeFontFamily(theme.heading_font),
+    body_font: normalizeFontFamily(theme.body_font),
+    font_family: normalizeFontFamily(theme.body_font),
+  }
+}
+
 export const FONT_OPTIONS = [
-  { value: 'inter', label: 'Inter', style: 'Moderna' },
-  { value: 'plus-jakarta', label: 'Plus Jakarta Sans', style: 'Premium' },
-  { value: 'manrope', label: 'Manrope', style: 'Minimal' },
+  { value: 'geist', label: 'Geist', style: 'Principal' },
+  { value: 'plus-jakarta', label: 'Plus Jakarta Sans', style: 'Display' },
   { value: 'playfair', label: 'Playfair Display', style: 'Editorial' },
-  { value: 'poppins', label: 'Poppins', style: 'Bold' },
-  { value: 'space-grotesk', label: 'Space Grotesk', style: 'Tech' },
-  { value: 'geist', label: 'Geist', style: 'Precisa' },
 ] as const
 
 export const FONT_PRESETS = [
@@ -63,27 +87,27 @@ export const FONT_PRESETS = [
     value: 'modern',
     label: 'Moderna',
     heading_font: 'plus-jakarta',
-    body_font: 'inter',
+    body_font: 'geist',
     heading_weight: 'semibold',
   },
   {
     value: 'minimal',
     label: 'Minimal',
-    heading_font: 'inter',
-    body_font: 'inter',
+    heading_font: 'geist',
+    body_font: 'geist',
     heading_weight: 'medium',
   },
   {
     value: 'elegant',
     label: 'Elegante',
-    heading_font: 'manrope',
-    body_font: 'inter',
+    heading_font: 'playfair',
+    body_font: 'geist',
     heading_weight: 'semibold',
   },
   {
     value: 'bold',
     label: 'Bold',
-    heading_font: 'poppins',
+    heading_font: 'plus-jakarta',
     body_font: 'geist',
     heading_weight: 'bold',
   },
@@ -91,13 +115,13 @@ export const FONT_PRESETS = [
     value: 'editorial',
     label: 'Editorial',
     heading_font: 'playfair',
-    body_font: 'inter',
+    body_font: 'geist',
     heading_weight: 'semibold',
   },
   {
     value: 'tech',
     label: 'Tech',
-    heading_font: 'space-grotesk',
+    heading_font: 'plus-jakarta',
     body_font: 'geist',
     heading_weight: 'semibold',
   },
@@ -180,12 +204,12 @@ export const CONTENT_LIMITS = {
 
 export const FONT_FAMILY_MAP: Record<string, string> = {
   geist: 'var(--font-geist-sans), sans-serif',
-  inter: 'var(--font-inter), sans-serif',
-  manrope: 'var(--font-manrope), sans-serif',
+  inter: 'var(--font-geist-sans), sans-serif',
+  manrope: 'var(--font-plus-jakarta), sans-serif',
   'plus-jakarta': 'var(--font-plus-jakarta), sans-serif',
   playfair: 'var(--font-playfair), serif',
-  poppins: 'var(--font-poppins), sans-serif',
-  'space-grotesk': 'var(--font-space-grotesk), sans-serif',
+  poppins: 'var(--font-plus-jakarta), sans-serif',
+  'space-grotesk': 'var(--font-plus-jakarta), sans-serif',
 }
 
 export const CONTAINER_WIDTH_MAP: Record<string, string> = {

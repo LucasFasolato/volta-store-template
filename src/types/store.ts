@@ -42,8 +42,8 @@ export type AdminStoreData = {
 }
 
 export type StoreStatus = Store['status']
-export type FontFamily = 'geist' | 'inter' | 'manrope' | 'plus-jakarta'
-export type FontPreset = 'elegant' | 'modern' | 'minimal' | 'bold'
+export type FontFamily = 'geist' | 'plus-jakarta' | 'playfair'
+export type FontPreset = 'elegant' | 'modern' | 'minimal' | 'bold' | 'editorial' | 'tech'
 export type HeadingScale = 'compact' | 'default' | 'large'
 export type HeadingWeight = 'medium' | 'semibold' | 'bold'
 export type BodyScale = 'sm' | 'base' | 'lg'

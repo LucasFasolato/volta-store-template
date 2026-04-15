@@ -14,6 +14,7 @@ import {
   type StoreLayoutInput,
 } from '@/lib/validations/store'
 import { slugify } from '@/lib/utils/format'
+import { normalizeThemeFontSelection } from '@/data/defaults'
 import { getPresetById } from '@/data/theme-presets'
 
 export async function updateStoreConfig(input: StoreConfigInput) {
@@ -148,7 +149,11 @@ export async function updateStoreContent(input: StoreContentInput) {
 }
 
 export async function updateStoreTheme(input: StoreThemeInput) {
-  const validated = storeThemeSchema.safeParse(input)
+  const normalizedInput = normalizeThemeFontSelection({
+    ...input,
+    font_family: input.body_font,
+  })
+  const validated = storeThemeSchema.safeParse(normalizedInput)
   if (!validated.success) return { error: validated.error.flatten() }
 
   const { supabase, store } = await requireAuthenticatedStoreContext()
