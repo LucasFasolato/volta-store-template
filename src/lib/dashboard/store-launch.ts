@@ -48,7 +48,7 @@ export type StoreLaunchPlan = {
 }
 
 export type ActivationFlowStep = {
-  id: 'contact' | 'hero' | 'products'
+  id: 'contact' | 'hero' | 'products' | 'publish'
   navLabel: string
   title: string
   description: string
@@ -354,6 +354,21 @@ export function buildActivationFlowSteps(plan: StoreLaunchPlan): ActivationFlowS
         : 'Este paso ya esta listo y deja a la tienda mucho mas cerca de poder publicarse.',
       doneMessage: step.doneMessage,
     }
+  })
+
+  mappedSteps.push({
+    id: 'publish',
+    navLabel: 'Publicar',
+    title: 'Publica la tienda y empieza a recibir pedidos',
+    description: 'Con la base resuelta, el siguiente paso es dejar el enlace visible para otras personas.',
+    href: '#publish-gate',
+    ctaLabel: plan.isPublished ? 'Compartir tienda' : 'Ir a publicar',
+    status: plan.isPublished ? 'done' : 'upcoming',
+    completionText: plan.isPublished ? '1/1' : '0/1',
+    hint: plan.publication.isReadyToPublish
+      ? 'Negocio, portada y producto ya estan listos. Revisa la vista previa y publica cuando quieras.'
+      : 'Este paso se habilita cuando completes negocio, portada y producto con una base comercial minima.',
+    doneMessage: 'La tienda ya esta visible y lista para compartirse.',
   })
 
   const currentStepIndex = mappedSteps.findIndex((step) => step.status !== 'done')
