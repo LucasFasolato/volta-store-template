@@ -31,6 +31,7 @@ export type StoreLaunchPlan = {
   missingRequiredCount: number
   shareEnabled: boolean
   previewEnabled: boolean
+  previewPath: string
   canPublish: boolean
   isPublished: boolean
   publication: StorePublicationSnapshot
@@ -228,6 +229,7 @@ export function buildStoreLaunchPlan({
   const blockers = missingRequiredItems.map((item) => item.title)
   const stateCopy = buildStateCopy(publication)
   const { publicPath, publicUrl } = buildPublicUrl(store.slug)
+  const previewPath = '/admin/vista-previa'
   const shareMessage = `Hola! Te comparto mi tienda ${store.name}. Puedes verla aqui: ${publicUrl}`
   const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`
   const firstMissingRequired = missingRequiredItems[0]
@@ -273,6 +275,7 @@ export function buildStoreLaunchPlan({
     missingRequiredCount,
     shareEnabled: publication.isPublished,
     previewEnabled: true,
+    previewPath,
     canPublish: publication.canPublish,
     isPublished: publication.isPublished,
     publication,

@@ -25,6 +25,7 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
   const canSimulate = !!(firstProduct && whatsapp)
   const isPublished = plan.isPublished
   const isReadyToPublish = plan.publication.isReadyToPublish
+  const storefrontPath = isPublished ? publicPath : plan.previewPath
 
   async function handleCopy() {
     try {
@@ -121,7 +122,7 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
 
           <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
             <Button asChild size="lg" className="h-11 rounded-xl px-4 sm:h-12">
-              <Link href={publicPath} target="_blank" rel="noreferrer">
+              <Link href={storefrontPath} target="_blank" rel="noreferrer">
                 <ExternalLink className="size-4" />
                 Abrir tienda
               </Link>
@@ -164,7 +165,7 @@ export function StoreSharePanel({ plan, firstProduct, whatsapp }: StoreSharePane
 
           <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
             <Button asChild size="lg" className="h-11 rounded-xl px-4 sm:h-12">
-              <Link href={publicPath} target="_blank" rel="noreferrer">
+              <Link href={storefrontPath} target="_blank" rel="noreferrer">
                 <ExternalLink className="size-4" />
                 Ver vista previa
               </Link>

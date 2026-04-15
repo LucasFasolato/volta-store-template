@@ -21,7 +21,6 @@ export default async function AparienciaPage({ searchParams }: Props) {
         store={storeData.store}
         theme={storeData.theme}
         layout={storeData.layout}
-        storeSlug={storeData.store.slug}
       />
     </div>
   )

@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { safeGetUser } from '@/lib/supabase/auth'
 import type { StorePublicData, AdminStoreData, ProductWithImages } from '@/types/store'
 import { getOwnerStoreData } from '@/lib/server/store-context'
 
@@ -14,18 +13,10 @@ export async function getStoreBySlug(slug: string): Promise<StorePublicData | nu
     .select('*')
     .eq('slug', slug)
     .eq('is_active', true)
+    .eq('status', 'published')
     .maybeSingle()
 
   if (!store) return null
-
-  if (store.status !== 'published') {
-    const { user } = await safeGetUser(supabase)
-    const isOwnerPreview = user?.id === store.owner_id
-
-    if (!isOwnerPreview) {
-      return null
-    }
-  }
 
   const [themeRes, layoutRes, contentRes, categoriesRes, productsRes] = await Promise.all([
     supabase.from('store_theme').select('*').eq('store_id', store.id).maybeSingle(),

@@ -44,7 +44,6 @@ type Props = {
   theme: StoreTheme
   layout: StoreLayout
   store: Store
-  storeSlug: string
   initialTab?: AppTab
 }
 
@@ -53,7 +52,6 @@ export function AppearanceEditor({
   theme,
   layout,
   store,
-  storeSlug,
   initialTab = 'estilos',
 }: Props) {
   const [tab, setTab] = useState<AppTab>(initialTab)
@@ -99,7 +97,7 @@ export function AppearanceEditor({
       </div>
 
       {tab === 'estilos' ? (
-        <EstilosEditorView theme={theme} storeSlug={storeSlug} />
+        <EstilosEditorView theme={theme} />
       ) : tab === 'contenido' ? (
         <ContentForm content={content} store={store} />
       ) : tab === 'avanzado' ? (
@@ -108,7 +106,6 @@ export function AppearanceEditor({
         <ThemeForm
           theme={theme}
           activeSection={tab as ThemeSection}
-          storeSlug={storeSlug}
           onNavigate={(s) => setTab(s)}
         />
       )}
@@ -200,7 +197,7 @@ function PreviewWrapper({
 
 // ─── Estilos tab ──────────────────────────────────────────────────────────────
 
-function EstilosEditorView({ theme, storeSlug }: { theme: StoreTheme; storeSlug: string }) {
+function EstilosEditorView({ theme }: { theme: StoreTheme }) {
   const [applying, setApplying]   = useState<string | null>(null)
   const [appliedId, setAppliedId] = useState<string | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
@@ -294,7 +291,7 @@ function EstilosEditorView({ theme, storeSlug }: { theme: StoreTheme; storeSlug:
               )}
             </div>
             <a
-              href={`/tienda/${storeSlug}`}
+              href="/admin/vista-previa"
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-1.5 rounded-[10px] border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-medium text-neutral-300 transition hover:border-white/20 hover:text-white active:scale-[0.97]"

@@ -31,7 +31,6 @@ export type ThemeSection = 'fuentes' | 'colores' | 'layout' | 'productos'
 type ThemeFormProps = {
   theme: StoreTheme
   activeSection: ThemeSection
-  storeSlug: string
   onNavigate?: (section: ThemeSection) => void
 }
 
@@ -105,7 +104,7 @@ function colorLuminance(hex: string): number {
   return 0.299 * r + 0.587 * g + 0.114 * b
 }
 
-export function ThemeForm({ theme, activeSection, storeSlug, onNavigate }: ThemeFormProps) {
+export function ThemeForm({ theme, activeSection, onNavigate }: ThemeFormProps) {
   const [saved, setSaved] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [systemMode, setSystemMode] = useState<'light' | 'dark'>('light')
@@ -218,7 +217,7 @@ export function ThemeForm({ theme, activeSection, storeSlug, onNavigate }: Theme
     setThemeValue('heading_weight', preset.heading_weight as StoreThemeInput['heading_weight'])
   }
 
-  const storePublicPath = `/tienda/${storeSlug}`
+  const storePreviewPath = '/admin/vista-previa'
 
   const visualModeHeader = (
     <div className="admin-surface rounded-[18px] px-4 py-3">
@@ -252,7 +251,7 @@ export function ThemeForm({ theme, activeSection, storeSlug, onNavigate }: Theme
             ))}
           </div>
           <a
-            href={storePublicPath}
+            href={storePreviewPath}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-1.5 rounded-[10px] border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-medium text-neutral-300 transition hover:border-white/20 hover:text-white"

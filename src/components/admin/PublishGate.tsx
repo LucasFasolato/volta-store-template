@@ -13,6 +13,7 @@ export function PublishGate({ plan }: { plan: StoreLaunchPlan }) {
   const isPublished = plan.isPublished
   const isReadyToPublish = plan.publication.isReadyToPublish
   const publishedNeedsAttention = isPublished && !plan.canPublish
+  const storefrontPath = isPublished ? plan.publicPath : plan.previewPath
 
   const badge = isPublished
     ? {
@@ -67,7 +68,7 @@ export function PublishGate({ plan }: { plan: StoreLaunchPlan }) {
             size="lg"
             className="h-11 rounded-xl border-border bg-black/[0.04] px-4 text-foreground hover:bg-black/[0.07] dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:hover:bg-white/[0.08] sm:h-12"
           >
-            <Link href={plan.publicPath} target="_blank" rel="noreferrer">
+            <Link href={storefrontPath} target="_blank" rel="noreferrer">
               <Eye className="size-4" />
               {isPublished ? 'Ver tienda' : 'Ver vista previa'}
             </Link>

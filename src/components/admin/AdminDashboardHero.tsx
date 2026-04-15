@@ -13,6 +13,7 @@ export function AdminDashboardHero({
   storeName,
 }: AdminDashboardHeroProps) {
   const isPublished = plan.isPublished
+  const storefrontPath = isPublished ? plan.publicPath : plan.previewPath
   const title = isPublished
     ? `${storeName} ya puede recibir pedidos`
     : `${storeName} ya esta lista para publicarse`
@@ -58,7 +59,7 @@ export function AdminDashboardHero({
             size="lg"
             className="h-11 rounded-xl bg-[linear-gradient(135deg,#2ee6a6,#72f6df)] px-5 text-sm font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_14px_34px_rgba(46,230,166,0.18)] transition duration-200 hover:scale-[1.01] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_20px_52px_rgba(46,230,166,0.26)] sm:h-12"
           >
-            <Link href={plan.publicPath} target="_blank" rel="noreferrer">
+            <Link href={storefrontPath} target="_blank" rel="noreferrer">
               {isPublished ? <ArrowUpRight className="size-4" /> : <Globe className="size-4" />}
               {isPublished ? 'Ver tienda' : 'Ver vista previa'}
             </Link>

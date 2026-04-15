@@ -31,10 +31,9 @@ const NAV_ITEMS: NavItem[] = [
 
 type AdminSidebarProps = {
   storeName: string
-  storeSlug: string
 }
 
-export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
+export function AdminSidebar({ storeName }: AdminSidebarProps) {
   const pathname = usePathname()
 
   function isActive(item: NavItem) {
@@ -62,7 +61,7 @@ export function AdminSidebar({ storeName, storeSlug }: AdminSidebarProps) {
             Vista publica
           </p>
           <Link
-            href={`/tienda/${storeSlug}`}
+            href="/admin/vista-previa"
             target="_blank"
             className="admin-button-primary mt-2.5 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold shadow-[0_18px_38px_rgba(16,185,129,0.22)] transition hover:shadow-[0_0_28px_rgba(52,211,153,0.38)]"
           >
