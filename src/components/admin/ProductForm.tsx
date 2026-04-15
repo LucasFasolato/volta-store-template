@@ -378,7 +378,7 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
         toast.success('Producto creado y listo para seguir editando.')
       }
 
-      router.push(`/admin/productos/${result.productId}`)
+      router.push(`/admin/catalogo/${result.productId}`)
     }
   }
 

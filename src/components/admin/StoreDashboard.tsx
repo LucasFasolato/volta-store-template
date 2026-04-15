@@ -173,27 +173,27 @@ function StatusCard({
 
 const QUICK_ACTIONS = [
   {
-    href: '/admin/productos/nuevo',
+    href: '/admin/catalogo/nuevo',
     icon: Package,
     label: 'Agregar producto',
     description: 'Suma algo al catalogo.',
   },
   {
-    href: '/admin/apariencia?tab=contenido',
+    href: '/admin/tienda?tab=contenido',
     icon: ImageIcon,
     label: 'Portada y banner',
     description: 'Ajusta la portada.',
   },
   {
-    href: '/admin/apariencia',
+    href: '/admin/tienda',
     icon: Palette,
-    label: 'Apariencia',
-    description: 'Cambia colores y estilo.',
+    label: 'Tienda',
+    description: 'Define branding, estilo y layout.',
   },
   {
-    href: '/admin/configuracion',
+    href: '/admin/negocio',
     icon: Settings,
-    label: 'Configuracion',
+    label: 'Negocio',
     description: 'Edita datos del negocio.',
   },
 ] as const satisfies ReadonlyArray<{

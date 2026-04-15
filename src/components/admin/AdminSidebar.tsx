@@ -4,30 +4,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   ExternalLink,
-  LayoutDashboard,
   LogOut,
-  Package,
-  Palette,
-  Settings,
   Store,
 } from 'lucide-react'
 import { signOut } from '@/lib/actions/auth'
+import { ADMIN_NAV_ITEMS, type AdminNavItem } from '@/components/admin/admin-nav'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { cn } from '@/lib/utils'
-
-type NavItem = {
-  href: string
-  label: string
-  icon: React.ElementType
-  exact?: boolean
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { href: '/admin', label: 'Resumen', icon: LayoutDashboard, exact: true },
-  { href: '/admin/apariencia', label: 'Apariencia', icon: Palette },
-  { href: '/admin/productos', label: 'Productos', icon: Package },
-  { href: '/admin/configuracion', label: 'Configuracion', icon: Settings },
-]
 
 type AdminSidebarProps = {
   storeName: string
@@ -36,7 +19,7 @@ type AdminSidebarProps = {
 export function AdminSidebar({ storeName }: AdminSidebarProps) {
   const pathname = usePathname()
 
-  function isActive(item: NavItem) {
+  function isActive(item: AdminNavItem) {
     return item.exact ? pathname === item.href : pathname.startsWith(item.href)
   }
 
@@ -73,7 +56,7 @@ export function AdminSidebar({ storeName }: AdminSidebarProps) {
 
         {/* Nav */}
         <nav className="mt-3.5 flex-1 space-y-1">
-          {NAV_ITEMS.map((item) => {
+          {ADMIN_NAV_ITEMS.map((item) => {
             const Icon = item.icon
             const active = isActive(item)
 

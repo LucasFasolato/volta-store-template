@@ -571,7 +571,7 @@ function ImportResultView({
 
       <div className="flex gap-3">
         <Link
-          href="/admin/productos"
+          href="/admin/catalogo"
           className="inline-flex items-center gap-2 rounded-full bg-emerald-400 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-emerald-300"
         >
           Ver productos

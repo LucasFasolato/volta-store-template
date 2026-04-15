@@ -48,8 +48,7 @@ async function getUniqueSlug({
 
 function revalidateStorePaths(storeSlug: string) {
   revalidatePath('/admin')
-  revalidatePath('/admin/productos')
-  revalidatePath('/admin/categorias')
+  revalidatePath('/admin/catalogo')
   revalidatePath(`/tienda/${storeSlug}`)
 }
 
@@ -119,7 +118,7 @@ export async function updateProduct(productId: string, input: ProductInput) {
   if (error) return { error: { formErrors: [error.message], fieldErrors: {} } }
 
   revalidateStorePaths(store.slug)
-  revalidatePath(`/admin/productos/${productId}`)
+  revalidatePath(`/admin/catalogo/${productId}`)
   return { success: true }
 }
 
@@ -197,7 +196,7 @@ export async function uploadProductImage(productId: string, file: FormData) {
   if (insertError) return { error: insertError.message }
 
   revalidateStorePaths(store.slug)
-  revalidatePath(`/admin/productos/${productId}`)
+  revalidatePath(`/admin/catalogo/${productId}`)
   return { success: true, image }
 }
 
@@ -213,7 +212,7 @@ export async function deleteProductImage(imageId: string, productId: string) {
   if (error) return { error: error.message }
 
   revalidateStorePaths(store.slug)
-  revalidatePath(`/admin/productos/${productId}`)
+  revalidatePath(`/admin/catalogo/${productId}`)
   return { success: true }
 }
 

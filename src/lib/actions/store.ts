@@ -63,7 +63,7 @@ export async function updateStoreConfig(input: StoreConfigInput) {
   if (error) return { error: { formErrors: [error.message], fieldErrors: {} } }
 
   revalidatePath('/admin')
-  revalidatePath('/admin/configuracion')
+  revalidatePath('/admin/negocio')
   revalidatePath(`/tienda/${validated.data.slug}`)
   revalidatePath(`/tienda/${store.slug}`)
   return { success: true }
@@ -142,8 +142,7 @@ export async function updateStoreContent(input: StoreContentInput) {
   if (error) return { error: { formErrors: [error.message], fieldErrors: {} } }
 
   revalidatePath('/admin')
-  revalidatePath('/admin/apariencia')
-  revalidatePath('/admin/contenido')
+  revalidatePath('/admin/tienda')
   revalidatePath(`/tienda/${store.slug}`)
   return { success: true }
 }
@@ -165,7 +164,7 @@ export async function updateStoreTheme(input: StoreThemeInput) {
 
   if (error) return { error: { formErrors: [error.message], fieldErrors: {} } }
 
-  revalidatePath('/admin/apariencia')
+  revalidatePath('/admin/tienda')
   revalidatePath(`/tienda/${store.slug}`)
   return { success: true }
 }
@@ -183,7 +182,7 @@ export async function updateStoreLayout(input: StoreLayoutInput) {
 
   if (error) return { error: { formErrors: [error.message], fieldErrors: {} } }
 
-  revalidatePath('/admin/apariencia')
+  revalidatePath('/admin/tienda')
   revalidatePath(`/tienda/${store.slug}`)
   return { success: true }
 }
@@ -213,6 +212,7 @@ export async function uploadLogo(formData: FormData) {
   if (updateError) return { error: updateError.message }
 
   revalidatePath('/admin')
+  revalidatePath('/admin/tienda')
   revalidatePath(`/tienda/${store.slug}`)
   return { success: true, url: urlData.publicUrl }
 }
@@ -245,7 +245,7 @@ export async function uploadHeroImage(formData: FormData) {
   if (updateError) return { error: updateError.message }
 
   revalidatePath('/admin')
-  revalidatePath('/admin/contenido')
+  revalidatePath('/admin/tienda')
   revalidatePath(`/tienda/${store.slug}`)
   return { success: true, url: versionedUrl }
 }

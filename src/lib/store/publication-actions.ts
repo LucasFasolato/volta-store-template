@@ -12,9 +12,9 @@ import type { StoreStatus } from '@/types/store'
 
 function revalidatePublicationPaths(slug: string) {
   revalidatePath('/admin')
-  revalidatePath('/admin/configuracion')
-  revalidatePath('/admin/apariencia')
-  revalidatePath('/admin/productos')
+  revalidatePath('/admin/negocio')
+  revalidatePath('/admin/tienda')
+  revalidatePath('/admin/catalogo')
   revalidatePath('/admin/vista-previa')
   revalidatePath(`/tienda/${slug}`)
 }

@@ -89,7 +89,7 @@ export function ProductList({ products, categories }: ProductListProps) {
             }
             action={
               <Button asChild className="rounded-full bg-emerald-400 text-black hover:bg-emerald-300">
-                <Link href="/admin/productos/nuevo">
+                <Link href="/admin/catalogo/nuevo">
                   {hasProducts ? 'Agregar producto' : 'Agregar primer producto'}
                 </Link>
               </Button>
@@ -155,7 +155,7 @@ export function ProductList({ products, categories }: ProductListProps) {
                         variant="outline"
                         className="rounded-full border-white/10 bg-white/5 text-white hover:bg-white/10"
                       >
-                        <Link href={`/admin/productos/${product.id}`}>
+                        <Link href={`/admin/catalogo/${product.id}`}>
                           <Edit className="mr-2 size-4" />
                           Editar
                         </Link>

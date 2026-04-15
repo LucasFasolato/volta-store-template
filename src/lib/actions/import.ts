@@ -234,7 +234,7 @@ export async function importProductsFromCSV(rows: ImportRow[]): Promise<ImportRe
   }
 
   revalidatePath('/admin')
-  revalidatePath('/admin/productos')
+  revalidatePath('/admin/catalogo')
   revalidatePath(`/tienda/${store.slug}`)
 
   return result

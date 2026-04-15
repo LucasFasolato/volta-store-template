@@ -2,15 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Package, Palette, Settings } from 'lucide-react'
+import { ADMIN_NAV_ITEMS } from '@/components/admin/admin-nav'
 import { cn } from '@/lib/utils'
-
-const MOBILE_NAV = [
-  { href: '/admin', label: 'Resumen', icon: LayoutDashboard, exact: true },
-  { href: '/admin/apariencia', label: 'Apariencia', icon: Palette },
-  { href: '/admin/productos', label: 'Productos', icon: Package },
-  { href: '/admin/configuracion', label: 'Config', icon: Settings },
-]
 
 export function MobileAdminNav() {
   const pathname = usePathname()
@@ -18,7 +11,7 @@ export function MobileAdminNav() {
   return (
     <nav className="safe-area-pb admin-surface fixed inset-x-2.5 bottom-2.5 z-40 rounded-[18px] p-1.5 lg:hidden">
       <div className="grid grid-cols-4 gap-1">
-        {MOBILE_NAV.map((item) => {
+        {ADMIN_NAV_ITEMS.map((item) => {
           const Icon = item.icon
           const active = item.exact ? pathname === item.href : pathname.startsWith(item.href)
 

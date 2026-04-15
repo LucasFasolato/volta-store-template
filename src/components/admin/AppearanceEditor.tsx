@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import {
   CheckCircle2,
   FileText,
+  ImageIcon,
   LayoutGrid,
   Layers3,
   Loader2,
@@ -16,18 +17,21 @@ import {
   Sparkles,
   Type,
 } from 'lucide-react'
+import Link from 'next/link'
 import { ContentForm } from '@/components/admin/ContentForm'
 import { toast } from 'sonner'
+import { ImageUpload } from '@/components/admin/ImageUpload'
 import { LayoutForm } from '@/components/admin/LayoutForm'
 import { ThemeForm, type ThemeSection } from '@/components/admin/ThemeForm'
 import { THEME_PRESETS, type ThemePreset } from '@/data/theme-presets'
-import { applyThemePreset } from '@/lib/actions/store'
+import { applyThemePreset, uploadLogo } from '@/lib/actions/store'
 import { buildThemeVars } from '@/lib/utils/theme'
 import { cn } from '@/lib/utils'
 import type { Store, StoreContent, StoreLayout, StoreTheme } from '@/types/store'
 
 type AppTab = ThemeSection | 'avanzado' | 'contenido' | 'estilos'
 type PreviewDevice = 'desktop' | 'mobile'
+export type AppearanceEditorTab = AppTab
 
 const TABS: Array<{ value: AppTab; label: string; icon: React.ElementType }> = [
   { value: 'estilos',   label: 'Estilos',   icon: Sparkles },
@@ -58,12 +62,109 @@ export function AppearanceEditor({
 
   return (
     <div className="space-y-4">
+      <section className="admin-surface rounded-[24px] p-4 sm:p-6">
+        <div className="max-w-3xl">
+          <p className="admin-label">Tienda</p>
+          <h1 className="mt-2 text-balance font-heading text-[2rem] font-semibold tracking-[-0.05em] text-foreground sm:text-[2.5rem]">
+            La parte visible de tu marca y de tu tienda
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-[15px]">
+            Aqui decides como se ve la portada, que estilo transmite tu tienda y como se ordena la experiencia antes del clic en WhatsApp.
+          </p>
+        </div>
+
+        <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(260px,0.9fr)]">
+          <button
+            type="button"
+            onClick={() => setTab('contenido')}
+            className="rounded-[22px] border border-border bg-black/[0.04] p-4 text-left transition hover:bg-black/[0.06] dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.05]"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-400/12 text-emerald-300">
+                <FileText className="size-4" />
+              </div>
+              <span className="rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground">
+                Prioridad
+              </span>
+            </div>
+            <p className="mt-6 text-sm font-semibold text-foreground">Ajustar portada</p>
+            <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
+              Define titulo, subtitulo e imagen para que la tienda explique rapido que vendes.
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTab('estilos')}
+            className="rounded-[22px] border border-border bg-black/[0.04] p-4 text-left transition hover:bg-black/[0.06] dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.05]"
+          >
+            <div className="flex size-10 items-center justify-center rounded-xl bg-black/[0.06] text-muted-foreground dark:bg-white/[0.06]">
+              <Sparkles className="size-4" />
+            </div>
+            <p className="mt-6 text-sm font-semibold text-foreground">Elegir estilo base</p>
+            <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
+              Elige un preset de arranque y luego afina colores, fuentes y tarjetas segun tu marca.
+            </p>
+          </button>
+
+          <div id="branding" className="rounded-[22px] border border-border bg-black/[0.04] p-4 dark:border-white/10 dark:bg-white/[0.03]">
+            <div className="flex items-center gap-2">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-black/[0.06] text-muted-foreground dark:bg-white/[0.06]">
+                <ImageIcon className="size-4" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Branding</p>
+                <p className="text-xs text-muted-foreground">Logo y presencia visual</p>
+              </div>
+            </div>
+
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              Sube tu logo aqui para que la identidad visual quede junto al resto de la tienda y no mezclada con datos operativos.
+            </p>
+
+            <div className="mt-4 max-w-[220px]">
+              <ImageUpload
+                currentUrl={store.logo_url}
+                onUpload={uploadLogo}
+                fieldName="logo"
+                aspectHint="1:1"
+                label="Subir logo"
+              />
+            </div>
+
+            <Link
+              href="/admin/vista-previa"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-foreground transition hover:text-emerald-300"
+            >
+              Ver vista previa
+              <CheckCircle2 className="size-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <div className="flex items-center gap-4">
         <div className="shrink-0">
-          <p className="admin-label">Volta Admin</p>
-          <h1 className="mt-1 font-heading text-[1.45rem] font-semibold tracking-[-0.04em] text-white">
-            Apariencia
-          </h1>
+          <p className="admin-label">Editor de tienda</p>
+          <h2 className="mt-1 font-heading text-[1.45rem] font-semibold tracking-[-0.04em] text-white">
+            Ajusta lo que conviene tocar ahora
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Empieza por portada o estilo, y deja los ajustes finos para despues.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium text-muted-foreground">
+            <button type="button" onClick={() => setTab('contenido')} className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 transition hover:text-white">
+              Portada
+            </button>
+            <button type="button" onClick={() => setTab('estilos')} className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 transition hover:text-white">
+              Estilo
+            </button>
+            <button type="button" onClick={() => setTab('layout')} className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 transition hover:text-white">
+              Layout
+            </button>
+          </div>
         </div>
 
         <div className="ml-auto flex gap-1 overflow-x-auto">

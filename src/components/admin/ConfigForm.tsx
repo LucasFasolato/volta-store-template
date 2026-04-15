@@ -7,15 +7,10 @@ import { CheckCircle2, Copy, Link2, Loader2, TriangleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import { SaveButton } from '@/components/common/SaveButton'
 import { FormFeedback } from '@/components/common/FormFeedback'
-import { ImageUpload } from '@/components/admin/ImageUpload'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { COPY } from '@/data/system-copy'
-import {
-  checkStoreSlugAvailability,
-  updateStoreConfig,
-  uploadLogo,
-} from '@/lib/actions/store'
+import { checkStoreSlugAvailability, updateStoreConfig } from '@/lib/actions/store'
 import { sanitizeInstagramHandle, slugify } from '@/lib/utils/format'
 import { storeConfigSchema, type StoreConfigInput } from '@/lib/validations/store'
 import type { Store } from '@/types/store'
@@ -157,101 +152,83 @@ export function ConfigForm({ store }: ConfigFormProps) {
         <SectionIntro
           eyebrow="Seccion 1"
           title="Lo esencial para que tu tienda funcione"
-          description="Nombre, logo y URL en un solo lugar para que tu marca sea clara desde el primer vistazo."
+          description="Nombre y URL en un solo lugar para que tu negocio sea claro desde el primer vistazo."
         />
 
-        <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
-          <div className="admin-surface-muted rounded-xl p-5">
-            <h4 className="text-sm font-semibold text-white">Logo</h4>
-            <p className="mt-2 text-sm leading-6 text-neutral-400">
-              Recomendado: fondo transparente, buen contraste y formato cuadrado.
-            </p>
-            <div className="mt-5 max-w-[220px]">
-              <ImageUpload
-                currentUrl={store.logo_url}
-                onUpload={uploadLogo}
-                fieldName="logo"
-                aspectHint="1:1"
-                label="Subir logo"
-              />
-            </div>
+        <div id="identidad" className="space-y-5">
+          <div>
+            <Label className="mb-2 block text-sm font-medium text-neutral-200">Nombre del negocio *</Label>
+            <Input
+              {...register('name')}
+              placeholder="Ej: Atelier Norte"
+              aria-invalid={!!errors.name}
+              className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+            />
+            {errors.name ? <p className="mt-1.5 text-xs text-red-300">{errors.name.message}</p> : null}
           </div>
 
-          <div className="space-y-5">
-            <div>
-              <Label className="mb-2 block text-sm font-medium text-neutral-200">Nombre del negocio *</Label>
-              <Input
-                {...register('name')}
-                placeholder="Ej: Atelier Norte"
-                aria-invalid={!!errors.name}
-                className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
-              />
-              {errors.name ? <p className="mt-1.5 text-xs text-red-300">{errors.name.message}</p> : null}
+          <div>
+            <Label className="mb-2 block text-sm font-medium text-neutral-200">URL publica *</Label>
+            <p className="mb-2 text-xs leading-5 text-neutral-500">
+              Usa minusculas, numeros y guiones. Si ya la compartiste, mejor no cambiarla seguido.
+            </p>
+            <Input
+              {...register('slug', {
+                onBlur: (event) =>
+                  setValue('slug', slugify(event.target.value).slice(0, 48), { shouldDirty: true }),
+              })}
+              placeholder="atelier-norte"
+              aria-invalid={!!errors.slug || slugStatus.tone === 'error'}
+              className="h-12 rounded-md border-white/10 bg-white/5 font-mono text-white placeholder:text-neutral-500"
+            />
+            {errors.slug ? <p className="mt-1.5 text-xs text-red-300">{errors.slug.message}</p> : null}
+          </div>
+
+          <div className="rounded-xl border border-white/8 bg-black/10 p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                  Asi se ve tu enlace
+                </p>
+                <p className="mt-3 overflow-hidden text-ellipsis whitespace-nowrap text-base font-semibold text-emerald-300 sm:whitespace-normal sm:[word-break:break-word]">
+                  {publicUrl}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={copyUrl}
+                className="admin-button-soft inline-flex h-11 items-center gap-2 rounded-md px-4 text-sm text-white"
+              >
+                <Copy className="size-4" />
+                {copied ? 'Copiada' : 'Copiar'}
+              </button>
             </div>
 
-            <div>
-              <Label className="mb-2 block text-sm font-medium text-neutral-200">URL publica *</Label>
-              <p className="mb-2 text-xs leading-5 text-neutral-500">
-                Usa minusculas, numeros y guiones. Si ya la compartiste, mejor no cambiarla seguido.
-              </p>
-              <Input
-                {...register('slug', {
-                  onBlur: (event) =>
-                    setValue('slug', slugify(event.target.value).slice(0, 48), { shouldDirty: true }),
-                })}
-                placeholder="atelier-norte"
-                aria-invalid={!!errors.slug || slugStatus.tone === 'error'}
-                className="h-12 rounded-md border-white/10 bg-white/5 font-mono text-white placeholder:text-neutral-500"
-              />
-              {errors.slug ? <p className="mt-1.5 text-xs text-red-300">{errors.slug.message}</p> : null}
-            </div>
-
-            <div className="rounded-xl border border-white/8 bg-black/10 p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
-                    Asi se ve tu enlace
-                  </p>
-                  <p className="mt-3 overflow-hidden text-ellipsis whitespace-nowrap text-base font-semibold text-emerald-300 sm:whitespace-normal sm:[word-break:break-word]">
-                    {publicUrl}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={copyUrl}
-                  className="admin-button-soft inline-flex h-11 items-center gap-2 rounded-md px-4 text-sm text-white"
-                >
-                  <Copy className="size-4" />
-                  {copied ? 'Copiada' : 'Copiar'}
-                </button>
+            <div className="mt-4 rounded-lg border border-white/8 bg-white/4 px-4 py-3">
+              <div className="flex items-center gap-2 text-sm text-white">
+                <Link2 className="size-4 text-emerald-300" />
+                {slugStatus.message}
+                <span className="ml-auto">
+                  {slugStatus.tone === 'checking' ? (
+                    <Loader2 className="size-4 animate-spin text-emerald-200" />
+                  ) : slugStatus.tone === 'error' ? (
+                    <TriangleAlert className="size-4 text-amber-200" />
+                  ) : (
+                    <CheckCircle2 className="size-4 text-emerald-200" />
+                  )}
+                </span>
               </div>
-
-              <div className="mt-4 rounded-lg border border-white/8 bg-white/4 px-4 py-3">
-                <div className="flex items-center gap-2 text-sm text-white">
-                  <Link2 className="size-4 text-emerald-300" />
-                  {slugStatus.message}
-                  <span className="ml-auto">
-                    {slugStatus.tone === 'checking' ? (
-                      <Loader2 className="size-4 animate-spin text-emerald-200" />
-                    ) : slugStatus.tone === 'error' ? (
-                      <TriangleAlert className="size-4 text-amber-200" />
-                    ) : (
-                      <CheckCircle2 className="size-4 text-emerald-200" />
-                    )}
-                  </span>
-                </div>
-                {slugChanged ? (
-                  <p className="mt-2 text-xs leading-5 text-amber-100/80">
-                    Si guardas este cambio, los links compartidos con el slug anterior pueden dejar de funcionar.
-                  </p>
-                ) : null}
-              </div>
+              {slugChanged ? (
+                <p className="mt-2 text-xs leading-5 text-amber-100/80">
+                  Si guardas este cambio, los links compartidos con el slug anterior pueden dejar de funcionar.
+                </p>
+              ) : null}
             </div>
           </div>
         </div>
       </section>
 
-      <section className="admin-surface rounded-xl p-6">
+      <section id="canales" className="admin-surface rounded-xl p-6">
         <SectionIntro
           eyebrow="Seccion 2"
           title="Como te encuentran y te escriben"
@@ -291,7 +268,7 @@ export function ConfigForm({ store }: ConfigFormProps) {
         </div>
       </section>
 
-      <section className="admin-surface rounded-xl p-6">
+      <section id="operacion" className="admin-surface rounded-xl p-6">
         <SectionIntro
           eyebrow="Seccion 3"
           title="Informacion que ayuda a comprar"

@@ -1,8 +1,5 @@
-import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
-import { ConfigurationPage } from '@/components/admin/ConfigurationPage'
+import { redirect } from 'next/navigation'
 
-export default async function ConfiguracionPage() {
-  const { storeData } = await requireAuthenticatedAdminStore()
-
-  return <ConfigurationPage store={storeData.store} />
+export default function ConfiguracionPage() {
+  redirect('/admin/negocio')
 }

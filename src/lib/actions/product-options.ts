@@ -36,8 +36,8 @@ async function requireProductOwnership(productId: string) {
 
 function revalidate(storeSlug: string, productId: string) {
   revalidatePath('/admin')
-  revalidatePath('/admin/productos')
-  revalidatePath(`/admin/productos/${productId}`)
+  revalidatePath('/admin/catalogo')
+  revalidatePath(`/admin/catalogo/${productId}`)
   revalidatePath(`/tienda/${storeSlug}`)
 }
 
