@@ -12,7 +12,6 @@ export async function getStoreBySlug(slug: string): Promise<StorePublicData | nu
     .from('stores')
     .select('*')
     .eq('slug', slug)
-    .eq('is_active', true)
     .eq('status', 'published')
     .maybeSingle()
 

@@ -1,9 +1,7 @@
 import Link from 'next/link'
-import { ArrowUpRight, CheckCircle2, Eye, Globe, LockKeyhole, ShieldAlert } from 'lucide-react'
-import { publishStore, unpublishStore } from '@/lib/store/publication'
+import { ArrowUpRight, CheckCircle2, Globe, LockKeyhole, ShieldAlert } from 'lucide-react'
 import type { StoreLaunchPlan } from '@/lib/dashboard/store-launch'
-import { Button } from '@/components/ui/button'
-import { PublishGateActionButton } from '@/components/admin/PublishGateActionButton'
+import { PublishGateControls } from '@/components/admin/PublishGateControls'
 import { StoreSetupChecklist } from '@/components/admin/StoreSetupChecklist'
 
 export function PublishGate({ plan }: { plan: StoreLaunchPlan }) {
@@ -61,49 +59,11 @@ export function PublishGate({ plan }: { plan: StoreLaunchPlan }) {
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row lg:justify-end">
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
-            className="h-11 rounded-xl border-border bg-black/[0.04] px-4 text-foreground hover:bg-black/[0.07] dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:hover:bg-white/[0.08] sm:h-12"
-          >
-            <Link href={storefrontPath} target="_blank" rel="noreferrer">
-              <Eye className="size-4" />
-              {isPublished ? 'Ver tienda' : 'Ver vista previa'}
-            </Link>
-          </Button>
-
-          {isPublished ? (
-            <form
-              action={async () => {
-                'use server'
-                await unpublishStore()
-              }}
-            >
-              <PublishGateActionButton
-                idleLabel="Pasar a borrador"
-                pendingLabel="Pasando a borrador..."
-                variant="outline"
-                className="h-11 rounded-xl border-border bg-black/[0.04] px-4 text-foreground hover:bg-black/[0.07] dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:hover:bg-white/[0.08] sm:h-12"
-              />
-            </form>
-          ) : (
-            <form
-              action={async () => {
-                'use server'
-                await publishStore()
-              }}
-            >
-              <PublishGateActionButton
-                idleLabel="Publicar tienda"
-                pendingLabel="Publicando..."
-                disabled={!plan.canPublish}
-                className="h-11 rounded-xl bg-[linear-gradient(135deg,#2ee6a6,#72f6df)] px-4 text-slate-950 hover:brightness-105 sm:h-12"
-              />
-            </form>
-          )}
-        </div>
+        <PublishGateControls
+          isPublished={isPublished}
+          canPublish={plan.canPublish}
+          storefrontPath={storefrontPath}
+        />
       </div>
 
       <div className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
