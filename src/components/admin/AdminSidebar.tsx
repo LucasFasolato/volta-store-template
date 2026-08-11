@@ -2,11 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  ExternalLink,
-  LogOut,
-  Store,
-} from 'lucide-react'
+import { ExternalLink, LogOut } from 'lucide-react'
 import { signOut } from '@/lib/actions/auth'
 import { ADMIN_NAV_ITEMS, type AdminNavItem } from '@/components/admin/admin-nav'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -24,38 +20,16 @@ export function AdminSidebar({ storeName }: AdminSidebarProps) {
   }
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-20 hidden w-[220px] px-3 py-3 lg:block">
-      <div className="admin-surface flex h-full flex-col rounded-xl p-3">
-        {/* Brand */}
-        <div className="admin-surface-muted rounded-lg px-3 py-3">
-          <div className="flex items-center gap-2.5">
-            <div className="admin-button-primary flex size-8 shrink-0 items-center justify-center rounded-xl text-xs font-black">
-              V
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-foreground">{storeName}</p>
-              <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Admin</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="admin-surface-selected mt-2.5 rounded-xl p-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">
-            Vista publica
-          </p>
-          <Link
-            href="/admin/vista-previa"
-            target="_blank"
-            className="admin-button-primary mt-2.5 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold shadow-[0_18px_38px_rgba(16,185,129,0.22)] transition hover:shadow-[0_0_28px_rgba(52,211,153,0.38)]"
-          >
-            <Store className="size-4.5 shrink-0" />
-            <span className="flex-1">Ver tienda</span>
-            <ExternalLink className="size-4 shrink-0 opacity-80" />
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[232px] p-3 lg:block">
+      <div className="flex h-full flex-col overflow-hidden rounded-[18px] border border-white/8 bg-[#10161d] text-white shadow-[0_18px_48px_rgba(15,23,42,.14)]">
+        <div className="px-5 pb-4 pt-5">
+          <Link href="/admin" className="inline-flex items-center gap-2.5" aria-label="Ir al resumen">
+            <span className="flex size-7 items-center justify-center rounded-[8px] bg-[#12e89a] text-[11px] font-black text-[#062117]">V</span>
+            <span className="text-[15px] font-semibold tracking-[-0.03em]">VOLTA</span>
           </Link>
         </div>
 
-        {/* Nav */}
-        <nav className="mt-3.5 flex-1 space-y-1">
+        <nav className="flex-1 space-y-1 px-3 pt-2">
           {ADMIN_NAV_ITEMS.map((item) => {
             const Icon = item.icon
             const active = isActive(item)
@@ -65,40 +39,46 @@ export function AdminSidebar({ storeName }: AdminSidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm transition duration-150',
+                  'group flex h-10 items-center gap-3 rounded-[9px] px-3 text-[13px] font-medium transition duration-150',
                   active
-                    ? 'admin-surface-selected font-medium text-foreground'
-                    : 'text-muted-foreground hover:bg-foreground/[0.05] hover:text-foreground',
+                    ? 'bg-white/[0.09] text-white'
+                    : 'text-white/58 hover:bg-white/[0.055] hover:text-white',
                 )}
               >
-                <Icon
-                  className={cn(
-                    'size-4 shrink-0',
-                    active ? 'text-emerald-500' : 'text-muted-foreground',
-                  )}
-                />
-                <span>{item.label}</span>
-                {active ? (
-                  <span className="ml-auto size-1.5 rounded-full bg-emerald-500" />
-                ) : null}
+                <Icon className={cn('size-[15px] shrink-0', active ? 'text-[#12e89a]' : 'text-white/44 group-hover:text-white/70')} />
+                <span className="flex-1">{item.label}</span>
+                {active ? <span className="size-1.5 rounded-full bg-[#12e89a]" /> : null}
               </Link>
             )
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="space-y-1.5 border-t border-border pt-3">
-          <ThemeToggle variant="sidebar" />
+        <div className="px-3 pb-3">
+          <Link
+            href="/admin/vista-previa"
+            target="_blank"
+            className="mb-3 flex h-10 items-center justify-between rounded-[9px] bg-[#12e89a] px-3.5 text-[13px] font-semibold text-[#062117] transition hover:bg-[#0fd98f]"
+          >
+            <span>Ver tienda</span>
+            <ExternalLink className="size-3.5" />
+          </Link>
 
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-red-400/8 hover:text-red-500"
-            >
-              <LogOut className="size-4 shrink-0" />
-              Salir
-            </button>
-          </form>
+          <div className="border-t border-white/8 pt-3">
+            <div className="mb-2 px-2">
+              <p className="truncate text-[12px] font-medium text-white/90">{storeName}</p>
+              <p className="mt-0.5 text-[10px] text-white/38">Administración</p>
+            </div>
+            <ThemeToggle variant="sidebar" />
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="mt-1 flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-[12px] text-white/46 transition hover:bg-white/[0.05] hover:text-red-300"
+              >
+                <LogOut className="size-3.5" />
+                Salir
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </aside>
