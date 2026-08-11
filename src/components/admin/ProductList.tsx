@@ -1,14 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Edit, Eye, EyeOff, Package2, Star, Trash2 } from 'lucide-react'
+import { Eye, EyeOff, Package2, Search, Star, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ConfirmationDialog } from '@/components/common/ConfirmationDialog'
 import { EmptyState } from '@/components/common/EmptyState'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { deleteProduct } from '@/lib/actions/products'
 import { formatCurrency } from '@/lib/utils/format'
 import type { Category, ProductWithImages } from '@/types/store'
@@ -21,24 +21,28 @@ type ProductListProps = {
 export function ProductList({ products, categories }: ProductListProps) {
   const [localProducts, setLocalProducts] = useState(products)
   const [filter, setFilter] = useState<string>('all')
+  const [query, setQuery] = useState('')
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [productToDelete, setProductToDelete] = useState<ProductWithImages | null>(null)
 
   const categoryMap = Object.fromEntries(categories.map((category) => [category.id, category.name]))
   const hasProducts = localProducts.length > 0
 
-  const filtered =
-    filter === 'all'
-      ? localProducts
-      : filter === 'active'
-        ? localProducts.filter((product) => product.is_active)
-        : filter === 'featured'
-          ? localProducts.filter((product) => product.is_featured)
-          : localProducts.filter((product) => product.category_id === filter)
+  const filtered = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase()
+    return localProducts.filter((product) => {
+      const matchesFilter =
+        filter === 'all' ||
+        (filter === 'active' && product.is_active) ||
+        (filter === 'featured' && product.is_featured) ||
+        product.category_id === filter
+      const matchesQuery = !normalizedQuery || product.name.toLowerCase().includes(normalizedQuery)
+      return matchesFilter && matchesQuery
+    })
+  }, [filter, localProducts, query])
 
   async function handleDelete() {
     if (!productToDelete) return
-
     setDeletingId(productToDelete.id)
     const result = await deleteProduct(productToDelete.id)
     setDeletingId(null)
@@ -53,145 +57,124 @@ export function ProductList({ products, categories }: ProductListProps) {
     toast.success('Producto eliminado.')
   }
 
+  const filterItems = [
+    { value: 'all', label: 'Todos' },
+    { value: 'active', label: 'Activos' },
+    { value: 'featured', label: 'Destacados' },
+    ...categories.map((category) => ({ value: category.id, label: category.name })),
+  ]
+
   return (
     <>
-      <div className="space-y-5">
-        <div className="flex flex-wrap gap-2">
-          {[
-            { value: 'all', label: 'Todos' },
-            { value: 'active', label: 'Activos' },
-            { value: 'featured', label: 'Destacados' },
-            ...categories.map((category) => ({ value: category.id, label: category.name })),
-          ].map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              onClick={() => setFilter(item.value)}
-              className={
-                filter === item.value
-                  ? 'rounded-full border border-emerald-400/25 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-200'
-                  : 'rounded-full border border-white/8 bg-white/4 px-4 py-2 text-sm font-medium text-neutral-400 transition hover:border-white/15 hover:text-white'
-              }
-            >
-              {item.label}
-            </button>
-          ))}
+      <div className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative w-full sm:max-w-sm">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar productos..." className="h-10 rounded-[10px] bg-white pl-9 dark:bg-white/5" />
+          </div>
+          <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+            {filterItems.map((item) => (
+              <button
+                key={item.value}
+                type="button"
+                onClick={() => setFilter(item.value)}
+                className={
+                  filter === item.value
+                    ? 'shrink-0 rounded-[9px] bg-[#10161d] px-3 py-2 text-xs font-medium text-white dark:bg-white dark:text-slate-950'
+                    : 'shrink-0 rounded-[9px] border border-black/8 bg-white px-3 py-2 text-xs font-medium text-slate-500 transition hover:border-black/15 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-white/50 dark:hover:text-white'
+                }
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {filtered.length === 0 ? (
           <EmptyState
             icon={Package2}
-            title={hasProducts ? 'No hay productos para este filtro' : 'Tu catalogo todavia esta vacio'}
-            description={
-              hasProducts
-                ? 'Prueba otra categoria o suma un producto activo para que aparezca en este listado.'
-                : 'Agrega tu primer producto para que la tienda tenga algo real para vender y compartir.'
-            }
+            title={hasProducts ? 'No encontramos productos' : 'Tu catálogo todavía está vacío'}
+            description={hasProducts ? 'Probá otra búsqueda o filtro.' : 'Agregá tu primer producto y empezá a armar el catálogo.'}
             action={
-              <Button asChild className="rounded-full bg-emerald-400 text-black hover:bg-emerald-300">
-                <Link href="/admin/catalogo/nuevo">
-                  {hasProducts ? 'Agregar producto' : 'Agregar primer producto'}
-                </Link>
+              <Button asChild className="rounded-[10px] bg-[#12e89a] text-[#062117] hover:bg-[#0fd98f]">
+                <Link href="/admin/catalogo/nuevo">{hasProducts ? 'Agregar producto' : 'Crear primer producto'}</Link>
               </Button>
             }
           />
         ) : (
-          <div className="space-y-3">
-            {filtered.map((product) => {
-              const coverImage = product.images?.[0]?.url
+          <>
+            <div className="hidden overflow-hidden rounded-[14px] border border-black/8 bg-white dark:border-white/10 dark:bg-[#111820] md:block">
+              <div className="grid grid-cols-[minmax(260px,1.7fr)_minmax(140px,.8fr)_120px_110px_64px] items-center border-b border-black/7 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground dark:border-white/8">
+                <span>Producto</span><span>Categoría</span><span>Precio</span><span>Estado</span><span />
+              </div>
+              {filtered.map((product) => (
+                <ProductRow key={product.id} product={product} category={product.category_id ? categoryMap[product.category_id] : undefined} onDelete={() => setProductToDelete(product)} />
+              ))}
+            </div>
 
-              return (
-                <article
-                  key={product.id}
-                  className="surface-panel-soft premium-ring rounded-[26px] p-4 transition hover:bg-white/6 sm:p-5"
-                >
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                    <div className="relative size-[4.5rem] overflow-hidden rounded-[20px] bg-white/8 sm:size-20">
-                      {coverImage ? (
-                        <Image src={coverImage} alt={product.name} fill className="object-cover" />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-xs text-neutral-500">
-                          Sin imagen
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="truncate text-base font-semibold text-white">{product.name}</h3>
-                        {product.is_featured ? <Star className="size-4 text-amber-300" /> : null}
-                        {product.badge ? (
-                          <Badge className="border-0 bg-white/10 px-2 py-1 text-[11px] text-neutral-200">
-                            {product.badge}
-                          </Badge>
-                        ) : null}
-                      </div>
-                      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-                        <span className="font-semibold text-emerald-300">
-                          {formatCurrency(product.price)}
-                        </span>
-                        {product.category_id && categoryMap[product.category_id] ? (
-                          <span className="text-neutral-400">{categoryMap[product.category_id]}</span>
-                        ) : null}
-                        <span className="inline-flex items-center gap-1 text-neutral-500">
-                          {product.is_active ? (
-                            <>
-                              <Eye className="size-4" />
-                              Visible
-                            </>
-                          ) : (
-                            <>
-                              <EyeOff className="size-4" />
-                              Oculto
-                            </>
-                          )}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 self-end sm:self-auto">
-                      <Button
-                        asChild
-                        variant="outline"
-                        className="rounded-full border-white/10 bg-white/5 text-white hover:bg-white/10"
-                      >
-                        <Link href={`/admin/catalogo/${product.id}`}>
-                          <Edit className="mr-2 size-4" />
-                          Editar
-                        </Link>
-                      </Button>
-
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => setProductToDelete(product)}
-                        disabled={deletingId === product.id}
-                        className="rounded-full text-neutral-400 hover:bg-red-400/10 hover:text-red-300"
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </article>
-              )
-            })}
-          </div>
+            <div className="space-y-2 md:hidden">
+              {filtered.map((product) => (
+                <ProductMobileCard key={product.id} product={product} category={product.category_id ? categoryMap[product.category_id] : undefined} onDelete={() => setProductToDelete(product)} />
+              ))}
+            </div>
+          </>
         )}
       </div>
 
       <ConfirmationDialog
         open={!!productToDelete}
         onOpenChange={(open) => {
-          if (!open && !deletingId) {
-            setProductToDelete(null)
-          }
+          if (!open && !deletingId) setProductToDelete(null)
         }}
-        title={productToDelete ? `Eliminar ${productToDelete.name}` : 'Eliminar producto'}
-        description="Este producto dejara de verse en la tienda y ya no podra agregarse a nuevos pedidos."
+        title={productToDelete ? `Eliminar “${productToDelete.name}”?` : 'Eliminar producto'}
+        description="El producto dejará de aparecer en tu tienda. Esta acción no se puede deshacer."
         confirmLabel="Eliminar producto"
         onConfirm={handleDelete}
         isPending={!!productToDelete && deletingId === productToDelete.id}
       />
     </>
+  )
+}
+
+function ProductThumb({ product }: { product: ProductWithImages }) {
+  const image = product.images?.[0]?.url
+  return (
+    <div className="relative size-11 shrink-0 overflow-hidden rounded-[9px] bg-slate-100 dark:bg-white/5">
+      {image ? <Image src={image} alt={product.name} fill className="object-cover" /> : <div className="flex h-full items-center justify-center text-[8px] text-muted-foreground">Sin foto</div>}
+    </div>
+  )
+}
+
+function ProductRow({ product, category, onDelete }: { product: ProductWithImages; category?: string; onDelete: () => void }) {
+  return (
+    <div className="grid grid-cols-[minmax(260px,1.7fr)_minmax(140px,.8fr)_120px_110px_64px] items-center border-b border-black/6 px-4 py-2.5 last:border-b-0 hover:bg-slate-50/80 dark:border-white/7 dark:hover:bg-white/[0.025]">
+      <Link href={`/admin/catalogo/${product.id}`} className="flex min-w-0 items-center gap-3">
+        <ProductThumb product={product} />
+        <span className="min-w-0">
+          <span className="flex items-center gap-1.5 truncate text-sm font-medium text-foreground">{product.name}{product.is_featured ? <Star className="size-3.5 fill-amber-300 text-amber-300" /> : null}</span>
+          <span className="mt-0.5 block truncate text-xs text-muted-foreground">{product.short_description || 'Sin descripción corta'}</span>
+        </span>
+      </Link>
+      <span className="truncate text-sm text-muted-foreground">{category || 'Sin categoría'}</span>
+      <span className="text-sm font-semibold text-foreground">{formatCurrency(product.price)}</span>
+      <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">{product.is_active ? <><span className="size-1.5 rounded-full bg-[#12e89a]" /><Eye className="size-3.5" />Activo</> : <><span className="size-1.5 rounded-full bg-slate-300" /><EyeOff className="size-3.5" />Oculto</>}</span>
+      <button type="button" onClick={onDelete} className="ml-auto flex size-8 items-center justify-center rounded-[8px] text-muted-foreground transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-400/10" aria-label={`Eliminar ${product.name}`}><Trash2 className="size-4" /></button>
+    </div>
+  )
+}
+
+function ProductMobileCard({ product, category, onDelete }: { product: ProductWithImages; category?: string; onDelete: () => void }) {
+  return (
+    <div className="flex items-center gap-3 rounded-[13px] border border-black/8 bg-white p-3 dark:border-white/10 dark:bg-[#111820]">
+      <Link href={`/admin/catalogo/${product.id}`} className="flex min-w-0 flex-1 items-center gap-3">
+        <ProductThumb product={product} />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium text-foreground">{product.name}</span>
+          <span className="mt-1 flex items-center gap-2 text-xs text-muted-foreground"><strong className="font-semibold text-foreground">{formatCurrency(product.price)}</strong><span>·</span><span className="truncate">{category || 'Sin categoría'}</span></span>
+          <span className="mt-1 inline-flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className={`size-1.5 rounded-full ${product.is_active ? 'bg-[#12e89a]' : 'bg-slate-300'}`} />{product.is_active ? 'Activo' : 'Oculto'}</span>
+        </span>
+      </Link>
+      <button type="button" onClick={onDelete} className="flex size-9 shrink-0 items-center justify-center rounded-[9px] text-muted-foreground hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-400/10" aria-label={`Eliminar ${product.name}`}><Trash2 className="size-4" /></button>
+    </div>
   )
 }
