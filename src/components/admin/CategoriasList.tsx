@@ -1,11 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Check, Edit, FolderTree, GripVertical, Plus, Trash2, X } from 'lucide-react'
+import { Check, Edit3, FolderTree, GripVertical, Plus, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { CharCounter } from '@/components/common/CharCounter'
 import { ConfirmationDialog } from '@/components/common/ConfirmationDialog'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Button } from '@/components/ui/button'
@@ -15,77 +14,51 @@ import { createCategory, deleteCategory, updateCategory } from '@/lib/actions/pr
 import { CONTENT_LIMITS } from '@/data/defaults'
 import type { Category } from '@/types/store'
 
-type CategoriasListProps = {
-  categories: Category[]
-}
-
-export function CategoriasList({ categories: initialCategories }: CategoriasListProps) {
+export function CategoriasList({ categories: initialCategories }: { categories: Category[] }) {
   const [categories, setCategories] = useState(initialCategories)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showNew, setShowNew] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null)
 
-  const newForm = useForm<CategoryInput>({
-    resolver: zodResolver(categorySchema),
-    defaultValues: { name: '', sort_order: categories.length },
-  })
-
-  const editForm = useForm<CategoryInput>({
-    resolver: zodResolver(categorySchema),
-  })
+  const newForm = useForm<CategoryInput>({ resolver: zodResolver(categorySchema), defaultValues: { name: '', sort_order: categories.length } })
+  const editForm = useForm<CategoryInput>({ resolver: zodResolver(categorySchema) })
 
   async function handleCreate(data: CategoryInput) {
     const result = await createCategory(data)
-
     if (result?.error) {
-      const message = result.error.formErrors?.[0] ?? 'No pudimos crear la categoria.'
-      toast.error(message)
+      toast.error(result.error.formErrors?.[0] ?? 'No pudimos crear la categoría.')
       return
     }
-
-    if (result?.category) {
-      setCategories((prev) => [...prev, result.category as Category])
-    }
-
+    if (result?.category) setCategories((current) => [...current, result.category as Category])
     setShowNew(false)
     newForm.reset({ name: '', sort_order: categories.length + 1 })
-    toast.success('Categoria creada.')
+    toast.success('Categoría creada.')
   }
 
   async function handleUpdate(id: string, data: CategoryInput) {
     const result = await updateCategory(id, data)
-
     if (result?.error) {
-      const message = result.error.formErrors?.[0] ?? 'No pudimos actualizar la categoria.'
-      toast.error(message)
+      toast.error(result.error.formErrors?.[0] ?? 'No pudimos actualizar la categoría.')
       return
     }
-
-    if (result?.category) {
-      setCategories((prev) =>
-        prev.map((category) => (category.id === id ? (result.category as Category) : category)),
-      )
-    }
+    if (result?.category) setCategories((current) => current.map((item) => item.id === id ? result.category as Category : item))
     setEditingId(null)
-    toast.success('Categoria actualizada.')
+    toast.success('Categoría actualizada.')
   }
 
   async function handleDelete() {
     if (!categoryToDelete) return
-
     setDeletingId(categoryToDelete.id)
     const result = await deleteCategory(categoryToDelete.id)
     setDeletingId(null)
-
     if (result?.error) {
       toast.error(result.error)
       return
     }
-
-    setCategories((prev) => prev.filter((category) => category.id !== categoryToDelete.id))
+    setCategories((current) => current.filter((item) => item.id !== categoryToDelete.id))
     setCategoryToDelete(null)
-    toast.success('Categoria eliminada.')
+    toast.success('Categoría eliminada.')
   }
 
   function startEdit(category: Category) {
@@ -93,188 +66,65 @@ export function CategoriasList({ categories: initialCategories }: CategoriasList
     setEditingId(category.id)
   }
 
-  const newName = useWatch({ control: newForm.control, name: 'name' }) ?? ''
-  const editName = useWatch({ control: editForm.control, name: 'name' }) ?? ''
+  if (categories.length === 0 && !showNew) {
+    return (
+      <EmptyState
+        icon={FolderTree}
+        title="Todavía no hay categorías"
+        description="Son opcionales. Agregalas cuando ayuden a ordenar el catálogo."
+        action={<Button type="button" onClick={() => setShowNew(true)} className="rounded-[9px] bg-[#12e89a] text-[#062117] hover:bg-[#0fd98f]"><Plus className="size-4" />Nueva categoría</Button>}
+      />
+    )
+  }
 
   return (
     <>
-      <div className="space-y-5">
-        {categories.length === 0 && !showNew ? (
-          <EmptyState
-            icon={FolderTree}
-            title="Todavia no tienes categorias"
-            description="Crea una categoria para ordenar el catalogo y ayudar a los clientes a encontrar productos mas rapido."
-            action={
-              <Button
-                type="button"
-                onClick={() => setShowNew(true)}
-                className="rounded-full bg-emerald-400 text-black hover:bg-emerald-300"
-              >
-                <Plus className="mr-2 size-4" />
-                Crear primera categoria
-              </Button>
-            }
-          />
-        ) : null}
-
-        <div className="space-y-3">
-          {categories.map((category) => (
-            <div
-              key={category.id}
-              className="surface-panel-soft premium-ring rounded-[24px] px-4 py-4 sm:px-5"
-            >
-              {editingId === category.id ? (
-                <form
-                  onSubmit={editForm.handleSubmit((data) => handleUpdate(category.id, data))}
-                  className="flex flex-col gap-3 sm:flex-row sm:items-center"
-                >
-                  <div className="flex items-center gap-3">
-                    <GripVertical className="size-4 text-neutral-600" />
-                    <div className="relative w-full sm:min-w-[18rem]">
-                      <Input
-                        {...editForm.register('name')}
-                        autoFocus
-                        maxLength={CONTENT_LIMITS.category_name}
-                        className="h-10 rounded-2xl border-white/10 bg-white/5 pr-16 text-white"
-                      />
-                      <CharCounter
-                        current={editName.length}
-                        max={CONTENT_LIMITS.category_name}
-                        className="absolute right-3 top-1/2 -translate-y-1/2"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="submit"
-                      size="sm"
-                      className="rounded-full bg-emerald-400 text-black hover:bg-emerald-300"
-                    >
-                      <Check className="mr-1.5 size-3.5" />
-                      Guardar
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setEditingId(null)}
-                      className="rounded-full border-white/10 bg-white/5 text-white hover:bg-white/10"
-                    >
-                      <X className="mr-1.5 size-3.5" />
-                      Cancelar
-                    </Button>
-                  </div>
-                </form>
-              ) : (
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <div className="flex items-center gap-3">
-                    <GripVertical className="size-4 text-neutral-600" />
-                    <div>
-                      <p className="text-sm font-medium text-white">{category.name}</p>
-                      <p className="mt-0.5 text-xs text-neutral-500">/{category.slug}</p>
-                    </div>
-                  </div>
-
-                  <div className="sm:ml-auto flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => startEdit(category)}
-                      className="rounded-full border-white/10 bg-white/5 text-white hover:bg-white/10"
-                    >
-                      <Edit className="mr-1.5 size-3.5" />
-                      Editar
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      disabled={deletingId === category.id}
-                      onClick={() => setCategoryToDelete(category)}
-                      className="rounded-full text-neutral-400 hover:bg-red-400/10 hover:text-red-300"
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </div>
+      <div className="space-y-2">
+        {categories.map((category) => (
+          <div key={category.id} className="rounded-[10px] border border-black/7 bg-[#fbfcfd] p-2.5 dark:border-white/8 dark:bg-white/[0.025]">
+            {editingId === category.id ? (
+              <form onSubmit={editForm.handleSubmit((data) => handleUpdate(category.id, data))} className="space-y-2">
+                <Input {...editForm.register('name')} autoFocus maxLength={CONTENT_LIMITS.category_name} className="h-9 rounded-[8px] bg-white dark:bg-white/5" />
+                {editForm.formState.errors.name ? <p className="text-xs text-red-500">{editForm.formState.errors.name.message}</p> : null}
+                <div className="flex gap-1.5">
+                  <Button type="submit" size="sm" className="h-8 rounded-[8px] bg-[#12e89a] text-[#062117] hover:bg-[#0fd98f]"><Check className="size-3.5" />Guardar</Button>
+                  <Button type="button" size="sm" variant="ghost" onClick={() => setEditingId(null)} className="h-8 rounded-[8px]"><X className="size-3.5" />Cancelar</Button>
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+              </form>
+            ) : (
+              <div className="flex items-center gap-2.5">
+                <GripVertical className="size-3.5 shrink-0 text-muted-foreground/45" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">{category.name}</p>
+                  <p className="mt-0.5 truncate text-[10px] text-muted-foreground">/{category.slug}</p>
+                </div>
+                <button type="button" onClick={() => startEdit(category)} className="flex size-8 items-center justify-center rounded-[8px] text-muted-foreground hover:bg-black/5 hover:text-foreground dark:hover:bg-white/5" aria-label={`Editar ${category.name}`}><Edit3 className="size-3.5" /></button>
+                <button type="button" onClick={() => setCategoryToDelete(category)} disabled={deletingId === category.id} className="flex size-8 items-center justify-center rounded-[8px] text-muted-foreground hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-400/10" aria-label={`Eliminar ${category.name}`}><Trash2 className="size-3.5" /></button>
+              </div>
+            )}
+          </div>
+        ))}
 
         {showNew ? (
-          <form
-            onSubmit={newForm.handleSubmit(handleCreate)}
-            className="surface-panel premium-ring rounded-[24px] px-4 py-4 sm:px-5"
-          >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="relative flex-1">
-                <Input
-                  {...newForm.register('name')}
-                  autoFocus
-                  placeholder="Nombre de la categoria"
-                  maxLength={CONTENT_LIMITS.category_name}
-                  className="h-10 rounded-2xl border-white/10 bg-white/5 pr-16 text-white placeholder:text-neutral-500"
-                />
-                <CharCounter
-                  current={newName.length}
-                  max={CONTENT_LIMITS.category_name}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="rounded-full bg-emerald-400 text-black hover:bg-emerald-300"
-                >
-                  <Check className="mr-1.5 size-3.5" />
-                  Crear
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setShowNew(false)
-                    newForm.reset({ name: '', sort_order: categories.length })
-                  }}
-                  className="rounded-full border-white/10 bg-white/5 text-white hover:bg-white/10"
-                >
-                  <X className="mr-1.5 size-3.5" />
-                  Cancelar
-                </Button>
-              </div>
+          <form onSubmit={newForm.handleSubmit(handleCreate)} className="rounded-[10px] border border-[#12e89a]/30 bg-[#12e89a]/5 p-2.5">
+            <Input {...newForm.register('name')} autoFocus placeholder="Nombre de la categoría" maxLength={CONTENT_LIMITS.category_name} className="h-9 rounded-[8px] bg-white" />
+            {newForm.formState.errors.name ? <p className="mt-1 text-xs text-red-500">{newForm.formState.errors.name.message}</p> : null}
+            <div className="mt-2 flex gap-1.5">
+              <Button type="submit" size="sm" className="h-8 rounded-[8px] bg-[#12e89a] text-[#062117] hover:bg-[#0fd98f]"><Check className="size-3.5" />Crear</Button>
+              <Button type="button" size="sm" variant="ghost" onClick={() => { setShowNew(false); newForm.reset({ name: '', sort_order: categories.length }) }} className="h-8 rounded-[8px]"><X className="size-3.5" />Cancelar</Button>
             </div>
-            {newForm.formState.errors.name ? (
-              <p className="mt-2 text-xs text-red-300">{newForm.formState.errors.name.message}</p>
-            ) : null}
           </form>
-        ) : categories.length > 0 ? (
-          <Button
-            type="button"
-            onClick={() => setShowNew(true)}
-            variant="outline"
-            className="rounded-full border-white/10 bg-white/5 text-white hover:bg-white/10"
-          >
-            <Plus className="mr-2 size-4" />
-            Agregar categoria
-          </Button>
-        ) : null}
+        ) : (
+          <button type="button" onClick={() => setShowNew(true)} className="flex h-9 w-full items-center justify-center gap-2 rounded-[9px] border border-dashed border-black/10 text-xs font-medium text-muted-foreground transition hover:border-black/20 hover:text-foreground dark:border-white/10"><Plus className="size-3.5" />Nueva categoría</button>
+        )}
       </div>
 
       <ConfirmationDialog
         open={!!categoryToDelete}
-        onOpenChange={(open) => {
-          if (!open && !deletingId) {
-            setCategoryToDelete(null)
-          }
-        }}
-        title={categoryToDelete ? `Eliminar ${categoryToDelete.name}` : 'Eliminar categoria'}
-        description="Los productos que usaban esta categoria seguiran activos, pero quedaran sin categoria en la tienda."
-        confirmLabel="Eliminar categoria"
+        onOpenChange={(open) => { if (!open && !deletingId) setCategoryToDelete(null) }}
+        title={categoryToDelete ? `Eliminar “${categoryToDelete.name}”?` : 'Eliminar categoría'}
+        description="Los productos no se eliminan, pero dejarán de pertenecer a esta categoría."
+        confirmLabel="Eliminar categoría"
         onConfirm={handleDelete}
         isPending={!!categoryToDelete && deletingId === categoryToDelete.id}
       />

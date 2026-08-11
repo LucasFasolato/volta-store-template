@@ -9,8 +9,8 @@ export function MobileAdminNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="safe-area-pb admin-surface fixed inset-x-2.5 bottom-2.5 z-40 rounded-[18px] p-1.5 lg:hidden">
-      <div className="grid grid-cols-4 gap-1">
+    <nav className="safe-area-pb fixed inset-x-2.5 bottom-2.5 z-50 lg:hidden">
+      <div className="grid grid-cols-4 gap-1 rounded-[16px] border border-black/8 bg-white/96 p-1.5 shadow-[0_14px_40px_rgba(15,23,42,.13)] backdrop-blur-xl dark:border-white/10 dark:bg-[#111820]/96">
         {ADMIN_NAV_ITEMS.map((item) => {
           const Icon = item.icon
           const active = item.exact ? pathname === item.href : pathname.startsWith(item.href)
@@ -20,12 +20,14 @@ export function MobileAdminNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center gap-0.5 rounded-md px-2 py-2 text-[10px] font-medium transition sm:text-[11px]',
-                active ? 'admin-surface-selected text-foreground' : 'text-muted-foreground',
+                'flex min-h-[50px] flex-col items-center justify-center gap-1 rounded-[10px] px-1 text-[10px] font-medium transition sm:text-[11px]',
+                active
+                  ? 'bg-[#10161d] text-white dark:bg-white dark:text-slate-950'
+                  : 'text-slate-500 hover:bg-slate-50 dark:text-white/50 dark:hover:bg-white/5',
               )}
             >
-              <Icon className="size-3.5 sm:size-4" />
-              {item.label}
+              <Icon className={cn('size-4', active && 'text-[#12e89a]')} />
+              <span className="max-w-full truncate">{item.label}</span>
             </Link>
           )
         })}

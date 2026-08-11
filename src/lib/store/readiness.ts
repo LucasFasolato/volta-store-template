@@ -8,7 +8,6 @@ export type StoreReadinessCheckKey =
   | 'hero-copy'
   | 'hero-image'
   | 'active-product'
-  | 'product-image'
   | 'product-price'
 
 export type StoreReadinessCheck = {
@@ -61,7 +60,6 @@ export function evaluateStoreReadiness({
 }): StoreReadinessReport {
   const { store, content } = storeData
   const activeProducts = products.filter((product) => product.is_active)
-  const activeProductsWithImage = activeProducts.filter((product) => (product.images?.length ?? 0) > 0)
   const activeProductsWithPrice = activeProducts.filter((product) => product.price > 0)
 
   const checks = [
@@ -72,18 +70,18 @@ export function evaluateStoreReadiness({
       blocking: true,
       detail: isValidStoreName(store.name)
         ? 'Tu marca ya se muestra con un nombre claro.'
-        : 'Define un nombre corto y claro para que la tienda se entienda rapido.',
+        : 'Definí un nombre corto y claro para que la tienda se entienda rápido.',
       href: '/admin/negocio',
       ctaLabel: 'Completar negocio',
     }),
     buildCheck({
       key: 'slug',
-      label: 'Enlace publico',
+      label: 'Enlace público',
       passed: isValidSlug(store.slug),
       blocking: true,
       detail: isValidSlug(store.slug)
-        ? 'La URL publica ya tiene un formato valido.'
-        : 'Revisa el enlace publico para que sea facil de compartir y no falle.',
+        ? 'La URL pública ya tiene un formato válido.'
+        : 'Revisá el enlace público para que sea fácil de compartir y no falle.',
       href: '/admin/negocio',
       ctaLabel: 'Revisar enlace',
     }),
@@ -93,8 +91,8 @@ export function evaluateStoreReadiness({
       passed: isValidWhatsapp(store.whatsapp),
       blocking: true,
       detail: isValidWhatsapp(store.whatsapp)
-        ? 'El numero que recibe pedidos ya esta listo.'
-        : 'Agrega un WhatsApp valido para que los pedidos lleguen sin friccion.',
+        ? 'El número que recibe pedidos ya está listo.'
+        : 'Agregá un WhatsApp válido para que los pedidos lleguen sin fricción.',
       href: '/admin/negocio',
       ctaLabel: 'Configurar WhatsApp',
     }),
@@ -104,8 +102,8 @@ export function evaluateStoreReadiness({
       passed: hasValidHeroCopy(content.hero_title, content.hero_subtitle),
       blocking: true,
       detail: hasValidHeroCopy(content.hero_title, content.hero_subtitle)
-        ? 'La portada ya explica que vendes en un vistazo.'
-        : 'Completa titulo y subtitulo para que la portada cuente rapido que vendes.',
+        ? 'La portada ya explica qué vendés en un vistazo.'
+        : 'Completá título y subtítulo para que la portada cuente rápido qué vendés.',
       href: '/admin/tienda?tab=contenido',
       ctaLabel: 'Completar portada',
     }),
@@ -115,8 +113,8 @@ export function evaluateStoreReadiness({
       passed: Boolean(content.hero_image_url),
       blocking: true,
       detail: content.hero_image_url
-        ? 'La portada ya tiene una imagen que completa la primera impresion.'
-        : 'Sube una imagen de portada para que la tienda no se vea incompleta.',
+        ? 'La portada ya tiene una imagen que completa la primera impresión.'
+        : 'Subí una imagen de portada para completar este paso.',
       href: '/admin/tienda?tab=contenido',
       ctaLabel: 'Subir portada',
     }),
@@ -128,21 +126,9 @@ export function evaluateStoreReadiness({
       detail:
         activeProducts.length >= 1
           ? 'Ya hay al menos un producto real para vender.'
-          : 'Agrega al menos un producto activo para que la tienda tenga algo concreto.',
+          : 'Agregá al menos un producto activo para que la tienda tenga algo concreto.',
       href: activeProducts.length > 0 ? '/admin/catalogo' : '/admin/catalogo/nuevo',
       ctaLabel: activeProducts.length > 0 ? 'Ver productos' : 'Agregar producto',
-    }),
-    buildCheck({
-      key: 'product-image',
-      label: 'Producto con imagen',
-      passed: activeProductsWithImage.length >= 1,
-      blocking: true,
-      detail:
-        activeProductsWithImage.length >= 1
-          ? 'Al menos un producto activo ya tiene imagen.'
-          : 'Necesitas al menos un producto activo con imagen para que la tienda venda mejor.',
-      href: activeProducts.length > 0 ? '/admin/catalogo' : '/admin/catalogo/nuevo',
-      ctaLabel: activeProducts.length > 0 ? 'Completar producto' : 'Agregar producto',
     }),
     buildCheck({
       key: 'product-price',
@@ -152,7 +138,7 @@ export function evaluateStoreReadiness({
       detail:
         activeProductsWithPrice.length >= 1
           ? 'Al menos un producto activo ya tiene precio visible.'
-          : 'Necesitas al menos un producto activo con precio para publicar con criterio comercial.',
+          : 'Necesitás al menos un producto activo con precio para publicar.',
       href: activeProducts.length > 0 ? '/admin/catalogo' : '/admin/catalogo/nuevo',
       ctaLabel: activeProducts.length > 0 ? 'Completar producto' : 'Agregar producto',
     }),

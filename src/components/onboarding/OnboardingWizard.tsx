@@ -1,357 +1,108 @@
 'use client'
 
-import { useSyncExternalStore, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, Check } from 'lucide-react'
-import { useTheme } from 'next-themes'
-import { ThemeToggle } from '@/components/ThemeToggle'
+import { ArrowRight, Loader2 } from 'lucide-react'
 import { completeOnboarding } from '@/lib/actions/onboarding'
-import { cn } from '@/lib/utils'
-
-type Step = 1 | 2
-
-const STEP_LABELS = ['Nombre', 'WhatsApp']
-
-const slideVariants = {
-  enter: (dir: 'forward' | 'back') => ({ x: dir === 'forward' ? 40 : -40, opacity: 0 }),
-  center: { x: 0, opacity: 1 },
-  exit: (dir: 'forward' | 'back') => ({ x: dir === 'forward' ? -40 : 40, opacity: 0 }),
-}
 
 export function OnboardingWizard({ initialName }: { initialName: string }) {
   const router = useRouter()
-  const { resolvedTheme } = useTheme()
-  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false)
-
-  const [step, setStep] = useState<Step>(1)
-  const [direction, setDirection] = useState<'forward' | 'back'>('forward')
   const [storeName, setStoreName] = useState(initialName)
   const [whatsapp, setWhatsapp] = useState('')
-  const [nameError, setNameError] = useState('')
-  const [waError, setWaError] = useState('')
-  const [submitError, setSubmitError] = useState('')
+  const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const isDark = mounted ? resolvedTheme === 'dark' : false
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError('')
 
-  function validateStep1() {
-    if (!storeName.trim() || storeName.trim().length < 2) {
-      setNameError('El nombre debe tener al menos 2 caracteres')
-      return false
+    const name = storeName.trim()
+    const phone = whatsapp.trim()
+
+    if (name.length < 2) {
+      setError('Ingresá el nombre de tu negocio.')
+      return
     }
 
-    setNameError('')
-    return true
-  }
-
-  function validateStep2() {
-    const value = whatsapp.trim()
-    if (!value || value.length < 8 || !/^\+?[0-9\s\-()]+$/.test(value)) {
-      setWaError('Ingresa un numero valido. Ejemplo: +5491112345678')
-      return false
+    if (phone.length < 8 || !/^\+?[0-9\s\-()]+$/.test(phone)) {
+      setError('Ingresá un número de WhatsApp válido.')
+      return
     }
-
-    setWaError('')
-    return true
-  }
-
-  function goNext() {
-    if (step === 1 && !validateStep1()) return
-    setDirection('forward')
-    setStep(2)
-  }
-
-  function goBack() {
-    setDirection('back')
-    setStep(1)
-  }
-
-  async function handleFinish() {
-    if (!validateStep2()) return
 
     setIsSubmitting(true)
-    setSubmitError('')
-
-    const result = await completeOnboarding({
-      storeName,
-      whatsapp,
-    })
+    const result = await completeOnboarding({ storeName: name, whatsapp: phone })
 
     if (result.error) {
-      setSubmitError(result.error)
+      setError(result.error)
       setIsSubmitting(false)
       return
     }
 
-    router.replace('/admin')
+    router.replace('/onboarding/success')
   }
 
-  const inputClass = (error: boolean) =>
-    cn(
-      'w-full rounded-xl border px-4 py-3.5 text-base outline-none transition-all duration-150',
-      isDark
-        ? 'border-white/10 bg-white/5 text-white placeholder:text-white/22 focus:border-emerald-400/45 focus:ring-2 focus:ring-emerald-400/18'
-        : 'border-black/10 bg-[#f1f5f9] text-[#0f172a] placeholder:text-[#b0bece] focus:border-[#0f172a]/25 focus:bg-white focus:ring-2 focus:ring-[#0f172a]/6',
-      error ? (isDark ? 'border-red-400/60' : 'border-red-400') : '',
-    )
-
-  const labelClass = cn(
-    'block text-[11px] font-medium uppercase tracking-widest',
-    isDark ? 'text-white/38' : 'text-[#94a3b8]',
-  )
-
-  const hintClass = cn('text-xs', isDark ? 'text-white/30' : 'text-[#94a3b8]')
-
   return (
-    <div className={cn('min-h-screen', isDark ? 'bg-[#030712]' : 'bg-[#f5f7fa]')}>
-      <header className="flex items-center justify-between px-6 py-5 sm:px-10">
-        <div className="flex items-center gap-3">
-          <div
-            className={cn(
-              'flex size-9 items-center justify-center rounded-xl text-sm font-black',
-              isDark ? 'bg-emerald-400 text-black' : 'bg-[#0f172a] text-white',
-            )}
-          >
-            V
+    <main className="min-h-screen bg-[#f7f8fa] px-4 py-6 text-slate-950 sm:px-6">
+      <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-5xl flex-col overflow-hidden rounded-[22px] border border-black/8 bg-white lg:grid lg:grid-cols-[.95fr_1.05fr]">
+        <section className="flex flex-col justify-between p-6 sm:p-9 lg:p-12">
+          <div>
+            <div className="inline-flex items-center gap-2.5">
+              <span className="flex size-8 items-center justify-center rounded-[9px] bg-[#12e89a] text-xs font-black text-[#062117]">V</span>
+              <span className="text-sm font-semibold tracking-[-0.03em]">VOLTA STORE</span>
+            </div>
+
+            <div className="mt-12 max-w-md lg:mt-20">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Empecemos por lo esencial</p>
+              <h1 className="mt-3 text-[2.35rem] font-semibold leading-[.98] tracking-[-0.06em] sm:text-[3.15rem]">Tu tienda empieza acá.</h1>
+              <p className="mt-5 max-w-sm text-sm leading-6 text-slate-500">Con estos dos datos creamos tu espacio. Después vas a completar portada, primer producto y estilo desde el admin.</p>
+            </div>
           </div>
-          <span className={cn('text-sm font-semibold tracking-tight', isDark ? 'text-white' : 'text-[#0f172a]')}>
-            Volta Store
-          </span>
-        </div>
+          <p className="mt-10 text-xs leading-5 text-slate-400">Sin configuraciones técnicas. Podés cambiar todo más adelante.</p>
+        </section>
 
-        <ThemeToggle variant="pill" />
-      </header>
+        <section className="flex items-center border-t border-black/7 bg-[#fbfcfd] p-5 sm:p-9 lg:border-l lg:border-t-0 lg:p-12">
+          <form onSubmit={handleSubmit} className="mx-auto w-full max-w-md">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Crear tienda</p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-[-0.045em]">Creemos tu tienda</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-500">Solo necesitamos estos datos para arrancar.</p>
+            </div>
 
-      <main className="flex min-h-[calc(100vh-72px)] items-center justify-center px-4 py-10">
-        <div className="w-full max-w-5xl">
-          <div className="mb-10 flex items-center justify-center gap-3">
-            {([1, 2] as Step[]).map((currentStep) => (
-              <div key={currentStep} className="flex items-center gap-3">
-                <div className="flex flex-col items-center gap-1.5">
-                  <div
-                    className={cn(
-                      'flex size-8 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300',
-                      currentStep < step
-                        ? 'bg-emerald-500 text-white'
-                        : currentStep === step
-                          ? isDark
-                            ? 'bg-emerald-400 text-black'
-                            : 'bg-[#0f172a] text-white'
-                          : isDark
-                            ? 'bg-white/10 text-white/28'
-                            : 'bg-black/8 text-black/22',
-                    )}
-                  >
-                    {currentStep < step ? <Check className="size-4" strokeWidth={2.5} /> : currentStep}
-                  </div>
-                  <span
-                    className={cn(
-                      'hidden text-[10px] font-medium sm:block',
-                      currentStep === step
-                        ? isDark
-                          ? 'text-white/65'
-                          : 'text-[#0f172a]/55'
-                        : isDark
-                          ? 'text-white/22'
-                          : 'text-black/20',
-                    )}
-                  >
-                    {STEP_LABELS[currentStep - 1]}
-                  </span>
-                </div>
-                {currentStep < 2 ? (
-                  <div
-                    className={cn(
-                      'mb-4 h-px w-12 transition-all duration-500',
-                      currentStep < step ? 'bg-emerald-500' : isDark ? 'bg-white/10' : 'bg-black/10',
-                    )}
-                  />
-                ) : null}
-              </div>
-            ))}
-          </div>
+            <div className="mt-7 space-y-5">
+              <label className="block">
+                <span className="mb-2 block text-xs font-medium text-slate-700">Nombre del negocio</span>
+                <input
+                  autoFocus
+                  value={storeName}
+                  onChange={(event) => setStoreName(event.target.value)}
+                  placeholder="Casa Olivia"
+                  maxLength={48}
+                  className="h-12 w-full rounded-[10px] border border-black/10 bg-white px-3.5 text-sm outline-none transition focus:border-[#12e89a] focus:ring-4 focus:ring-[#12e89a]/10"
+                />
+              </label>
 
-          <div
-            className={cn(
-              'overflow-hidden rounded-2xl border',
-              isDark
-                ? 'border-white/8 bg-[#0b1220]'
-                : 'border-black/7 bg-white shadow-[0_2px_24px_rgba(0,0,0,0.07),0_1px_4px_rgba(0,0,0,0.04)]',
-            )}
-          >
-            <AnimatePresence custom={direction} mode="wait">
-              <motion.div
-                key={step}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-              >
-                {step === 1 ? (
-                  <TwoCol
-                    isDark={isDark}
-                    left={
-                      <StepCopy
-                        isDark={isDark}
-                        title={<>Como se llama<br />tu negocio?</>}
-                        body="Solo necesitamos lo esencial para entrar rapido al panel de activacion y mostrarte que falta para vender."
-                      />
-                    }
-                  >
-                    <div className="space-y-3">
-                      <label className={labelClass}>Nombre del negocio</label>
-                      <input
-                        autoFocus
-                        type="text"
-                        value={storeName}
-                        onChange={(event) => {
-                          setStoreName(event.target.value)
-                          if (nameError) setNameError('')
-                        }}
-                        onKeyDown={(event) => event.key === 'Enter' && goNext()}
-                        placeholder="Tu negocio"
-                        maxLength={48}
-                        className={inputClass(!!nameError)}
-                      />
-                      {nameError ? (
-                        <p className="text-xs text-red-400">{nameError}</p>
-                      ) : (
-                        <p className={hintClass}>Esto es lo que van a ver primero cuando entres al admin y a tu tienda.</p>
-                      )}
-                    </div>
-                  </TwoCol>
-                ) : (
-                  <TwoCol
-                    isDark={isDark}
-                    left={
-                      <StepCopy
-                        isDark={isDark}
-                        title={<>A donde te van<br />a escribir?</>}
-                        body="Tu WhatsApp es la base del flujo de venta. Apenas lo cargues, te llevamos al admin para seguir activando la tienda."
-                      />
-                    }
-                  >
-                    <div className="space-y-3">
-                      <label className={labelClass}>Numero de WhatsApp</label>
-                      <input
-                        autoFocus
-                        type="tel"
-                        value={whatsapp}
-                        onChange={(event) => {
-                          setWhatsapp(event.target.value)
-                          if (waError) setWaError('')
-                          if (submitError) setSubmitError('')
-                        }}
-                        onKeyDown={(event) => event.key === 'Enter' && handleFinish()}
-                        placeholder="+54 9 11 1234 5678"
-                        className={inputClass(!!waError || !!submitError)}
-                      />
-                      {waError || submitError ? (
-                        <p className="text-xs text-red-400">{waError || submitError}</p>
-                      ) : (
-                        <p className={hintClass}>Despues vas a ver que ya quedo listo, que falta y cual es el siguiente paso para publicar.</p>
-                      )}
-                    </div>
-                  </TwoCol>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </div>
+              <label className="block">
+                <span className="mb-2 block text-xs font-medium text-slate-700">WhatsApp de pedidos</span>
+                <input
+                  value={whatsapp}
+                  onChange={(event) => setWhatsapp(event.target.value)}
+                  type="tel"
+                  inputMode="tel"
+                  placeholder="+54 9 351 000 0000"
+                  className="h-12 w-full rounded-[10px] border border-black/10 bg-white px-3.5 text-sm outline-none transition focus:border-[#12e89a] focus:ring-4 focus:ring-[#12e89a]/10"
+                />
+                <span className="mt-2 block text-xs leading-5 text-slate-400">Lo vamos a usar para recibir los pedidos de tu tienda.</span>
+              </label>
+            </div>
 
-          <div className={cn('mt-6 flex items-center', step === 1 ? 'justify-end' : 'justify-between')}>
-            {step > 1 ? (
-              <button
-                onClick={goBack}
-                className={cn(
-                  'text-sm font-medium transition-colors',
-                  isDark ? 'text-white/38 hover:text-white/62' : 'text-[#94a3b8] hover:text-[#64748b]',
-                )}
-              >
-                ← Atras
-              </button>
-            ) : null}
+            {error ? <p className="mt-4 rounded-[10px] border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-700">{error}</p> : null}
 
-            {step === 1 ? (
-              <button
-                onClick={goNext}
-                className={cn(
-                  'flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-150 active:scale-95',
-                  isDark ? 'bg-emerald-400 text-black hover:bg-emerald-300' : 'bg-[#0f172a] text-white hover:bg-[#1e293b]',
-                )}
-              >
-                Continuar
-                <ArrowRight className="size-4" />
-              </button>
-            ) : (
-              <button
-                onClick={handleFinish}
-                disabled={isSubmitting}
-                className={cn(
-                  'flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-150 active:scale-95',
-                  isDark ? 'bg-emerald-400 text-black hover:bg-emerald-300' : 'bg-[#0f172a] text-white hover:bg-[#1e293b]',
-                  isSubmitting ? 'cursor-not-allowed opacity-60' : '',
-                )}
-              >
-                {isSubmitting ? 'Entrando al panel...' : 'Entrar al panel de activacion'}
-                {!isSubmitting ? <ArrowRight className="size-4" /> : null}
-              </button>
-            )}
-          </div>
-        </div>
-      </main>
-    </div>
-  )
-}
-
-function TwoCol({
-  isDark,
-  left,
-  children,
-}: {
-  isDark: boolean
-  left: React.ReactNode
-  children: React.ReactNode
-}) {
-  return (
-    <div className="flex flex-col gap-10 p-8 sm:flex-row sm:gap-0 sm:p-0">
-      <div className="sm:w-[42%] sm:p-12 lg:p-14">{left}</div>
-      <div
-        className={cn(
-          'flex flex-col justify-center sm:w-[58%] sm:border-l sm:p-12 lg:p-14',
-          isDark ? 'border-white/8' : 'border-black/7',
-        )}
-      >
-        {children}
+            <button type="submit" disabled={isSubmitting} className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-[10px] bg-[#12e89a] px-5 text-sm font-semibold text-[#062117] transition hover:bg-[#0fd98f] disabled:opacity-60">
+              {isSubmitting ? <><Loader2 className="size-4 animate-spin" />Creando tu tienda…</> : <>Crear mi tienda<ArrowRight className="size-4" /></>}
+            </button>
+          </form>
+        </section>
       </div>
-    </div>
-  )
-}
-
-function StepCopy({
-  isDark,
-  title,
-  body,
-}: {
-  isDark: boolean
-  title: React.ReactNode
-  body: string
-}) {
-  return (
-    <>
-      <h1
-        className={cn(
-          'text-3xl font-semibold leading-tight tracking-tight sm:text-[2rem]',
-          isDark ? 'text-white' : 'text-[#0f172a]',
-        )}
-      >
-        {title}
-      </h1>
-      <p className={cn('mt-4 text-[0.9375rem] leading-relaxed', isDark ? 'text-white/50' : 'text-[#64748b]')}>
-        {body}
-      </p>
-    </>
+    </main>
   )
 }
