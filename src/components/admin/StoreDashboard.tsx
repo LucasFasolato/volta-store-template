@@ -1,13 +1,5 @@
 import Link from 'next/link'
-import {
-  ArrowUpRight,
-  CheckCircle2,
-  ImageIcon,
-  Package,
-  Palette,
-  Settings,
-  Shapes,
-} from 'lucide-react'
+import { ArrowUpRight, CheckCircle2, ImageIcon, Package, Palette, Shapes } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { StoreLaunchPlan } from '@/lib/dashboard/store-launch'
 import type { ProductWithImages } from '@/types/store'
@@ -35,211 +27,96 @@ export function StoreDashboard({
     plan.requiredItems.find((item) => item.id === 'hero-image')?.status === 'done'
 
   return (
-    <div className="space-y-4 p-3.5 sm:p-5 lg:space-y-5 lg:p-6">
+    <div className="volta-admin-page space-y-5 p-3.5 sm:p-5 lg:p-6">
       <AdminDashboardHero plan={plan} storeName={storeName} />
       <PublishGate plan={plan} />
-      <StoreStatusSection
-        activeProductCount={activeProductCount}
-        categoryCount={categoryCount}
-        heroDone={heroDone}
-        confidenceValue={`${plan.completedRecommendedCount}/${plan.totalRecommendedCount}`}
-        confidenceStarted={plan.completedRecommendedCount > 0}
-      />
-      <QuickActionsSection />
+
+      <section>
+        <div className="volta-section-heading">
+          <div>
+            <p className="admin-label">Estado</p>
+            <h2>Tu tienda, en un vistazo</h2>
+          </div>
+        </div>
+
+        <div className="volta-status-strip dark:border-white/10 dark:bg-[#111820]">
+          <StatusItem icon={Package} label="Productos" value={String(activeProductCount)} ready={activeProductCount > 0} />
+          <StatusItem icon={Shapes} label="Categorías" value={String(categoryCount)} ready={categoryCount > 0} optional />
+          <StatusItem icon={ImageIcon} label="Portada" value={heroDone ? 'Lista' : 'Pendiente'} ready={heroDone} />
+          <StatusItem icon={CheckCircle2} label="Tienda" value={plan.isPublished ? 'Publicada' : 'En preparación'} ready={plan.isPublished} />
+        </div>
+      </section>
+
+      <section>
+        <div className="volta-section-heading">
+          <div>
+            <p className="admin-label">Acciones rápidas</p>
+            <h2>Seguí trabajando sin perder tiempo</h2>
+          </div>
+        </div>
+
+        <div className="volta-quick-actions">
+          <QuickAction href="/admin/catalogo/nuevo" icon={Package} title="Nuevo producto" text="Sumá algo al catálogo." />
+          <QuickAction href="/admin/tienda" icon={Palette} title="Editar apariencia" text="Ajustá estilo, portada y diseño." />
+          <QuickAction href={plan.isPublished ? plan.publicPath : plan.previewPath} icon={ArrowUpRight} title="Revisar tienda" text="Mirá la experiencia como cliente." external />
+        </div>
+      </section>
+
       <StoreSharePanel plan={plan} firstProduct={firstProduct} whatsapp={whatsapp} />
     </div>
   )
 }
 
-function StoreStatusSection({
-  activeProductCount,
-  categoryCount,
-  heroDone,
-  confidenceValue,
-  confidenceStarted,
-}: {
-  activeProductCount: number
-  categoryCount: number
-  heroDone: boolean
-  confidenceValue: string
-  confidenceStarted: boolean
-}) {
-  return (
-    <section className="space-y-3 sm:space-y-4">
-      <div className="space-y-1">
-        <p className="admin-label">Estado de la tienda</p>
-        <h2 className="text-xl font-semibold text-foreground sm:text-2xl">
-          La foto general de tu tienda
-        </h2>
-      </div>
-
-      <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
-        <StatusCard
-          icon={Package}
-          label="Productos activos"
-          value={String(activeProductCount)}
-          status={activeProductCount > 0 ? 'Listo' : 'Pendiente'}
-          detail={
-            activeProductCount > 0
-              ? 'Catalogo visible.'
-              : 'Agrega tu primer producto.'
-          }
-          done={activeProductCount > 0}
-        />
-        <StatusCard
-          icon={Shapes}
-          label="Categorias"
-          value={String(categoryCount)}
-          status={categoryCount > 0 ? 'Listo' : 'Opcional'}
-          detail={
-            categoryCount > 0
-              ? 'Ordenan el recorrido.'
-              : 'Puedes sumarlas despues.'
-          }
-          done={categoryCount > 0}
-        />
-        <StatusCard
-          icon={ImageIcon}
-          label="Portada"
-          value={heroDone ? 'Lista' : 'No lista'}
-          status={heroDone ? 'Completa' : 'Falta'}
-          detail={
-            heroDone
-              ? 'Primera impresion resuelta.'
-              : 'Falta copy o imagen.'
-          }
-          done={heroDone}
-        />
-        <StatusCard
-          icon={CheckCircle2}
-          label="Confianza"
-          value={confidenceValue}
-          status={confidenceStarted ? 'Progreso' : 'Inicial'}
-          detail="Mas datos, mas confianza."
-          done={confidenceStarted}
-        />
-      </div>
-    </section>
-  )
-}
-
-function StatusCard({
+function StatusItem({
   icon: Icon,
   label,
   value,
-  status,
-  detail,
-  done,
+  ready,
+  optional = false,
 }: {
   icon: LucideIcon
   label: string
   value: string
-  status: string
-  detail: string
-  done: boolean
+  ready: boolean
+  optional?: boolean
 }) {
   return (
-    <article className="admin-surface flex min-h-[148px] flex-col rounded-2xl p-3.5 sm:min-h-[168px] sm:p-5">
-      <div className="flex items-start justify-between gap-2.5">
-        <div className="flex size-9 items-center justify-center rounded-xl bg-black/[0.04] text-muted-foreground dark:bg-white/[0.05] sm:size-10">
+    <div className="dark:bg-transparent">
+      <div className="flex items-start justify-between gap-3">
+        <span className="flex size-8 items-center justify-center rounded-[9px] bg-slate-50 text-slate-500 dark:bg-white/5 dark:text-white/45">
           <Icon className="size-4" />
-        </div>
-        <span
-          className={`inline-flex items-center rounded-full border px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] sm:px-2.5 sm:text-[10px] ${
-            done
-              ? 'border-emerald-300/20 bg-emerald-400/10 text-emerald-700 dark:text-emerald-300'
-              : 'border-border bg-black/[0.04] text-muted-foreground dark:border-white/10 dark:bg-white/[0.04]'
-          }`}
-        >
-          {status}
         </span>
+        <span className={`size-2 rounded-full ${ready ? 'bg-[#12e89a]' : optional ? 'bg-slate-300 dark:bg-white/20' : 'bg-amber-400'}`} />
       </div>
-
-      <div className="mt-4.5 sm:mt-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-          {label}
-        </p>
-        <p className="mt-1.5 text-[1.55rem] font-semibold leading-none tracking-[-0.04em] text-foreground sm:mt-2 sm:text-[1.8rem]">
-          {value}
-        </p>
-      </div>
-
-      <p className="mt-auto pt-3.5 text-sm leading-5 text-muted-foreground sm:pt-5 sm:leading-6">
-        {detail}
-      </p>
-    </article>
+      <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+      <p className="mt-1 text-[1.2rem] font-semibold tracking-[-0.035em] text-foreground">{value}</p>
+    </div>
   )
 }
 
-const QUICK_ACTIONS = [
-  {
-    href: '/admin/catalogo/nuevo',
-    icon: Package,
-    label: 'Agregar producto',
-    description: 'Suma algo al catalogo.',
-  },
-  {
-    href: '/admin/tienda?tab=contenido',
-    icon: ImageIcon,
-    label: 'Portada y banner',
-    description: 'Ajusta la portada.',
-  },
-  {
-    href: '/admin/tienda',
-    icon: Palette,
-    label: 'Tienda',
-    description: 'Define branding, estilo y layout.',
-  },
-  {
-    href: '/admin/negocio',
-    icon: Settings,
-    label: 'Negocio',
-    description: 'Edita datos del negocio.',
-  },
-] as const satisfies ReadonlyArray<{
+function QuickAction({
+  href,
+  icon: Icon,
+  title,
+  text,
+  external = false,
+}: {
   href: string
   icon: LucideIcon
-  label: string
-  description: string
-}>
-
-function QuickActionsSection() {
+  title: string
+  text: string
+  external?: boolean
+}) {
   return (
-    <section className="space-y-3 sm:space-y-4">
-      <div className="space-y-1">
-        <p className="admin-label">Acciones rapidas</p>
-        <h2 className="text-xl font-semibold text-foreground sm:text-2xl">
-          Lo que probablemente quieras hacer ahora
-        </h2>
-      </div>
-
-      <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
-        {QUICK_ACTIONS.map((action) => {
-          const Icon = action.icon
-
-          return (
-            <Link
-              key={action.href}
-              href={action.href}
-              className="group admin-surface flex min-h-[132px] flex-col rounded-2xl p-3.5 transition duration-200 hover:-translate-y-0.5 hover:border-white/12 hover:bg-white/[0.04] sm:min-h-[152px] sm:p-5"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-black/[0.04] text-muted-foreground transition-colors group-hover:text-foreground dark:bg-white/[0.05] sm:size-11">
-                  <Icon className="size-4" />
-                </div>
-                <ArrowUpRight className="size-4 text-muted-foreground transition group-hover:text-foreground" />
-              </div>
-
-              <div className="mt-auto pt-6 sm:pt-8">
-                <p className="text-sm font-medium text-foreground">{action.label}</p>
-                <p className="mt-1.5 text-sm leading-5 text-muted-foreground sm:mt-2 sm:leading-6">
-                  {action.description}
-                </p>
-              </div>
-            </Link>
-          )
-        })}
-      </div>
-    </section>
+    <Link href={href} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined} className="volta-quick-action dark:border-white/10 dark:bg-[#111820]">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-slate-50 text-slate-600 dark:bg-white/5 dark:text-white/55">
+        <Icon className="size-4" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-foreground">{title}</span>
+        <span className="mt-1 block text-xs leading-5 text-muted-foreground">{text}</span>
+      </span>
+      <ArrowUpRight className="size-4 shrink-0 text-muted-foreground" />
+    </Link>
   )
 }
