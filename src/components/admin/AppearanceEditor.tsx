@@ -38,13 +38,8 @@ const SECTIONS: SectionItem[] = [
   { value: 'secciones', label: 'Secciones', description: 'Qué bloques aparecen.', icon: Rows3 },
 ]
 
-function normalizeInitialTab(initialTab: AppTab): AppTab {
-  if (initialTab === 'avanzado') return 'secciones'
-  return initialTab
-}
-
 export function AppearanceEditor({ content, theme, layout, store, initialTab = 'estilos' }: Props) {
-  const [activeSection, setActiveSection] = useState<AppTab>(() => normalizeInitialTab(initialTab))
+  const [activeSection, setActiveSection] = useState<AppTab>(initialTab)
   const meta = SECTIONS.find((item) => item.value === activeSection) ?? SECTIONS[0]
 
   function openAdvanced(section: ThemeSection) {
