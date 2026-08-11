@@ -1,8 +1,8 @@
 import {
-  BriefcaseBusiness,
   LayoutDashboard,
   Package,
-  Store,
+  Palette,
+  Settings,
 } from 'lucide-react'
 
 export type AdminNavItem = {
@@ -14,7 +14,7 @@ export type AdminNavItem = {
 
 export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { href: '/admin', label: 'Resumen', icon: LayoutDashboard, exact: true },
-  { href: '/admin/catalogo', label: 'Catalogo', icon: Package },
-  { href: '/admin/tienda', label: 'Tienda', icon: Store },
-  { href: '/admin/negocio', label: 'Negocio', icon: BriefcaseBusiness },
+  { href: '/admin/tienda', label: 'Apariencia', icon: Palette },
+  { href: '/admin/catalogo', label: 'Productos', icon: Package },
+  { href: '/admin/negocio', label: 'Configuración', icon: Settings },
 ]
