@@ -48,8 +48,10 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
     setIsGoogleLoading(true)
 
     const supabase = createClient()
-    const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin
-    const redirectTo = `${base}/auth/callback?next=/admin&provider=google`
+    // Always return to the exact origin the user is currently visiting.
+    // This avoids stale NEXT_PUBLIC_APP_URL values sending production OAuth
+    // callbacks to an old Vercel/domain URL.
+    const redirectTo = `${window.location.origin}/auth/callback?next=/admin&provider=google`
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
