@@ -8,7 +8,6 @@ export type StoreReadinessCheckKey =
   | 'hero-copy'
   | 'hero-image'
   | 'active-product'
-  | 'product-image'
   | 'product-price'
 
 export type StoreReadinessCheck = {
@@ -61,7 +60,6 @@ export function evaluateStoreReadiness({
 }): StoreReadinessReport {
   const { store, content } = storeData
   const activeProducts = products.filter((product) => product.is_active)
-  const activeProductsWithImage = activeProducts.filter((product) => (product.images?.length ?? 0) > 0)
   const activeProductsWithPrice = activeProducts.filter((product) => product.price > 0)
 
   const checks = [
@@ -131,18 +129,6 @@ export function evaluateStoreReadiness({
           : 'Agregá al menos un producto activo para que la tienda tenga algo concreto.',
       href: activeProducts.length > 0 ? '/admin/catalogo' : '/admin/catalogo/nuevo',
       ctaLabel: activeProducts.length > 0 ? 'Ver productos' : 'Agregar producto',
-    }),
-    buildCheck({
-      key: 'product-image',
-      label: 'Imagen de producto',
-      passed: activeProductsWithImage.length >= 1,
-      blocking: false,
-      detail:
-        activeProductsWithImage.length >= 1
-          ? 'Al menos un producto activo ya tiene imagen.'
-          : 'Es recomendable sumar una imagen, pero no bloquea la activación de tu tienda.',
-      href: activeProducts.length > 0 ? '/admin/catalogo' : '/admin/catalogo/nuevo',
-      ctaLabel: activeProducts.length > 0 ? 'Agregar imagen' : 'Agregar producto',
     }),
     buildCheck({
       key: 'product-price',
