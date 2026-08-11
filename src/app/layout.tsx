@@ -8,6 +8,7 @@ import {
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import './globals.css'
+import './volta-premium.css'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
     default: 'Volta Store',
     template: '%s - Volta Store',
   },
-  description: 'La plataforma de ventas por WhatsApp con estetica premium y control total de marca.',
+  description: 'La forma más simple y profesional de vender por WhatsApp.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
