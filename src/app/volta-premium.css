@@ -1,0 +1,250 @@
+/* VOLTA STORE — premium product layer
+   Final visual direction approved in the UX boards.
+   Imported after globals.css so these rules intentionally refine existing utilities. */
+
+:root {
+  --volta-green: #12e89a;
+  --volta-green-strong: #0fd98f;
+  --volta-ink: #111827;
+  --volta-subtle: #667085;
+  --volta-line: rgba(17, 24, 39, 0.09);
+  --volta-canvas: #f7f8fa;
+  --volta-panel: #ffffff;
+  --volta-radius-control: 10px;
+  --volta-radius-card: 14px;
+  --volta-radius-panel: 18px;
+  --volta-shadow-float: 0 18px 54px rgba(15, 23, 42, 0.12);
+}
+
+.light body {
+  background: var(--volta-canvas) !important;
+  background-image: none !important;
+}
+
+.light .admin-gradient {
+  background: var(--volta-canvas) !important;
+}
+
+.light .admin-shell::before {
+  display: none;
+}
+
+.light .admin-surface,
+.light .surface-panel,
+.light .surface-panel-soft,
+.light .admin-surface-elevated {
+  border: 1px solid var(--volta-line) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.light .admin-surface-muted {
+  border: 1px solid rgba(17, 24, 39, 0.07) !important;
+  background: #f8fafb !important;
+  box-shadow: none !important;
+}
+
+.light .admin-surface-selected {
+  border: 1px solid rgba(18, 232, 154, 0.34) !important;
+  background: rgba(18, 232, 154, 0.08) !important;
+  box-shadow: none !important;
+}
+
+.light .admin-button-soft {
+  border: 1px solid var(--volta-line) !important;
+  background: #fff !important;
+  color: var(--volta-ink) !important;
+  box-shadow: none !important;
+}
+
+.light .admin-button-soft:hover {
+  border-color: rgba(17, 24, 39, 0.16) !important;
+  background: #fbfcfd !important;
+}
+
+.admin-button-primary,
+.light .admin-button-primary {
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  background: var(--volta-green) !important;
+  color: #062117 !important;
+  box-shadow: 0 10px 26px rgba(18, 232, 154, 0.16) !important;
+}
+
+.admin-button-primary:hover,
+.light .admin-button-primary:hover {
+  background: var(--volta-green-strong) !important;
+  box-shadow: 0 14px 34px rgba(18, 232, 154, 0.2) !important;
+}
+
+.light .premium-ring {
+  border: 1px solid var(--volta-line) !important;
+  box-shadow: none !important;
+}
+
+.light .admin-label {
+  color: #8b95a5 !important;
+}
+
+.light .admin-title {
+  color: var(--volta-ink) !important;
+}
+
+/* More deliberate control geometry */
+.light input:not([type='checkbox']):not([type='radio']),
+.light textarea,
+.light button[role='combobox'] {
+  border-color: rgba(17, 24, 39, 0.1) !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.light input:focus,
+.light textarea:focus,
+.light button[role='combobox']:focus {
+  border-color: rgba(18, 232, 154, 0.7) !important;
+  box-shadow: 0 0 0 3px rgba(18, 232, 154, 0.12) !important;
+}
+
+/* Admin rhythm */
+.volta-admin-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1480px;
+}
+
+.volta-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.volta-section-heading h2 {
+  font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+
+.volta-status-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--volta-line);
+  border-radius: var(--volta-radius-panel);
+  background: #fff;
+}
+
+.volta-status-strip > * {
+  min-width: 0;
+  padding: 1.15rem 1.25rem;
+}
+
+.volta-status-strip > * + * {
+  border-left: 1px solid var(--volta-line);
+}
+
+.volta-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.volta-quick-action {
+  display: flex;
+  min-height: 86px;
+  align-items: center;
+  gap: 0.9rem;
+  border: 1px solid var(--volta-line);
+  border-radius: var(--volta-radius-card);
+  background: #fff;
+  padding: 1rem;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.volta-quick-action:hover {
+  transform: translateY(-1px);
+  border-color: rgba(17, 24, 39, 0.15);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+/* Storefront: editorial, commerce-first */
+.store-shell {
+  background: var(--store-background, #fff);
+}
+
+.store-shell .store-card {
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.store-shell .store-card:hover {
+  transform: translateY(-2px);
+}
+
+.store-shell .store-button {
+  min-height: max(44px, var(--store-control-height));
+  font-weight: 650;
+}
+
+.store-shell img {
+  text-rendering: auto;
+}
+
+/* Sheets/dialogs should feel like product surfaces, not browser overlays */
+[data-slot='dialog-content'],
+[data-slot='sheet-content'] {
+  border-color: rgba(17, 24, 39, 0.09) !important;
+}
+
+.light [data-slot='dialog-content'],
+.light [data-slot='sheet-content'] {
+  background: #fff !important;
+  box-shadow: var(--volta-shadow-float) !important;
+}
+
+/* Mobile admin behaves like an app */
+@media (max-width: 1023px) {
+  .volta-admin-page {
+    padding-bottom: 5.8rem;
+  }
+
+  .volta-status-strip {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .volta-status-strip > * + * {
+    border-left: 0;
+  }
+
+  .volta-status-strip > *:nth-child(even) {
+    border-left: 1px solid var(--volta-line);
+  }
+
+  .volta-status-strip > *:nth-child(n+3) {
+    border-top: 1px solid var(--volta-line);
+  }
+
+  .volta-quick-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .volta-status-strip {
+    border-radius: 14px;
+  }
+
+  .volta-status-strip > * {
+    padding: 0.9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
