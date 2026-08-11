@@ -10,7 +10,8 @@ import { ThemeForm, type ThemeSection } from '@/components/admin/ThemeForm'
 import { cn } from '@/lib/utils'
 import type { Store, StoreContent, StoreLayout, StoreTheme } from '@/types/store'
 
-type AppTab = ThemeSection | 'contenido' | 'estilos' | 'secciones'
+type LegacyAdvancedTab = ThemeSection | 'avanzado'
+type AppTab = ThemeSection | 'contenido' | 'estilos' | 'secciones' | 'avanzado'
 export type AppearanceEditorTab = AppTab
 
 type Props = {
@@ -22,7 +23,7 @@ type Props = {
 }
 
 type SectionItem = {
-  value: AppTab
+  value: Exclude<AppTab, 'avanzado'>
   label: string
   description: string
   icon: LucideIcon
@@ -38,12 +39,16 @@ const SECTIONS: SectionItem[] = [
   { value: 'secciones', label: 'Secciones', description: 'Qué bloques aparecen.', icon: Rows3 },
 ]
 
+function normalizeTab(tab: AppTab): Exclude<AppTab, 'avanzado'> {
+  return tab === 'avanzado' ? 'secciones' : tab
+}
+
 export function AppearanceEditor({ content, theme, layout, store, initialTab = 'estilos' }: Props) {
-  const [activeSection, setActiveSection] = useState<AppTab>(initialTab)
+  const [activeSection, setActiveSection] = useState<Exclude<AppTab, 'avanzado'>>(() => normalizeTab(initialTab))
   const meta = SECTIONS.find((item) => item.value === activeSection) ?? SECTIONS[0]
 
-  function openAdvanced(section: ThemeSection) {
-    setActiveSection(section)
+  function openAdvanced(section: LegacyAdvancedTab) {
+    setActiveSection(section === 'avanzado' ? 'secciones' : section)
   }
 
   return (
@@ -99,7 +104,7 @@ export function AppearanceEditor({ content, theme, layout, store, initialTab = '
             </div>
           ) : null}
           {activeSection !== 'estilos' && activeSection !== 'contenido' && activeSection !== 'secciones' ? (
-            <ThemeForm theme={theme} activeSection={activeSection as ThemeSection} onNavigate={(section) => setActiveSection(section)} />
+            <ThemeForm theme={theme} activeSection={activeSection} onNavigate={(section) => setActiveSection(section)} />
           ) : null}
         </main>
       </div>
