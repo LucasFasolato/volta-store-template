@@ -90,6 +90,25 @@
   color: var(--volta-ink) !important;
 }
 
+/* Older admin forms used explicit dark-mode utility colors. Keep their logic but
+   make the light product surface readable and consistent with the approved board. */
+.light .admin-shell main .text-white,
+.light .admin-shell main .text-neutral-100,
+.light .admin-shell main .text-neutral-200 {
+  color: var(--volta-ink) !important;
+}
+
+.light .admin-shell main .text-neutral-300,
+.light .admin-shell main .text-neutral-400,
+.light .admin-shell main .text-neutral-500 {
+  color: var(--volta-subtle) !important;
+}
+
+.light .admin-shell main .border-white\/10,
+.light .admin-shell main .border-white\/8 {
+  border-color: var(--volta-line) !important;
+}
+
 /* More deliberate control geometry */
 .light input:not([type='checkbox']):not([type='radio']),
 .light textarea,
@@ -237,6 +256,13 @@
 
   .volta-status-strip > * {
     padding: 0.9rem;
+  }
+
+  /* Product detail is a true mobile commerce surface, not a tiny dialog. */
+  [role='dialog'][aria-labelledby='product-modal-title'] > .relative {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
   }
 }
 
