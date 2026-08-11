@@ -12,7 +12,7 @@ const VALID_TABS: AppearanceEditorTab[] = [
   'productos',
   'layout',
   'fuentes',
-  'avanzado',
+  'secciones',
 ]
 
 export default async function TiendaPage({ searchParams }: Props) {
@@ -26,14 +26,12 @@ export default async function TiendaPage({ searchParams }: Props) {
     : undefined
 
   return (
-    <div className="p-4 sm:p-5 lg:p-6">
-      <AppearanceEditor
-        content={storeData.content}
-        initialTab={initialTab}
-        store={storeData.store}
-        theme={storeData.theme}
-        layout={storeData.layout}
-      />
-    </div>
+    <AppearanceEditor
+      content={storeData.content}
+      initialTab={initialTab}
+      store={storeData.store}
+      theme={storeData.theme}
+      layout={storeData.layout}
+    />
   )
 }
