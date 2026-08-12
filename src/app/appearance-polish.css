@@ -1,0 +1,44 @@
+/* Appearance editor polish derived from production visual QA.
+   Keeps ThemeForm logic untouched and only improves usable composition. */
+
+@media (min-width: 1280px) {
+  /* Give the controls enough room without sacrificing the live preview.
+     The selector only matches ThemeForm's split editor while controls are visible. */
+  .volta-admin-page section.grid:has(> .admin-surface):has(.preview-live) {
+    grid-template-columns: minmax(420px, 0.9fr) minmax(0, 1.3fr) !important;
+  }
+
+  /* Font presets were being forced into three narrow columns inside the controls pane. */
+  .volta-admin-page section.grid:has(.preview-live)
+    .admin-surface-muted
+    > .grid[class*='xl:grid-cols-3'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .volta-admin-page section.grid:has(.preview-live)
+    .admin-surface-muted
+    > .grid[class*='xl:grid-cols-3']
+    > button {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Contrast cards need reading width; three cards inside the narrow controls pane
+     caused the status badges to sit on top of their labels and values. */
+  .volta-admin-page div.grid:has(> .admin-surface-muted[class*='pr-24']) {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  /* At medium desktop widths, stack controls and preview instead of compressing either. */
+  .volta-admin-page section.grid:has(.preview-live) {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Keep long preset/font labels from escaping their card at any width. */
+.volta-admin-page .admin-surface-muted button,
+.volta-admin-page .admin-surface-muted span {
+  min-width: 0;
+}
