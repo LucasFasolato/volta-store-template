@@ -16,7 +16,13 @@ export type CartItem = {
   selectedOptions?: Record<string, string>
 }
 
-export function buildWhatsAppMessage(items: CartItem[]): string {
+export type CheckoutDetails = {
+  customerName?: string
+  fulfillment?: 'pickup' | 'delivery'
+  notes?: string
+}
+
+export function buildWhatsAppMessage(items: CartItem[], details: CheckoutDetails = {}): string {
   const { subtotal } = getCartSummary(items)
   const lines: string[] = [COPY.checkout.greeting, '', `*${COPY.checkout.orderLabel}*`]
 
@@ -36,21 +42,36 @@ export function buildWhatsAppMessage(items: CartItem[]): string {
 
   lines.push('')
   lines.push(`*Total estimado:* ${formatCurrency(subtotal)}`)
-  lines.push('')
-  lines.push(`*${COPY.checkout.dataLabel}*`)
-  lines.push(COPY.checkout.nameField)
-  lines.push(COPY.checkout.phoneField)
-  lines.push(COPY.checkout.addressField)
-  lines.push(COPY.checkout.notesField)
+
+  const customerName = details.customerName?.trim()
+  const notes = details.notes?.trim()
+  const fulfillment = details.fulfillment === 'pickup'
+    ? 'Retiro'
+    : details.fulfillment === 'delivery'
+      ? 'Envío'
+      : null
+
+  if (customerName || fulfillment || notes) {
+    lines.push('')
+    lines.push(`*${COPY.checkout.dataLabel}*`)
+    if (customerName) lines.push(`- Nombre: ${customerName}`)
+    if (fulfillment) lines.push(`- Entrega: ${fulfillment}`)
+    if (notes) lines.push(`- Aclaraciones: ${notes}`)
+  }
+
   lines.push('')
   lines.push(COPY.checkout.closing)
 
   return lines.join('\n')
 }
 
-export function buildWhatsAppUrl(whatsapp: string, items: CartItem[]): string {
+export function buildWhatsAppUrl(
+  whatsapp: string,
+  items: CartItem[],
+  details: CheckoutDetails = {},
+): string {
   const phone = whatsapp.replace(/\D/g, '')
-  const message = buildWhatsAppMessage(items)
+  const message = buildWhatsAppMessage(items, details)
   const encoded = encodeURIComponent(message)
   return `https://wa.me/${phone}?text=${encoded}`
 }

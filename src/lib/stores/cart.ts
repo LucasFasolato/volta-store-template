@@ -2,10 +2,9 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { trackStoreEvent } from '@/lib/analytics/store-events'
 
 export type CartItem = {
-  // Unique key per line: productId for simple products,
-  // productId + sorted option hash for items with options.
   cartItemKey: string
   productId: string
   name: string
@@ -15,10 +14,6 @@ export type CartItem = {
   selectedOptions?: Record<string, string>
 }
 
-/**
- * Build a stable cart item key from productId + selected options.
- * Products without options use productId alone.
- */
 export function buildCartItemKey(
   productId: string,
   selectedOptions?: Record<string, string>,
@@ -33,11 +28,13 @@ export function buildCartItemKey(
 
 type CartState = {
   storeSlug: string | null
+  storeId: string | null
   items: CartItem[]
   isOpen: boolean
 }
 
 type CartActions = {
+  setStoreContext: (slug: string, storeId: string) => void
   setStoreSlug: (slug: string) => void
   addItem: (item: Omit<CartItem, 'quantity'>) => void
   removeItem: (cartItemKey: string) => void
@@ -64,8 +61,18 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       storeSlug: null,
+      storeId: null,
       items: [],
       isOpen: false,
+
+      setStoreContext: (slug, storeId) => {
+        const current = get().storeSlug
+        if (current && current !== slug) {
+          set({ storeSlug: slug, storeId, items: [] })
+        } else {
+          set({ storeSlug: slug, storeId })
+        }
+      },
 
       setStoreSlug: (slug) => {
         const current = get().storeSlug
@@ -77,6 +84,7 @@ export const useCartStore = create<CartStore>()(
       },
 
       addItem: (item) => {
+        const existingBeforeAdd = get().items.some((i) => i.cartItemKey === item.cartItemKey)
         set((state) => {
           const existing = state.items.find((i) => i.cartItemKey === item.cartItemKey)
           if (existing) {
@@ -90,6 +98,11 @@ export const useCartStore = create<CartStore>()(
           }
           return { items: [...state.items, { ...item, quantity: 1 }] }
         })
+
+        const storeId = get().storeId
+        if (!existingBeforeAdd && storeId) {
+          trackStoreEvent({ storeId, type: 'add_to_cart', productId: item.productId })
+        }
       },
 
       removeItem: (cartItemKey) => {
@@ -120,23 +133,37 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: 'volta-cart',
-      version: 2,
-      // Migrate old persisted data (v0/v1) that lacks cartItemKey
+      version: 3,
       migrate: (persistedState, version) => {
+        const old = persistedState as {
+          storeSlug?: string | null
+          storeId?: string | null
+          items?: Array<{ productId: string; cartItemKey?: string; [key: string]: unknown }>
+        }
+
         if (version < 2) {
-          const old = persistedState as { storeSlug?: string | null; items?: Array<{ productId: string; cartItemKey?: string; [key: string]: unknown }> }
           return {
             storeSlug: old.storeSlug ?? null,
+            storeId: old.storeId ?? null,
             items: (old.items ?? []).map((item) => ({
               ...item,
               cartItemKey: item.cartItemKey ?? item.productId,
             })),
           }
         }
+
+        if (version < 3) {
+          return {
+            ...old,
+            storeId: old.storeId ?? null,
+          }
+        }
+
         return persistedState as CartStore
       },
       partialize: (state) => ({
         storeSlug: state.storeSlug,
+        storeId: state.storeId,
         items: state.items,
       }),
     },

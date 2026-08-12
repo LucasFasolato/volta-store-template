@@ -29,23 +29,19 @@ export const COPY = {
     noProductsInCategoryDescription:
       'Probá explorando otras secciones o volvé al catálogo completo.',
     modalFallbackDescription:
-      'Agregalo al pedido y coordiná disponibilidad, opciones y entrega por WhatsApp.',
+      'Agregalo al pedido y seguí la compra por WhatsApp con disponibilidad, opciones y entrega.',
     backToStore: 'Volver a la tienda',
     shareProduct: 'Compartir producto',
   },
   checkout: {
-    greeting: '¡Hola! Quiero hacer este pedido:',
+    greeting: 'Hola! Quiero hacer este pedido:',
     orderLabel: 'Pedido',
     dataLabel: 'Datos para coordinar',
-    nameField: '- Nombre:',
-    phoneField: '- Teléfono:',
-    addressField: '- Entrega o retiro:',
-    notesField: '- Aclaraciones:',
-    closing: 'Quedo atento a la confirmación. ¡Gracias!',
+    closing: 'Quedo atento a la confirmación. Gracias!',
   },
   admin: {
     saved: 'Guardado',
-    saving: 'Guardando…',
+    saving: 'Guardando...',
     saveChanges: 'Guardar cambios',
     cancel: 'Cancelar',
     delete: 'Eliminar',
