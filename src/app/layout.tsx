@@ -9,6 +9,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import './globals.css'
 import './volta-premium.css'
+import './appearance-polish.css'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
