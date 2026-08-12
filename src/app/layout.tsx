@@ -10,6 +10,7 @@ import { ThemeProvider } from '@/components/ThemeProvider'
 import './globals.css'
 import './volta-premium.css'
 import './appearance-polish.css'
+import './admin-nav-contrast.css'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
