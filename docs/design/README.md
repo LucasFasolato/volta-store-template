@@ -25,3 +25,4 @@ Estas láminas documentan la dirección visual aprobada para la productización 
 ## Estándar de QA
 
 Antes de shipping revisar desktop + mobile, light + dark del admin, focus/teclado, reduced motion, loading/empty/error/save/upload, variantes, carrito, handoff a WhatsApp, portada y cambio de presets.
+
