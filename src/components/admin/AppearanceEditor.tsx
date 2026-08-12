@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { FileText, LayoutTemplate, Palette, Rows3, Sparkles, SwatchBook, Type } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Eye, FileText, LayoutTemplate, Palette, Rows3, Save, Sparkles, SwatchBook, Type } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { ContentForm } from '@/components/admin/ContentForm'
 import { LayoutForm } from '@/components/admin/LayoutForm'
@@ -45,14 +45,41 @@ function normalizeTab(tab: AppTab): Exclude<AppTab, 'avanzado'> {
 
 export function AppearanceEditor({ content, theme, layout, store, initialTab = 'estilos' }: Props) {
   const [activeSection, setActiveSection] = useState<Exclude<AppTab, 'avanzado'>>(() => normalizeTab(initialTab))
+  const [hasPendingChanges, setHasPendingChanges] = useState(false)
+  const [isSubmittingChanges, setIsSubmittingChanges] = useState(false)
+  const workspaceRef = useRef<HTMLElement | null>(null)
   const meta = SECTIONS.find((item) => item.value === activeSection) ?? SECTIONS[0]
 
+  function selectSection(section: Exclude<AppTab, 'avanzado'>) {
+    setActiveSection(section)
+    setHasPendingChanges(false)
+  }
+
   function openAdvanced(section: LegacyAdvancedTab) {
-    setActiveSection(section === 'avanzado' ? 'secciones' : section)
+    selectSection(section === 'avanzado' ? 'secciones' : section)
+  }
+
+  function markPendingFromInteraction(event: React.SyntheticEvent) {
+    const target = event.target as HTMLElement
+    if (target.closest('a')) return
+    if (target.closest('[data-appearance-no-dirty="true"]')) return
+    setHasPendingChanges(true)
+  }
+
+  function submitActiveAppearanceForm() {
+    const form = workspaceRef.current?.querySelector('form')
+    if (!(form instanceof HTMLFormElement)) return
+
+    setIsSubmittingChanges(true)
+    form.requestSubmit()
+    window.setTimeout(() => {
+      setIsSubmittingChanges(false)
+      setHasPendingChanges(false)
+    }, 900)
   }
 
   return (
-    <div className="volta-admin-page space-y-4 p-3.5 sm:p-5 lg:p-6">
+    <div className="volta-admin-page appearance-editor space-y-4 p-3.5 sm:p-5 lg:p-6">
       <header>
         <p className="admin-label">Apariencia</p>
         <h1 className="mt-1 text-[1.8rem] font-semibold tracking-[-0.055em] text-foreground sm:text-[2.2rem]">
@@ -65,9 +92,9 @@ export function AppearanceEditor({ content, theme, layout, store, initialTab = '
 
       <nav
         aria-label="Secciones de apariencia"
-        className="overflow-x-auto rounded-[14px] border border-black/8 bg-white p-1.5 dark:border-white/10 dark:bg-[#111820] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="appearance-tabs rounded-[14px] border border-black/8 bg-white p-1.5 dark:border-white/10 dark:bg-[#111820]"
       >
-        <div className="flex min-w-max gap-1">
+        <div className="grid grid-cols-4 gap-1 md:flex md:flex-wrap">
           {SECTIONS.map((section) => {
             const Icon = section.icon
             const active = section.value === activeSection
@@ -75,40 +102,73 @@ export function AppearanceEditor({ content, theme, layout, store, initialTab = '
               <button
                 key={section.value}
                 type="button"
-                onClick={() => setActiveSection(section.value)}
+                data-appearance-no-dirty="true"
+                onClick={() => selectSection(section.value)}
                 className={cn(
-                  'flex h-10 shrink-0 items-center gap-2 rounded-[9px] px-3.5 text-xs font-medium transition sm:text-sm',
-                  active
-                    ? 'bg-[#10161d] text-white shadow-sm dark:bg-white dark:text-slate-950'
-                    : 'text-slate-500 hover:bg-black/[0.035] hover:text-slate-900 dark:text-white/48 dark:hover:bg-white/5 dark:hover:text-white',
+                  'appearance-tab flex min-w-0 items-center justify-center gap-1.5 rounded-[9px] px-1.5 py-2.5 text-[10px] font-medium transition sm:gap-2 sm:px-2.5 sm:text-xs md:h-10 md:flex-none md:px-3.5 md:text-sm',
+                  active ? 'appearance-tab-active shadow-sm' : 'appearance-tab-idle',
                 )}
               >
-                <Icon className={cn('size-4 shrink-0', active && 'text-[#12e89a]')} />
-                <span>{section.label}</span>
+                <Icon className={cn('size-3.5 shrink-0 sm:size-4', active && 'text-[#12e89a]')} />
+                <span className="min-w-0 truncate">{section.label}</span>
               </button>
             )
           })}
+
+          <a
+            href="/admin/vista-previa"
+            target="_blank"
+            rel="noreferrer"
+            className="appearance-tab appearance-tab-preview flex min-w-0 items-center justify-center gap-1.5 rounded-[9px] px-1.5 py-2.5 text-[10px] font-medium transition sm:gap-2 sm:px-2.5 sm:text-xs md:h-10 md:flex-none md:px-3.5 md:text-sm"
+          >
+            <Eye className="size-3.5 shrink-0 sm:size-4" />
+            <span>Vista</span>
+          </a>
         </div>
       </nav>
 
-      <section className="min-w-0 rounded-[18px] border border-black/8 bg-[#f7f8fa] p-3 dark:border-white/10 dark:bg-[#0d131b] sm:p-4 lg:p-5">
-        <div className="mb-4 flex items-end justify-between gap-4">
-          <div>
+      <section
+        ref={workspaceRef}
+        className="appearance-workspace min-w-0 overflow-x-clip rounded-[18px] border border-black/8 bg-[#f7f8fa] p-3 dark:border-white/10 dark:bg-[#0d131b] sm:p-4 lg:p-5"
+        onChangeCapture={markPendingFromInteraction}
+        onInputCapture={markPendingFromInteraction}
+        onClickCapture={(event) => {
+          const target = event.target as HTMLElement
+          const button = target.closest('button[type="button"]')
+          if (button) markPendingFromInteraction(event)
+        }}
+      >
+        <div className="appearance-section-header mb-4 flex items-center justify-between gap-3 rounded-[12px] bg-[#f7f8fa]/95 py-1.5 dark:bg-[#0d131b]/95">
+          <div className="min-w-0">
             <h2 className="text-lg font-semibold tracking-[-0.035em] text-foreground">{meta.label}</h2>
             <p className="mt-1 text-xs text-muted-foreground">{meta.description}</p>
           </div>
+
+          {hasPendingChanges ? (
+            <button
+              type="button"
+              data-appearance-no-dirty="true"
+              onClick={submitActiveAppearanceForm}
+              disabled={isSubmittingChanges}
+              className="appearance-context-save inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-[10px] bg-[#12e89a] px-3 py-2 text-xs font-semibold text-[#062117] shadow-[0_8px_22px_rgba(18,232,154,.18)] transition hover:bg-[#0fd98f] disabled:cursor-wait disabled:opacity-65 sm:px-4 sm:text-sm"
+            >
+              <Save className="size-3.5" />
+              <span className="hidden xs:inline">{isSubmittingChanges ? 'Guardando…' : 'Guardar cambios'}</span>
+              <span className="xs:hidden">Guardar</span>
+            </button>
+          ) : null}
         </div>
 
         {activeSection === 'estilos' ? <QuickAppearanceForm theme={theme} store={store} onOpenAdvanced={openAdvanced} /> : null}
         {activeSection === 'contenido' ? <ContentForm content={content} store={store} /> : null}
         {activeSection === 'secciones' ? (
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
             <LayoutForm layout={layout} />
             <SectionsSummary layout={layout} />
           </div>
         ) : null}
         {activeSection !== 'estilos' && activeSection !== 'contenido' && activeSection !== 'secciones' ? (
-          <ThemeForm theme={theme} activeSection={activeSection} onNavigate={(section) => setActiveSection(section)} />
+          <ThemeForm theme={theme} activeSection={activeSection} onNavigate={(section) => selectSection(section)} />
         ) : null}
       </section>
     </div>
