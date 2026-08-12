@@ -13,7 +13,7 @@ export function CartFloatingBar() {
   return (
     <AnimatePresence>
       {itemCount > 0 ? (
-        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-4 pb-5 sm:hidden">
+        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:hidden">
           <motion.button
             type="button"
             onClick={toggleCart}
@@ -21,7 +21,7 @@ export function CartFloatingBar() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 420, damping: 30 }}
-            className="pointer-events-auto mx-auto flex w-full max-w-md items-center justify-between px-4 py-3.5 text-left transition-all duration-150 active:scale-[0.98]"
+            className="pointer-events-auto mx-auto flex min-h-[64px] w-full max-w-md items-center justify-between gap-3 px-4 py-3.5 text-left transition-all duration-150 active:scale-[0.98]"
             style={{
               borderRadius: 'calc(var(--store-card-radius) * 0.88)',
               background:
@@ -30,12 +30,11 @@ export function CartFloatingBar() {
               boxShadow: 'var(--store-shadow)',
               backdropFilter: 'blur(calc(var(--store-card-blur) + 8px))',
             }}
-            aria-label="Abrir carrito"
+            aria-label={`Ver pedido: ${itemCount} ${itemCount === 1 ? 'producto' : 'productos'}, ${formatCurrency(subtotal)}`}
           >
-            {/* Left: icon + count badge + label */}
-            <div className="flex items-center gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <div
-                className="relative flex size-11 items-center justify-center"
+                className="relative flex size-11 shrink-0 items-center justify-center"
                 style={{
                   borderRadius: 'var(--store-button-radius)',
                   background:
@@ -44,8 +43,6 @@ export function CartFloatingBar() {
                 }}
               >
                 <ShoppingBag className="size-4" style={{ color: 'var(--store-primary-contrast)' }} />
-
-                {/* Badge — pops with spring when count changes */}
                 <AnimatePresence mode="popLayout" initial={false}>
                   <motion.span
                     key={itemCount}
@@ -54,58 +51,32 @@ export function CartFloatingBar() {
                     exit={{ scale: 0.3, opacity: 0 }}
                     transition={{ type: 'spring', stiffness: 550, damping: 20 }}
                     className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full text-[10px] font-bold"
-                    style={{
-                      backgroundColor: 'var(--store-text)',
-                      color: 'var(--store-bg)',
-                    }}
+                    style={{ backgroundColor: 'var(--store-text)', color: 'var(--store-bg)' }}
                   >
                     {itemCount}
                   </motion.span>
                 </AnimatePresence>
               </div>
 
-              <div>
-                <p className="text-sm font-semibold" style={{ color: 'var(--store-text)' }}>
-                  Revisar pedido
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold" style={{ color: 'var(--store-text)' }}>
+                  Ver pedido
                 </p>
-                <p className="text-xs uppercase tracking-[0.14em]" style={{ color: 'var(--store-muted-text)' }}>
-                  {itemCount} {itemCount === 1 ? 'producto' : 'productos'} · listo para WhatsApp
+                <p className="truncate text-xs" style={{ color: 'var(--store-muted-text)' }}>
+                  {itemCount} {itemCount === 1 ? 'producto' : 'productos'} · {formatCurrency(subtotal)}
                 </p>
               </div>
             </div>
 
-            {/* Right: total + WhatsApp icon */}
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--store-muted-text)' }}>
-                  Total
-                </p>
-                {/* Subtotal animates when it changes */}
-                <AnimatePresence mode="popLayout" initial={false}>
-                  <motion.p
-                    key={subtotal}
-                    initial={{ y: -8, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 8, opacity: 0 }}
-                    transition={{ duration: 0.18 }}
-                    className="text-base font-semibold"
-                    style={{ color: 'var(--store-primary)' }}
-                  >
-                    {formatCurrency(subtotal)}
-                  </motion.p>
-                </AnimatePresence>
-              </div>
-
-              <div
-                className="flex size-9 items-center justify-center"
-                style={{
-                  borderRadius: 'var(--store-button-radius)',
-                  backgroundColor: '#25D366',
-                  color: '#ffffff',
-                }}
-              >
-                <MessageCircle className="size-4" />
-              </div>
+            <div
+              className="flex size-10 shrink-0 items-center justify-center"
+              style={{
+                borderRadius: 'var(--store-button-radius)',
+                backgroundColor: '#25D366',
+                color: '#ffffff',
+              }}
+            >
+              <MessageCircle className="size-4" />
             </div>
           </motion.button>
         </div>

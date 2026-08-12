@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Eye, FileText, LayoutTemplate, Palette, Rows3, Save, Sparkles, SwatchBook, Type } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { ContentForm } from '@/components/admin/ContentForm'
@@ -50,9 +50,21 @@ export function AppearanceEditor({ content, theme, layout, store, initialTab = '
   const workspaceRef = useRef<HTMLElement | null>(null)
   const meta = SECTIONS.find((item) => item.value === activeSection) ?? SECTIONS[0]
 
+  useEffect(() => {
+    function handleFormFeedback(event: Event) {
+      const detail = (event as CustomEvent<{ kind?: 'error' | 'success' }>).detail
+      setIsSubmittingChanges(false)
+      if (detail?.kind === 'success') setHasPendingChanges(false)
+    }
+
+    window.addEventListener('volta:form-feedback', handleFormFeedback)
+    return () => window.removeEventListener('volta:form-feedback', handleFormFeedback)
+  }, [])
+
   function selectSection(section: Exclude<AppTab, 'avanzado'>) {
     setActiveSection(section)
     setHasPendingChanges(false)
+    setIsSubmittingChanges(false)
   }
 
   function openAdvanced(section: LegacyAdvancedTab) {
@@ -68,14 +80,14 @@ export function AppearanceEditor({ content, theme, layout, store, initialTab = '
 
   function submitActiveAppearanceForm() {
     const form = workspaceRef.current?.querySelector('form')
-    if (!(form instanceof HTMLFormElement)) return
+    if (!(form instanceof HTMLFormElement) || isSubmittingChanges) return
 
     setIsSubmittingChanges(true)
     form.requestSubmit()
+
     window.setTimeout(() => {
       setIsSubmittingChanges(false)
-      setHasPendingChanges(false)
-    }, 900)
+    }, 12000)
   }
 
   return (
@@ -108,6 +120,7 @@ export function AppearanceEditor({ content, theme, layout, store, initialTab = '
                   'appearance-tab flex min-w-0 items-center justify-center gap-1.5 rounded-[9px] px-1.5 py-2.5 text-[10px] font-medium transition sm:gap-2 sm:px-2.5 sm:text-xs md:h-10 md:flex-none md:px-3.5 md:text-sm',
                   active ? 'appearance-tab-active shadow-sm' : 'appearance-tab-idle',
                 )}
+                aria-current={active ? 'page' : undefined}
               >
                 <Icon className={cn('size-3.5 shrink-0 sm:size-4', active && 'text-[#12e89a]')} />
                 <span className="min-w-0 truncate">{section.label}</span>
@@ -154,7 +167,7 @@ export function AppearanceEditor({ content, theme, layout, store, initialTab = '
             >
               <Save className="size-3.5" />
               <span className="hidden xs:inline">{isSubmittingChanges ? 'Guardando…' : 'Guardar cambios'}</span>
-              <span className="xs:hidden">Guardar</span>
+              <span className="xs:hidden">{isSubmittingChanges ? 'Guardando…' : 'Guardar'}</span>
             </button>
           ) : null}
         </div>

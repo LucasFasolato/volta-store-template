@@ -43,20 +43,20 @@ export function StoreFooter({
                   className="text-[11px] font-semibold uppercase tracking-[0.2em]"
                   style={{ color: 'var(--store-primary)' }}
                 >
-                  Cierre directo
+                  ¿Necesitás ayuda?
                 </p>
                 <p className="mt-2 text-lg font-semibold tracking-tight" style={{ color: 'var(--store-text)' }}>
-                  Cuando estes listo, envias el pedido por WhatsApp.
+                  Hablá directamente con {store.name}.
                 </p>
                 <p className="mt-1 max-w-md text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
-                  El negocio confirma disponibilidad, pago y entrega en una sola conversacion.
+                  Podés consultar disponibilidad, entrega, retiro o cualquier duda antes de enviar tu pedido.
                 </p>
               </div>
               <a
                 href={`https://wa.me/${phone}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex shrink-0 items-center gap-2.5 rounded-full px-7 py-4 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_44px_rgba(37,211,102,0.28)]"
+                className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2.5 rounded-full px-7 py-3 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_44px_rgba(37,211,102,0.28)]"
                 style={{
                   background: 'linear-gradient(145deg, #25D366, #1db954)',
                   color: '#ffffff',
@@ -64,7 +64,7 @@ export function StoreFooter({
                 }}
               >
                 <MessageCircle className="size-[1.1rem]" />
-                Pedir por WhatsApp
+                Hablar por WhatsApp
               </a>
             </div>
           </div>
@@ -82,14 +82,14 @@ export function StoreFooter({
               className="store-heading mt-3 text-2xl font-semibold tracking-tight sm:text-[2rem]"
               style={{ color: 'var(--store-text)' }}
             >
-              Una tienda pensada para elegir rapido y comprar directo.
+              Elegí fácil. Enviá tu pedido por WhatsApp.
             </h2>
             <p
               className="mt-4 max-w-xl text-sm leading-7 sm:text-[15px]"
               style={{ color: 'var(--store-soft-text)' }}
             >
-              {productCount} {productCount === 1 ? 'producto visible' : 'productos visibles'}
-              {categoryCount > 1 ? ` en ${categoryCount} categorias` : ''}. Todo el cierre se coordina con datos reales del negocio.
+              {productCount} {productCount === 1 ? 'producto disponible' : 'productos disponibles'}
+              {categoryCount > 1 ? ` en ${categoryCount} categorías` : ''}. Armá tu pedido y coordiná los detalles directamente con el negocio.
             </p>
           </div>
 
@@ -104,12 +104,12 @@ export function StoreFooter({
             {store.hours ? <FooterRow icon={<Clock className="size-4" />}>{store.hours}</FooterRow> : null}
           </FooterColumn>
 
-          <FooterColumn title="Compra">
+          <FooterColumn title="Cómo comprar">
             <FooterRow icon={<Package className="size-4" />}>
-              Armas el pedido en el carrito y lo envias cuando quieras.
+              Agregá lo que quieras al pedido.
             </FooterRow>
             <FooterRow icon={<Rows3 className="size-4" />}>
-              Explora el catalogo y coordina envio o retiro directamente con el negocio.
+              Revisalo y continuá por WhatsApp para coordinar el resto.
             </FooterRow>
           </FooterColumn>
         </div>
@@ -121,8 +121,8 @@ export function StoreFooter({
             color: 'var(--store-muted-text)',
           }}
         >
-          <span>Powered by Volta Store</span>
-          <span>Catalogo operativo con cierre conversacional</span>
+          <span>Creado con VOLTA STORE</span>
+          <span>Compra directa por WhatsApp</span>
         </div>
       </div>
     </footer>
@@ -149,7 +149,7 @@ function FooterLink({ href, icon, label }: { href: string; icon: React.ReactNode
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-3 transition hover:opacity-90"
+      className="flex min-h-11 items-center gap-3 transition hover:opacity-90"
       style={{ color: 'var(--store-text)' }}
     >
       <span style={{ color: 'var(--store-primary)' }}>{icon}</span>
