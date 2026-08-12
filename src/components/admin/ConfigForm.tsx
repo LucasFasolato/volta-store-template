@@ -24,7 +24,7 @@ export function ConfigForm({ store }: { store: Store }) {
   const [currentSlug, setCurrentSlug] = useState(store.slug)
   const [copied, setCopied] = useState(false)
   const [slugAvailability, setSlugAvailability] = useState<{ slug: string; available: boolean; message: string } | null>(null)
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tu-app.com'
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://tu-app.com').replace(/\/+$/, '')
 
   const { handleSubmit, register, setValue, setError, control, formState: { errors, isSubmitting } } = useForm<StoreConfigInput>({
     resolver: zodResolver(storeConfigSchema),
