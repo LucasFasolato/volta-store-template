@@ -11,6 +11,7 @@ import './globals.css'
 import './volta-premium.css'
 import './appearance-polish.css'
 import './admin-nav-contrast.css'
+import './core-ux-polish.css'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

@@ -19,10 +19,10 @@ export function StoreNavCartButton() {
         color: 'var(--store-primary-contrast)',
         boxShadow: '0 14px 34px color-mix(in srgb, var(--store-primary) 22%, transparent)',
       }}
-      aria-label="Ver carrito"
+      aria-label={count > 0 ? `Ver pedido, ${count} ${count === 1 ? 'producto' : 'productos'}` : 'Ver pedido'}
     >
       <ShoppingBag className="size-4" />
-      <span className="hidden sm:block">Carrito</span>
+      <span className="hidden sm:block">Pedido</span>
       <AnimatePresence mode="popLayout" initial={false}>
         {count > 0 ? (
           <motion.span
