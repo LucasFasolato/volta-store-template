@@ -1,0 +1,65 @@
+/* Navigation contrast isolation.
+   The global light-mode admin overrides intentionally remap text-white to dark text
+   for light surfaces. Sidebar and mobile navigation are exceptions because their
+   active/dark surfaces must retain high-contrast light labels. */
+
+.light .admin-sidebar,
+.light .admin-sidebar * {
+  --admin-nav-fg: #f8fafc;
+}
+
+.light .admin-sidebar .admin-sidebar-brand,
+.light .admin-sidebar .admin-sidebar-store-name {
+  color: #f8fafc !important;
+}
+
+.light .admin-sidebar .admin-sidebar-store-meta {
+  color: rgba(248, 250, 252, 0.42) !important;
+}
+
+.light .admin-sidebar .admin-sidebar-nav-link[data-active='true'] {
+  color: #f8fafc !important;
+  background: rgba(255, 255, 255, 0.09) !important;
+}
+
+.light .admin-sidebar .admin-sidebar-nav-link[data-active='false'] {
+  color: rgba(248, 250, 252, 0.62) !important;
+}
+
+.light .admin-sidebar .admin-sidebar-nav-link[data-active='false']:hover {
+  color: #f8fafc !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+}
+
+.light .admin-sidebar .admin-sidebar-signout {
+  color: rgba(248, 250, 252, 0.52) !important;
+}
+
+.light .admin-sidebar .admin-sidebar-signout:hover {
+  color: #fda4af !important;
+}
+
+.light .mobile-admin-nav .mobile-admin-nav-link[data-active='true'] {
+  color: #f8fafc !important;
+  background: #10161d !important;
+}
+
+.light .mobile-admin-nav .mobile-admin-nav-link[data-active='false'] {
+  color: #64748b !important;
+}
+
+.light .mobile-admin-nav .mobile-admin-nav-link[data-active='false']:hover {
+  color: #0f172a !important;
+  background: #f8fafc !important;
+}
+
+.dark .admin-sidebar .admin-sidebar-brand,
+.dark .admin-sidebar .admin-sidebar-store-name,
+.dark .admin-sidebar .admin-sidebar-nav-link[data-active='true'] {
+  color: #f8fafc !important;
+}
+
+.dark .mobile-admin-nav .mobile-admin-nav-link[data-active='true'] {
+  color: #0f172a !important;
+  background: #ffffff !important;
+}
