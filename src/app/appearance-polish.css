@@ -1,21 +1,77 @@
 /* Appearance editor polish derived from production visual QA.
-   Keeps ThemeForm logic untouched and only improves usable composition. */
+   Keeps the appearance logic intact and improves usable composition. */
+
+.appearance-editor,
+.appearance-workspace,
+.appearance-workspace form,
+.appearance-workspace form > *,
+.appearance-workspace section,
+.appearance-workspace div {
+  min-width: 0;
+}
+
+.appearance-workspace {
+  max-width: 100%;
+}
+
+.appearance-tab-active {
+  background: #10161d !important;
+  color: #ffffff !important;
+}
+
+.dark .appearance-tab-active {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.appearance-tab-idle,
+.appearance-tab-preview {
+  color: #526178 !important;
+}
+
+.appearance-tab-idle:hover,
+.appearance-tab-preview:hover {
+  background: rgba(15, 23, 42, 0.045);
+  color: #0f172a !important;
+}
+
+.dark .appearance-tab-idle,
+.dark .appearance-tab-preview {
+  color: rgba(255, 255, 255, 0.58) !important;
+}
+
+.dark .appearance-tab-idle:hover,
+.dark .appearance-tab-preview:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff !important;
+}
+
+/* Appearance now exposes one contextual save action near the active section title.
+   Hide legacy submit buttons that used to force the user to scroll to the bottom. */
+.appearance-workspace form button[type='submit'] {
+  display: none !important;
+}
+
+.appearance-section-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(12px);
+}
 
 @media (min-width: 1280px) {
-  /* Give the controls enough room without sacrificing the live preview.
-     The selector only matches ThemeForm's split editor while controls are visible. */
-  .volta-admin-page section.grid:has(> .admin-surface):has(.preview-live) {
+  /* Give controls enough room without sacrificing the live preview. */
+  .appearance-workspace section.grid:has(> .admin-surface):has(.preview-live) {
     grid-template-columns: minmax(420px, 0.9fr) minmax(0, 1.3fr) !important;
   }
 
-  /* Font presets were being forced into three narrow columns inside the controls pane. */
-  .volta-admin-page section.grid:has(.preview-live)
+  .appearance-workspace section.grid:has(.preview-live)
     .admin-surface-muted
     > .grid[class*='xl:grid-cols-3'] {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
-  .volta-admin-page section.grid:has(.preview-live)
+  .appearance-workspace section.grid:has(.preview-live)
     .admin-surface-muted
     > .grid[class*='xl:grid-cols-3']
     > button {
@@ -23,22 +79,118 @@
     overflow: hidden;
   }
 
-  /* Contrast cards need reading width; three cards inside the narrow controls pane
-     caused the status badges to sit on top of their labels and values. */
-  .volta-admin-page div.grid:has(> .admin-surface-muted[class*='pr-24']) {
+  .appearance-workspace div.grid:has(> .admin-surface-muted[class*='pr-24']) {
     grid-template-columns: 1fr !important;
   }
 }
 
 @media (min-width: 1024px) and (max-width: 1279px) {
-  /* At medium desktop widths, stack controls and preview instead of compressing either. */
-  .volta-admin-page section.grid:has(.preview-live) {
+  .appearance-workspace section.grid:has(.preview-live) {
     grid-template-columns: 1fr !important;
   }
 }
 
 /* Keep long preset/font labels from escaping their card at any width. */
-.volta-admin-page .admin-surface-muted button,
-.volta-admin-page .admin-surface-muted span {
+.appearance-workspace .admin-surface-muted button,
+.appearance-workspace .admin-surface-muted span {
   min-width: 0;
+}
+
+@media (max-width: 767px) {
+  .appearance-editor {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: clip;
+    padding-inline: 0.75rem !important;
+  }
+
+  .appearance-editor > header h1 {
+    font-size: clamp(1.55rem, 7vw, 1.9rem);
+    line-height: 1.08;
+  }
+
+  .appearance-editor > header p:last-child {
+    line-height: 1.55;
+  }
+
+  .appearance-tabs {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .appearance-tab {
+    width: 100%;
+    min-height: 44px;
+    overflow: hidden;
+  }
+
+  .appearance-workspace {
+    width: 100%;
+    overflow-x: clip !important;
+    padding: 0.65rem !important;
+  }
+
+  .appearance-section-header {
+    margin-inline: -0.15rem;
+    padding-inline: 0.15rem;
+  }
+
+  .appearance-context-save {
+    min-width: 44px;
+  }
+
+  /* Every editor split becomes a single readable column on mobile. */
+  .appearance-workspace form,
+  .appearance-workspace form[class*='grid'],
+  .appearance-workspace section.grid,
+  .appearance-workspace div.grid {
+    max-width: 100%;
+  }
+
+  .appearance-workspace form[class*='xl:grid-cols'],
+  .appearance-workspace section[class*='xl:grid-cols'],
+  .appearance-workspace div[class*='xl:grid-cols'] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  /* Preview surfaces must fit the viewport instead of keeping desktop intrinsic widths. */
+  .appearance-workspace .preview-live,
+  .appearance-workspace .admin-surface,
+  .appearance-workspace .admin-surface-muted,
+  .appearance-workspace .admin-surface-elevated {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .appearance-workspace .preview-live {
+    overflow: hidden;
+  }
+
+  .appearance-workspace [style*='grid-template-columns'] {
+    max-width: 100%;
+  }
+
+  /* Product/theme selectors should wrap instead of creating horizontal canvases. */
+  .appearance-workspace .grid[class*='grid-cols-3'],
+  .appearance-workspace .grid[class*='sm:grid-cols-3'],
+  .appearance-workspace .grid[class*='xl:grid-cols-3'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .appearance-workspace .grid[class*='grid-cols-4'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* Avoid child controls preserving desktop minimum widths. */
+  .appearance-workspace button,
+  .appearance-workspace input,
+  .appearance-workspace textarea,
+  .appearance-workspace [role='combobox'] {
+    max-width: 100%;
+  }
+
+  .appearance-workspace img,
+  .appearance-workspace svg {
+    max-width: 100%;
+  }
 }
