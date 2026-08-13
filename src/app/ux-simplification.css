@@ -1,10 +1,13 @@
 .admin-preview-shell .store-shell nav { top: 3rem; }
 .ux-dark-button { color: #ffffff !important; }
 .ux-dark-button svg { color: #12e89a; }
+.admin-shell .bg-\[\#10161d\].text-white { color: #ffffff !important; }
+.dark .admin-shell .bg-\[\#10161d\].text-white { color: #0f172a !important; }
 @media (max-width: 640px) {
   .volta-admin-page .volta-status-strip,
   .volta-admin-page .volta-quick-actions { display: none; }
   .activation-simple input,
   .activation-simple button { font-size: 16px; }
   .appearance-workspace { min-height: 0 !important; }
+  .store-shell main { padding-bottom: 5rem; }
 }
