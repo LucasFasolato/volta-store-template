@@ -155,11 +155,15 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
       <StoreInteractiveShell
         closeModalHref={closeModalHref}
         selectedProduct={view.selectedProduct}
+        storeId={store.id}
         storeName={store.name}
         storeRootId={storeRootId}
         storeSlug={store.slug}
         theme={theme}
         whatsapp={store.whatsapp}
+        checkoutAskName={store.checkout_ask_name ?? true}
+        checkoutAskFulfillment={store.checkout_ask_fulfillment ?? true}
+        checkoutAllowNotes={store.checkout_allow_notes ?? true}
       />
     </div>
   )

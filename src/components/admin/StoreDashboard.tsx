@@ -2,9 +2,11 @@ import Link from 'next/link'
 import { ArrowUpRight, CheckCircle2, ImageIcon, Package, Palette, Shapes } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { StoreLaunchPlan } from '@/lib/dashboard/store-launch'
+import type { StoreAnalyticsSummary } from '@/lib/queries/analytics'
 import type { ProductWithImages } from '@/types/store'
 import { AdminDashboardHero } from '@/components/admin/AdminDashboardHero'
 import { PublishGate } from '@/components/admin/PublishGate'
+import { StoreAnalyticsPanel } from '@/components/admin/StoreAnalyticsPanel'
 import { StoreSharePanel } from '@/components/admin/StoreSharePanel'
 
 export function StoreDashboard({
@@ -14,6 +16,7 @@ export function StoreDashboard({
   categoryCount,
   firstProduct,
   whatsapp,
+  analytics,
 }: {
   plan: StoreLaunchPlan
   storeName: string
@@ -21,6 +24,7 @@ export function StoreDashboard({
   categoryCount: number
   firstProduct: ProductWithImages | null
   whatsapp: string
+  analytics: StoreAnalyticsSummary
 }) {
   const heroDone =
     plan.requiredItems.find((item) => item.id === 'hero-copy')?.status === 'done' &&
@@ -30,6 +34,7 @@ export function StoreDashboard({
     <div className="volta-admin-page space-y-5 p-3.5 sm:p-5 lg:p-6">
       <AdminDashboardHero plan={plan} storeName={storeName} />
       <PublishGate plan={plan} />
+      <StoreAnalyticsPanel analytics={analytics} />
 
       <section>
         <div className="volta-section-heading">
@@ -62,7 +67,7 @@ export function StoreDashboard({
         </div>
       </section>
 
-      <StoreSharePanel plan={plan} firstProduct={firstProduct} whatsapp={whatsapp} />
+      <StoreSharePanel plan={plan} firstProduct={firstProduct} whatsapp={whatsapp} storeName={storeName} />
     </div>
   )
 }

@@ -42,6 +42,9 @@ export interface Database {
           logo_url: string | null
           status: 'draft' | 'published'
           is_active: boolean
+          checkout_ask_name: boolean
+          checkout_ask_fulfillment: boolean
+          checkout_allow_notes: boolean
           created_at: string
           updated_at: string
         }
@@ -57,6 +60,9 @@ export interface Database {
           logo_url?: string | null
           status?: 'draft' | 'published'
           is_active?: boolean
+          checkout_ask_name?: boolean
+          checkout_ask_fulfillment?: boolean
+          checkout_allow_notes?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -70,6 +76,9 @@ export interface Database {
           logo_url?: string | null
           status?: 'draft' | 'published'
           is_active?: boolean
+          checkout_ask_name?: boolean
+          checkout_ask_fulfillment?: boolean
+          checkout_allow_notes?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -338,6 +347,30 @@ export interface Database {
           url?: string
           alt?: string | null
           sort_order?: number
+        }
+        Relationships: []
+      }
+      store_events: {
+        Row: {
+          id: string
+          store_id: string
+          event_type: 'store_view' | 'product_view' | 'add_to_cart' | 'cart_open' | 'whatsapp_checkout'
+          product_id: string | null
+          session_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          store_id: string
+          event_type: 'store_view' | 'product_view' | 'add_to_cart' | 'cart_open' | 'whatsapp_checkout'
+          product_id?: string | null
+          session_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          event_type?: 'store_view' | 'product_view' | 'add_to_cart' | 'cart_open' | 'whatsapp_checkout'
+          product_id?: string | null
+          session_id?: string | null
         }
         Relationships: []
       }

@@ -1,4 +1,5 @@
 import { buildActivationFlowSteps, buildStoreLaunchPlan } from '@/lib/dashboard/store-launch'
+import { getStoreAnalytics } from '@/lib/queries/analytics'
 import { getAdminCategories, getAdminProducts } from '@/lib/queries/store'
 import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
 import { ActivationWizard } from '@/components/admin/ActivationWizard'
@@ -19,6 +20,7 @@ export default async function AdminPage() {
 
   if (plan.isPublished) {
     const firstProduct = activeProducts[0] ?? null
+    const analytics = await getStoreAnalytics(storeData.store.id)
 
     return (
       <StoreDashboard
@@ -28,6 +30,7 @@ export default async function AdminPage() {
         categoryCount={categories.length}
         firstProduct={firstProduct}
         whatsapp={storeData.store.whatsapp}
+        analytics={analytics}
       />
     )
   }
