@@ -1,60 +1,15 @@
 import Link from 'next/link'
-import { ArrowUpRight, CheckCircle2, MessageCircle, Rocket } from 'lucide-react'
+import { Eye, QrCode, Share2 } from 'lucide-react'
 import type { StoreLaunchPlan } from '@/lib/dashboard/store-launch'
-import { Button } from '@/components/ui/button'
 
-type AdminDashboardHeroProps = {
-  plan: StoreLaunchPlan
-  storeName: string
-}
-
-export function AdminDashboardHero({ plan, storeName }: AdminDashboardHeroProps) {
-  const isPublished = plan.isPublished
-  const storefrontPath = isPublished ? plan.publicPath : plan.previewPath
-
+export function AdminDashboardHero({ plan, storeName }: { plan: StoreLaunchPlan; storeName: string }) {
   return (
-    <section className="overflow-hidden rounded-[18px] border border-black/8 bg-white px-4 py-5 dark:border-white/10 dark:bg-[#111820] sm:px-6 sm:py-6 lg:px-7">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300">
-            {isPublished ? <CheckCircle2 className="size-3.5" /> : <Rocket className="size-3.5" />}
-            {isPublished ? 'Lista para recibir pedidos' : 'Lista para publicar'}
-          </div>
-
-          <h1 className="mt-3 text-balance text-[1.75rem] font-semibold leading-[1.04] tracking-[-0.055em] text-foreground sm:text-[2.35rem]">
-            {storeName}
-          </h1>
-          <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-            {isPublished
-              ? 'Tu tienda está activa. Revisala, compartila y seguí mejorando el catálogo cuando quieras.'
-              : 'La base de tu tienda ya está preparada. Revisá la vista previa y publicala cuando esté como querés.'}
-          </p>
-        </div>
-
-        <div className="grid w-full gap-2 sm:flex lg:w-auto lg:justify-end">
-          <Button asChild size="lg" className="h-11 rounded-[10px] bg-[#12e89a] px-5 text-sm font-semibold text-[#062117] shadow-none hover:bg-[#0fd98f]">
-            <Link href={storefrontPath} target="_blank" rel="noreferrer">
-              <ArrowUpRight className="size-4" />
-              {isPublished ? 'Ver tienda' : 'Ver vista previa'}
-            </Link>
-          </Button>
-
-          {isPublished ? (
-            <Button asChild variant="outline" size="lg" className="h-11 rounded-[10px] bg-white px-5 text-sm dark:bg-white/5">
-              <Link href={plan.whatsappShareUrl} target="_blank" rel="noreferrer">
-                <MessageCircle className="size-4" />
-                Compartir
-              </Link>
-            </Button>
-          ) : (
-            <Button asChild variant="outline" size="lg" className="h-11 rounded-[10px] bg-white px-5 text-sm dark:bg-white/5">
-              <Link href="#publish-gate">
-                <Rocket className="size-4" />
-                Publicar tienda
-              </Link>
-            </Button>
-          )}
-        </div>
+    <section className="rounded-[18px] border border-black/8 bg-white p-4 dark:border-white/10 dark:bg-[#111820] sm:p-5">
+      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-emerald-700 dark:text-emerald-300"><span className="size-2 rounded-full bg-[#12e89a]" />Tienda online</div>
+      <h1 className="mt-2 truncate text-[1.55rem] font-semibold tracking-[-0.05em] text-foreground sm:text-[2rem]">{storeName}</h1>
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:flex">
+        <Link href={plan.publicPath} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] bg-[#12e89a] px-4 text-sm font-semibold text-[#062117]"><Eye className="size-4" />Ver tienda</Link>
+        <a href="#share-tools" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] border border-black/8 bg-slate-50 px-4 text-sm font-semibold text-foreground dark:border-white/10 dark:bg-white/5"><Share2 className="size-4" />Compartir <QrCode className="size-3.5" /></a>
       </div>
     </section>
   )
