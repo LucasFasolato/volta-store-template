@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ChevronDown, Eye, FileText, LayoutTemplate, Palette, Rows3, Save, Sparkles, SwatchBook, Type } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { ContentForm } from '@/components/admin/ContentForm'
-import { LayoutForm } from '@/components/admin/LayoutForm'
+import { HumanSectionsForm } from '@/components/admin/HumanSectionsForm'
 import { QuickAppearanceForm } from '@/components/admin/QuickAppearanceForm'
 import { SimpleThemeForm, type SimpleThemeSection } from '@/components/admin/SimpleThemeForm'
 import { cn } from '@/lib/utils'
@@ -74,7 +74,7 @@ export function AppearanceEditor({ content, theme, layout, store, initialTab = '
     <section ref={workspaceRef} className="appearance-workspace min-w-0 overflow-x-clip rounded-[18px] border border-black/8 bg-[#f7f8fa] p-3 dark:border-white/10 dark:bg-[#0d131b] sm:p-4" onChangeCapture={markDirty} onInputCapture={markDirty} onClickCapture={(event) => { if ((event.target as HTMLElement).closest('button[type="button"]')) markDirty(event) }}><div className="appearance-section-header mb-3 flex items-center justify-between gap-3"><h2 className="text-lg font-semibold text-foreground">{label}</h2>{dirty ? <button type="button" data-appearance-no-dirty="true" onClick={save} disabled={saving} className="inline-flex min-h-10 items-center gap-1.5 rounded-[10px] bg-[#12e89a] px-3 text-xs font-semibold text-[#062117]"><Save className="size-3.5" />{saving ? 'Guardando…' : 'Guardar'}</button> : null}</div>
       {active === 'estilos' ? <QuickAppearanceForm theme={theme} store={store} onOpenAdvanced={openAdvanced} /> : null}
       {active === 'contenido' ? <ContentForm content={content} store={store} /> : null}
-      {active === 'secciones' ? <LayoutForm layout={layout} /> : null}
+      {active === 'secciones' ? <HumanSectionsForm layout={layout} /> : null}
       {active !== 'estilos' && active !== 'contenido' && active !== 'secciones' ? <SimpleThemeForm theme={theme} activeSection={active} /> : null}
     </section>
   </div>
