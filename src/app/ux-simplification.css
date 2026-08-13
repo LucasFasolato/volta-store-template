@@ -1,0 +1,7 @@
+.admin-preview-shell .store-shell nav { top: 3rem; }
+@media (max-width: 640px) {
+  .volta-admin-page .volta-status-strip,
+  .volta-admin-page .volta-quick-actions { display: none; }
+  .activation-simple input,
+  .activation-simple button { font-size: 16px; }
+}
