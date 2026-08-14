@@ -13,20 +13,20 @@ import type { Store } from '@/types/store'
 const SETTINGS = [
   {
     name: 'checkout_ask_name' as const,
-    title: 'Pedir nombre',
-    description: 'Ayuda al negocio a identificar rápido quién está haciendo el pedido.',
+    title: 'Nombre del cliente',
+    description: 'Para saber quién está haciendo el pedido.',
     icon: UserRound,
   },
   {
     name: 'checkout_ask_fulfillment' as const,
-    title: 'Preguntar retiro o envío',
-    description: 'El cliente elige una opción antes de abrir WhatsApp.',
+    title: 'Retiro o envío',
+    description: 'El cliente elige una opción antes de continuar.',
     icon: Truck,
   },
   {
     name: 'checkout_allow_notes' as const,
-    title: 'Permitir observaciones',
-    description: 'Sirve para aclaraciones simples, sin convertir el pedido en un formulario largo.',
+    title: 'Aclaración opcional',
+    description: 'Deja un espacio libre para que el cliente agregue algo importante.',
     icon: MessageSquareText,
   },
 ]
@@ -45,14 +45,12 @@ export function CheckoutSettingsForm({ store }: { store: Store }) {
   async function onSubmit(data: CheckoutSettingsInput) {
     setSubmitError(null)
     const result = await updateCheckoutSettings(data)
-
     if (result?.error) {
       const message = result.error.formErrors?.[0] ?? 'No pudimos guardar estas opciones.'
       setSubmitError(message)
       toast.error(message)
       return
     }
-
     setSaved(true)
     toast.success('Forma de pedido actualizada.')
     window.setTimeout(() => setSaved(false), 2200)
@@ -61,10 +59,9 @@ export function CheckoutSettingsForm({ store }: { store: Store }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <section className="rounded-[14px] border border-black/8 bg-white p-4 dark:border-white/10 dark:bg-[#111820] sm:p-5">
-        <div className="mb-5 border-b border-black/7 pb-4 dark:border-white/8">
-          <p className="admin-label">Pedido por WhatsApp</p>
-          <h2 className="mt-1 text-base font-semibold tracking-[-0.03em] text-foreground">Pedí solo los datos que realmente necesitás</h2>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">Máximo tres decisiones simples antes de abrir WhatsApp.</p>
+        <div className="mb-4">
+          <p className="admin-label">Antes de abrir WhatsApp</p>
+          <h2 className="mt-1 text-base font-semibold tracking-[-0.03em] text-foreground">Qué datos querés pedir</h2>
         </div>
 
         <div className="space-y-2.5">
@@ -76,15 +73,15 @@ export function CheckoutSettingsForm({ store }: { store: Store }) {
                 control={control}
                 name={setting.name}
                 render={({ field }) => (
-                  <label className="flex cursor-pointer items-start gap-3 rounded-[12px] border border-black/7 bg-[#fbfcfd] p-3.5 transition hover:border-black/12 dark:border-white/8 dark:bg-white/[0.025] dark:hover:border-white/14">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-[12px] border border-black/7 bg-[#fbfcfd] p-3.5 transition hover:border-black/12 dark:border-white/8 dark:bg-white/[0.025] dark:hover:border-white/14">
                     <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-white/55">
                       <Icon className="size-4" />
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-semibold text-foreground">{setting.title}</span>
-                      <span className="mt-1 block text-xs leading-5 text-muted-foreground">{setting.description}</span>
+                      <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{setting.description}</span>
                     </span>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} className="mt-1 shrink-0 data-[state=checked]:bg-[#12e89a]" />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} className="shrink-0 data-[state=checked]:bg-[#12e89a]" />
                   </label>
                 )}
               />
@@ -97,7 +94,7 @@ export function CheckoutSettingsForm({ store }: { store: Store }) {
       {!submitError && saved ? <FormFeedback kind="success" title="Opciones guardadas" message="El próximo pedido ya va a usar esta configuración." /> : null}
 
       <div className="flex justify-end">
-        <SaveButton isLoading={isSubmitting} isSaved={saved} label="Guardar forma de pedido" />
+        <SaveButton isLoading={isSubmitting} isSaved={saved} label="Guardar" />
       </div>
     </form>
   )
