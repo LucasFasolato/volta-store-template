@@ -2,7 +2,7 @@
 .ux-dark-button { color: #ffffff !important; }
 .ux-dark-button svg { color: #12e89a; }
 .admin-shell .bg-\[\#10161d\].text-white { color: #ffffff !important; }
-.dark .admin-shell .bg-\[\#10161d\].text-white { color: #0f172a !important; }
+#new-product-form > form > section:last-child { display: none; }
 @media (max-width: 640px) {
   .volta-admin-page .volta-status-strip,
   .volta-admin-page .volta-quick-actions { display: none; }
