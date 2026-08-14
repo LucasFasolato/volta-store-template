@@ -25,11 +25,18 @@ const SHORT_COPY: Record<string, string> = {
   deco: 'Sobrio y elegante',
 }
 
+function matchPreset(theme: StoreTheme) {
+  return FRIENDLY_PRESETS.find((preset) =>
+    preset.theme.primary_color === theme.primary_color &&
+    preset.theme.background_color === theme.background_color &&
+    preset.theme.card_layout === theme.card_layout,
+  )?.id ?? null
+}
+
 export function QuickAppearanceForm({ theme, store, onOpenAdvanced }: Props) {
-  void theme
   void store
   const router = useRouter()
-  const [selected, setSelected] = useState<string | null>(null)
+  const [selected, setSelected] = useState<string | null>(() => matchPreset(theme))
   const [isPending, startTransition] = useTransition()
 
   function chooseStyle(id: string) {
