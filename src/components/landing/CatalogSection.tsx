@@ -14,6 +14,7 @@ export function CatalogSection({ products, totalFiltered, categories, theme, con
   const isSmallCatalog = catalogSize === 'small'
   const gridClass = getCatalogGridClass(theme.grid_columns, totalFiltered, catalogSize)
   const activeCategoryName = categories.find((category) => category.slug === routeState.activeCategory)?.name
+  const compactWidth = totalFiltered === 1 ? 'max-w-[23rem]' : totalFiltered === 2 ? 'max-w-[46rem]' : ''
 
   return (
     <section id="catalogo" className={cn('pb-[var(--store-space-section)]', isSmallCatalog ? 'pt-5 sm:pt-7' : 'pt-[var(--store-space-section)]')}>
@@ -29,7 +30,7 @@ export function CatalogSection({ products, totalFiltered, categories, theme, con
         {categories.length > 0 ? <div className={cn('-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0', isSmallCatalog ? 'mb-4' : 'mb-7')}><CategoryPill label="Todos" href={buildStorefrontHref(pathname, { category: null, page: 1, pageSize: routeState.pageSize })} active={!routeState.activeCategory} />{categories.map((category) => <CategoryPill key={category.id} label={category.name} href={buildStorefrontHref(pathname, { category: category.slug, page: 1, pageSize: routeState.pageSize })} active={routeState.activeCategory === category.slug} />)}</div> : null}
 
         {totalFiltered === 0 ? <EmptyState icon={SearchX} title={activeCategoryName ? `No encontramos productos en ${activeCategoryName}` : COPY.product.noProducts} description={activeCategoryName ? COPY.product.noProductsInCategoryDescription : COPY.product.noProductsDescription} action={routeState.activeCategory ? <Link href={buildStorefrontHref(pathname, { pageSize: routeState.pageSize })} scroll={false} className="store-button px-5 py-3 text-sm font-semibold" style={{ background: 'var(--store-primary)', color: 'var(--store-primary-contrast)' }}>Ver todos</Link> : undefined} className="border-0" tone="light" /> : <>
-          <div className={cn('grid', isSmallCatalog ? 'gap-3 sm:gap-4' : 'gap-5 sm:gap-6', gridClass)}>{products.map((product) => <ProductCard key={product.id} product={product} productHref={buildStorefrontHref(pathname, { category: routeState.activeCategory, page: routeState.page, pageSize: routeState.pageSize, product: product.slug })} theme={theme} />)}</div>
+          <div className={cn('grid w-full', isSmallCatalog ? 'gap-3 sm:gap-4' : 'gap-5 sm:gap-6', gridClass, compactWidth)}>{products.map((product) => <ProductCard key={product.id} product={product} productHref={buildStorefrontHref(pathname, { category: routeState.activeCategory, page: routeState.page, pageSize: routeState.pageSize, product: product.slug })} theme={theme} />)}</div>
           {(totalPages > 1 || totalFiltered > PAGE_SIZE_OPTIONS[0]) ? <Pagination pathname={pathname} routeState={routeState} totalPages={totalPages} totalFiltered={totalFiltered} /> : null}
         </>}
       </div>

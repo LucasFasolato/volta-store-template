@@ -28,13 +28,16 @@ export function buildThemeVars(
   const density = DENSITY_MAP[theme.ui_density] ?? DENSITY_MAP.comfortable
   const spacing = SPACING_SCALE_MAP[theme.spacing_scale] ?? SPACING_SCALE_MAP.balanced
   const cardStyle = CARD_STYLE_TOKENS[theme.card_style] ?? CARD_STYLE_TOKENS.soft
-  const borderRadius = BORDER_RADIUS_MAP[theme.border_radius] ?? BORDER_RADIUS_MAP.lg
+  const requestedRadius = BORDER_RADIUS_MAP[theme.border_radius] ?? BORDER_RADIUS_MAP.lg
+  // Structural containers are intentionally capped. A legacy/full radius should
+  // never turn a product card or sheet into a giant capsule.
+  const structuralRadius = theme.border_radius === 'full' ? '24px' : requestedRadius
   const cardRadius =
     theme.card_style === 'sharp'
-      ? `calc(${borderRadius} * 0.72)`
+      ? `calc(${structuralRadius} * 0.72)`
       : theme.card_style === 'glass'
-        ? `calc(${borderRadius} * 1.08)`
-        : borderRadius
+        ? `calc(${structuralRadius} * 1.08)`
+        : structuralRadius
 
   const bgColor2 = theme.background_color_2
     ? (isDark ? mixHexColors(theme.background_color_2, '#020617', 0.78) : theme.background_color_2)
@@ -65,7 +68,7 @@ export function buildThemeVars(
     '--store-glow': withAlpha(accent, isDark ? 0.2 : 0.14),
     '--store-card-radius': cardRadius,
     '--store-button-radius': BUTTON_RADIUS_MAP[theme.button_style] ?? BUTTON_RADIUS_MAP.rounded,
-    '--store-radius': borderRadius,
+    '--store-radius': structuralRadius,
     '--store-image-ratio': IMAGE_RATIO_MAP[theme.image_ratio] ?? IMAGE_RATIO_MAP['4:5'],
     '--store-font-heading': FONT_FAMILY_MAP[theme.heading_font] ?? FONT_FAMILY_MAP['plus-jakarta'],
     '--store-font-body': FONT_FAMILY_MAP[theme.body_font] ?? FONT_FAMILY_MAP.geist,
@@ -96,20 +99,13 @@ export function buildThemeVars(
     '--store-card-border': withAlpha(text, cardStyle.borderOpacity),
     '--store-card-shadow': cardStyle.shadow,
     '--store-card-blur': cardStyle.blur,
-
-    // Navigation — semi-transparent for backdrop-blur effect
     '--store-nav-bg': withAlpha(background, isDark ? 0.88 : 0.84),
-
-    // Footer — gradient from bg to surface
     '--store-footer-bg-gradient': `linear-gradient(180deg, ${withAlpha(background, isDark ? 0.97 : 1)}, ${withAlpha(mixHexColors(surface, background, isDark ? 0.35 : 0.5), 1)})`,
-
-    // Hero height derived from spacing_scale (compact → short, airy → tall)
     '--store-hero-height': ({
       tight: 'clamp(360px, 60vh, 640px)',
       balanced: 'clamp(520px, 78vh, 880px)',
       airy: 'clamp(660px, 92vh, 1060px)',
     }[theme.spacing_scale] ?? 'clamp(520px, 78vh, 880px)'),
-
     colorScheme: resolvedMode,
   } as React.CSSProperties
 }
