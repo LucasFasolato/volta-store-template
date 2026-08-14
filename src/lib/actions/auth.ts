@@ -1,5 +1,6 @@
 'use server'
 
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { safeGetUser } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
@@ -9,13 +10,43 @@ function parseRetryAfter(message: string): number {
   return match ? Number.parseInt(match[1], 10) : 60
 }
 
+async function getRequestOrigin(): Promise<string> {
+  const requestHeaders = await headers()
+  const forwardedHost = requestHeaders.get('x-forwarded-host')
+  const host = forwardedHost ?? requestHeaders.get('host')
+  const forwardedProto = requestHeaders.get('x-forwarded-proto')
+  const protocol = forwardedProto ?? (process.env.NODE_ENV === 'development' ? 'http' : 'https')
+
+  if (host) {
+    return `${protocol}://${host}`
+  }
+
+  const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, '')
+  if (configuredUrl) {
+    return configuredUrl
+  }
+
+  throw new Error('No se pudo resolver el origen de la aplicacion para enviar el acceso.')
+}
+
 export async function signInWithMagicLink(email: string) {
   const supabase = await createClient()
+  let origin: string
+
+  try {
+    origin = await getRequestOrigin()
+  } catch {
+    return {
+      error: 'No pudimos preparar el acceso por email. Intenta nuevamente en unos instantes.',
+    }
+  }
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/admin&provider=email`,
+      // The email template adds the TokenHash to this scanner-safe landing page.
+      // Merely opening the email link does not consume the one-time token.
+      emailRedirectTo: `${origin}/auth/email?next=/admin&provider=email`,
     },
   })
 
