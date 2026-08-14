@@ -1,11 +1,11 @@
-import { AtSign, Clock3, MapPin, MessageCircle, ShieldCheck } from 'lucide-react'
+import { AtSign, Clock3, MapPin, MessageCircle, Store as StoreIcon } from 'lucide-react'
 import { sanitizeInstagramHandle } from '@/lib/utils/format'
 import type { Store } from '@/types/store'
 
 export function BusinessTrustPreview({ store }: { store: Store }) {
   const instagram = store.instagram ? sanitizeInstagramHandle(store.instagram) : null
   const items = [
-    store.whatsapp ? { icon: MessageCircle, label: 'Atención por WhatsApp' } : null,
+    store.whatsapp ? { icon: MessageCircle, label: 'WhatsApp' } : null,
     store.address ? { icon: MapPin, label: store.address } : null,
     store.hours ? { icon: Clock3, label: store.hours } : null,
     instagram ? { icon: AtSign, label: `@${instagram}` } : null,
@@ -15,11 +15,11 @@ export function BusinessTrustPreview({ store }: { store: Store }) {
     <section className="rounded-[14px] border border-black/8 bg-white p-4 dark:border-white/10 dark:bg-[#111820] sm:p-5">
       <div className="flex items-start gap-3">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-[11px] bg-[#12e89a]/10 text-emerald-600 dark:text-[#12e89a]">
-          <ShieldCheck className="size-4" />
+          <StoreIcon className="size-4" />
         </span>
         <div>
-          <h2 className="text-base font-semibold tracking-[-0.03em] text-foreground">Confianza para tus clientes</h2>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">Estos datos aparecen en la tienda para resolver dudas antes del pedido.</p>
+          <h2 className="text-base font-semibold tracking-[-0.03em] text-foreground">Datos visibles en tu tienda</h2>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">Solo mostramos lo que cargues.</p>
         </div>
       </div>
 
@@ -36,8 +36,8 @@ export function BusinessTrustPreview({ store }: { store: Store }) {
           })}
         </div>
       ) : (
-        <p className="mt-4 rounded-[11px] border border-dashed border-black/10 p-3 text-xs leading-5 text-muted-foreground dark:border-white/10">
-          Completá WhatsApp, horarios, dirección o Instagram. Solo mostramos los datos que cargues.
+        <p className="mt-4 text-xs leading-5 text-muted-foreground">
+          Podés sumar horarios, dirección o Instagram cuando te sirva.
         </p>
       )}
     </section>

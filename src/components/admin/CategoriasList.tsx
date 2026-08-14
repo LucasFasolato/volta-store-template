@@ -25,6 +25,12 @@ export function CategoriasList({ categories: initialCategories }: { categories: 
   const editForm = useForm<CategoryInput>({ resolver: zodResolver(categorySchema) })
 
   async function handleCreate(data: CategoryInput) {
+    const normalized = data.name.trim().toLocaleLowerCase('es')
+    if (categories.some((category) => category.name.trim().toLocaleLowerCase('es') === normalized)) {
+      toast.error('Ya existe una categoría con ese nombre.')
+      return
+    }
+
     const result = await createCategory(data)
     if (result?.error) {
       toast.error(result.error.formErrors?.[0] ?? 'No pudimos crear la categoría.')
@@ -37,6 +43,12 @@ export function CategoriasList({ categories: initialCategories }: { categories: 
   }
 
   async function handleUpdate(id: string, data: CategoryInput) {
+    const normalized = data.name.trim().toLocaleLowerCase('es')
+    if (categories.some((category) => category.id !== id && category.name.trim().toLocaleLowerCase('es') === normalized)) {
+      toast.error('Ya existe una categoría con ese nombre.')
+      return
+    }
+
     const result = await updateCategory(id, data)
     if (result?.error) {
       toast.error(result.error.formErrors?.[0] ?? 'No pudimos actualizar la categoría.')
@@ -87,8 +99,8 @@ export function CategoriasList({ categories: initialCategories }: { categories: 
                 <Input {...editForm.register('name')} autoFocus maxLength={CONTENT_LIMITS.category_name} className="h-9 rounded-[8px] bg-white dark:bg-white/5" />
                 {editForm.formState.errors.name ? <p className="text-xs text-red-500">{editForm.formState.errors.name.message}</p> : null}
                 <div className="flex gap-1.5">
-                  <Button type="submit" size="sm" className="h-8 rounded-[8px] bg-[#12e89a] text-[#062117] hover:bg-[#0fd98f]"><Check className="size-3.5" />Guardar</Button>
-                  <Button type="button" size="sm" variant="ghost" onClick={() => setEditingId(null)} className="h-8 rounded-[8px]"><X className="size-3.5" />Cancelar</Button>
+                  <Button type="submit" size="sm" disabled={editForm.formState.isSubmitting} className="h-8 rounded-[8px] bg-[#12e89a] text-[#062117] hover:bg-[#0fd98f]"><Check className="size-3.5" />{editForm.formState.isSubmitting ? 'Guardando…' : 'Guardar'}</Button>
+                  <Button type="button" size="sm" variant="ghost" disabled={editForm.formState.isSubmitting} onClick={() => setEditingId(null)} className="h-8 rounded-[8px]"><X className="size-3.5" />Cancelar</Button>
                 </div>
               </form>
             ) : (
@@ -110,8 +122,8 @@ export function CategoriasList({ categories: initialCategories }: { categories: 
             <Input {...newForm.register('name')} autoFocus placeholder="Nombre de la categoría" maxLength={CONTENT_LIMITS.category_name} className="h-9 rounded-[8px] bg-white" />
             {newForm.formState.errors.name ? <p className="mt-1 text-xs text-red-500">{newForm.formState.errors.name.message}</p> : null}
             <div className="mt-2 flex gap-1.5">
-              <Button type="submit" size="sm" className="h-8 rounded-[8px] bg-[#12e89a] text-[#062117] hover:bg-[#0fd98f]"><Check className="size-3.5" />Crear</Button>
-              <Button type="button" size="sm" variant="ghost" onClick={() => { setShowNew(false); newForm.reset({ name: '', sort_order: categories.length }) }} className="h-8 rounded-[8px]"><X className="size-3.5" />Cancelar</Button>
+              <Button type="submit" size="sm" disabled={newForm.formState.isSubmitting} className="h-8 rounded-[8px] bg-[#12e89a] text-[#062117] hover:bg-[#0fd98f]"><Check className="size-3.5" />{newForm.formState.isSubmitting ? 'Creando…' : 'Crear'}</Button>
+              <Button type="button" size="sm" variant="ghost" disabled={newForm.formState.isSubmitting} onClick={() => { setShowNew(false); newForm.reset({ name: '', sort_order: categories.length }) }} className="h-8 rounded-[8px]"><X className="size-3.5" />Cancelar</Button>
             </div>
           </form>
         ) : (

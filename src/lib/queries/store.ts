@@ -1,9 +1,22 @@
 import { createClient } from '@/lib/supabase/server'
-import type { StorePublicData, AdminStoreData, ProductWithImages } from '@/types/store'
+import type { StorePublicData, AdminStoreData, ProductWithImages, Category } from '@/types/store'
 import { getOwnerStoreData } from '@/lib/server/store-context'
 
-// Supabase nested select for products with all relations
 const PRODUCT_SELECT = '*, images:product_images(*), category:categories(*), options:product_options(*)' as const
+
+function categoryKey(category: Pick<Category, 'name'>) {
+  return category.name.trim().toLocaleLowerCase('es')
+}
+
+function uniqueCategories(categories: Category[]) {
+  const seen = new Set<string>()
+  return categories.filter((category) => {
+    const key = categoryKey(category)
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
 
 export async function getStoreBySlug(slug: string): Promise<StorePublicData | null> {
   const supabase = await createClient()
@@ -21,11 +34,7 @@ export async function getStoreBySlug(slug: string): Promise<StorePublicData | nu
     supabase.from('store_theme').select('*').eq('store_id', store.id).maybeSingle(),
     supabase.from('store_layout').select('*').eq('store_id', store.id).maybeSingle(),
     supabase.from('store_content').select('*').eq('store_id', store.id).maybeSingle(),
-    supabase
-      .from('categories')
-      .select('*')
-      .eq('store_id', store.id)
-      .order('sort_order'),
+    supabase.from('categories').select('*').eq('store_id', store.id).order('sort_order'),
     supabase
       .from('products')
       .select(PRODUCT_SELECT)
@@ -43,7 +52,7 @@ export async function getStoreBySlug(slug: string): Promise<StorePublicData | nu
     theme: themeRes.data,
     layout: layoutRes.data,
     content: contentRes.data,
-    categories: categoriesRes.data ?? [],
+    categories: uniqueCategories((categoriesRes.data ?? []) as Category[]),
     products: (productsRes.data ?? []) as ProductWithImages[],
   }
 }
@@ -71,7 +80,32 @@ export async function getAdminCategories(storeId: string) {
     .select('*')
     .eq('store_id', storeId)
     .order('sort_order')
-  return data ?? []
+
+  const categories = (data ?? []) as Category[]
+  const canonicalByName = new Map<string, Category>()
+
+  for (const category of categories) {
+    const key = categoryKey(category)
+    const canonical = canonicalByName.get(key)
+    if (!canonical) {
+      canonicalByName.set(key, category)
+      continue
+    }
+
+    await supabase
+      .from('products')
+      .update({ category_id: canonical.id })
+      .eq('store_id', storeId)
+      .eq('category_id', category.id)
+
+    await supabase
+      .from('categories')
+      .delete()
+      .eq('store_id', storeId)
+      .eq('id', category.id)
+  }
+
+  return Array.from(canonicalByName.values())
 }
 
 export async function getAdminProductById(storeId: string, productId: string) {
