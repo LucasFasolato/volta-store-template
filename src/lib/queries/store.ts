@@ -4,10 +4,14 @@ import { getOwnerStoreData } from '@/lib/server/store-context'
 
 const PRODUCT_SELECT = '*, images:product_images(*), category:categories(*), options:product_options(*)' as const
 
+function categoryKey(category: Pick<Category, 'name'>) {
+  return category.name.trim().toLocaleLowerCase('es')
+}
+
 function uniqueCategories(categories: Category[]) {
   const seen = new Set<string>()
   return categories.filter((category) => {
-    const key = category.name.trim().toLocaleLowerCase('es')
+    const key = categoryKey(category)
     if (seen.has(key)) return false
     seen.add(key)
     return true
@@ -76,7 +80,32 @@ export async function getAdminCategories(storeId: string) {
     .select('*')
     .eq('store_id', storeId)
     .order('sort_order')
-  return uniqueCategories((data ?? []) as Category[])
+
+  const categories = (data ?? []) as Category[]
+  const canonicalByName = new Map<string, Category>()
+
+  for (const category of categories) {
+    const key = categoryKey(category)
+    const canonical = canonicalByName.get(key)
+    if (!canonical) {
+      canonicalByName.set(key, category)
+      continue
+    }
+
+    await supabase
+      .from('products')
+      .update({ category_id: canonical.id })
+      .eq('store_id', storeId)
+      .eq('category_id', category.id)
+
+    await supabase
+      .from('categories')
+      .delete()
+      .eq('store_id', storeId)
+      .eq('id', category.id)
+  }
+
+  return Array.from(canonicalByName.values())
 }
 
 export async function getAdminProductById(storeId: string, productId: string) {
