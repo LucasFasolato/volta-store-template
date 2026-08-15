@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { VoltaBrand } from '@/components/brand/VoltaBrand'
 
 export function LegalPage({
   eyebrow,
@@ -19,9 +20,8 @@ export function LegalPage({
       <div className="mx-auto max-w-5xl overflow-hidden rounded-[28px] border border-black/8 bg-white shadow-[0_24px_80px_rgba(15,23,42,.06)]">
         <header className="border-b border-black/7 px-6 py-7 sm:px-10 sm:py-9">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <Link href="/login" className="inline-flex items-center gap-2.5" aria-label="Volver a VOLTA Store">
-              <span className="flex size-9 items-center justify-center rounded-[10px] bg-[#12e89a] text-xs font-black text-[#062117]">V</span>
-              <span className="text-sm font-semibold tracking-[-0.03em]">VOLTA STORE</span>
+            <Link href="/login" aria-label="Volver a VOLTA">
+              <VoltaBrand />
             </Link>
             <nav className="flex items-center gap-4 text-xs font-medium text-slate-500">
               <Link href="/privacy" className="transition hover:text-slate-950">Privacidad</Link>
@@ -37,12 +37,10 @@ export function LegalPage({
           </div>
         </header>
 
-        <article className="legal-content px-6 py-8 sm:px-10 sm:py-12">
-          {children}
-        </article>
+        <article className="legal-content px-6 py-8 sm:px-10 sm:py-12">{children}</article>
 
         <footer className="flex flex-col gap-4 border-t border-black/7 bg-[#fbfcfd] px-6 py-6 text-xs leading-5 text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-10">
-          <p>VOLTA Store · Plataforma para crear tiendas y gestionar ventas por WhatsApp.</p>
+          <p>VOLTA · Plataforma para crear tiendas y gestionar ventas por WhatsApp.</p>
           <div className="flex gap-4">
             <Link href="/login" className="font-medium text-slate-700 transition hover:text-slate-950">Volver al ingreso</Link>
             <a href="mailto:legal@voltastore.app" className="font-medium text-slate-700 transition hover:text-slate-950">legal@voltastore.app</a>

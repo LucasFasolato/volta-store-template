@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LoginForm } from '@/components/auth/LoginForm'
+import { VoltaBrand } from '@/components/brand/VoltaBrand'
 import { getLoginFeedbackFromSearchParams } from '@/lib/auth/login-feedback'
 
 export const metadata: Metadata = {
@@ -20,10 +21,7 @@ export default async function LoginPage({
       <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-6xl overflow-hidden rounded-[22px] border border-black/8 bg-white lg:grid-cols-[.9fr_1.1fr]">
         <section className="flex flex-col justify-between p-6 sm:p-9 lg:p-12">
           <div>
-            <div className="inline-flex items-center gap-2.5">
-              <span className="flex size-8 items-center justify-center rounded-[9px] bg-[#12e89a] text-xs font-black text-[#062117]">V</span>
-              <span className="text-sm font-semibold tracking-[-0.03em]">VOLTA STORE</span>
-            </div>
+            <VoltaBrand />
 
             <div className="mt-12 max-w-md lg:mt-20">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Vendé por WhatsApp</p>
