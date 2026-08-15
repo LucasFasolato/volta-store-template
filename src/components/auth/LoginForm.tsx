@@ -48,9 +48,6 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
     setIsGoogleLoading(true)
 
     const supabase = createClient()
-    // Always return to the exact origin the user is currently visiting.
-    // This avoids stale NEXT_PUBLIC_APP_URL values sending production OAuth
-    // callbacks to an old Vercel/domain URL.
     const redirectTo = `${window.location.origin}/auth/callback?next=/admin&provider=google`
 
     const { error } = await supabase.auth.signInWithOAuth({
@@ -77,14 +74,11 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
 
     if (result.error) {
       if ('rateLimited' in result && result.rateLimited) {
-        setBlockingFeedback({
-          tone: 'pending',
-          title: 'Revisa el link que ya enviamos',
-          message:
-            'Ya enviamos un acceso hace instantes. Abre ese correo en este mismo dispositivo para entrar aqui.',
-          detail: 'Si lo abriste en otro dispositivo, esa sesion quedo iniciada alli. Espera un minuto y pide un nuevo acceso desde este navegador.',
+        const params = new URLSearchParams({
+          reason: 'rate_limit',
           email: data.email,
         })
+        window.location.assign(`/login?${params.toString()}`)
         return
       }
 
@@ -96,13 +90,11 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
       return
     }
 
-    setBlockingFeedback({
-      tone: 'success',
-      title: 'Revisa tu email',
-      message: 'Te enviamos un acceso. Abre el correo desde este mismo dispositivo para iniciar sesion aqui.',
-      detail: 'Si lo abres en otro celular o computadora, VOLTA iniciara sesion en ese dispositivo, no en este.',
+    const params = new URLSearchParams({
+      sent: 'magic_link',
       email: data.email,
     })
+    window.location.assign(`/login?${params.toString()}`)
   }
 
   if (blockingFeedback) {
