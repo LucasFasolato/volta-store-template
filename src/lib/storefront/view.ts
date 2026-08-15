@@ -4,6 +4,7 @@ export const DEFAULT_PAGE_SIZE = 12
 export const PAGE_SIZE_OPTIONS = [8, 12, 24] as const
 
 type QueryValue = string | string[] | undefined
+type OrderedProduct = ProductWithImages & { category_sort_order?: number }
 
 export type StorefrontSearchParams = {
   categoria?: QueryValue
@@ -38,28 +39,23 @@ function parsePositiveInt(value: QueryValue, fallback: number) {
 
 function parsePageSize(value: QueryValue) {
   const parsed = parsePositiveInt(value, DEFAULT_PAGE_SIZE)
-  return PAGE_SIZE_OPTIONS.includes(parsed as (typeof PAGE_SIZE_OPTIONS)[number])
-    ? parsed
-    : DEFAULT_PAGE_SIZE
+  return PAGE_SIZE_OPTIONS.includes(parsed as (typeof PAGE_SIZE_OPTIONS)[number]) ? parsed : DEFAULT_PAGE_SIZE
 }
 
-export function resolveStorefrontView(
-  products: ProductWithImages[],
-  categories: Category[],
-  searchParams: StorefrontSearchParams,
-): StorefrontViewModel {
+export function resolveStorefrontView(products: ProductWithImages[], categories: Category[], searchParams: StorefrontSearchParams): StorefrontViewModel {
   const categorySlug = getSingleValue(searchParams.categoria)
   const productSlug = getSingleValue(searchParams.producto)
   const pageSize = parsePageSize(searchParams.tamano)
   const category = categories.find((item) => item.slug === categorySlug) ?? null
   const activeCategory = category?.slug ?? null
   const filteredProducts = category
-    ? products.filter((product) => product.category_id === category.id)
+    ? [...(products as OrderedProduct[])]
+        .filter((product) => product.category_id === category.id)
+        .sort((a, b) => (a.category_sort_order ?? a.sort_order) - (b.category_sort_order ?? b.sort_order))
     : products
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize))
   const page = Math.min(parsePositiveInt(searchParams.pagina, 1), totalPages)
-  const selectedProduct =
-    productSlug ? products.find((product) => product.slug === productSlug) ?? null : null
+  const selectedProduct = productSlug ? products.find((product) => product.slug === productSlug) ?? null : null
 
   return {
     activeCategory,
@@ -74,24 +70,12 @@ export function resolveStorefrontView(
   }
 }
 
-export function buildStorefrontHref(
-  pathname: string,
-  state: {
-    category?: string | null
-    product?: string | null
-    page?: number
-    pageSize?: number
-  },
-) {
+export function buildStorefrontHref(pathname: string, state: { category?: string | null; product?: string | null; page?: number; pageSize?: number }) {
   const params = new URLSearchParams()
-
   if (state.category) params.set('categoria', state.category)
   if (state.product) params.set('producto', state.product)
   if (state.page && state.page > 1) params.set('pagina', String(state.page))
-  if (state.pageSize && state.pageSize !== DEFAULT_PAGE_SIZE) {
-    params.set('tamano', String(state.pageSize))
-  }
-
+  if (state.pageSize && state.pageSize !== DEFAULT_PAGE_SIZE) params.set('tamano', String(state.pageSize))
   const query = params.toString()
   return query ? `${pathname}?${query}` : pathname
 }
