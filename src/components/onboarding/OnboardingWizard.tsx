@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Loader2 } from 'lucide-react'
@@ -47,7 +48,9 @@ export function OnboardingWizard({ initialName }: { initialName: string }) {
         <section className="flex flex-col justify-between p-6 sm:p-9 lg:p-12">
           <div>
             <div className="inline-flex items-center gap-2.5">
-              <span className="flex size-8 items-center justify-center rounded-[9px] bg-[#12e89a] text-xs font-black text-[#062117]">V</span>
+              <span className="flex size-9 items-center justify-center rounded-[10px] bg-white shadow-[0_8px_22px_rgba(15,23,42,.08)] ring-1 ring-black/6">
+                <Image src="/brand/volta-mark.svg" alt="VOLTA" width={30} height={30} priority className="size-7" />
+              </span>
               <span className="text-sm font-semibold tracking-[-0.03em]">VOLTA STORE</span>
             </div>
 
