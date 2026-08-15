@@ -243,14 +243,14 @@ function StatusFeedback({ feedback }: { feedback: LoginFeedback }) {
   }
 
   return (
-    <div className="rounded-[24px] border border-amber-300/20 bg-[linear-gradient(180deg,rgba(251,191,36,0.12),rgba(146,64,14,0.12))] px-4 py-3.5 text-sm text-amber-50 shadow-[0_18px_40px_rgba(2,6,23,0.16)]">
+    <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-3.5 text-sm text-amber-950 shadow-sm dark:border-amber-300/20 dark:bg-[linear-gradient(180deg,rgba(251,191,36,0.12),rgba(146,64,14,0.12))] dark:text-amber-50 dark:shadow-[0_18px_40px_rgba(2,6,23,0.16)]">
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-2xl bg-amber-200/12 text-amber-100">
+        <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-200/12 dark:text-amber-100">
           <Clock3 className="size-4" />
         </div>
         <div className="min-w-0">
-          <p className="font-semibold text-current">{feedback.title}</p>
-          <p className="mt-1 leading-6 text-current/85">{feedback.detail ?? feedback.message}</p>
+          <p className="font-semibold text-amber-950 dark:text-current">{feedback.title}</p>
+          <p className="mt-1 leading-6 text-amber-800 dark:text-current/85">{feedback.detail ?? feedback.message}</p>
         </div>
       </div>
     </div>
@@ -259,14 +259,14 @@ function StatusFeedback({ feedback }: { feedback: LoginFeedback }) {
 
 function statusIconClassName(tone: LoginFeedback['tone']) {
   if (tone === 'pending') {
-    return 'mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-amber-300/12 text-amber-100'
+    return 'mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-300/12 dark:text-amber-100'
   }
 
   if (tone === 'success') {
-    return 'mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-emerald-400/12 text-emerald-100'
+    return 'mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-400/12 dark:text-emerald-100'
   }
 
-  return 'mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-red-400/12 text-red-100'
+  return 'mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-red-100 text-red-700 dark:bg-red-400/12 dark:text-red-100'
 }
 
 function LabelBlock({
