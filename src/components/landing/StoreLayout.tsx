@@ -43,7 +43,7 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
         {showTrustBar ? <TrustBar store={store} content={content} productCount={productCount} categoryCount={categoryCount} /> : null}
         {showFeaturedSection ? <FeaturedSection products={view.featuredProducts} pathname={pathname} routeState={view} theme={theme} containerClass={containerClass} productCount={productCount} /> : null}
         {layout.show_catalog && catalogMode === 'sections' ? (
-          <CatalogSections products={data.products} categories={layout.show_categories ? categories : []} theme={theme} containerClass={containerClass} pathname={pathname} />
+          <CatalogSections products={data.products} categories={categories} theme={theme} containerClass={containerClass} pathname={pathname} />
         ) : null}
         {layout.show_catalog && catalogMode === 'navigation' ? (
           <CatalogSection products={view.paginatedProducts} totalFiltered={view.filteredProducts.length} categories={layout.show_categories ? categories : []} theme={theme} containerClass={containerClass} pathname={pathname} routeState={view} totalPages={view.totalPages} catalogSize={densityMode} />
