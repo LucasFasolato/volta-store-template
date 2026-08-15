@@ -2,10 +2,12 @@ import Link from 'next/link'
 import { Plus, Upload } from 'lucide-react'
 import { getAdminCategories, getAdminProducts } from '@/lib/queries/store'
 import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
+import { CatalogPresentation } from '@/components/admin/CatalogPresentation'
 import { CategoriasList } from '@/components/admin/CategoriasList'
 import { CsvImporter } from '@/components/admin/CsvImporter'
 import { ProductList } from '@/components/admin/ProductList'
 import { Button } from '@/components/ui/button'
+import type { CatalogMode } from '@/lib/actions/catalog-presentation'
 
 export default async function CatalogoPage() {
   const { storeData } = await requireAuthenticatedAdminStore()
@@ -13,6 +15,7 @@ export default async function CatalogoPage() {
     getAdminProducts(storeData.store.id),
     getAdminCategories(storeData.store.id),
   ])
+  const catalogMode = ((storeData.layout as unknown as { catalog_mode?: CatalogMode }).catalog_mode ?? 'all') as CatalogMode
 
   return (
     <div className="volta-admin-page space-y-5 p-3.5 sm:p-5 lg:p-6">
@@ -27,16 +30,18 @@ export default async function CatalogoPage() {
         </Button>
       </header>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,.65fr)]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]">
         <section className="min-w-0">
           <ProductList products={products} categories={categories} />
         </section>
 
         <aside className="space-y-4 xl:sticky xl:top-5 xl:self-start">
+          <CatalogPresentation initialMode={catalogMode} categories={categories} products={products} />
+
           <section id="categorias" className="rounded-[14px] border border-black/8 bg-white p-4 dark:border-white/10 dark:bg-[#111820] sm:p-5">
             <div className="mb-4">
               <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Categorías</p>
-              <h2 className="mt-1 text-base font-semibold tracking-[-0.03em] text-foreground">Ordená el catálogo</h2>
+              <h2 className="mt-1 text-base font-semibold tracking-[-0.03em] text-foreground">Administrá las categorías</h2>
             </div>
             <CategoriasList categories={categories} />
           </section>
