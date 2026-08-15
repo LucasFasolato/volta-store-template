@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { LoginForm } from '@/components/auth/LoginForm'
 import { getLoginFeedbackFromSearchParams } from '@/lib/auth/login-feedback'
 
@@ -31,10 +32,16 @@ export default async function LoginPage({
             </div>
           </div>
 
-          <div className="mt-10 hidden grid-cols-3 gap-3 text-xs text-slate-500 sm:grid lg:mt-16">
-            <div><strong className="block text-slate-900">Simple</strong><span className="mt-1 block">Configuración rápida</span></div>
-            <div><strong className="block text-slate-900">Profesional</strong><span className="mt-1 block">Diseño listo para vender</span></div>
-            <div><strong className="block text-slate-900">Directo</strong><span className="mt-1 block">Pedidos por WhatsApp</span></div>
+          <div>
+            <div className="mt-10 hidden grid-cols-3 gap-3 text-xs text-slate-500 sm:grid lg:mt-16">
+              <div><strong className="block text-slate-900">Simple</strong><span className="mt-1 block">Configuración rápida</span></div>
+              <div><strong className="block text-slate-900">Profesional</strong><span className="mt-1 block">Diseño listo para vender</span></div>
+              <div><strong className="block text-slate-900">Directo</strong><span className="mt-1 block">Pedidos por WhatsApp</span></div>
+            </div>
+            <div className="mt-8 flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-400">
+              <Link href="/privacy" className="transition hover:text-slate-700">Política de Privacidad</Link>
+              <Link href="/terms" className="transition hover:text-slate-700">Términos y Condiciones</Link>
+            </div>
           </div>
         </section>
 
