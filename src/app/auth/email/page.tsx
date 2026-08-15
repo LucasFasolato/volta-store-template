@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, MailCheck, ShieldCheck } from 'lucide-react'
+import { MailCheck, ShieldCheck } from 'lucide-react'
+import { EmailConfirmForm } from '@/components/auth/EmailConfirmForm'
 
 export const metadata: Metadata = {
   title: 'Confirmar acceso',
@@ -43,17 +44,7 @@ export default async function EmailAccessPage({ searchParams }: { searchParams: 
                 Confirmá el ingreso para abrir tu panel. El enlace todavía no fue usado: el acceso se valida recién cuando tocás el botón.
               </p>
 
-              <form method="post" action="/auth/email/confirm" className="mt-8">
-                <input type="hidden" name="token_hash" value={tokenHash} />
-                <input type="hidden" name="next" value={next} />
-                <button
-                  type="submit"
-                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#12e89a] px-5 text-sm font-semibold text-[#062117] shadow-[0_16px_36px_rgba(18,232,154,.2)] transition hover:bg-[#0fd98f] active:scale-[0.99]"
-                >
-                  Entrar a VOLTA
-                  <ArrowRight className="size-4" />
-                </button>
-              </form>
+              <EmailConfirmForm tokenHash={tokenHash} next={next} />
 
               <div className="mt-6 flex items-start gap-3 rounded-2xl border border-black/6 bg-slate-50 p-4 text-xs leading-5 text-slate-500">
                 <MailCheck className="mt-0.5 size-4 shrink-0 text-slate-700" />
