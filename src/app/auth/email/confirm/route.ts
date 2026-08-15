@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { ensureOnboarding, needsOnboarding } from '@/lib/actions/onboarding'
+import { safeGetUser } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
 
 function loginError(origin: string) {
@@ -13,6 +13,12 @@ function loginError(origin: string) {
 function safeNext(value: FormDataEntryValue | null) {
   const next = typeof value === 'string' ? value : ''
   return next.startsWith('/') && !next.startsWith('//') ? next : '/admin'
+}
+
+function completionRedirect(origin: string, next: string) {
+  const url = new URL('/auth/email/complete', origin)
+  url.searchParams.set('next', next)
+  return NextResponse.redirect(url, { status: 303 })
 }
 
 export async function POST(request: Request) {
@@ -31,18 +37,25 @@ export async function POST(request: Request) {
     type: 'email',
   })
 
-  if (error || !data.user) {
-    return loginError(origin)
+  if (!error && data.user) {
+    // Keep this request deliberately short. The successful verify writes the
+    // auth cookies; onboarding is completed on the following GET request.
+    return completionRedirect(origin, next)
   }
 
-  try {
-    await ensureOnboarding(data.user)
-  } catch {
-    // Onboarding is idempotent and the protected admin layout can retry it.
+  // A mobile browser can submit the same one-time form twice while the first
+  // request is completing. If the first request already established a session,
+  // treat the duplicate as success instead of showing an expired-link error.
+  const authResult = await safeGetUser(supabase)
+  if (authResult.user) {
+    return completionRedirect(origin, next)
   }
 
-  const goToOnboarding = await needsOnboarding(data.user.id).catch(() => false)
-  const destination = goToOnboarding ? '/onboarding' : next
+  console.warn('VOLTA email OTP verification failed.', {
+    code: error?.code ?? null,
+    status: error?.status ?? null,
+    message: error?.message ?? 'Unknown verification failure',
+  })
 
-  return NextResponse.redirect(`${origin}${destination}`, { status: 303 })
+  return loginError(origin)
 }
