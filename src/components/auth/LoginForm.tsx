@@ -81,8 +81,8 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
           tone: 'pending',
           title: 'Revisa el link que ya enviamos',
           message:
-            'Ya enviamos un acceso hace instantes. Usa ese correo para entrar o espera un minuto antes de pedir otro.',
-          detail: 'Si no lo ves, revisa spam o promociones antes de volver a intentarlo.',
+            'Ya enviamos un acceso hace instantes. Abre ese correo en este mismo dispositivo para entrar aqui.',
+          detail: 'Si lo abriste en otro dispositivo, esa sesion quedo iniciada alli. Espera un minuto y pide un nuevo acceso desde este navegador.',
           email: data.email,
         })
         return
@@ -99,8 +99,8 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
     setBlockingFeedback({
       tone: 'success',
       title: 'Revisa tu email',
-      message: 'Enviamos un magic link a este email. Cuando abras el correo podras entrar directo al panel.',
-      detail: 'Si no aparece en unos segundos, revisa spam o promociones.',
+      message: 'Te enviamos un acceso. Abre el correo desde este mismo dispositivo para iniciar sesion aqui.',
+      detail: 'Si lo abres en otro celular o computadora, VOLTA iniciara sesion en ese dispositivo, no en este.',
       email: data.email,
     })
   }
@@ -130,7 +130,7 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
           <StatusFeedback feedback={blockingFeedback} />
 
           <div className="rounded-[24px] border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-4 text-sm leading-6 text-muted-foreground">
-            El enlace es seguro y no necesitas contrasena. Se abre una sola vez y te lleva directo al admin.
+            El acceso funciona una sola vez y la sesion se abre en el dispositivo donde confirmas el correo.
           </div>
         </div>
 
@@ -142,7 +142,7 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
           }}
           className="mt-6 w-full rounded-full border border-border dark:border-white/10 px-4 py-3 text-sm font-medium text-foreground transition hover:bg-black/[0.04] dark:hover:bg-white/6"
         >
-          Usar otro email
+          Volver al ingreso
         </button>
       </div>
     )
@@ -232,7 +232,7 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
       <div className="mt-6 rounded-[24px] border border-border dark:border-white/8 bg-black/[0.04] dark:bg-black/10 p-4">
         <p className="text-sm font-medium text-foreground">Que va a pasar despues</p>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Google te lleva directo al callback seguro. Si eliges email, revisas tu bandeja y entras desde el link.
+          Google te lleva directo al callback seguro. Si eliges email, abre el link desde el dispositivo donde quieras iniciar sesion.
         </p>
       </div>
     </div>
