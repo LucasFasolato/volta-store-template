@@ -1,6 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-labelledby="title desc">
   <title id="title">VOLTA</title>
-  <desc id="desc">Monograma V de VOLTA en azul tinta y verde menta.</desc>
-  <path d="M86 82c-14 0-23 15-16 27l129 224c19 33 67 34 87 1L409 119c9-16-2-37-21-37h-49L256 227 173 82H86Z" fill="#0B1220"/>
-  <path d="M315 82h95c20 0 31 22 20 38L295 335c-24 38-80 38-104 0l-11-18c20 19 53 15 69-10L315 82Z" fill="#12E89A"/>
+  <desc id="desc">Monograma oficial de VOLTA.</desc>
+  <image href="/brand/volta-mark.png" x="0" y="0" width="192" height="192" preserveAspectRatio="xMidYMid meet"/>
 </svg>
