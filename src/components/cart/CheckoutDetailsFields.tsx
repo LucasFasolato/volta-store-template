@@ -16,40 +16,45 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, val
 
   return (
     <section
-      className="mt-4 rounded-[calc(var(--store-card-radius)*0.72)] border p-4"
+      id="datos-pedido"
+      className="rounded-[calc(var(--store-card-radius)*0.72)] border p-4"
       style={{
-        borderColor: 'var(--store-card-border)',
-        background: 'color-mix(in srgb, var(--store-surface) 82%, transparent)',
+        borderColor: 'color-mix(in srgb, var(--store-primary) 30%, var(--store-card-border))',
+        background: 'color-mix(in srgb, var(--store-primary) 6%, var(--store-surface))',
+        boxShadow: '0 10px 28px color-mix(in srgb, var(--store-primary) 8%, transparent)',
       }}
     >
-      <div>
-        <p className="text-sm font-semibold" style={{ color: 'var(--store-text)' }}>Datos para el pedido</p>
-        <p className="mt-1 text-xs leading-5" style={{ color: 'var(--store-muted-text)' }}>Solo te pedimos lo necesario antes de abrir WhatsApp.</p>
+      <div className="flex items-start gap-3">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold" style={{ background: 'var(--store-primary)', color: 'var(--store-primary-contrast)' }}>1</span>
+        <div>
+          <p className="text-sm font-semibold" style={{ color: 'var(--store-text)' }}>Completá tus datos</p>
+          <p className="mt-1 text-xs leading-5" style={{ color: 'var(--store-muted-text)' }}>Esto va dentro del mensaje de WhatsApp. Los campos obligatorios están marcados.</p>
+        </div>
       </div>
 
       <div className="mt-4 space-y-4">
         {askName ? (
-          <label className="block">
-            <span className="mb-2 flex items-center gap-2 text-xs font-semibold" style={{ color: 'var(--store-soft-text)' }}>
-              <UserRound className="size-3.5" />
-              Tu nombre
+          <label className="block rounded-[var(--store-button-radius)] border p-3" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-surface)' }}>
+            <span className="mb-2 flex items-center justify-between gap-2 text-xs font-semibold" style={{ color: 'var(--store-soft-text)' }}>
+              <span className="flex items-center gap-2"><UserRound className="size-3.5" />Tu nombre</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--store-primary)' }}>Obligatorio</span>
             </span>
             <input
               value={value.customerName ?? ''}
               onChange={(event) => onChange({ ...value, customerName: event.target.value })}
               placeholder="Ej: Lucas"
               autoComplete="name"
-              className="min-h-11 w-full rounded-[var(--store-button-radius)] border bg-transparent px-3.5 text-sm outline-none"
-              style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)' }}
+              className="min-h-11 w-full rounded-[var(--store-button-radius)] border px-3.5 text-sm outline-none transition focus:ring-2"
+              style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)', background: 'color-mix(in srgb, var(--store-bg) 52%, var(--store-surface))' }}
             />
           </label>
         ) : null}
 
         {askFulfillment ? (
-          <div>
-            <span className="mb-2 flex items-center gap-2 text-xs font-semibold" style={{ color: 'var(--store-soft-text)' }}>
-              <Truck className="size-3.5" />
-              ¿Cómo querés recibirlo?
+          <div className="rounded-[var(--store-button-radius)] border p-3" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-surface)' }}>
+            <span className="mb-2 flex items-center justify-between gap-2 text-xs font-semibold" style={{ color: 'var(--store-soft-text)' }}>
+              <span className="flex items-center gap-2"><Truck className="size-3.5" />¿Cómo querés recibirlo?</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--store-primary)' }}>Obligatorio</span>
             </span>
             <div className="grid grid-cols-2 gap-2">
               <ChoiceButton
@@ -69,7 +74,7 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, val
         ) : null}
 
         {allowNotes ? (
-          <label className="block">
+          <label className="block rounded-[var(--store-button-radius)] border p-3" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-surface)' }}>
             <span className="mb-2 flex items-center gap-2 text-xs font-semibold" style={{ color: 'var(--store-soft-text)' }}>
               <MessageSquareText className="size-3.5" />
               Observaciones <span className="font-normal opacity-60">(opcional)</span>
@@ -79,8 +84,8 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, val
               onChange={(event) => onChange({ ...value, notes: event.target.value.slice(0, 240) })}
               placeholder="Ej: pasar después de las 18 hs"
               rows={2}
-              className="w-full resize-none rounded-[var(--store-button-radius)] border bg-transparent px-3.5 py-3 text-sm outline-none"
-              style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)' }}
+              className="w-full resize-none rounded-[var(--store-button-radius)] border px-3.5 py-3 text-sm outline-none"
+              style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)', background: 'color-mix(in srgb, var(--store-bg) 52%, var(--store-surface))' }}
             />
           </label>
         ) : null}
@@ -99,8 +104,9 @@ function ChoiceButton({ active, onClick, children }: { active: boolean; onClick:
       style={active
         ? {
             borderColor: 'var(--store-primary)',
-            background: 'color-mix(in srgb, var(--store-primary) 12%, transparent)',
+            background: 'color-mix(in srgb, var(--store-primary) 14%, transparent)',
             color: 'var(--store-text)',
+            boxShadow: '0 0 0 1px color-mix(in srgb, var(--store-primary) 18%, transparent)',
           }
         : {
             borderColor: 'var(--store-card-border)',
