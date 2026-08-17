@@ -71,11 +71,13 @@ export function CartSheet({
     if (!whatsapp || items.length === 0) return
 
     if (missingName) {
+      document.getElementById('datos-pedido')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       toast.error('Escribí tu nombre para continuar.')
       return
     }
 
     if (missingFulfillment) {
+      document.getElementById('datos-pedido')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       toast.error('Elegí retiro o envío para continuar.')
       return
     }
@@ -122,7 +124,7 @@ export function CartSheet({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 260 }}
-            className="cart-sheet fixed inset-y-0 right-0 z-50 flex w-full max-w-[30rem] flex-col"
+            className="cart-sheet fixed inset-y-0 right-0 z-50 w-full max-w-[30rem] overflow-y-auto overscroll-contain"
             style={{
               background:
                 'linear-gradient(180deg, color-mix(in srgb, var(--store-surface) 94%, white 6%), color-mix(in srgb, var(--store-bg) 96%, var(--store-text) 4%))',
@@ -133,7 +135,7 @@ export function CartSheet({
             aria-modal="true"
             aria-labelledby="cart-title"
           >
-            <div className="flex items-center justify-between border-b px-5 py-5" style={{ borderColor: 'var(--store-card-border)' }}>
+            <div className="sticky top-0 z-20 flex items-center justify-between border-b px-5 py-4 backdrop-blur-xl" style={{ borderColor: 'var(--store-card-border)', background: 'color-mix(in srgb, var(--store-surface) 92%, transparent)' }}>
               <div className="flex min-w-0 items-center gap-3">
                 <div
                   className="flex size-10 shrink-0 items-center justify-center"
@@ -180,7 +182,7 @@ export function CartSheet({
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 py-4">
+            <div className="px-4 py-4">
               {items.length === 0 ? (
                 <EmptyState
                   icon={ShoppingBag}
@@ -203,11 +205,22 @@ export function CartSheet({
                   tone="light"
                 />
               ) : (
-                <div className="space-y-4 pb-2">
+                <div className="space-y-5">
+                  <CheckoutDetailsFields
+                    askName={askName}
+                    askFulfillment={askFulfillment}
+                    allowNotes={allowNotes}
+                    value={details}
+                    onChange={setDetails}
+                  />
+
                   <section>
                     <div className="flex items-end justify-between gap-3 px-1">
                       <div>
-                        <h3 className="text-base font-semibold leading-6" style={{ color: 'var(--store-text)' }}>Revisá antes de enviar</h3>
+                        <div className="flex items-center gap-2">
+                          {(askName || askFulfillment || allowNotes) ? <span className="flex size-6 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: 'color-mix(in srgb, var(--store-primary) 12%, transparent)', color: 'var(--store-primary)' }}>2</span> : null}
+                          <h3 className="text-base font-semibold leading-6" style={{ color: 'var(--store-text)' }}>Revisá tu pedido</h3>
+                        </div>
                         <p className="mt-1 text-xs leading-5" style={{ color: 'var(--store-muted-text)' }}>Podés cambiar cantidades o quitar productos.</p>
                       </div>
                       <p className="text-xs" style={{ color: 'var(--store-muted-text)' }}>{items.length} {items.length === 1 ? 'producto' : 'productos'}</p>
@@ -224,14 +237,6 @@ export function CartSheet({
                       ))}
                     </div>
                   </section>
-
-                  <CheckoutDetailsFields
-                    askName={askName}
-                    askFulfillment={askFulfillment}
-                    allowNotes={allowNotes}
-                    value={details}
-                    onChange={setDetails}
-                  />
                 </div>
               )}
             </div>
@@ -247,13 +252,13 @@ export function CartSheet({
                 </div>
 
                 {(missingName || missingFulfillment) ? (
-                  <p className="mt-3 rounded-[10px] border px-3 py-2 text-center text-xs" style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-soft-text)' }}>
+                  <button type="button" onClick={() => document.getElementById('datos-pedido')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="mt-3 w-full rounded-[10px] border px-3 py-2 text-center text-xs font-medium transition hover:opacity-80" style={{ borderColor: 'color-mix(in srgb, var(--store-primary) 28%, var(--store-card-border))', color: 'var(--store-primary)', background: 'color-mix(in srgb, var(--store-primary) 6%, transparent)' }}>
                     {missingName && missingFulfillment
-                      ? 'Completá tu nombre y elegí retiro o envío.'
+                      ? '↑ Completá nombre y forma de entrega para continuar'
                       : missingName
-                        ? 'Completá tu nombre para continuar.'
-                        : 'Elegí retiro o envío para continuar.'}
-                  </p>
+                        ? '↑ Completá tu nombre para continuar'
+                        : '↑ Elegí retiro o envío para continuar'}
+                  </button>
                 ) : null}
 
                 <button
