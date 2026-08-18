@@ -27,13 +27,13 @@ create policy "brands_select_public"
     exists (
       select 1 from public.stores s
       where s.id = store_id
-        and (s.status = 'published' or s.owner_id = auth.uid())
+        and (s.status = 'published' or s.owner_id = (select auth.uid()))
     )
     and (
       is_active = true
       or exists (
         select 1 from public.stores s
-        where s.id = store_id and s.owner_id = auth.uid()
+        where s.id = store_id and s.owner_id = (select auth.uid())
       )
     )
   );
@@ -44,7 +44,7 @@ create policy "brands_insert_own"
   with check (
     exists (
       select 1 from public.stores s
-      where s.id = store_id and s.owner_id = auth.uid()
+      where s.id = store_id and s.owner_id = (select auth.uid())
     )
   );
 
@@ -54,7 +54,7 @@ create policy "brands_update_own"
   using (
     exists (
       select 1 from public.stores s
-      where s.id = store_id and s.owner_id = auth.uid()
+      where s.id = store_id and s.owner_id = (select auth.uid())
     )
   );
 
@@ -64,7 +64,7 @@ create policy "brands_delete_own"
   using (
     exists (
       select 1 from public.stores s
-      where s.id = store_id and s.owner_id = auth.uid()
+      where s.id = store_id and s.owner_id = (select auth.uid())
     )
   );
 
@@ -84,6 +84,9 @@ alter table public.store_layout
 create unique index if not exists products_store_sku_unique_idx
   on public.products (store_id, lower(btrim(sku)))
   where sku is not null and btrim(sku) <> '';
+
+create index if not exists products_brand_id_idx
+  on public.products (brand_id);
 
 create index if not exists products_store_active_sort_idx
   on public.products (store_id, is_active, sort_order);
