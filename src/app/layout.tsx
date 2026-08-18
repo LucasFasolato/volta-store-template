@@ -17,6 +17,13 @@ const playfair = Playfair_Display({ variable: '--font-playfair', subsets: ['lati
 export const metadata: Metadata = {
   title: { default: 'Volta Store', template: '%s - Volta Store' },
   description: 'La forma más simple y profesional de vender por WhatsApp.',
+  icons: {
+    icon: [
+      { url: '/brand/volta-mark.png', type: 'image/png', sizes: '192x192' },
+    ],
+    shortcut: '/brand/volta-mark.png',
+    apple: '/brand/volta-mark.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
