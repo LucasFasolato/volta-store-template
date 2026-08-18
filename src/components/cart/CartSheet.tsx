@@ -83,14 +83,16 @@ export function CartSheet({
     }
 
     const url = buildWhatsAppUrl(whatsapp, items, details)
-    const opened = window.open(url, '_blank', 'noopener,noreferrer')
+    const opened = window.open('about:blank', '_blank')
 
     if (!opened) {
       toast.error('No pudimos abrir WhatsApp. Revisá que el navegador permita ventanas nuevas.')
       return
     }
 
+    opened.opener = null
     trackStoreEvent({ storeId, type: 'whatsapp_checkout' })
+    opened.location.href = url
     closeCart()
     toast.success('WhatsApp abierto. Revisá el mensaje y envialo cuando estés listo.')
   }

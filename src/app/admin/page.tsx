@@ -7,19 +7,28 @@ import { StoreDashboard } from '@/components/admin/StoreDashboard'
 
 export default async function AdminPage() {
   const { storeData } = await requireAuthenticatedAdminStore()
-  const [products, categories] = await Promise.all([getAdminProducts(storeData.store.id), getAdminCategories(storeData.store.id)])
+  const [products, categories] = await Promise.all([
+    getAdminProducts(storeData.store.id),
+    getAdminCategories(storeData.store.id),
+  ])
   const plan = buildStoreLaunchPlan({ storeData, categories, products })
   const activeProducts = products.filter((product) => product.is_active)
   const activeProductCount = activeProducts.length
 
   if (plan.isPublished) {
-    const analytics = await getStoreAnalytics(storeData.store.id)
+    const analytics = await getStoreAnalytics(storeData.store.id, products)
     return <StoreDashboard plan={plan} storeName={storeData.store.name} analytics={analytics} />
   }
 
   return (
     <div className="p-3.5 sm:p-5 lg:p-6">
-      <ActivationWizard steps={buildActivationFlowSteps(plan)} plan={plan} storeData={storeData} categories={categories} activeProductCount={activeProductCount} />
+      <ActivationWizard
+        steps={buildActivationFlowSteps(plan)}
+        plan={plan}
+        storeData={storeData}
+        categories={categories}
+        activeProductCount={activeProductCount}
+      />
     </div>
   )
 }
