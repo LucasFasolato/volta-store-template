@@ -8,7 +8,11 @@ export type StoreLayout = Database['public']['Tables']['store_layout']['Row'] & 
   show_catalog_search?: boolean
   show_catalog_brands?: boolean
 }
-export type StoreContent = Database['public']['Tables']['store_content']['Row']
+export type HeroImageLayout = 'side' | 'background'
+export type StoreContent = Database['public']['Tables']['store_content']['Row'] & {
+  hero_image_layout?: HeroImageLayout
+  hero_overlay_opacity?: number
+}
 export type Category = Database['public']['Tables']['categories']['Row']
 export type Brand = {
   id: string
