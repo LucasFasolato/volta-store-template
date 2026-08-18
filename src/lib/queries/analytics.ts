@@ -244,20 +244,23 @@ function buildTopProducts(
     counts.set(row.product_id, current)
   }
 
-  return [...counts.entries()]
-    .map(([productId, count]) => {
-      const product = productMap.get(productId)
-      if (!product) return null
-      return {
-        id: product.id,
-        name: product.name,
-        imageUrl: product.images?.[0]?.url ?? null,
-        views: count.views,
-        addToCart: count.addToCart,
-        cartRate: count.views > 0 ? (count.addToCart / count.views) * 100 : 0,
-      }
+  const products: AnalyticsProductPerformance[] = []
+
+  for (const [productId, count] of counts.entries()) {
+    const product = productMap.get(productId)
+    if (!product) continue
+
+    products.push({
+      id: product.id,
+      name: product.name,
+      imageUrl: product.images?.[0]?.url ?? null,
+      views: count.views,
+      addToCart: count.addToCart,
+      cartRate: count.views > 0 ? (count.addToCart / count.views) * 100 : 0,
     })
-    .filter((product): product is AnalyticsProductPerformance => product !== null)
+  }
+
+  return products
     .sort((a, b) => b.views - a.views || b.addToCart - a.addToCart)
     .slice(0, 5)
 }
