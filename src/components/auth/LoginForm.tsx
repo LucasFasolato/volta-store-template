@@ -48,7 +48,13 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
     setIsGoogleLoading(true)
 
     const supabase = createClient()
-    const redirectTo = `${window.location.origin}/auth/callback?next=/admin&provider=google`
+    // Vercel currently redirects the apex domain to www. Supabase only accepts
+    // allow-listed redirect URLs, so always request the canonical apex callback
+    // in production. The browser may later follow Vercel's host redirect while
+    // preserving /auth/callback and its query string.
+    const redirectOrigin =
+      window.location.hostname === 'www.voltastore.app' ? 'https://voltastore.app' : window.location.origin
+    const redirectTo = `${redirectOrigin}/auth/callback?next=/admin&provider=google`
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
