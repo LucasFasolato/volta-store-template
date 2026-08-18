@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
 
 export default function CategoriasPage() {
-  redirect('/admin/catalogo')
+  redirect('/admin/catalogo?tab=categorias')
 }
