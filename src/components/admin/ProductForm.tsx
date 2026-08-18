@@ -57,6 +57,11 @@ type ProductFormProps = {
 
 const MIN_PRODUCT_IMAGE_WIDTH = 800
 
+function parsePesoInput(value: string) {
+  const digits = value.replace(/\D/g, '')
+  return digits === '' ? 0 : Number(digits)
+}
+
 export function ProductForm({ product, categories, productId }: ProductFormProps) {
   const router = useRouter()
   const [saved, setSaved] = useState(false)
@@ -340,7 +345,6 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
       if (!optionsResult.success) followUpErrors.push(optionsResult.message)
 
       setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
 
       if (followUpErrors.length > 0) {
         const message = `Producto guardado, pero hay detalles por revisar: ${followUpErrors.join(' ')}`
@@ -350,6 +354,7 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
       }
 
       toast.success('Producto guardado.')
+      router.push('/admin/catalogo')
       return
     }
 
@@ -375,10 +380,10 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
           `Producto creado, pero hay detalles por revisar: ${followUpErrors.join(' ')}`,
         )
       } else {
-        toast.success('Producto creado y listo para seguir editando.')
+        toast.success('Producto creado.')
       }
 
-      router.push(`/admin/catalogo/${result.productId}`)
+      router.push('/admin/catalogo')
     }
   }
 
@@ -511,13 +516,23 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
               <FieldBlock label="Precio" hint="Es el valor principal que se muestra en la tienda.">
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-neutral-500">$</span>
-                  <Input
-                    {...register('price', { valueAsNumber: true })}
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    aria-invalid={!!errors.price}
-                    className="h-12 rounded-md border-white/10 bg-white/5 pl-8 text-white"
+                  <Controller
+                    control={control}
+                    name="price"
+                    render={({ field }) => (
+                      <Input
+                        ref={field.ref}
+                        name={field.name}
+                        value={field.value ?? 0}
+                        onBlur={field.onBlur}
+                        onChange={(event) => field.onChange(parsePesoInput(event.target.value))}
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        aria-invalid={!!errors.price}
+                        className="h-12 rounded-md border-white/10 bg-white/5 pl-8 text-white"
+                      />
+                    )}
                   />
                 </div>
                 {errors.price ? (
@@ -739,16 +754,25 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
               >
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-neutral-500">$</span>
-                  <Input
-                    {...register('compare_price', {
-                      valueAsNumber: true,
-                      setValueAs: (value) =>
-                        value === '' || Number.isNaN(value) ? null : Number(value),
-                    })}
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    className="h-12 rounded-md border-white/10 bg-white/5 pl-8 text-white"
+                  <Controller
+                    control={control}
+                    name="compare_price"
+                    render={({ field }) => (
+                      <Input
+                        ref={field.ref}
+                        name={field.name}
+                        value={field.value ?? ''}
+                        onBlur={field.onBlur}
+                        onChange={(event) => {
+                          const digits = event.target.value.replace(/\D/g, '')
+                          field.onChange(digits === '' ? null : Number(digits))
+                        }}
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        className="h-12 rounded-md border-white/10 bg-white/5 pl-8 text-white"
+                      />
+                    )}
                   />
                 </div>
               </FieldBlock>
