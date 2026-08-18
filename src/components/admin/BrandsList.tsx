@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Check, Edit3, GripVertical, Plus, Tags, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { ConfirmationDialog } from '@/components/common/ConfirmationDialog'
@@ -18,12 +19,14 @@ import {
 import type { Brand } from '@/types/store'
 
 export function BrandsList({ brands: initialBrands }: { brands: Brand[] }) {
+  const router = useRouter()
   const [brands, setBrands] = useState(initialBrands)
   const [showNew, setShowNew] = useState(false)
   const [newName, setNewName] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingName, setEditingName] = useState('')
   const [brandToDelete, setBrandToDelete] = useState<Brand | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const createLock = useRef(false)
@@ -42,6 +45,7 @@ export function BrandsList({ brands: initialBrands }: { brands: Brand[] }) {
       setNewName('')
       setShowNew(false)
       toast.success('Marca creada.')
+      router.refresh()
     } finally {
       createLock.current = false
     }
@@ -59,6 +63,7 @@ export function BrandsList({ brands: initialBrands }: { brands: Brand[] }) {
     setEditingId(null)
     setEditingName('')
     toast.success('Marca actualizada.')
+    router.refresh()
   }
 
   function toggleBrand(brand: Brand, checked: boolean) {
@@ -72,19 +77,26 @@ export function BrandsList({ brands: initialBrands }: { brands: Brand[] }) {
         return
       }
       toast.success(checked ? 'Marca visible.' : 'Marca oculta.')
+      router.refresh()
     })
   }
 
   async function handleDelete() {
-    if (!brandToDelete) return
-    const result = await deleteBrand(brandToDelete.id)
-    if (result?.error) {
-      toast.error(result.error)
-      return
+    if (!brandToDelete || deleting) return
+    setDeleting(true)
+    try {
+      const result = await deleteBrand(brandToDelete.id)
+      if (result?.error) {
+        toast.error(result.error)
+        return
+      }
+      setBrands((current) => current.filter((item) => item.id !== brandToDelete.id))
+      setBrandToDelete(null)
+      toast.success('Marca eliminada. Los productos quedaron sin marca.')
+      router.refresh()
+    } finally {
+      setDeleting(false)
     }
-    setBrands((current) => current.filter((item) => item.id !== brandToDelete.id))
-    setBrandToDelete(null)
-    toast.success('Marca eliminada. Los productos quedaron sin marca.')
   }
 
   function moveBrand(sourceId: string, targetId: string) {
@@ -108,6 +120,7 @@ export function BrandsList({ brands: initialBrands }: { brands: Brand[] }) {
         return
       }
       toast.success('Orden de marcas guardado.')
+      router.refresh()
     })
   }
 
@@ -177,12 +190,12 @@ export function BrandsList({ brands: initialBrands }: { brands: Brand[] }) {
 
       <ConfirmationDialog
         open={!!brandToDelete}
-        onOpenChange={(open) => { if (!open) setBrandToDelete(null) }}
+        onOpenChange={(open) => { if (!open && !deleting) setBrandToDelete(null) }}
         title={brandToDelete ? `Eliminar “${brandToDelete.name}”?` : 'Eliminar marca'}
         description="Los productos no se eliminan. Quedarán sin marca hasta que les asignes otra."
         confirmLabel="Eliminar marca"
         onConfirm={handleDelete}
-        isPending={false}
+        isPending={deleting}
       />
     </>
   )
