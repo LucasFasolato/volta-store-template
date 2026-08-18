@@ -66,6 +66,7 @@ export function FeaturedSection({
                 productHref={buildStorefrontHref(pathname, {
                   category: routeState.activeCategory,
                   brand: routeState.activeBrand,
+                  promotion: routeState.activePromotion,
                   query: routeState.query,
                   page: routeState.page,
                   pageSize: routeState.pageSize,
