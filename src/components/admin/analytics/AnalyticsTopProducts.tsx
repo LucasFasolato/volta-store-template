@@ -26,11 +26,6 @@ export function AnalyticsTopProducts({ snapshot }: { snapshot: StoreAnalyticsSna
                   <span className="inline-flex items-center gap-1"><ShoppingBag className="size-3" />{product.addToCart} al carrito</span>
                 </div>
               </div>
-              {product.views >= 3 ? (
-                <span className="shrink-0 text-[11px] font-semibold text-muted-foreground" title="Agregados al carrito sobre vistas del producto">
-                  {new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(product.cartRate)}%
-                </span>
-              ) : null}
             </div>
           ))}
         </div>
