@@ -97,6 +97,7 @@ create index if not exists products_store_category_brand_active_idx
 create or replace function public.validate_product_brand_store()
 returns trigger
 language plpgsql
+set search_path = ''
 as $$
 begin
   if new.brand_id is not null and not exists (
