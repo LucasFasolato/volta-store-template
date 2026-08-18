@@ -87,9 +87,10 @@ export default async function CatalogoPage({ searchParams }: Props) {
                 className={cn(
                   'inline-flex min-h-10 items-center gap-2 rounded-[10px] px-3.5 text-xs font-semibold transition sm:text-sm',
                   active
-                    ? 'bg-[#10161d] text-white shadow-sm dark:bg-white dark:text-[#10161d]'
+                    ? 'shadow-sm'
                     : 'text-muted-foreground hover:bg-slate-50 hover:text-foreground dark:hover:bg-white/5',
                 )}
+                style={active ? { backgroundColor: '#10161d', color: '#f8fafc' } : undefined}
               >
                 <Icon className={cn('size-4', active && 'text-[#12e89a]')} />
                 {tab.label}
