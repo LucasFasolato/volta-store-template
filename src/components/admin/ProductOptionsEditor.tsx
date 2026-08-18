@@ -76,7 +76,7 @@ export function ProductOptionsEditor({
         <div className="space-y-3">
           {value.map((option, index) => (
             <OptionRow
-              key={option.id ?? `${option.name}-${index}`}
+              key={option.id ?? index}
               option={option}
               disabled={disabled}
               onNameChange={(nextName) => updateName(index, nextName)}
