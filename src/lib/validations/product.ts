@@ -31,6 +31,8 @@ export const productSchema = z.object({
     .nullable()
     .optional(),
   category_id: z.string().uuid().nullable().optional(),
+  brand_id: z.string().uuid().nullable().optional(),
+  sku: z.string().trim().max(80, 'El SKU no puede superar los 80 caracteres.').nullable().optional(),
   is_featured: z.boolean(),
   is_active: z.boolean(),
   sort_order: z.number().int().min(0),

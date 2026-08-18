@@ -1,18 +1,41 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { StoreLayout } from '@/components/landing/StoreLayout'
-import { getAdminCategories, getAdminProducts } from '@/lib/queries/store'
+import { getAdminBrands, getAdminCategories, getAdminProducts } from '@/lib/queries/store'
 import { resolveStorefrontView, type StorefrontSearchParams } from '@/lib/storefront/view'
 import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
+import type { StorePublicData } from '@/types/store'
 
 type Props = { searchParams: Promise<StorefrontSearchParams> }
 
 export default async function AdminPreviewPage({ searchParams }: Props) {
   const { storeData } = await requireAuthenticatedAdminStore()
   const storefrontSearchParams = await searchParams
-  const [products, categories] = await Promise.all([getAdminProducts(storeData.store.id), getAdminCategories(storeData.store.id)])
-  const data = { store: storeData.store, theme: storeData.theme, layout: storeData.layout, content: storeData.content, categories, products: products.filter((product) => product.is_active) }
-  const view = resolveStorefrontView(data.products, data.categories, storefrontSearchParams)
+  const [products, categories, brands] = await Promise.all([
+    getAdminProducts(storeData.store.id),
+    getAdminCategories(storeData.store.id),
+    getAdminBrands(storeData.store.id),
+  ])
+  const rawLayout = storeData.layout as typeof storeData.layout & {
+    catalog_mode?: 'all' | 'sections' | 'navigation'
+    show_catalog_search?: boolean
+    show_catalog_brands?: boolean
+  }
+  const data: StorePublicData = {
+    store: storeData.store,
+    theme: storeData.theme,
+    layout: {
+      ...rawLayout,
+      catalog_mode: rawLayout.catalog_mode ?? 'all',
+      show_catalog_search: rawLayout.show_catalog_search ?? true,
+      show_catalog_brands: rawLayout.show_catalog_brands ?? false,
+    },
+    content: storeData.content,
+    categories,
+    brands,
+    products: products.filter((product) => product.is_active),
+  }
+  const view = resolveStorefrontView(data.products, data.categories, data.brands, storefrontSearchParams)
 
   return (
     <div className="admin-preview-shell pt-12">

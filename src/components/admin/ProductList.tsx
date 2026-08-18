@@ -11,36 +11,51 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { deleteProduct } from '@/lib/actions/products'
 import { setProductCategory } from '@/lib/actions/product-category'
+import { setProductBrand } from '@/lib/actions/product-discovery'
 import { formatCurrency } from '@/lib/utils/format'
-import type { Category, ProductWithImages } from '@/types/store'
+import type { Brand, Category, ProductWithImages } from '@/types/store'
 
 type ProductListProps = {
   products: ProductWithImages[]
   categories: Category[]
+  brands: Brand[]
 }
 
-export function ProductList({ products, categories }: ProductListProps) {
+export function ProductList({ products, categories, brands }: ProductListProps) {
   const [localProducts, setLocalProducts] = useState(products)
   const [filter, setFilter] = useState<string>('all')
+  const [brandFilter, setBrandFilter] = useState<string>('all')
   const [query, setQuery] = useState('')
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [productToDelete, setProductToDelete] = useState<ProductWithImages | null>(null)
 
   const categoryMap = Object.fromEntries(categories.map((category) => [category.id, category.name]))
+  const brandMap = Object.fromEntries(brands.map((brand) => [brand.id, brand.name]))
   const hasProducts = localProducts.length > 0
 
   const filtered = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase()
+    const normalizedQuery = query.trim().toLocaleLowerCase('es')
     return localProducts.filter((product) => {
       const matchesFilter =
         filter === 'all' ||
         (filter === 'active' && product.is_active) ||
         (filter === 'featured' && product.is_featured) ||
         product.category_id === filter
-      const matchesQuery = !normalizedQuery || product.name.toLowerCase().includes(normalizedQuery)
-      return matchesFilter && matchesQuery
+      const matchesBrand = brandFilter === 'all' || product.brand_id === brandFilter
+      const searchable = [
+        product.name,
+        product.sku,
+        product.short_description,
+        product.category_id ? categoryMap[product.category_id] : null,
+        product.brand_id ? brandMap[product.brand_id] : null,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLocaleLowerCase('es')
+      const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery)
+      return matchesFilter && matchesBrand && matchesQuery
     })
-  }, [filter, localProducts, query])
+  }, [brandFilter, brandMap, categoryMap, filter, localProducts, query])
 
   async function handleDelete() {
     if (!productToDelete) return
@@ -62,6 +77,10 @@ export function ProductList({ products, categories }: ProductListProps) {
     setLocalProducts((current) => current.map((product) => product.id === productId ? { ...product, category_id: categoryId } : product))
   }
 
+  function updateLocalBrand(productId: string, brandId: string | null) {
+    setLocalProducts((current) => current.map((product) => product.id === productId ? { ...product, brand_id: brandId } : product))
+  }
+
   const filterItems = [
     { value: 'all', label: 'Todos' },
     { value: 'active', label: 'Activos' },
@@ -72,12 +91,31 @@ export function ProductList({ products, categories }: ProductListProps) {
   return (
     <>
       <div className="space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative w-full sm:max-w-sm">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar productos..." className="h-10 rounded-[10px] bg-white pl-9 dark:bg-white/5" />
+        <div className="space-y-3">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="relative min-w-0 flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Buscar producto, marca o SKU..."
+                className="h-10 rounded-[10px] bg-white pl-9 dark:bg-white/5"
+              />
+            </div>
+            {brands.length > 0 ? (
+              <select
+                value={brandFilter}
+                onChange={(event) => setBrandFilter(event.target.value)}
+                aria-label="Filtrar por marca"
+                className="h-10 rounded-[10px] border border-black/8 bg-white px-3 text-xs font-medium text-foreground outline-none focus:border-[#12e89a] dark:border-white/10 dark:bg-white/5"
+              >
+                <option value="all">Todas las marcas</option>
+                {brands.map((brand) => <option key={brand.id} value={brand.id}>{brand.name}</option>)}
+              </select>
+            ) : null}
           </div>
-          <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
             {filterItems.map((item) => {
               const active = filter === item.value
               return (
@@ -111,30 +149,34 @@ export function ProductList({ products, categories }: ProductListProps) {
           />
         ) : (
           <>
-            <div className="hidden overflow-hidden rounded-[14px] border border-black/8 bg-white dark:border-white/10 dark:bg-[#111820] md:block">
-              <div className="grid grid-cols-[minmax(260px,1.7fr)_minmax(170px,.9fr)_120px_110px_64px] items-center border-b border-black/7 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground dark:border-white/8">
-                <span>Producto</span><span>Categoría</span><span>Precio</span><span>Estado</span><span />
+            <div className="hidden overflow-hidden rounded-[14px] border border-black/8 bg-white dark:border-white/10 dark:bg-[#111820] lg:block">
+              <div className="grid grid-cols-[minmax(240px,1.6fr)_minmax(145px,.8fr)_minmax(145px,.8fr)_110px_105px_56px] items-center border-b border-black/7 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground dark:border-white/8">
+                <span>Producto</span><span>Categoría</span><span>Marca</span><span>Precio</span><span>Estado</span><span />
               </div>
               {filtered.map((product) => (
                 <ProductRow
                   key={product.id}
                   product={product}
                   categories={categories}
-                  category={product.category_id ? categoryMap[product.category_id] : undefined}
+                  brands={brands}
                   onCategoryChange={(categoryId) => updateLocalCategory(product.id, categoryId)}
+                  onBrandChange={(brandId) => updateLocalBrand(product.id, brandId)}
                   onDelete={() => setProductToDelete(product)}
                 />
               ))}
             </div>
 
-            <div className="space-y-2 md:hidden">
+            <div className="space-y-2 lg:hidden">
               {filtered.map((product) => (
                 <ProductMobileCard
                   key={product.id}
                   product={product}
                   categories={categories}
+                  brands={brands}
                   category={product.category_id ? categoryMap[product.category_id] : undefined}
+                  brand={product.brand_id ? brandMap[product.brand_id] : undefined}
                   onCategoryChange={(categoryId) => updateLocalCategory(product.id, categoryId)}
+                  onBrandChange={(brandId) => updateLocalBrand(product.id, brandId)}
                   onDelete={() => setProductToDelete(product)}
                 />
               ))}
@@ -191,7 +233,7 @@ function ProductCategorySelect({ productId, value, categories, onChange }: { pro
       onChange={(event) => handleChange(event.target.value)}
       disabled={pending}
       aria-label="Categoría del producto"
-      className="h-9 w-full max-w-[170px] rounded-[9px] border border-black/8 bg-white px-2.5 text-xs font-medium text-foreground outline-none transition focus:border-[#12e89a] disabled:opacity-60 dark:border-white/10 dark:bg-white/5"
+      className="h-9 w-full max-w-[160px] rounded-[9px] border border-black/8 bg-white px-2.5 text-xs font-medium text-foreground outline-none transition focus:border-[#12e89a] disabled:opacity-60 dark:border-white/10 dark:bg-white/5"
     >
       <option value="none">Sin categoría</option>
       {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
@@ -199,17 +241,50 @@ function ProductCategorySelect({ productId, value, categories, onChange }: { pro
   )
 }
 
-function ProductRow({ product, categories, category, onCategoryChange, onDelete }: { product: ProductWithImages; categories: Category[]; category?: string; onCategoryChange: (categoryId: string | null) => void; onDelete: () => void }) {
+function ProductBrandSelect({ productId, value, brands, onChange }: { productId: string; value: string | null; brands: Brand[]; onChange: (brandId: string | null) => void }) {
+  const [pending, startTransition] = useTransition()
+
+  function handleChange(nextValue: string) {
+    const nextBrandId = nextValue === 'none' ? null : nextValue
+    const previous = value
+    onChange(nextBrandId)
+    startTransition(async () => {
+      const result = await setProductBrand(productId, nextBrandId)
+      if (result?.error) {
+        onChange(previous)
+        toast.error(result.error)
+        return
+      }
+      toast.success(nextBrandId ? 'Marca actualizada.' : 'Producto sin marca.')
+    })
+  }
+
   return (
-    <div className="grid grid-cols-[minmax(260px,1.7fr)_minmax(170px,.9fr)_120px_110px_64px] items-center border-b border-black/6 px-4 py-2.5 last:border-b-0 hover:bg-slate-50/80 dark:border-white/7 dark:hover:bg-white/[0.025]">
+    <select
+      value={value ?? 'none'}
+      onChange={(event) => handleChange(event.target.value)}
+      disabled={pending}
+      aria-label="Marca del producto"
+      className="h-9 w-full max-w-[160px] rounded-[9px] border border-black/8 bg-white px-2.5 text-xs font-medium text-foreground outline-none transition focus:border-[#12e89a] disabled:opacity-60 dark:border-white/10 dark:bg-white/5"
+    >
+      <option value="none">Sin marca</option>
+      {brands.map((brand) => <option key={brand.id} value={brand.id}>{brand.name}</option>)}
+    </select>
+  )
+}
+
+function ProductRow({ product, categories, brands, onCategoryChange, onBrandChange, onDelete }: { product: ProductWithImages; categories: Category[]; brands: Brand[]; onCategoryChange: (categoryId: string | null) => void; onBrandChange: (brandId: string | null) => void; onDelete: () => void }) {
+  return (
+    <div className="grid grid-cols-[minmax(240px,1.6fr)_minmax(145px,.8fr)_minmax(145px,.8fr)_110px_105px_56px] items-center border-b border-black/6 px-4 py-2.5 last:border-b-0 hover:bg-slate-50/80 dark:border-white/7 dark:hover:bg-white/[0.025]">
       <Link href={`/admin/catalogo/${product.id}`} className="flex min-w-0 items-center gap-3">
         <ProductThumb product={product} />
         <span className="min-w-0">
           <span className="flex items-center gap-1.5 truncate text-sm font-medium text-foreground">{product.name}{product.is_featured ? <Star className="size-3.5 fill-amber-300 text-amber-300" /> : null}</span>
-          <span className="mt-0.5 block truncate text-xs text-muted-foreground">{product.short_description || 'Sin descripción corta'}</span>
+          <span className="mt-0.5 block truncate text-xs text-muted-foreground">{product.sku ? `SKU ${product.sku}` : product.short_description || 'Sin descripción corta'}</span>
         </span>
       </Link>
       <ProductCategorySelect productId={product.id} value={product.category_id} categories={categories} onChange={onCategoryChange} />
+      <ProductBrandSelect productId={product.id} value={product.brand_id} brands={brands} onChange={onBrandChange} />
       <span className="text-sm font-semibold text-foreground">{formatCurrency(product.price)}</span>
       <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">{product.is_active ? <><span className="size-1.5 rounded-full bg-[#12e89a]" /><Eye className="size-3.5" />Activo</> : <><span className="size-1.5 rounded-full bg-slate-300" /><EyeOff className="size-3.5" />Oculto</>}</span>
       <button type="button" onClick={onDelete} className="ml-auto flex size-8 items-center justify-center rounded-[8px] text-muted-foreground transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-400/10" aria-label={`Eliminar ${product.name}`}><Trash2 className="size-4" /></button>
@@ -217,7 +292,7 @@ function ProductRow({ product, categories, category, onCategoryChange, onDelete 
   )
 }
 
-function ProductMobileCard({ product, categories, category, onCategoryChange, onDelete }: { product: ProductWithImages; categories: Category[]; category?: string; onCategoryChange: (categoryId: string | null) => void; onDelete: () => void }) {
+function ProductMobileCard({ product, categories, brands, category, brand, onCategoryChange, onBrandChange, onDelete }: { product: ProductWithImages; categories: Category[]; brands: Brand[]; category?: string; brand?: string; onCategoryChange: (categoryId: string | null) => void; onBrandChange: (brandId: string | null) => void; onDelete: () => void }) {
   return (
     <div className="rounded-[13px] border border-black/8 bg-white p-3 dark:border-white/10 dark:bg-[#111820]">
       <div className="flex items-center gap-3">
@@ -225,14 +300,16 @@ function ProductMobileCard({ product, categories, category, onCategoryChange, on
           <ProductThumb product={product} />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-medium text-foreground">{product.name}</span>
-            <span className="mt-1 flex items-center gap-2 text-xs text-muted-foreground"><strong className="font-semibold text-foreground">{formatCurrency(product.price)}</strong><span>·</span><span className="truncate">{category || 'Sin categoría'}</span></span>
+            <span className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"><strong className="font-semibold text-foreground">{formatCurrency(product.price)}</strong><span>·</span><span>{category || 'Sin categoría'}</span>{brand ? <><span>·</span><span>{brand}</span></> : null}</span>
+            {product.sku ? <span className="mt-1 block text-[10px] text-muted-foreground">SKU {product.sku}</span> : null}
             <span className="mt-1 inline-flex items-center gap-1.5 text-[11px] text-muted-foreground"><span className={`size-1.5 rounded-full ${product.is_active ? 'bg-[#12e89a]' : 'bg-slate-300'}`} />{product.is_active ? 'Activo' : 'Oculto'}</span>
           </span>
         </Link>
         <button type="button" onClick={onDelete} className="flex size-9 shrink-0 items-center justify-center rounded-[9px] text-muted-foreground hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-400/10" aria-label={`Eliminar ${product.name}`}><Trash2 className="size-4" /></button>
       </div>
-      <div className="mt-3 border-t border-black/6 pt-3 dark:border-white/7">
+      <div className="mt-3 grid gap-2 border-t border-black/6 pt-3 dark:border-white/7 sm:grid-cols-2">
         <ProductCategorySelect productId={product.id} value={product.category_id} categories={categories} onChange={onCategoryChange} />
+        <ProductBrandSelect productId={product.id} value={product.brand_id} brands={brands} onChange={onBrandChange} />
       </div>
     </div>
   )

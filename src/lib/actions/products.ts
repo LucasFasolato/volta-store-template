@@ -64,13 +64,21 @@ function revalidateStorePaths(storeSlug: string) {
   revalidatePath(`/tienda/${storeSlug}`)
 }
 
+function productWriteError(error: { code?: string; message: string }) {
+  if (error.code === '23505') {
+    return { formErrors: ['El SKU ya está usado por otro producto.'], fieldErrors: {} }
+  }
+  return { formErrors: [error.message], fieldErrors: {} }
+}
+
 export async function createProduct(input: ProductInput) {
   const validated = productSchema.safeParse(input)
   if (!validated.success) return { error: validated.error.flatten() }
   const { supabase, store } = await requireAuthenticatedStoreContext()
+  const db = supabase as any
   const data = validated.data
   const slug = await getUniqueSlug({ supabase, table: 'products', storeId: store.id, value: data.name })
-  const { data: product, error } = await supabase
+  const { data: product, error } = await db
     .from('products')
     .insert({
       store_id: store.id,
@@ -82,13 +90,15 @@ export async function createProduct(input: ProductInput) {
       compare_price: data.compare_price ?? null,
       badge: data.badge ?? null,
       category_id: data.category_id ?? null,
+      brand_id: data.brand_id ?? null,
+      sku: data.sku?.trim() || null,
       is_featured: data.is_featured,
       is_active: data.is_active,
       sort_order: data.sort_order,
     })
     .select('id, slug')
     .single()
-  if (error) return { error: { formErrors: [error.message], fieldErrors: {} } }
+  if (error) return { error: productWriteError(error) }
   revalidateStorePaths(store.slug)
   return { success: true, productId: product.id }
 }
@@ -97,8 +107,9 @@ export async function updateProduct(productId: string, input: ProductInput) {
   const validated = productSchema.safeParse(input)
   if (!validated.success) return { error: validated.error.flatten() }
   const { supabase, store } = await requireAuthenticatedStoreContext()
+  const db = supabase as any
   const data = validated.data
-  const { error } = await supabase
+  const { error } = await db
     .from('products')
     .update({
       name: data.name,
@@ -108,13 +119,15 @@ export async function updateProduct(productId: string, input: ProductInput) {
       compare_price: data.compare_price ?? null,
       badge: data.badge ?? null,
       category_id: data.category_id ?? null,
+      brand_id: data.brand_id ?? null,
+      sku: data.sku?.trim() || null,
       is_featured: data.is_featured,
       is_active: data.is_active,
       sort_order: data.sort_order,
     })
     .eq('id', productId)
     .eq('store_id', store.id)
-  if (error) return { error: { formErrors: [error.message], fieldErrors: {} } }
+  if (error) return { error: productWriteError(error) }
   revalidateStorePaths(store.slug)
   revalidatePath(`/admin/catalogo/${productId}`)
   return { success: true }
