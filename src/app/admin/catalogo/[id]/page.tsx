@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
-import { getAdminCategories, getAdminProductById } from '@/lib/queries/store'
+import { getAdminBrands, getAdminCategories, getAdminProductById } from '@/lib/queries/store'
 import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
 import { FloatingProductSubmit } from '@/components/admin/FloatingProductSubmit'
 import { ProductForm } from '@/components/admin/ProductForm'
@@ -9,9 +9,10 @@ import { ProductForm } from '@/components/admin/ProductForm'
 export default async function EditProductoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const { storeData } = await requireAuthenticatedAdminStore()
-  const [product, categories] = await Promise.all([
+  const [product, categories, brands] = await Promise.all([
     getAdminProductById(storeData.store.id, id),
     getAdminCategories(storeData.store.id),
+    getAdminBrands(storeData.store.id),
   ])
 
   if (!product) notFound()
@@ -24,9 +25,9 @@ export default async function EditProductoPage({ params }: { params: Promise<{ i
       <header className="mb-5 pr-36 sm:pr-44">
         <p className="admin-label">Editar producto</p>
         <h1 className="mt-1 text-[1.85rem] font-semibold tracking-[-0.055em] text-foreground sm:text-[2.2rem]">{product.name}</h1>
-        <p className="mt-1.5 max-w-xl text-sm leading-6 text-muted-foreground">Cambiá lo esencial rápido y abrí opciones avanzadas solo cuando hagan falta.</p>
+        <p className="mt-1.5 max-w-xl text-sm leading-6 text-muted-foreground">Cambiá lo esencial rápido y mantené categoría, marca y SKU organizados desde la misma ficha.</p>
       </header>
-      <div id={scopeId} className="max-w-5xl"><ProductForm product={product} categories={categories} productId={product.id} /></div>
+      <div id={scopeId} className="max-w-5xl"><ProductForm product={product} categories={categories} brands={brands} productId={product.id} /></div>
       <FloatingProductSubmit scopeId={scopeId} mode="save" />
     </div>
   )
