@@ -60,6 +60,7 @@ export type StoreAnalyticsSummary = {
 type AnalyticsEventRow = {
   event_type: 'store_view' | 'product_view' | 'add_to_cart' | 'cart_open' | 'whatsapp_checkout'
   product_id: string | null
+  session_id: string | null
   created_at: string
 }
 
@@ -113,7 +114,7 @@ export async function getStoreAnalytics(
   for (let from = 0; ; from += PAGE_SIZE) {
     const { data, error } = await supabase
       .from('store_events')
-      .select('event_type, product_id, created_at')
+      .select('event_type, product_id, session_id, created_at')
       .eq('store_id', storeId)
       .gte('created_at', oldestNeeded)
       .order('created_at', { ascending: true })
@@ -171,6 +172,8 @@ function buildSnapshot(
   const previousAddToCart = countType(previousRows, 'add_to_cart')
   const previousWhatsapp = countType(previousRows, 'whatsapp_checkout')
 
+  const visitSessions = countUniqueSessions(currentRows, 'store_view')
+  const whatsappSessions = countUniqueSessions(currentRows, 'whatsapp_checkout')
   const topProducts = buildTopProducts(currentRows, productMap)
   const topCategory = buildTopCategory(currentRows, productMap)
   const whatsappMetric = comparableMetric(currentWhatsapp, previousWhatsapp)
@@ -181,7 +184,7 @@ function buildSnapshot(
     productViews: comparableMetric(currentProductViews, previousProductViews),
     addToCart: comparableMetric(currentAddToCart, previousAddToCart),
     whatsappClicks: whatsappMetric,
-    conversionRate: currentVisits > 0 ? (currentWhatsapp / currentVisits) * 100 : 0,
+    conversionRate: visitSessions > 0 ? (whatsappSessions / visitSessions) * 100 : 0,
     daily: buildDailySeries(currentRows, days, now),
     topProducts,
     topCategory,
@@ -212,6 +215,19 @@ function countType(rows: AnalyticsEventRow[], type: AnalyticsEventRow['event_typ
     if (row.event_type === type) count += 1
   }
   return count
+}
+
+function countUniqueSessions(rows: AnalyticsEventRow[], type: AnalyticsEventRow['event_type']) {
+  const sessions = new Set<string>()
+  let anonymousWithoutSession = 0
+
+  for (const row of rows) {
+    if (row.event_type !== type) continue
+    if (row.session_id) sessions.add(row.session_id)
+    else anonymousWithoutSession += 1
+  }
+
+  return sessions.size + anonymousWithoutSession
 }
 
 function buildTopProducts(
