@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import type { AnalyticsDailyPoint } from '@/lib/queries/analytics'
 
 type ChartMetric = 'visits' | 'whatsapp'
@@ -79,7 +79,7 @@ export function AnalyticsActivityChart({ data }: { data: AnalyticsDailyPoint[] }
   )
 }
 
-function ChartToggle({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function ChartToggle({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
   return (
     <button
       type="button"
