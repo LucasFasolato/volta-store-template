@@ -1,4 +1,5 @@
 import type { Brand, Category, ProductWithImages } from '@/types/store'
+import { getProductDiscountPercent, isProductOnPromotion } from '@/lib/products/promotion'
 
 export const DEFAULT_PAGE_SIZE = 12
 export const PAGE_SIZE_OPTIONS = [8, 12, 24] as const
@@ -9,6 +10,7 @@ type OrderedProduct = ProductWithImages & { category_sort_order?: number }
 export type StorefrontSearchParams = {
   categoria?: QueryValue
   marca?: QueryValue
+  promo?: QueryValue
   buscar?: QueryValue
   producto?: QueryValue
   pagina?: QueryValue
@@ -18,6 +20,7 @@ export type StorefrontSearchParams = {
 export type StorefrontRouteState = {
   activeCategory: string | null
   activeBrand: string | null
+  activePromotion: boolean
   activeProduct: string | null
   query: string
   page: number
@@ -70,6 +73,11 @@ function matchesSearch(product: ProductWithImages, query: string) {
   return tokens.every((token) => haystack.includes(token))
 }
 
+function parsePromotion(value: QueryValue) {
+  const promotion = getSingleValue(value)
+  return promotion === '1' || promotion === 'true'
+}
+
 export function resolveStorefrontView(
   products: ProductWithImages[],
   categories: Category[],
@@ -79,6 +87,7 @@ export function resolveStorefrontView(
   const categorySlug = getSingleValue(searchParams.categoria)
   const brandSlug = getSingleValue(searchParams.marca)
   const productSlug = getSingleValue(searchParams.producto)
+  const activePromotion = parsePromotion(searchParams.promo)
   const query = (getSingleValue(searchParams.buscar) ?? '').trim().slice(0, 120)
   const pageSize = parsePageSize(searchParams.tamano)
   const category = categories.find((item) => item.slug === categorySlug) ?? null
@@ -89,9 +98,14 @@ export function resolveStorefrontView(
   let filteredProducts = [...(products as OrderedProduct[])]
   if (category) filteredProducts = filteredProducts.filter((product) => product.category_id === category.id)
   if (brand) filteredProducts = filteredProducts.filter((product) => product.brand_id === brand.id)
+  if (activePromotion) filteredProducts = filteredProducts.filter(isProductOnPromotion)
   if (query) filteredProducts = filteredProducts.filter((product) => matchesSearch(product, query))
 
   filteredProducts.sort((a, b) => {
+    if (activePromotion) {
+      const discountDifference = (getProductDiscountPercent(b) ?? 0) - (getProductDiscountPercent(a) ?? 0)
+      if (discountDifference !== 0) return discountDifference
+    }
     if (category) return (a.category_sort_order ?? a.sort_order) - (b.category_sort_order ?? b.sort_order)
     return a.sort_order - b.sort_order
   })
@@ -103,6 +117,7 @@ export function resolveStorefrontView(
   return {
     activeCategory,
     activeBrand,
+    activePromotion,
     activeProduct: selectedProduct?.slug ?? null,
     query,
     page,
@@ -120,6 +135,7 @@ export function buildStorefrontHref(
   state: {
     category?: string | null
     brand?: string | null
+    promotion?: boolean
     query?: string | null
     product?: string | null
     page?: number
@@ -129,6 +145,7 @@ export function buildStorefrontHref(
   const params = new URLSearchParams()
   if (state.category) params.set('categoria', state.category)
   if (state.brand) params.set('marca', state.brand)
+  if (state.promotion) params.set('promo', '1')
   if (state.query?.trim()) params.set('buscar', state.query.trim())
   if (state.product) params.set('producto', state.product)
   if (state.page && state.page > 1) params.set('pagina', String(state.page))
