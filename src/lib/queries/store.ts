@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
-import type { StorePublicData, AdminStoreData, ProductWithImages, Category } from '@/types/store'
+import type { StorePublicData, AdminStoreData, ProductWithImages, Category, Brand } from '@/types/store'
 import { getOwnerStoreData } from '@/lib/server/store-context'
 
-const PRODUCT_SELECT = '*, images:product_images(*), category:categories(*), options:product_options(*)' as const
+const PRODUCT_SELECT = '*, images:product_images(*), category:categories(*), brand:brands(*), options:product_options(*)' as const
 
 function categoryKey(category: Pick<Category, 'name'>) {
   return category.name.trim().toLocaleLowerCase('es')
@@ -20,6 +20,7 @@ function uniqueCategories(categories: Category[]) {
 
 export async function getStoreBySlug(slug: string): Promise<StorePublicData | null> {
   const supabase = await createClient()
+  const db = supabase as any
 
   const { data: store } = await supabase
     .from('stores')
@@ -30,12 +31,13 @@ export async function getStoreBySlug(slug: string): Promise<StorePublicData | nu
 
   if (!store) return null
 
-  const [themeRes, layoutRes, contentRes, categoriesRes, productsRes] = await Promise.all([
+  const [themeRes, layoutRes, contentRes, categoriesRes, brandsRes, productsRes] = await Promise.all([
     supabase.from('store_theme').select('*').eq('store_id', store.id).maybeSingle(),
-    supabase.from('store_layout').select('*').eq('store_id', store.id).maybeSingle(),
+    db.from('store_layout').select('*').eq('store_id', store.id).maybeSingle(),
     supabase.from('store_content').select('*').eq('store_id', store.id).maybeSingle(),
     supabase.from('categories').select('*').eq('store_id', store.id).order('sort_order'),
-    supabase
+    db.from('brands').select('*').eq('store_id', store.id).eq('is_active', true).order('sort_order'),
+    db
       .from('products')
       .select(PRODUCT_SELECT)
       .eq('store_id', store.id)
@@ -53,17 +55,19 @@ export async function getStoreBySlug(slug: string): Promise<StorePublicData | nu
     layout: layoutRes.data,
     content: contentRes.data,
     categories: uniqueCategories((categoriesRes.data ?? []) as Category[]),
+    brands: (brandsRes.data ?? []) as Brand[],
     products: (productsRes.data ?? []) as ProductWithImages[],
   }
 }
 
 export async function getAdminStore(userId: string): Promise<AdminStoreData | null> {
-  return getOwnerStoreData(userId)
+  return getOwnerStoreData(userId) as Promise<AdminStoreData | null>
 }
 
 export async function getAdminProducts(storeId: string) {
   const supabase = await createClient()
-  const { data } = await supabase
+  const db = supabase as any
+  const { data } = await db
     .from('products')
     .select(PRODUCT_SELECT)
     .eq('store_id', storeId)
@@ -108,9 +112,22 @@ export async function getAdminCategories(storeId: string) {
   return Array.from(canonicalByName.values())
 }
 
+export async function getAdminBrands(storeId: string) {
+  const supabase = await createClient()
+  const db = supabase as any
+  const { data } = await db
+    .from('brands')
+    .select('*')
+    .eq('store_id', storeId)
+    .order('sort_order')
+
+  return (data ?? []) as Brand[]
+}
+
 export async function getAdminProductById(storeId: string, productId: string) {
   const supabase = await createClient()
-  const { data } = await supabase
+  const db = supabase as any
+  const { data } = await db
     .from('products')
     .select(PRODUCT_SELECT)
     .eq('id', productId)
@@ -123,7 +140,8 @@ export async function getAdminProductById(storeId: string, productId: string) {
 
 export async function getProductBySlug(storeId: string, slug: string) {
   const supabase = await createClient()
-  const { data } = await supabase
+  const db = supabase as any
+  const { data } = await db
     .from('products')
     .select(PRODUCT_SELECT)
     .eq('store_id', storeId)
