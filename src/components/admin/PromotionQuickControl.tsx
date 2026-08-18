@@ -41,6 +41,23 @@ export function PromotionQuickControl({ product, onChange, compact = false }: Pr
     if (open) setInputValue(active ? String(product.price) : '')
   }, [active, open, product.price])
 
+  function applyActionResult(result: Awaited<ReturnType<typeof setProductPromotion>>) {
+    if (result?.error) {
+      toast.error(result.error)
+      return false
+    }
+    if (typeof result?.price !== 'number') {
+      toast.error('No pudimos actualizar la promoción.')
+      return false
+    }
+
+    onChange({
+      price: result.price,
+      comparePrice: typeof result.comparePrice === 'number' ? result.comparePrice : null,
+    })
+    return true
+  }
+
   function savePromotion() {
     const promotionalPrice = parsePrice(inputValue)
     if (!promotionalPrice) {
@@ -54,11 +71,7 @@ export function PromotionQuickControl({ product, onChange, compact = false }: Pr
 
     startTransition(async () => {
       const result = await setProductPromotion(product.id, promotionalPrice)
-      if (result?.error) {
-        toast.error(result.error)
-        return
-      }
-      onChange({ price: result.price, comparePrice: result.comparePrice })
+      if (!applyActionResult(result)) return
       setOpen(false)
       toast.success(active ? 'Promoción actualizada.' : 'Producto agregado a Promociones.')
     })
@@ -67,15 +80,16 @@ export function PromotionQuickControl({ product, onChange, compact = false }: Pr
   function removePromotion() {
     startTransition(async () => {
       const result = await setProductPromotion(product.id, null)
-      if (result?.error) {
-        toast.error(result.error)
-        return
-      }
-      onChange({ price: result.price, comparePrice: result.comparePrice })
+      if (!applyActionResult(result)) return
       setOpen(false)
       toast.success('Promoción desactivada.')
     })
   }
+
+  const draftPrice = parsePrice(inputValue)
+  const draftDiscount = draftPrice && draftPrice < normalPrice
+    ? Math.round((1 - draftPrice / normalPrice) * 100)
+    : null
 
   return (
     <>
@@ -130,10 +144,10 @@ export function PromotionQuickControl({ product, onChange, compact = false }: Pr
                 className="h-11 rounded-[10px] pl-8"
               />
             </div>
-            {parsePrice(inputValue) && parsePrice(inputValue)! < normalPrice ? (
+            {draftDiscount ? (
               <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-300">
                 <Tag className="size-3.5" />
-                {Math.round((1 - parsePrice(inputValue)! / normalPrice) * 100)}% de descuento
+                {draftDiscount}% de descuento
               </p>
             ) : null}
           </div>
@@ -144,7 +158,7 @@ export function PromotionQuickControl({ product, onChange, compact = false }: Pr
                 Sacar promoción
               </Button>
             ) : <span />}
-            <Button type="button" onClick={savePromotion} disabled={pending || !parsePrice(inputValue)} className="bg-[#12e89a] text-[#062117] hover:bg-[#0fd98f]">
+            <Button type="button" onClick={savePromotion} disabled={pending || !draftPrice} className="bg-[#12e89a] text-[#062117] hover:bg-[#0fd98f]">
               {pending ? 'Guardando…' : active ? 'Guardar oferta' : 'Aplicar promoción'}
             </Button>
           </DialogFooter>
