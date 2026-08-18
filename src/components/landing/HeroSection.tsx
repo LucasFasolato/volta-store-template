@@ -25,16 +25,59 @@ export function HeroSection({
   const whatsappHref = store.whatsapp ? `https://wa.me/${sanitizePhoneNumber(store.whatsapp)}` : '#catalogo'
   const hasImage = !!content.hero_image_url
   const compact = densityMode === 'small'
+  const backgroundMode = hasImage && content.hero_image_layout === 'background'
+  const overlayOpacity = Math.min(80, Math.max(20, content.hero_overlay_opacity ?? 55))
 
   return (
-    <section id="main-content" className="relative overflow-hidden border-b" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-bg-gradient)' }}>
-      <div className={cn('mx-auto grid items-stretch px-4 sm:px-6', containerClass, hasImage ? 'lg:grid-cols-[minmax(0,.95fr)_minmax(380px,1.05fr)]' : '')}>
-        <div className={cn('flex flex-col justify-center py-14 sm:py-20 lg:py-24', hasImage && 'lg:pr-12 xl:pr-16', compact && 'sm:py-16 lg:py-18')}>
+    <section
+      id="main-content"
+      className={cn('relative overflow-hidden border-b', backgroundMode && (compact ? 'min-h-[560px]' : 'min-h-[620px]'))}
+      style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-bg-gradient)' }}
+    >
+      {backgroundMode ? (
+        <>
+          <Image src={content.hero_image_url!} alt={content.hero_title} fill className="object-cover" priority />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(90deg, color-mix(in srgb, var(--store-bg) ${Math.min(86, overlayOpacity + 12)}%, transparent) 0%, color-mix(in srgb, var(--store-bg) ${overlayOpacity}%, transparent) 52%, color-mix(in srgb, var(--store-bg) ${Math.max(20, overlayOpacity - 12)}%, transparent) 100%)`,
+            }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(to top, color-mix(in srgb, var(--store-bg) 45%, transparent), transparent 48%)' }}
+          />
+        </>
+      ) : null}
+
+      <div
+        className={cn(
+          'relative z-10 mx-auto items-stretch px-4 sm:px-6',
+          containerClass,
+          !backgroundMode && hasImage ? 'grid lg:grid-cols-[minmax(0,.95fr)_minmax(380px,1.05fr)]' : '',
+        )}
+      >
+        <div
+          className={cn(
+            'flex flex-col justify-center py-14 sm:py-20 lg:py-24',
+            !backgroundMode && hasImage && 'lg:pr-12 xl:pr-16',
+            compact && 'sm:py-16 lg:py-18',
+            backgroundMode && 'min-h-[560px] max-w-3xl py-20 sm:min-h-[620px] sm:py-24 lg:py-28',
+          )}
+        >
           {content.support_text ? (
             <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'var(--store-secondary)' }}>{content.support_text}</p>
           ) : null}
 
-          <h1 className="store-display max-w-3xl text-balance" style={{ color: 'var(--store-text)', fontSize: compact ? 'clamp(2.35rem, 6vw, 4.5rem)' : 'clamp(2.7rem, 6.7vw, 5.8rem)', lineHeight: '.98', letterSpacing: '-.055em' }}>
+          <h1
+            className="store-display max-w-3xl text-balance"
+            style={{
+              color: 'var(--store-text)',
+              fontSize: compact ? 'clamp(2.35rem, 6vw, 4.5rem)' : 'clamp(2.7rem, 6.7vw, 5.8rem)',
+              lineHeight: '.98',
+              letterSpacing: '-.055em',
+            }}
+          >
             {content.hero_title}
           </h1>
 
@@ -46,7 +89,7 @@ export function HeroSection({
               <ArrowDownRight className="size-4" />
             </a>
             {store.whatsapp ? (
-              <a href={whatsappHref} target="_blank" rel="noreferrer noopener" className="store-button inline-flex items-center justify-center gap-2 border px-6 text-sm font-semibold transition hover:-translate-y-0.5" style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)', backgroundColor: 'var(--store-surface)' }}>
+              <a href={whatsappHref} target="_blank" rel="noreferrer noopener" className="store-button inline-flex items-center justify-center gap-2 border px-6 text-sm font-semibold transition hover:-translate-y-0.5" style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)', backgroundColor: 'color-mix(in srgb, var(--store-surface) 90%, transparent)' }}>
                 <MessageCircle className="size-4" />
                 Consultar por WhatsApp
               </a>
@@ -56,7 +99,7 @@ export function HeroSection({
           {productCount > 0 ? <p className="mt-5 text-xs" style={{ color: 'var(--store-muted-text)' }}>{productCount} {productCount === 1 ? 'producto disponible' : 'productos disponibles'} · Armá tu pedido y continuá por WhatsApp.</p> : null}
         </div>
 
-        {hasImage ? (
+        {!backgroundMode && hasImage ? (
           <div className="relative -mx-4 min-h-[320px] overflow-hidden sm:-mx-6 sm:min-h-[440px] lg:mx-0 lg:min-h-[560px]">
             <Image src={content.hero_image_url!} alt={content.hero_title} fill className="object-cover" priority />
             <div className="absolute inset-0 lg:hidden" style={{ background: 'linear-gradient(to bottom, transparent 70%, color-mix(in srgb, var(--store-bg) 20%, transparent))' }} />
