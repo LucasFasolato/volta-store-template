@@ -4,9 +4,9 @@ export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Store = Database['public']['Tables']['stores']['Row']
 export type StoreTheme = Database['public']['Tables']['store_theme']['Row']
 export type StoreLayout = Database['public']['Tables']['store_layout']['Row'] & {
-  catalog_mode: 'all' | 'sections' | 'navigation'
-  show_catalog_search: boolean
-  show_catalog_brands: boolean
+  catalog_mode?: 'all' | 'sections' | 'navigation'
+  show_catalog_search?: boolean
+  show_catalog_brands?: boolean
 }
 export type StoreContent = Database['public']['Tables']['store_content']['Row']
 export type Category = Database['public']['Tables']['categories']['Row']
