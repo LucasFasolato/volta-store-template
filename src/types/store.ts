@@ -3,10 +3,28 @@ import type { Database } from './database'
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Store = Database['public']['Tables']['stores']['Row']
 export type StoreTheme = Database['public']['Tables']['store_theme']['Row']
-export type StoreLayout = Database['public']['Tables']['store_layout']['Row']
+export type StoreLayout = Database['public']['Tables']['store_layout']['Row'] & {
+  catalog_mode?: 'all' | 'sections' | 'navigation'
+  show_catalog_search?: boolean
+  show_catalog_brands?: boolean
+}
 export type StoreContent = Database['public']['Tables']['store_content']['Row']
 export type Category = Database['public']['Tables']['categories']['Row']
-export type Product = Database['public']['Tables']['products']['Row']
+export type Brand = {
+  id: string
+  store_id: string
+  name: string
+  slug: string
+  is_active: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+export type Product = Database['public']['Tables']['products']['Row'] & {
+  brand_id: string | null
+  sku: string | null
+  category_sort_order: number
+}
 export type ProductImage = Database['public']['Tables']['product_images']['Row']
 
 // Selectable attribute group for a product (e.g., name="Talle", values=["S","M","L","XL"])
@@ -22,6 +40,7 @@ export type ProductOption = {
 export type ProductWithImages = Product & {
   images: ProductImage[]
   category: Category | null
+  brand: Brand | null
   options: ProductOption[]
 }
 
@@ -31,6 +50,7 @@ export type StorePublicData = {
   layout: StoreLayout
   content: StoreContent
   categories: Category[]
+  brands: Brand[]
   products: ProductWithImages[]
 }
 

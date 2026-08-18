@@ -47,11 +47,12 @@ import {
 } from '@/lib/products/options'
 import { formatCurrency } from '@/lib/utils/format'
 import { productSchema, type ProductInput } from '@/lib/validations/product'
-import type { Category, ProductImage, ProductWithImages } from '@/types/store'
+import type { Brand, Category, ProductImage, ProductWithImages } from '@/types/store'
 
 type ProductFormProps = {
   product?: ProductWithImages
   categories: Category[]
+  brands: Brand[]
   productId?: string
 }
 
@@ -62,7 +63,7 @@ function parsePesoInput(value: string) {
   return digits === '' ? 0 : Number(digits)
 }
 
-export function ProductForm({ product, categories, productId }: ProductFormProps) {
+export function ProductForm({ product, categories, brands, productId }: ProductFormProps) {
   const router = useRouter()
   const [saved, setSaved] = useState(false)
   const [images, setImages] = useState(product?.images ?? [])
@@ -84,6 +85,7 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
         product?.description ||
         product?.compare_price ||
         product?.badge ||
+        product?.sku ||
         (product?.sort_order ?? 0) > 0 ||
         product?.is_featured ||
         product?.is_active === false,
@@ -105,6 +107,8 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
       compare_price: product?.compare_price ?? undefined,
       badge: product?.badge ?? '',
       category_id: product?.category_id ?? null,
+      brand_id: product?.brand_id ?? null,
+      sku: product?.sku ?? '',
       is_featured: product?.is_featured ?? false,
       is_active: product?.is_active ?? true,
       sort_order: product?.sort_order ?? 0,
@@ -124,19 +128,23 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
   const shortDescription = useWatch({ control, name: 'short_description' }) ?? ''
   const description = useWatch({ control, name: 'description' }) ?? ''
   const badge = useWatch({ control, name: 'badge' }) ?? ''
+  const sku = useWatch({ control, name: 'sku' }) ?? ''
   const comparePrice = useWatch({ control, name: 'compare_price' }) ?? null
   const sortOrder = useWatch({ control, name: 'sort_order' }) ?? 0
   const isActive = useWatch({ control, name: 'is_active' }) ?? true
   const isFeatured = useWatch({ control, name: 'is_featured' }) ?? false
   const categoryId = useWatch({ control, name: 'category_id' }) ?? null
+  const brandId = useWatch({ control, name: 'brand_id' }) ?? null
 
   const selectedCategory = categories.find((category) => category.id === categoryId) ?? null
+  const selectedBrand = brands.find((brand) => brand.id === brandId) ?? null
   const coverUrl = coverPreviewUrl ?? images[0]?.url ?? null
   const advancedCount = [
     shortDescription.trim().length > 0,
     description.trim().length > 0,
     typeof comparePrice === 'number' && comparePrice > 0,
     badge.trim().length > 0,
+    sku.trim().length > 0,
     sortOrder > 0,
     isFeatured,
     !isActive,
@@ -396,7 +404,7 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
             {productId ? 'Lo esencial del producto' : 'Carga rapida del producto'}
           </h2>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Nombre, precio, portada y categoria. Lo demas queda guardado para cuando haga falta.
+            Nombre, precio, portada, categoria y marca. Lo demas queda guardado para cuando haga falta.
           </p>
         </div>
 
@@ -489,13 +497,10 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
               <p className="mt-1 text-sm font-medium text-emerald-400">
                 {price > 0 ? formatCurrency(price) : 'Define un precio'}
               </p>
-              <p className="mt-3 text-xs leading-5 text-muted-foreground">
-                {selectedCategory
-                  ? `Categoria: ${selectedCategory.name}`
-                  : categories.length > 0
-                    ? 'Categoria opcional. Puedes usarla para ordenar mejor el catalogo.'
-                    : 'Puedes publicar sin categoria y organizarlo despues si quieres.'}
-              </p>
+              <div className="mt-3 space-y-1 text-xs leading-5 text-muted-foreground">
+                <p>{selectedCategory ? `Categoria: ${selectedCategory.name}` : 'Sin categoria'}</p>
+                <p>{selectedBrand ? `Marca: ${selectedBrand.name}` : 'Sin marca'}</p>
+              </div>
             </div>
           </div>
 
@@ -512,7 +517,7 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
               {errors.name ? <FieldError message={errors.name.message} /> : null}
             </FieldBlock>
 
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               <FieldBlock label="Precio" hint="Es el valor principal que se muestra en la tienda.">
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-neutral-500">$</span>
@@ -560,6 +565,33 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
                           {categories.map((category) => (
                             <SelectItem key={category.id} value={category.id}>
                               {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </FieldBlock>
+              ) : null}
+
+              {brands.length > 0 ? (
+                <FieldBlock label="Marca" hint="Opcional. Ideal para catalogos con varias marcas.">
+                  <Controller
+                    control={control}
+                    name="brand_id"
+                    render={({ field }) => (
+                      <Select
+                        value={field.value ?? 'none'}
+                        onValueChange={(value) => field.onChange(value === 'none' ? null : value)}
+                      >
+                        <SelectTrigger className="h-12 rounded-md border-white/10 bg-white/5 text-white">
+                          <SelectValue placeholder="Sin marca" />
+                        </SelectTrigger>
+                        <SelectContent className="border-white/10 bg-neutral-900 text-white">
+                          <SelectItem value="none">Sin marca</SelectItem>
+                          {brands.map((brand) => (
+                            <SelectItem key={brand.id} value={brand.id}>
+                              {brand.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -707,7 +739,7 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
               Detalles extra del producto
             </h3>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Descripcion, precio tachado, badge, orden y visibilidad. Nada de esto compite con lo principal.
+              Descripcion, SKU, precio tachado, badge, orden y visibilidad. Nada de esto compite con lo principal.
             </p>
           </div>
 
@@ -777,6 +809,7 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
                 </div>
               </FieldBlock>
             </div>
+
             <FieldBlock
               label="Descripcion completa"
               hint="Se muestra en el detalle del producto."
@@ -790,6 +823,18 @@ export function ProductForm({ product, categories, productId }: ProductFormProps
               />
               <FieldMeta current={description.length} max={CONTENT_LIMITS.product_description} />
               {errors.description ? <FieldError message={errors.description.message} /> : null}
+            </FieldBlock>
+
+            <FieldBlock label="SKU / codigo interno" hint="Opcional. Permite encontrar el producto por su codigo en catalogos grandes.">
+              <Input
+                {...register('sku')}
+                placeholder="Ej: STAR-WHEY-2KG"
+                maxLength={80}
+                aria-invalid={!!errors.sku}
+                className="h-12 rounded-md border-white/10 bg-white/5 text-white placeholder:text-neutral-500"
+              />
+              <FieldMeta current={sku.length} max={80} />
+              {errors.sku ? <FieldError message={errors.sku.message} /> : null}
             </FieldBlock>
 
             <div className="grid gap-6 lg:grid-cols-3">
