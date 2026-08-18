@@ -28,6 +28,8 @@ export const storeConfigSchema = z.object({
 export const storeContentSchema = z.object({
   banner_mode: z.enum(['static', 'animated']),
   banner_speed: z.enum(['slow', 'normal', 'fast']),
+  hero_image_layout: z.enum(['side', 'background']).optional(),
+  hero_overlay_opacity: z.number().int().min(20).max(80).optional(),
   hero_title: z
     .string()
     .max(CONTENT_LIMITS.hero_title, `Maximo ${CONTENT_LIMITS.hero_title} caracteres`)
