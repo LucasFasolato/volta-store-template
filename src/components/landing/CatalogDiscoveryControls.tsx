@@ -14,6 +14,7 @@ type Props = {
   routeState: StorefrontRouteState
   categories: Category[]
   brands: Brand[]
+  hasPromotions: boolean
   showSearch: boolean
   showCategories: boolean
   showBrands: boolean
@@ -25,6 +26,7 @@ export function CatalogDiscoveryControls({
   routeState,
   categories,
   brands,
+  hasPromotions,
   showSearch,
   showCategories,
   showBrands,
@@ -45,6 +47,7 @@ export function CatalogDiscoveryControls({
         buildStorefrontHref(pathname, {
           category: routeState.activeCategory,
           brand: routeState.activeBrand,
+          promotion: routeState.activePromotion,
           query: searchValue,
           page: 1,
           pageSize: routeState.pageSize,
@@ -54,10 +57,11 @@ export function CatalogDiscoveryControls({
     }, 300)
 
     return () => window.clearTimeout(timeout)
-  }, [pathname, routeState.activeBrand, routeState.activeCategory, routeState.pageSize, routeState.query, router, searchValue, showSearch])
+  }, [pathname, routeState.activeBrand, routeState.activeCategory, routeState.activePromotion, routeState.pageSize, routeState.query, router, searchValue, showSearch])
 
-  const hasActiveFilters = Boolean(routeState.activeCategory || routeState.activeBrand || routeState.query)
+  const hasActiveFilters = Boolean(routeState.activeCategory || routeState.activeBrand || routeState.activePromotion || routeState.query)
   const visibleBrands = brands.filter((brand) => brand.is_active)
+  const showCategoryRow = (showCategories && categories.length > 0) || hasPromotions
 
   return (
     <section className="pt-5 sm:pt-7" aria-label="Buscar y filtrar productos">
@@ -102,26 +106,53 @@ export function CatalogDiscoveryControls({
             </div>
           ) : null}
 
-          {showCategories && categories.length > 0 ? (
-            <FilterRow
-              label="Categoría"
-              items={categories.map((category) => ({ id: category.id, slug: category.slug, name: category.name }))}
-              activeSlug={routeState.activeCategory}
-              allHref={buildStorefrontHref(pathname, {
-                brand: routeState.activeBrand,
-                query: routeState.query,
-                page: 1,
-                pageSize: routeState.pageSize,
-              })}
-              hrefFor={(slug) => buildStorefrontHref(pathname, {
-                category: slug,
-                brand: routeState.activeBrand,
-                query: routeState.query,
-                page: 1,
-                pageSize: routeState.pageSize,
-              })}
-              separated={showSearch}
-            />
+          {showCategoryRow ? (
+            <div className={showSearch ? 'mt-3 border-t pt-3' : 'mt-1'} style={showSearch ? { borderColor: 'var(--store-card-border)' } : undefined}>
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
+                Categoría
+              </p>
+              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap">
+                <FilterPill
+                  label="Todas"
+                  href={buildStorefrontHref(pathname, {
+                    brand: routeState.activeBrand,
+                    query: routeState.query,
+                    page: 1,
+                    pageSize: routeState.pageSize,
+                  })}
+                  active={!routeState.activeCategory && !routeState.activePromotion}
+                />
+                {hasPromotions ? (
+                  <FilterPill
+                    label="Promociones"
+                    href={buildStorefrontHref(pathname, {
+                      category: routeState.activeCategory,
+                      brand: routeState.activeBrand,
+                      promotion: true,
+                      query: routeState.query,
+                      page: 1,
+                      pageSize: routeState.pageSize,
+                    })}
+                    active={routeState.activePromotion}
+                  />
+                ) : null}
+                {showCategories ? categories.map((category) => (
+                  <FilterPill
+                    key={category.id}
+                    label={category.name}
+                    href={buildStorefrontHref(pathname, {
+                      category: category.slug,
+                      brand: routeState.activeBrand,
+                      promotion: routeState.activePromotion,
+                      query: routeState.query,
+                      page: 1,
+                      pageSize: routeState.pageSize,
+                    })}
+                    active={routeState.activeCategory === category.slug}
+                  />
+                )) : null}
+              </div>
+            </div>
           ) : null}
 
           {showBrands && visibleBrands.length > 0 ? (
@@ -131,6 +162,7 @@ export function CatalogDiscoveryControls({
               activeSlug={routeState.activeBrand}
               allHref={buildStorefrontHref(pathname, {
                 category: routeState.activeCategory,
+                promotion: routeState.activePromotion,
                 query: routeState.query,
                 page: 1,
                 pageSize: routeState.pageSize,
@@ -138,11 +170,12 @@ export function CatalogDiscoveryControls({
               hrefFor={(slug) => buildStorefrontHref(pathname, {
                 category: routeState.activeCategory,
                 brand: slug,
+                promotion: routeState.activePromotion,
                 query: routeState.query,
                 page: 1,
                 pageSize: routeState.pageSize,
               })}
-              separated={showSearch || (showCategories && categories.length > 0)}
+              separated={showSearch || showCategoryRow}
             />
           ) : null}
 
