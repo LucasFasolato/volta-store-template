@@ -8,6 +8,7 @@ import { StoreFooter } from '@/components/landing/StoreFooter'
 import { StoreNav } from '@/components/landing/StoreNav'
 import { TrustBar } from '@/components/landing/TrustBar'
 import { getStorefrontDensityMode } from '@/components/landing/storefront-density'
+import { isProductOnPromotion } from '@/lib/products/promotion'
 import { buildStorefrontHref, type StorefrontViewModel } from '@/lib/storefront/view'
 import { buildThemeVars, CONTAINER_CLASS } from '@/lib/utils/theme'
 import type { StorePublicData } from '@/types/store'
@@ -20,6 +21,7 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
   const productCount = data.products.length
   const categoryCount = categories.length
   const featuredCount = view.featuredProducts.length
+  const hasPromotions = data.products.some(isProductOnPromotion)
   const densityMode = getStorefrontDensityMode(productCount)
   const showFeaturedSection = layout.show_featured && featuredCount > 0 && productCount > 5
   const showTrustBar = densityMode !== 'small'
@@ -29,15 +31,17 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
   const catalogMode = (layout.catalog_mode ?? 'all') as CatalogMode
   const showCatalogSearch = layout.show_catalog_search ?? true
   const showCatalogBrands = (layout.show_catalog_brands ?? false) && brands.length > 0
-  const hasDiscoverySelection = Boolean(view.activeCategory || view.activeBrand || view.query)
+  const hasDiscoverySelection = Boolean(view.activeCategory || view.activeBrand || view.activePromotion || view.query)
   const showDiscoveryControls = layout.show_catalog && (
     showCatalogSearch ||
     (layout.show_categories && categories.length > 0) ||
-    showCatalogBrands
+    showCatalogBrands ||
+    hasPromotions
   )
   const closeModalHref = buildStorefrontHref(pathname, {
     category: view.activeCategory,
     brand: view.activeBrand,
+    promotion: view.activePromotion,
     query: view.query,
     page: view.page,
     pageSize: view.pageSize,
@@ -59,6 +63,7 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
             routeState={view}
             categories={categories}
             brands={brands}
+            hasPromotions={hasPromotions}
             showSearch={showCatalogSearch}
             showCategories={layout.show_categories}
             showBrands={showCatalogBrands}
