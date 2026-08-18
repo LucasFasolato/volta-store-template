@@ -11,6 +11,14 @@ type Props = {
   onChange: (value: CheckoutDetails) => void
 }
 
+const readableFieldStyle = {
+  borderColor: 'var(--store-card-border)',
+  color: 'var(--store-text)',
+  WebkitTextFillColor: 'var(--store-text)',
+  caretColor: 'var(--store-primary)',
+  background: 'var(--store-bg)',
+} as const
+
 export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, value, onChange }: Props) {
   if (!askName && !askFulfillment && !allowNotes) return null
 
@@ -44,8 +52,8 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, val
               onChange={(event) => onChange({ ...value, customerName: event.target.value })}
               placeholder="Ej: Lucas"
               autoComplete="name"
-              className="min-h-11 w-full rounded-[var(--store-button-radius)] border px-3.5 text-sm outline-none transition focus:ring-2"
-              style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)', background: 'color-mix(in srgb, var(--store-bg) 52%, var(--store-surface))' }}
+              className="min-h-11 w-full rounded-[var(--store-button-radius)] border px-3.5 text-sm outline-none transition placeholder:opacity-55 focus:ring-2"
+              style={readableFieldStyle}
             />
           </label>
         ) : null}
@@ -84,8 +92,8 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, val
               onChange={(event) => onChange({ ...value, notes: event.target.value.slice(0, 240) })}
               placeholder="Ej: pasar después de las 18 hs"
               rows={2}
-              className="w-full resize-none rounded-[var(--store-button-radius)] border px-3.5 py-3 text-sm outline-none"
-              style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)', background: 'color-mix(in srgb, var(--store-bg) 52%, var(--store-surface))' }}
+              className="w-full resize-none rounded-[var(--store-button-radius)] border px-3.5 py-3 text-sm outline-none placeholder:opacity-55 focus:ring-2"
+              style={readableFieldStyle}
             />
           </label>
         ) : null}
