@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { ArrowRight, CheckCircle2, MessageCircle, ShieldCheck, Store } from 'lucide-react'
 import { VoltaBrand } from '@/components/brand/VoltaBrand'
 
@@ -12,7 +13,36 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootPage() {
+type RootSearchParams = Promise<Record<string, string | string[] | undefined>>
+
+function firstValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value
+}
+
+export default async function RootPage({ searchParams }: { searchParams: RootSearchParams }) {
+  const params = await searchParams
+  const code = firstValue(params.code)
+  const oauthError = firstValue(params.error)
+
+  // Safety net: if Supabase falls back to Site URL instead of our explicit
+  // /auth/callback redirect, never leave the OAuth authorization code stranded
+  // on the public homepage. Forward it to the existing server callback so the
+  // PKCE code can be exchanged for a session and the user can reach the panel.
+  if (code || oauthError) {
+    const callbackParams = new URLSearchParams()
+
+    if (code) callbackParams.set('code', code)
+    if (oauthError) callbackParams.set('error', oauthError)
+
+    const errorDescription = firstValue(params.error_description)
+    if (errorDescription) callbackParams.set('error_description', errorDescription)
+
+    callbackParams.set('provider', 'google')
+    callbackParams.set('next', '/admin')
+
+    redirect(`/auth/callback?${callbackParams.toString()}`)
+  }
+
   return (
     <main className="min-h-screen bg-[#f7f8fa] text-slate-950">
       <header className="border-b border-black/6 bg-white/90 px-4 py-4 backdrop-blur sm:px-6">
