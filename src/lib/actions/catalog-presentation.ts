@@ -27,6 +27,25 @@ export async function updateCatalogMode(mode: CatalogMode) {
   return { success: true }
 }
 
+export async function updateCatalogDiscoverySettings(input: {
+  showSearch: boolean
+  showBrands: boolean
+}) {
+  const { supabase, store } = await requireAuthenticatedStoreContext()
+  const db = supabase as any
+  const { error } = await db
+    .from('store_layout')
+    .update({
+      show_catalog_search: Boolean(input.showSearch),
+      show_catalog_brands: Boolean(input.showBrands),
+    })
+    .eq('store_id', store.id)
+
+  if (error) return { error: error.message }
+  revalidateCatalog(store.slug)
+  return { success: true }
+}
+
 export async function reorderCategories(categoryIds: string[]) {
   const { supabase, store } = await requireAuthenticatedStoreContext()
   const db = supabase as any

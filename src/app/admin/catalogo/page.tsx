@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { Plus, Upload } from 'lucide-react'
-import { getAdminCategories, getAdminProducts } from '@/lib/queries/store'
+import { getAdminBrands, getAdminCategories, getAdminProducts } from '@/lib/queries/store'
 import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
+import { BrandsList } from '@/components/admin/BrandsList'
 import { CatalogPresentation } from '@/components/admin/CatalogPresentation'
 import { CategoriasList } from '@/components/admin/CategoriasList'
 import { CsvImporter } from '@/components/admin/CsvImporter'
@@ -11,11 +12,19 @@ import type { CatalogMode } from '@/lib/actions/catalog-presentation'
 
 export default async function CatalogoPage() {
   const { storeData } = await requireAuthenticatedAdminStore()
-  const [products, categories] = await Promise.all([
+  const [products, categories, brands] = await Promise.all([
     getAdminProducts(storeData.store.id),
     getAdminCategories(storeData.store.id),
+    getAdminBrands(storeData.store.id),
   ])
-  const catalogMode = ((storeData.layout as unknown as { catalog_mode?: CatalogMode }).catalog_mode ?? 'all') as CatalogMode
+  const layout = storeData.layout as unknown as {
+    catalog_mode?: CatalogMode
+    show_catalog_search?: boolean
+    show_catalog_brands?: boolean
+  }
+  const catalogMode = (layout.catalog_mode ?? 'all') as CatalogMode
+  const showCatalogSearch = layout.show_catalog_search ?? true
+  const showCatalogBrands = layout.show_catalog_brands ?? false
 
   return (
     <div className="volta-admin-page space-y-5 p-3.5 sm:p-5 lg:p-6">
@@ -32,11 +41,18 @@ export default async function CatalogoPage() {
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]">
         <section className="min-w-0">
-          <ProductList products={products} categories={categories} />
+          <ProductList products={products} categories={categories} brands={brands} />
         </section>
 
         <aside className="space-y-4 xl:sticky xl:top-5 xl:self-start">
-          <CatalogPresentation initialMode={catalogMode} categories={categories} products={products} />
+          <CatalogPresentation
+            initialMode={catalogMode}
+            initialShowSearch={showCatalogSearch}
+            initialShowBrands={showCatalogBrands}
+            brandCount={brands.length}
+            categories={categories}
+            products={products}
+          />
 
           <section id="categorias" className="rounded-[14px] border border-black/8 bg-white p-4 dark:border-white/10 dark:bg-[#111820] sm:p-5">
             <div className="mb-4">
@@ -44,6 +60,15 @@ export default async function CatalogoPage() {
               <h2 className="mt-1 text-base font-semibold tracking-[-0.03em] text-foreground">Administrá las categorías</h2>
             </div>
             <CategoriasList categories={categories} />
+          </section>
+
+          <section id="marcas" className="rounded-[14px] border border-black/8 bg-white p-4 dark:border-white/10 dark:bg-[#111820] sm:p-5">
+            <div className="mb-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Marcas</p>
+              <h2 className="mt-1 text-base font-semibold tracking-[-0.03em] text-foreground">Organizá el catálogo por marca</h2>
+              <p className="mt-1.5 text-xs leading-5 text-muted-foreground">Opcional. Ideal para distribuidores y tiendas con varias líneas de producto.</p>
+            </div>
+            <BrandsList brands={brands} />
           </section>
 
           <details id="importar" className="group rounded-[14px] border border-black/8 bg-white p-4 dark:border-white/10 dark:bg-[#111820] sm:p-5">

@@ -1,15 +1,25 @@
 'use client'
 
 import { useMemo, useState, useTransition } from 'react'
-import { Check, GripVertical, Layers3, ListFilter, Rows3 } from 'lucide-react'
+import { Check, GripVertical, Layers3, ListFilter, Rows3, Search, Tags } from 'lucide-react'
 import { toast } from 'sonner'
-import { reorderCategories, reorderProducts, updateCatalogMode, type CatalogMode } from '@/lib/actions/catalog-presentation'
+import { Switch } from '@/components/ui/switch'
+import {
+  reorderCategories,
+  reorderProducts,
+  updateCatalogDiscoverySettings,
+  updateCatalogMode,
+  type CatalogMode,
+} from '@/lib/actions/catalog-presentation'
 import type { Category, ProductWithImages } from '@/types/store'
 
 type OrderedProduct = ProductWithImages & { category_sort_order?: number }
 
 type Props = {
   initialMode: CatalogMode
+  initialShowSearch: boolean
+  initialShowBrands: boolean
+  brandCount: number
   categories: Category[]
   products: ProductWithImages[]
 }
@@ -20,8 +30,17 @@ const MODES: Array<{ value: CatalogMode; title: string; description: string; ico
   { value: 'navigation', title: 'Navegación', description: 'El cliente elige una categoría y ve solo los productos de esa sección.', icon: ListFilter },
 ]
 
-export function CatalogPresentation({ initialMode, categories: initialCategories, products: initialProducts }: Props) {
+export function CatalogPresentation({
+  initialMode,
+  initialShowSearch,
+  initialShowBrands,
+  brandCount,
+  categories: initialCategories,
+  products: initialProducts,
+}: Props) {
   const [mode, setMode] = useState(initialMode)
+  const [showSearch, setShowSearch] = useState(initialShowSearch)
+  const [showBrands, setShowBrands] = useState(initialShowBrands)
   const [categories, setCategories] = useState(initialCategories)
   const [products, setProducts] = useState<OrderedProduct[]>(initialProducts as OrderedProduct[])
   const [scope, setScope] = useState<'global' | string>('global')
@@ -47,6 +66,29 @@ export function CatalogPresentation({ initialMode, categories: initialCategories
         return
       }
       toast.success('Presentación del catálogo actualizada.')
+    })
+  }
+
+  function updateDiscovery(next: { showSearch?: boolean; showBrands?: boolean }) {
+    const previousSearch = showSearch
+    const previousBrands = showBrands
+    const nextSearch = next.showSearch ?? showSearch
+    const nextBrands = next.showBrands ?? showBrands
+    setShowSearch(nextSearch)
+    setShowBrands(nextBrands)
+
+    startTransition(async () => {
+      const result = await updateCatalogDiscoverySettings({
+        showSearch: nextSearch,
+        showBrands: nextBrands,
+      })
+      if (result?.error) {
+        setShowSearch(previousSearch)
+        setShowBrands(previousBrands)
+        toast.error(result.error)
+        return
+      }
+      toast.success('Filtros del catálogo actualizados.')
     })
   }
 
@@ -123,6 +165,29 @@ export function CatalogPresentation({ initialMode, categories: initialCategories
         })}
       </div>
 
+      <div className="mt-5 border-t border-black/7 pt-5 dark:border-white/8">
+        <p className="text-xs font-semibold text-foreground">Descubrimiento de productos</p>
+        <p className="mt-1 text-[11px] leading-5 text-muted-foreground">Activá solo las herramientas que aportan valor a este catálogo.</p>
+        <div className="mt-3 space-y-2">
+          <DiscoveryToggle
+            icon={Search}
+            title="Buscador"
+            description="Busca por producto, marca, categoría, descripción o SKU."
+            checked={showSearch}
+            disabled={pending}
+            onCheckedChange={(checked) => updateDiscovery({ showSearch: checked })}
+          />
+          <DiscoveryToggle
+            icon={Tags}
+            title="Filtro por marca"
+            description={brandCount > 0 ? `${brandCount} ${brandCount === 1 ? 'marca disponible' : 'marcas disponibles'}.` : 'Creá una marca para empezar a usar este filtro.'}
+            checked={showBrands}
+            disabled={pending || brandCount === 0}
+            onCheckedChange={(checked) => updateDiscovery({ showBrands: checked })}
+          />
+        </div>
+      </div>
+
       {categories.length > 1 ? (
         <div className="mt-5 border-t border-black/7 pt-5 dark:border-white/8">
           <p className="text-xs font-semibold text-foreground">Orden de categorías</p>
@@ -154,6 +219,19 @@ export function CatalogPresentation({ initialMode, categories: initialCategories
         </div>
       ) : null}
     </section>
+  )
+}
+
+function DiscoveryToggle({ icon: Icon, title, description, checked, disabled, onCheckedChange }: { icon: typeof Search; title: string; description: string; checked: boolean; disabled: boolean; onCheckedChange: (checked: boolean) => void }) {
+  return (
+    <div className="flex items-start gap-3 rounded-[10px] border border-black/7 bg-[#fbfcfd] p-3 dark:border-white/8 dark:bg-white/[0.025]">
+      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-slate-50 text-slate-500 dark:bg-white/5 dark:text-white/50"><Icon className="size-4" /></span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-foreground">{title}</p>
+        <p className="mt-0.5 text-[11px] leading-5 text-muted-foreground">{description}</p>
+      </div>
+      <Switch checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} className="data-[state=checked]:bg-[#12e89a]" />
+    </div>
   )
 }
 

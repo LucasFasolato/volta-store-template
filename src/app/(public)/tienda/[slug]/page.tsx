@@ -32,7 +32,7 @@ export default async function TiendaPage({ params, searchParams }: Props) {
   const data = await getStoreBySlug(slug)
   if (!data) notFound()
 
-  const view = resolveStorefrontView(data.products, data.categories, storefrontSearchParams)
+  const view = resolveStorefrontView(data.products, data.categories, data.brands, storefrontSearchParams)
 
   return <StoreLayout data={data} pathname={`/tienda/${slug}`} view={view} />
 }
