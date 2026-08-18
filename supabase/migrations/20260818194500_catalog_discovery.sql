@@ -1,4 +1,4 @@
--- Catalog discovery: brands, SKU, discovery controls and scale indexes.
+-- Catalog discovery: brands, SKU, discovery controls and focused scale indexes.
 
 create table if not exists public.brands (
   id         uuid primary key default gen_random_uuid(),
@@ -90,12 +90,6 @@ create index if not exists products_brand_id_idx
 
 create index if not exists products_store_active_sort_idx
   on public.products (store_id, is_active, sort_order);
-
-create index if not exists products_store_brand_sort_idx
-  on public.products (store_id, brand_id, sort_order);
-
-create index if not exists products_store_category_brand_active_idx
-  on public.products (store_id, category_id, brand_id, is_active);
 
 create or replace function public.validate_product_brand_store()
 returns trigger
