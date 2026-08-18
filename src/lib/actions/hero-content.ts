@@ -16,8 +16,8 @@ export async function updateHeroContent(input: StoreContentInput) {
     .update({
       banner_mode: validated.data.banner_mode,
       banner_speed: validated.data.banner_speed,
-      hero_image_layout: validated.data.hero_image_layout,
-      hero_overlay_opacity: validated.data.hero_overlay_opacity,
+      hero_image_layout: validated.data.hero_image_layout ?? 'side',
+      hero_overlay_opacity: validated.data.hero_overlay_opacity ?? 55,
       hero_title: validated.data.hero_title,
       hero_subtitle: validated.data.hero_subtitle,
       support_text: validated.data.support_text,
