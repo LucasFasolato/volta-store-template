@@ -9,9 +9,13 @@ export type StoreLayout = Database['public']['Tables']['store_layout']['Row'] & 
   show_catalog_brands?: boolean
 }
 export type HeroImageLayout = 'side' | 'background'
+export type HeroTitleFont = 'inherit' | 'geist' | 'plus-jakarta' | 'playfair'
+export type HeroTitleScale = 'subtle' | 'balanced' | 'impact'
 export type StoreContent = Database['public']['Tables']['store_content']['Row'] & {
   hero_image_layout?: HeroImageLayout
   hero_overlay_opacity?: number
+  hero_title_font?: HeroTitleFont
+  hero_title_scale?: HeroTitleScale
 }
 export type Category = Database['public']['Tables']['categories']['Row']
 export type Brand = {
