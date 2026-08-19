@@ -1,18 +1,41 @@
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, LogOut } from 'lucide-react'
 import { BusinessTrustPreview } from '@/components/admin/BusinessTrustPreview'
 import { CheckoutSettingsForm } from '@/components/admin/CheckoutSettingsForm'
 import { ConfigForm } from '@/components/admin/ConfigForm'
 import { MobileConfigForm } from '@/components/admin/MobileConfigForm'
+import { signOut } from '@/lib/actions/auth'
 import type { Store } from '@/types/store'
 
 export function ConfigurationPage({ store }: { store: Store }) {
   return <div className="volta-admin-page space-y-4 p-3.5 sm:p-5 lg:p-6">
     <header><p className="admin-label">Configuración</p><h1 className="mt-1 text-[1.85rem] font-semibold text-foreground">Tu negocio</h1></header>
-    <div className="max-w-4xl md:hidden"><MobileConfigForm store={store} /><Fold title="Cómo recibir pedidos"><CheckoutSettingsForm store={store} /></Fold><Fold title="Qué ve el cliente"><BusinessTrustPreview store={store} /></Fold></div>
-    <div className="hidden max-w-4xl space-y-5 md:block"><ConfigForm store={store} /><CheckoutSettingsForm store={store} /><BusinessTrustPreview store={store} /></div>
+    <div className="max-w-4xl md:hidden"><MobileConfigForm store={store} /><Fold title="Cómo recibir pedidos"><CheckoutSettingsForm store={store} /></Fold><Fold title="Qué ve el cliente"><BusinessTrustPreview store={store} /></Fold><SignOutSection /></div>
+    <div className="hidden max-w-4xl space-y-5 md:block"><ConfigForm store={store} /><CheckoutSettingsForm store={store} /><BusinessTrustPreview store={store} /><SignOutSection /></div>
   </div>
 }
 
 function Fold({ title, children }: { title: string; children: React.ReactNode }) {
   return <details className="group mt-3 rounded-[14px] border border-black/8 bg-white dark:border-white/10 dark:bg-[#111820]"><summary className="flex min-h-12 cursor-pointer list-none items-center justify-between px-4 text-sm font-semibold text-foreground">{title}<ChevronDown className="size-4 transition group-open:rotate-180" /></summary><div className="border-t border-black/7 p-3 dark:border-white/8">{children}</div></details>
+}
+
+function SignOutSection() {
+  return (
+    <section className="mt-3 rounded-[14px] border border-black/8 bg-white p-4 dark:border-white/10 dark:bg-[#111820] md:mt-0 sm:p-5">
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-foreground">Sesión</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">Cerrá tu sesión en este dispositivo.</p>
+        </div>
+        <form action={signOut}>
+          <button
+            type="submit"
+            className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-[10px] border border-red-200 bg-red-50 px-3.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300 dark:hover:bg-red-400/15"
+          >
+            <LogOut className="size-4" />
+            Cerrar sesión
+          </button>
+        </form>
+      </div>
+    </section>
+  )
 }
