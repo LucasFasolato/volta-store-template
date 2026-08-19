@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { StoreCartClient } from '@/components/cart/StoreCartClient'
 import { ProductModal } from '@/components/product/ProductModal'
 import { SoldOutProductModal } from '@/components/product/SoldOutProductModal'
+import type { RelatedProductLink } from '@/components/product/RelatedProductsStrip'
 import { trackStoreEvent } from '@/lib/analytics/store-events'
 import { isProductSoldOut } from '@/lib/products/availability'
 import { buildThemeVars } from '@/lib/utils/theme'
@@ -13,6 +14,7 @@ import type { CheckoutCustomField, ProductWithImages, RepeatableProduct, SalesSe
 type StoreInteractiveShellProps = {
   closeModalHref: string
   selectedProduct: ProductWithImages | null
+  relatedProducts: RelatedProductLink[]
   storeId: string
   storeName: string
   storeRootId: string
@@ -39,16 +41,21 @@ export function StoreInteractiveShell(props: StoreInteractiveShellProps) {
     <>
       <StoreThemeAutoSync storeRootId={storeRootId} theme={theme} />
       <StoreCartClient storeId={props.storeId} storeSlug={props.storeSlug} storeName={props.storeName} whatsapp={props.whatsapp} askName={props.checkoutAskName} askFulfillment={props.checkoutAskFulfillment} allowNotes={props.checkoutAllowNotes} customFields={props.checkoutFields} salesSettings={props.salesSettings} repeatableProducts={props.repeatableProducts} />
-      {selectedProduct ? <StoreProductModalClient closeHref={props.closeModalHref} product={selectedProduct} storeName={props.storeName} whatsapp={props.whatsapp} /> : null}
+      {selectedProduct ? <StoreProductModalClient closeHref={props.closeModalHref} product={selectedProduct} relatedProducts={props.relatedProducts} storeName={props.storeName} whatsapp={props.whatsapp} /> : null}
     </>
   )
 }
 
-function StoreProductModalClient({ closeHref, product, storeName, whatsapp }: { closeHref: string; product: ProductWithImages; storeName: string; whatsapp: string }) {
+function StoreProductModalClient({ closeHref, product, relatedProducts, storeName, whatsapp }: { closeHref: string; product: ProductWithImages; relatedProducts: RelatedProductLink[]; storeName: string; whatsapp: string }) {
   const router = useRouter()
   const onClose = () => router.replace(closeHref, { scroll: false })
-  if (isProductSoldOut(product)) return <SoldOutProductModal product={product} onClose={onClose} />
-  return <ProductModal product={product} storeName={storeName} whatsapp={whatsapp} onClose={onClose} />
+  const onSelectRelated = (href: string) => router.replace(href, { scroll: false })
+
+  if (isProductSoldOut(product)) {
+    return <SoldOutProductModal key={product.id} product={product} relatedProducts={relatedProducts} onSelectRelated={onSelectRelated} onClose={onClose} />
+  }
+
+  return <ProductModal key={product.id} product={product} relatedProducts={relatedProducts} onSelectRelated={onSelectRelated} storeName={storeName} whatsapp={whatsapp} onClose={onClose} />
 }
 
 function StoreThemeAutoSync({ storeRootId, theme }: { storeRootId: string; theme: StoreTheme }) {

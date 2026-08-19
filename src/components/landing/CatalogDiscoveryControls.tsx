@@ -3,9 +3,14 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Search, X } from 'lucide-react'
+import { ArrowDownUp, Search, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { buildStorefrontHref, type StorefrontRouteState } from '@/lib/storefront/view'
+import {
+  STOREFRONT_SORT_OPTIONS,
+  buildStorefrontHref,
+  type StorefrontRouteState,
+  type StorefrontSort,
+} from '@/lib/storefront/view'
 import { cn } from '@/lib/utils'
 import type { Brand, Category } from '@/types/store'
 
@@ -18,6 +23,7 @@ type Props = {
   showSearch: boolean
   showCategories: boolean
   showBrands: boolean
+  showSort: boolean
   containerClass: string
 }
 
@@ -30,6 +36,7 @@ export function CatalogDiscoveryControls({
   showSearch,
   showCategories,
   showBrands,
+  showSort,
   containerClass,
 }: Props) {
   const router = useRouter()
@@ -51,20 +58,37 @@ export function CatalogDiscoveryControls({
           query: searchValue,
           page: 1,
           pageSize: routeState.pageSize,
+          sort: routeState.sort,
         }),
         { scroll: false },
       )
     }, 300)
 
     return () => window.clearTimeout(timeout)
-  }, [pathname, routeState.activeBrand, routeState.activeCategory, routeState.activePromotion, routeState.pageSize, routeState.query, router, searchValue, showSearch])
+  }, [pathname, routeState.activeBrand, routeState.activeCategory, routeState.activePromotion, routeState.pageSize, routeState.query, routeState.sort, router, searchValue, showSearch])
 
   const hasActiveFilters = Boolean(routeState.activeCategory || routeState.activeBrand || routeState.activePromotion || routeState.query)
   const visibleBrands = brands.filter((brand) => brand.is_active)
   const showCategoryRow = (showCategories && categories.length > 0) || hasPromotions
+  const hasRowsBeforeSort = showSearch || showCategoryRow || (showBrands && visibleBrands.length > 0)
+
+  function changeSort(sort: StorefrontSort) {
+    router.replace(
+      buildStorefrontHref(pathname, {
+        category: routeState.activeCategory,
+        brand: routeState.activeBrand,
+        promotion: routeState.activePromotion,
+        query: routeState.query,
+        page: 1,
+        pageSize: routeState.pageSize,
+        sort,
+      }),
+      { scroll: false },
+    )
+  }
 
   return (
-    <section className="pt-5 sm:pt-7" aria-label="Buscar y filtrar productos">
+    <section className="pt-5 sm:pt-7" aria-label="Buscar, filtrar y ordenar productos">
       <div className={cn('mx-auto px-4 sm:px-6', containerClass)}>
         <div
           className="rounded-[16px] p-3.5 sm:p-4"
@@ -119,6 +143,7 @@ export function CatalogDiscoveryControls({
                     query: routeState.query,
                     page: 1,
                     pageSize: routeState.pageSize,
+                    sort: routeState.sort,
                   })}
                   active={!routeState.activeCategory && !routeState.activePromotion}
                 />
@@ -132,6 +157,7 @@ export function CatalogDiscoveryControls({
                       query: routeState.query,
                       page: 1,
                       pageSize: routeState.pageSize,
+                      sort: routeState.sort,
                     })}
                     active={routeState.activePromotion}
                   />
@@ -147,6 +173,7 @@ export function CatalogDiscoveryControls({
                       query: routeState.query,
                       page: 1,
                       pageSize: routeState.pageSize,
+                      sort: routeState.sort,
                     })}
                     active={routeState.activeCategory === category.slug}
                   />
@@ -166,6 +193,7 @@ export function CatalogDiscoveryControls({
                 query: routeState.query,
                 page: 1,
                 pageSize: routeState.pageSize,
+                sort: routeState.sort,
               })}
               hrefFor={(slug) => buildStorefrontHref(pathname, {
                 category: routeState.activeCategory,
@@ -174,15 +202,56 @@ export function CatalogDiscoveryControls({
                 query: routeState.query,
                 page: 1,
                 pageSize: routeState.pageSize,
+                sort: routeState.sort,
               })}
               separated={showSearch || showCategoryRow}
             />
           ) : null}
 
+          {showSort ? (
+            <div className={hasRowsBeforeSort ? 'mt-3 flex items-center justify-between gap-3 border-t pt-3' : 'flex items-center justify-between gap-3'} style={hasRowsBeforeSort ? { borderColor: 'var(--store-card-border)' } : undefined}>
+              <div className="flex min-w-0 items-center gap-2.5">
+                <div
+                  className="flex size-9 shrink-0 items-center justify-center rounded-full"
+                  style={{
+                    background: 'color-mix(in srgb, var(--store-primary) 10%, transparent)',
+                    color: 'var(--store-primary)',
+                  }}
+                >
+                  <ArrowDownUp className="size-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
+                    Ordenar
+                  </p>
+                  <p className="hidden text-xs sm:block" style={{ color: 'var(--store-soft-text)' }}>
+                    Elegí qué querés ver primero
+                  </p>
+                </div>
+              </div>
+
+              <select
+                value={routeState.sort}
+                onChange={(event) => changeSort(event.target.value as StorefrontSort)}
+                aria-label="Ordenar productos"
+                className="h-10 max-w-[12rem] rounded-xl px-3 text-xs font-semibold outline-none transition focus:ring-2 sm:max-w-none sm:text-sm"
+                style={{
+                  color: 'var(--store-text)',
+                  background: 'color-mix(in srgb, var(--store-bg) 72%, var(--store-surface))',
+                  border: '1px solid var(--store-card-border)',
+                }}
+              >
+                {STOREFRONT_SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </div>
+          ) : null}
+
           {hasActiveFilters ? (
             <div className="mt-3 flex justify-end border-t pt-3" style={{ borderColor: 'var(--store-card-border)' }}>
               <Link
-                href={buildStorefrontHref(pathname, { pageSize: routeState.pageSize })}
+                href={buildStorefrontHref(pathname, { pageSize: routeState.pageSize, sort: routeState.sort })}
                 scroll={false}
                 className="text-xs font-semibold transition hover:opacity-75"
                 style={{ color: 'var(--store-primary)' }}

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Check, MessageCircle, Minus, Plus, ShoppingBag, X } from 'lucide-react'
+import { RelatedProductsStrip, type RelatedProductLink } from '@/components/product/RelatedProductsStrip'
 import { COPY } from '@/data/system-copy'
 import { buildCartItemKey, useCartStore } from '@/lib/stores/cart'
 import { formatCurrency } from '@/lib/utils/format'
@@ -11,12 +12,14 @@ import type { ProductWithImages } from '@/types/store'
 
 type ProductModalProps = {
   product: ProductWithImages
+  relatedProducts: RelatedProductLink[]
+  onSelectRelated: (href: string) => void
   storeName: string
   whatsapp: string
   onClose: () => void
 }
 
-export function ProductModal({ product, storeName, whatsapp, onClose }: ProductModalProps) {
+export function ProductModal({ product, relatedProducts, onSelectRelated, storeName, whatsapp, onClose }: ProductModalProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
@@ -413,6 +416,8 @@ export function ProductModal({ product, storeName, whatsapp, onClose }: ProductM
                     ) : null}
                   </div>
                 </div>
+
+                <RelatedProductsStrip items={relatedProducts} onSelect={onSelectRelated} />
               </div>
 
               <div
