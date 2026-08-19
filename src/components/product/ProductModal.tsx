@@ -33,9 +33,9 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
     [product.options],
   )
   const hasOptions = sortedOptions.length > 0
-  const allOptionsSelected =
-    !hasOptions || sortedOptions.every((opt) => !!selectedOptions[opt.name])
+  const allOptionsSelected = !hasOptions || sortedOptions.every((opt) => !!selectedOptions[opt.name])
   const hasWhatsapp = whatsapp.trim().length > 0
+  const total = product.price * quantity
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
@@ -59,6 +59,8 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
   }
 
   function handleAddToCart() {
+    if (!allOptionsSelected) return
+
     const cartItemKey = buildCartItemKey(product.id, hasOptions ? selectedOptions : undefined)
 
     for (let index = 0; index < quantity; index += 1) {
@@ -82,7 +84,7 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6"
+        className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-5"
         role="dialog"
         aria-modal="true"
         aria-labelledby="product-modal-title"
@@ -106,7 +108,7 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 30, stiffness: 260 }}
-          className="relative flex max-h-[94dvh] w-full flex-col overflow-hidden sm:max-w-5xl"
+          className="relative flex max-h-[94dvh] w-full flex-col overflow-hidden sm:max-w-3xl lg:max-h-[82dvh] lg:max-w-[960px] xl:max-h-[720px]"
           style={{
             background:
               'linear-gradient(180deg, color-mix(in srgb, var(--store-surface) 92%, white 8%), color-mix(in srgb, var(--store-bg) 96%, var(--store-text) 4%))',
@@ -116,29 +118,20 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
           }}
         >
           <div className="flex shrink-0 justify-center pb-1 pt-3 sm:hidden">
-            <div
-              className="h-1.5 w-14 rounded-full"
-              style={{ backgroundColor: 'var(--store-border)' }}
-            />
+            <div className="h-1.5 w-14 rounded-full" style={{ backgroundColor: 'var(--store-border)' }} />
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="shrink-0 p-4 sm:p-5 lg:overflow-y-auto lg:p-6">
+          <div className="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[0.88fr_1.12fr]">
+            <div className="shrink-0 p-4 sm:p-4 lg:overflow-y-auto lg:p-5">
               <div
-                className="relative aspect-[5/4] w-full overflow-hidden lg:aspect-[4/5]"
+                className="relative aspect-[5/4] w-full overflow-hidden sm:aspect-[16/9] lg:aspect-square"
                 style={{
                   borderRadius: 'calc(var(--store-card-radius) * 0.9)',
                   backgroundColor: 'color-mix(in srgb, var(--store-surface) 88%, transparent)',
                 }}
               >
                 {selectedImage ? (
-                  <Image
-                    src={selectedImage.url}
-                    alt={selectedImage.alt ?? product.name}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
+                  <Image src={selectedImage.url} alt={selectedImage.alt ?? product.name} fill className="object-cover" priority />
                 ) : (
                   <div
                     className="flex h-full items-center justify-center text-sm font-medium uppercase tracking-[0.18em]"
@@ -195,14 +188,10 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
                       key={image.id}
                       type="button"
                       onClick={() => setSelectedImageIndex(index)}
-                      className="relative h-16 w-12 shrink-0 overflow-hidden transition-all duration-150 hover:scale-105 active:scale-95"
+                      className="relative h-14 w-11 shrink-0 overflow-hidden transition-all duration-150 hover:scale-105 active:scale-95"
                       style={{
                         borderRadius: 'calc(var(--store-radius) * 0.72)',
-                        border: `2px solid ${
-                          index === selectedImageIndex
-                            ? 'var(--store-primary)'
-                            : 'var(--store-card-border)'
-                        }`,
+                        border: `2px solid ${index === selectedImageIndex ? 'var(--store-primary)' : 'var(--store-card-border)'}`,
                         opacity: index === selectedImageIndex ? 1 : 0.65,
                       }}
                       aria-label={`Ver imagen ${index + 1}`}
@@ -218,63 +207,51 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
               className="flex min-h-0 flex-col border-t lg:border-l lg:border-t-0"
               style={{ borderColor: 'var(--store-card-border)' }}
             >
-              <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6 lg:px-8 lg:py-8">
+              <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6 lg:px-6 lg:py-5">
                 {product.category?.name ? (
-                  <p
-                    className="text-[11px] font-semibold uppercase tracking-[0.22em]"
-                    style={{ color: 'var(--store-muted-text)' }}
-                  >
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>
                     {product.category.name}
                   </p>
                 ) : null}
 
                 <h2
                   id="product-modal-title"
-                  className="store-heading mt-2 text-2xl font-semibold tracking-tight sm:text-3xl"
+                  className="store-heading mt-1.5 text-2xl font-semibold tracking-tight sm:text-[1.75rem]"
                   style={{ color: 'var(--store-text)' }}
                 >
                   {product.name}
                 </h2>
 
-                <div className="mt-4 flex flex-wrap items-end gap-3">
-                  <span
-                    className="text-3xl font-semibold tracking-tight sm:text-[2rem]"
-                    style={{ color: 'var(--store-primary)' }}
-                  >
+                <div className="mt-3 flex flex-wrap items-end gap-3">
+                  <span className="text-[1.8rem] font-semibold tracking-tight" style={{ color: 'var(--store-primary)' }}>
                     {formatCurrency(product.price)}
                   </span>
                   {product.compare_price && product.compare_price > product.price ? (
-                    <span
-                      className="pb-0.5 text-base line-through"
-                      style={{ color: 'var(--store-muted-text)' }}
-                    >
+                    <span className="pb-0.5 text-sm line-through" style={{ color: 'var(--store-muted-text)' }}>
                       {formatCurrency(product.compare_price)}
                     </span>
                   ) : null}
                 </div>
 
                 {product.description ? (
-                  <p
-                    className="mt-5 text-sm leading-7 sm:text-[15px]"
-                    style={{ color: 'var(--store-soft-text)' }}
-                  >
+                  <p className="mt-3 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
                     {product.description}
                   </p>
                 ) : (
-                  <p className="mt-5 text-sm leading-7" style={{ color: 'var(--store-muted-text)' }}>
+                  <p className="mt-3 text-sm leading-6" style={{ color: 'var(--store-muted-text)' }}>
                     {COPY.product.modalFallbackDescription}
                   </p>
                 )}
 
                 <div
-                  className="mt-5 flex items-start gap-3 rounded-3xl px-4 py-4"
+                  className="mt-4 flex items-center gap-3 rounded-2xl px-3.5 py-3"
                   style={{
                     backgroundColor: 'color-mix(in srgb, var(--store-primary) 8%, var(--store-surface) 92%)',
                     border: '1px solid color-mix(in srgb, var(--store-primary) 18%, var(--store-card-border) 82%)',
                   }}
                 >
                   <div
-                    className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-2xl"
+                    className="flex size-8 shrink-0 items-center justify-center rounded-xl"
                     style={{
                       backgroundColor: 'color-mix(in srgb, var(--store-primary) 16%, transparent)',
                       color: 'var(--store-primary)',
@@ -282,49 +259,34 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
                   >
                     <MessageCircle className="size-4" />
                   </div>
-                  <div className="space-y-1.5">
-                    <p
-                      className="text-[11px] font-semibold uppercase tracking-[0.2em]"
-                      style={{ color: 'var(--store-muted-text)' }}
-                    >
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
                       Compra directa
                     </p>
-                    <p className="text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+                    <p className="mt-0.5 text-xs leading-5 sm:text-sm" style={{ color: 'var(--store-soft-text)' }}>
                       {hasWhatsapp
-                        ? `Agrega este producto al carrito y envia tu pedido directo a ${storeName} por WhatsApp para coordinar entrega, retiro o cualquier duda.`
-                        : `Revisa los detalles de ${storeName} y usa el carrito para preparar tu pedido con toda la informacion del producto.`}
+                        ? `Agregalo al carrito y enviá el pedido a ${storeName} por WhatsApp.`
+                        : `Prepará tu pedido en el carrito y revisá los datos de ${storeName}.`}
                     </p>
                   </div>
                 </div>
 
                 {hasOptions ? (
-                  <div className="mt-7 space-y-6">
+                  <div className="mt-5 space-y-4">
                     {sortedOptions.map((option) => {
                       const selected = selectedOptions[option.name]
                       return (
                         <div key={option.id}>
-                          <div className="mb-3 flex items-center gap-2">
-                            <p
-                              className="text-[11px] font-semibold uppercase tracking-[0.2em]"
-                              style={{ color: 'var(--store-muted-text)' }}
-                            >
+                          <div className="mb-2 flex items-center gap-2">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
                               {option.name}
                             </p>
-                            {selected ? (
-                              <span
-                                className="text-[11px] font-medium"
-                                style={{ color: 'var(--store-primary)' }}
-                              >
-                                {selected}
-                              </span>
-                            ) : (
-                              <span
-                                className="text-[11px] font-medium opacity-45"
-                                style={{ color: 'var(--store-text)' }}
-                              >
-                                elegir
-                              </span>
-                            )}
+                            <span
+                              className="text-[11px] font-medium"
+                              style={{ color: selected ? 'var(--store-primary)' : 'var(--store-muted-text)' }}
+                            >
+                              {selected ?? 'Elegí una opción'}
+                            </span>
                           </div>
                           <div className="flex flex-wrap gap-2">
                             {option.values.map((value) => {
@@ -334,20 +296,17 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
                                   key={value}
                                   type="button"
                                   onClick={() => selectOption(option.name, value)}
-                                  className="rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.94]"
+                                  className="rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150 active:scale-[0.96]"
                                   style={
                                     active
                                       ? {
                                           backgroundColor: 'var(--store-primary)',
                                           color: 'var(--store-primary-contrast)',
                                           border: '2px solid var(--store-primary)',
-                                          boxShadow:
-                                            '0 6px 18px color-mix(in srgb, var(--store-primary) 22%, transparent)',
-                                          transform: 'scale(1.04)',
+                                          boxShadow: '0 5px 14px color-mix(in srgb, var(--store-primary) 20%, transparent)',
                                         }
                                       : {
-                                          backgroundColor:
-                                            'color-mix(in srgb, var(--store-surface) 72%, transparent)',
+                                          backgroundColor: 'color-mix(in srgb, var(--store-surface) 72%, transparent)',
                                           color: 'var(--store-text)',
                                           border: '2px solid var(--store-card-border)',
                                         }
@@ -364,111 +323,68 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
                   </div>
                 ) : null}
 
-                <div className="mt-7">
-                  <p
-                    className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
-                    style={{ color: 'var(--store-muted-text)' }}
-                  >
+                <div className="mt-5 lg:hidden">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
                     {COPY.cart.quantity}
                   </p>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3">
-                      <QuantityButton
-                        label="Reducir cantidad"
-                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      >
-                        <Minus className="size-4" />
-                      </QuantityButton>
-                      <span
-                        className="w-10 text-center text-xl font-semibold"
-                        style={{ color: 'var(--store-text)' }}
-                      >
-                        {quantity}
-                      </span>
-                      <QuantityButton
-                        label="Aumentar cantidad"
-                        onClick={() => setQuantity((q) => q + 1)}
-                      >
-                        <Plus className="size-4" />
-                      </QuantityButton>
-                    </div>
-
-                    {quantity > 1 ? (
-                      <div
-                        className="rounded-lg px-3 py-2 text-right"
-                        style={{
-                          backgroundColor: 'color-mix(in srgb, var(--store-primary) 8%, transparent)',
-                        }}
-                      >
-                        <p
-                          className="text-[10px] font-semibold uppercase tracking-[0.16em]"
-                          style={{ color: 'var(--store-muted-text)' }}
-                        >
-                          Total
-                        </p>
-                        <p
-                          className="text-lg font-semibold tracking-tight"
-                          style={{ color: 'var(--store-primary)' }}
-                        >
-                          {formatCurrency(product.price * quantity)}
-                        </p>
-                      </div>
-                    ) : null}
-                  </div>
+                  <QuantityControl quantity={quantity} setQuantity={setQuantity} />
                 </div>
 
                 <RelatedProductsStrip items={relatedProducts} onSelect={onSelectRelated} />
               </div>
 
               <div
-                className="shrink-0 border-t px-5 pb-5 pt-4 lg:px-8"
+                className="shrink-0 border-t px-5 pb-5 pt-3 sm:px-6 lg:px-6 lg:py-4"
                 style={{
                   borderColor: 'var(--store-card-border)',
                   background:
-                    'linear-gradient(to bottom, color-mix(in srgb, var(--store-surface) 0%, transparent) 0%, color-mix(in srgb, var(--store-surface) 88%, transparent) 100%)',
+                    'linear-gradient(to bottom, color-mix(in srgb, var(--store-surface) 92%, transparent), color-mix(in srgb, var(--store-surface) 98%, var(--store-bg) 2%))',
+                  boxShadow: '0 -12px 28px color-mix(in srgb, var(--store-bg) 16%, transparent)',
                 }}
               >
                 {hasOptions && !allOptionsSelected ? (
-                  <p
-                    className="mb-3 text-center text-xs"
-                    style={{ color: 'var(--store-muted-text)' }}
-                  >
-                    Elegi todas las opciones para continuar
+                  <p className="mb-2 text-center text-xs lg:text-left" style={{ color: 'var(--store-muted-text)' }}>
+                    Elegí las opciones de arriba para continuar
                   </p>
                 ) : null}
 
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  disabled={!allOptionsSelected}
-                  className="store-button inline-flex w-full items-center justify-center gap-2.5 px-6 py-4 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-                  style={{
-                    background: allOptionsSelected
-                      ? 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))'
-                      : 'color-mix(in srgb, var(--store-surface) 80%, transparent)',
-                    color: allOptionsSelected
-                      ? 'var(--store-primary-contrast)'
-                      : 'var(--store-muted-text)',
-                    boxShadow: allOptionsSelected
-                      ? '0 18px 40px color-mix(in srgb, var(--store-primary) 24%, transparent)'
-                      : 'none',
-                    border: allOptionsSelected ? 'none' : '1px solid var(--store-card-border)',
-                  }}
-                >
-                  {allOptionsSelected ? (
-                    <>
-                      <ShoppingBag className="size-4" />
-                      {quantity > 1
-                        ? `${COPY.cart.addToCart} (${quantity}) · ${formatCurrency(product.price * quantity)}`
-                        : COPY.cart.addToCart}
-                    </>
-                  ) : (
-                    <>
-                      <Check className="size-4 opacity-40" />
-                      Elegi todas las opciones
-                    </>
-                  )}
-                </button>
+                <div className="flex items-end gap-3">
+                  <div className="hidden shrink-0 lg:block">
+                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--store-muted-text)' }}>
+                      Cantidad
+                    </p>
+                    <QuantityControl quantity={quantity} setQuantity={setQuantity} compact />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAddToCart}
+                    disabled={!allOptionsSelected}
+                    className="store-button inline-flex min-w-0 flex-1 items-center justify-center gap-2.5 px-5 py-3.5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                    style={{
+                      background: allOptionsSelected
+                        ? 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))'
+                        : 'color-mix(in srgb, var(--store-surface) 80%, transparent)',
+                      color: allOptionsSelected ? 'var(--store-primary-contrast)' : 'var(--store-muted-text)',
+                      boxShadow: allOptionsSelected
+                        ? '0 14px 32px color-mix(in srgb, var(--store-primary) 22%, transparent)'
+                        : 'none',
+                      border: allOptionsSelected ? 'none' : '1px solid var(--store-card-border)',
+                    }}
+                  >
+                    {allOptionsSelected ? (
+                      <>
+                        <ShoppingBag className="size-4" />
+                        <span className="truncate">{COPY.cart.addToCart} · {formatCurrency(total)}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check className="size-4 opacity-40" />
+                        Elegí las opciones
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -478,20 +394,49 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
   )
 }
 
+function QuantityControl({
+  quantity,
+  setQuantity,
+  compact = false,
+}: {
+  quantity: number
+  setQuantity: React.Dispatch<React.SetStateAction<number>>
+  compact?: boolean
+}) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <QuantityButton label="Reducir cantidad" onClick={() => setQuantity((q) => Math.max(1, q - 1))} compact={compact}>
+        <Minus className="size-4" />
+      </QuantityButton>
+      <span
+        className={compact ? 'w-8 text-center text-base font-semibold' : 'w-9 text-center text-xl font-semibold'}
+        style={{ color: 'var(--store-text)' }}
+      >
+        {quantity}
+      </span>
+      <QuantityButton label="Aumentar cantidad" onClick={() => setQuantity((q) => q + 1)} compact={compact}>
+        <Plus className="size-4" />
+      </QuantityButton>
+    </div>
+  )
+}
+
 function QuantityButton({
   label,
   onClick,
+  compact = false,
   children,
 }: {
   label: string
   onClick: () => void
+  compact?: boolean
   children: React.ReactNode
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex size-11 items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95"
+      className={`${compact ? 'size-9' : 'size-11'} flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95`}
       style={{
         borderRadius: 'var(--store-button-radius)',
         border: '1px solid var(--store-card-border)',
