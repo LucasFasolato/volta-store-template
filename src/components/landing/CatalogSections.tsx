@@ -1,4 +1,4 @@
-import { ProductCard } from '@/components/product/ProductCard'
+import { CatalogProductCard } from '@/components/product/CatalogProductCard'
 import { buildStorefrontHref } from '@/lib/storefront/view'
 import { cn } from '@/lib/utils'
 import { GRID_COLS_CLASS } from '@/lib/utils/theme'
@@ -53,9 +53,9 @@ export function CatalogSections({ products, categories, theme, containerClass, p
                 </div>
                 <span className="rounded-full px-3 py-1.5 text-xs font-semibold tabular-nums" style={{ color: 'var(--store-primary)', backgroundColor: 'color-mix(in srgb, var(--store-primary) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--store-primary) 18%, transparent)' }}>{group.products.length}</span>
               </div>
-              <div className={cn('grid gap-5 sm:gap-6', gridClass)}>
+              <div className={cn('grid gap-3 sm:gap-5', gridClass)}>
                 {group.products.map((product) => (
-                  <ProductCard
+                  <CatalogProductCard
                     key={product.id}
                     product={product}
                     productHref={buildStorefrontHref(pathname, { product: product.slug })}
