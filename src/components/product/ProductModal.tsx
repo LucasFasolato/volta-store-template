@@ -108,7 +108,7 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 30, stiffness: 260 }}
-          className="relative flex max-h-[94dvh] w-full flex-col overflow-hidden sm:max-w-3xl lg:max-h-[82dvh] lg:max-w-[960px] xl:max-h-[720px]"
+          className="relative flex max-h-[94dvh] w-full flex-col overflow-hidden sm:max-w-3xl lg:max-h-[80dvh] lg:max-w-[920px] xl:max-h-[690px]"
           style={{
             background:
               'linear-gradient(180deg, color-mix(in srgb, var(--store-surface) 92%, white 8%), color-mix(in srgb, var(--store-bg) 96%, var(--store-text) 4%))',
@@ -117,14 +117,14 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
             boxShadow: 'var(--store-shadow)',
           }}
         >
-          <div className="flex shrink-0 justify-center pb-1 pt-3 sm:hidden">
+          <div className="flex shrink-0 justify-center pb-1 pt-2 sm:hidden">
             <div className="h-1.5 w-14 rounded-full" style={{ backgroundColor: 'var(--store-border)' }} />
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[0.88fr_1.12fr]">
-            <div className="shrink-0 p-4 sm:p-4 lg:overflow-y-auto lg:p-5">
+          <div className="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[0.86fr_1.14fr]">
+            <div className="shrink-0 p-3 sm:p-4 lg:overflow-y-auto lg:p-5">
               <div
-                className="relative aspect-[5/4] w-full overflow-hidden sm:aspect-[16/9] lg:aspect-square"
+                className="relative aspect-[16/9] w-full overflow-hidden lg:aspect-square"
                 style={{
                   borderRadius: 'calc(var(--store-card-radius) * 0.9)',
                   backgroundColor: 'color-mix(in srgb, var(--store-surface) 88%, transparent)',
@@ -151,7 +151,7 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
 
                 {product.badge ? (
                   <span
-                    className="absolute left-4 top-4 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]"
+                    className="absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]"
                     style={{
                       backgroundColor: 'color-mix(in srgb, var(--store-bg) 78%, transparent)',
                       color: 'var(--store-text)',
@@ -167,7 +167,7 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
                   ref={closeButtonRef}
                   type="button"
                   onClick={onClose}
-                  className="absolute right-4 top-4 flex size-10 items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95"
+                  className="absolute right-3 top-3 flex size-9 items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95 sm:size-10"
                   style={{
                     borderRadius: 'var(--store-button-radius)',
                     backgroundColor: 'color-mix(in srgb, var(--store-bg) 72%, transparent)',
@@ -182,13 +182,13 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
               </div>
 
               {product.images && product.images.length > 1 ? (
-                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                <div className="mt-2.5 flex gap-2 overflow-x-auto pb-1">
                   {product.images.map((image, index) => (
                     <button
                       key={image.id}
                       type="button"
                       onClick={() => setSelectedImageIndex(index)}
-                      className="relative h-14 w-11 shrink-0 overflow-hidden transition-all duration-150 hover:scale-105 active:scale-95"
+                      className="relative h-12 w-10 shrink-0 overflow-hidden transition-all duration-150 hover:scale-105 active:scale-95 sm:h-14 sm:w-11"
                       style={{
                         borderRadius: 'calc(var(--store-radius) * 0.72)',
                         border: `2px solid ${index === selectedImageIndex ? 'var(--store-primary)' : 'var(--store-card-border)'}`,
@@ -204,47 +204,47 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
             </div>
 
             <div
-              className="flex min-h-0 flex-col border-t lg:border-l lg:border-t-0"
+              className="flex min-h-0 flex-1 flex-col border-t lg:border-l lg:border-t-0"
               style={{ borderColor: 'var(--store-card-border)' }}
             >
-              <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6 lg:px-6 lg:py-5">
+              <div className="flex-1 overflow-y-auto px-4 py-3 sm:px-6 sm:py-5 lg:px-6 lg:py-5">
                 {product.category?.name ? (
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--store-muted-text)' }}>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.2em] sm:text-[10px]" style={{ color: 'var(--store-muted-text)' }}>
                     {product.category.name}
                   </p>
                 ) : null}
 
                 <h2
                   id="product-modal-title"
-                  className="store-heading mt-1.5 text-2xl font-semibold tracking-tight sm:text-[1.75rem]"
+                  className="store-heading mt-1 text-xl font-semibold tracking-tight sm:mt-1.5 sm:text-[1.75rem]"
                   style={{ color: 'var(--store-text)' }}
                 >
                   {product.name}
                 </h2>
 
-                <div className="mt-3 flex flex-wrap items-end gap-3">
-                  <span className="text-[1.8rem] font-semibold tracking-tight" style={{ color: 'var(--store-primary)' }}>
+                <div className="mt-2 flex flex-wrap items-end gap-3 sm:mt-3">
+                  <span className="text-2xl font-semibold tracking-tight sm:text-[1.8rem]" style={{ color: 'var(--store-primary)' }}>
                     {formatCurrency(product.price)}
                   </span>
                   {product.compare_price && product.compare_price > product.price ? (
-                    <span className="pb-0.5 text-sm line-through" style={{ color: 'var(--store-muted-text)' }}>
+                    <span className="pb-0.5 text-xs line-through sm:text-sm" style={{ color: 'var(--store-muted-text)' }}>
                       {formatCurrency(product.compare_price)}
                     </span>
                   ) : null}
                 </div>
 
                 {product.description ? (
-                  <p className="mt-3 text-sm leading-6" style={{ color: 'var(--store-soft-text)' }}>
+                  <p className="mt-2 line-clamp-2 text-xs leading-5 sm:mt-3 sm:line-clamp-none sm:text-sm sm:leading-6" style={{ color: 'var(--store-soft-text)' }}>
                     {product.description}
                   </p>
                 ) : (
-                  <p className="mt-3 text-sm leading-6" style={{ color: 'var(--store-muted-text)' }}>
+                  <p className="mt-2 line-clamp-2 text-xs leading-5 sm:mt-3 sm:line-clamp-none sm:text-sm sm:leading-6" style={{ color: 'var(--store-muted-text)' }}>
                     {COPY.product.modalFallbackDescription}
                   </p>
                 )}
 
                 <div
-                  className="mt-4 flex items-center gap-3 rounded-2xl px-3.5 py-3"
+                  className="mt-4 hidden items-center gap-3 rounded-2xl px-3.5 py-3 sm:flex"
                   style={{
                     backgroundColor: 'color-mix(in srgb, var(--store-primary) 8%, var(--store-surface) 92%)',
                     border: '1px solid color-mix(in srgb, var(--store-primary) 18%, var(--store-card-border) 82%)',
@@ -272,7 +272,7 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
                 </div>
 
                 {hasOptions ? (
-                  <div className="mt-5 space-y-4">
+                  <div className="mt-3 space-y-3 sm:mt-5 sm:space-y-4">
                     {sortedOptions.map((option) => {
                       const selected = selectedOptions[option.name]
                       return (
@@ -296,7 +296,7 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
                                   key={value}
                                   type="button"
                                   onClick={() => selectOption(option.name, value)}
-                                  className="rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150 active:scale-[0.96]"
+                                  className="rounded-full px-3.5 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.96]"
                                   style={
                                     active
                                       ? {
@@ -323,34 +323,29 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
                   </div>
                 ) : null}
 
-                <div className="mt-5 lg:hidden">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>
-                    {COPY.cart.quantity}
-                  </p>
-                  <QuantityControl quantity={quantity} setQuantity={setQuantity} />
+                <div className="hidden sm:block">
+                  <RelatedProductsStrip items={relatedProducts} onSelect={onSelectRelated} />
                 </div>
-
-                <RelatedProductsStrip items={relatedProducts} onSelect={onSelectRelated} />
               </div>
 
               <div
-                className="shrink-0 border-t px-5 pb-5 pt-3 sm:px-6 lg:px-6 lg:py-4"
+                className="shrink-0 border-t px-4 pb-4 pt-3 sm:px-6 lg:px-6 lg:py-4"
                 style={{
                   borderColor: 'var(--store-card-border)',
                   background:
-                    'linear-gradient(to bottom, color-mix(in srgb, var(--store-surface) 92%, transparent), color-mix(in srgb, var(--store-surface) 98%, var(--store-bg) 2%))',
-                  boxShadow: '0 -12px 28px color-mix(in srgb, var(--store-bg) 16%, transparent)',
+                    'linear-gradient(to bottom, color-mix(in srgb, var(--store-surface) 94%, transparent), color-mix(in srgb, var(--store-surface) 99%, var(--store-bg) 1%))',
+                  boxShadow: '0 -12px 28px color-mix(in srgb, var(--store-bg) 18%, transparent)',
                 }}
               >
                 {hasOptions && !allOptionsSelected ? (
-                  <p className="mb-2 text-center text-xs lg:text-left" style={{ color: 'var(--store-muted-text)' }}>
+                  <p className="mb-2 text-center text-[11px] sm:text-xs lg:text-left" style={{ color: 'var(--store-muted-text)' }}>
                     Elegí las opciones de arriba para continuar
                   </p>
                 ) : null}
 
-                <div className="flex items-end gap-3">
-                  <div className="hidden shrink-0 lg:block">
-                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--store-muted-text)' }}>
+                <div className="flex items-end gap-2.5 sm:gap-3">
+                  <div className="shrink-0">
+                    <p className="mb-1 hidden text-[10px] font-semibold uppercase tracking-[0.16em] sm:block" style={{ color: 'var(--store-muted-text)' }}>
                       Cantidad
                     </p>
                     <QuantityControl quantity={quantity} setQuantity={setQuantity} compact />
@@ -360,7 +355,7 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
                     type="button"
                     onClick={handleAddToCart}
                     disabled={!allOptionsSelected}
-                    className="store-button inline-flex min-w-0 flex-1 items-center justify-center gap-2.5 px-5 py-3.5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="store-button inline-flex min-w-0 flex-1 items-center justify-center gap-2 px-3.5 py-3 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 sm:px-5 sm:py-3.5 sm:text-sm"
                     style={{
                       background: allOptionsSelected
                         ? 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))'
@@ -374,13 +369,13 @@ export function ProductModal({ product, relatedProducts, onSelectRelated, storeN
                   >
                     {allOptionsSelected ? (
                       <>
-                        <ShoppingBag className="size-4" />
+                        <ShoppingBag className="size-4 shrink-0" />
                         <span className="truncate">{COPY.cart.addToCart} · {formatCurrency(total)}</span>
                       </>
                     ) : (
                       <>
-                        <Check className="size-4 opacity-40" />
-                        Elegí las opciones
+                        <Check className="size-4 shrink-0 opacity-40" />
+                        <span className="truncate">Elegí las opciones</span>
                       </>
                     )}
                   </button>
@@ -404,12 +399,12 @@ function QuantityControl({
   compact?: boolean
 }) {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex items-center gap-2 sm:gap-2.5">
       <QuantityButton label="Reducir cantidad" onClick={() => setQuantity((q) => Math.max(1, q - 1))} compact={compact}>
         <Minus className="size-4" />
       </QuantityButton>
       <span
-        className={compact ? 'w-8 text-center text-base font-semibold' : 'w-9 text-center text-xl font-semibold'}
+        className={compact ? 'w-7 text-center text-sm font-semibold sm:w-8 sm:text-base' : 'w-9 text-center text-xl font-semibold'}
         style={{ color: 'var(--store-text)' }}
       >
         {quantity}
