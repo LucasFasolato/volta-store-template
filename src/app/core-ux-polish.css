@@ -22,6 +22,29 @@ body {
   overscroll-behavior: contain;
 }
 
+/* Native <select> menus are rendered by the browser/OS, so styling only the
+   closed control is not enough. Keep the browser color scheme aligned with
+   the admin theme and provide explicit option colors as a fallback. */
+.dark .admin-shell select {
+  color-scheme: dark;
+}
+
+.dark .admin-shell select option,
+.dark .admin-shell select optgroup {
+  background-color: #111820;
+  color: #f8fafc;
+}
+
+.light .admin-shell select {
+  color-scheme: light;
+}
+
+.light .admin-shell select option,
+.light .admin-shell select optgroup {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
 @media (max-width: 640px) {
   /* Product detail behaves like a real mobile commerce screen. */
   .store-shell [role='dialog'][aria-labelledby='product-modal-title'] {
