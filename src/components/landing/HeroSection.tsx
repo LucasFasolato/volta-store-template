@@ -16,24 +16,26 @@ type HeroSectionProps = {
   densityMode: StorefrontDensityMode
 }
 
-export function HeroSection({
-  content,
-  store,
-  containerClass,
-  productCount,
-  densityMode,
-}: HeroSectionProps) {
+const HERO_WEIGHT: Record<string, number> = { medium: 560, semibold: 640, bold: 720 }
+
+export function HeroSection({ content, store, containerClass, productCount, densityMode }: HeroSectionProps) {
   const whatsappHref = store.whatsapp ? `https://wa.me/${sanitizePhoneNumber(store.whatsapp)}` : '#catalogo'
   const hasImage = !!content.hero_image_url
   const compact = densityMode === 'small'
   const backgroundMode = hasImage && content.hero_image_layout === 'background'
-  const overlayOpacity = Math.min(80, Math.max(20, content.hero_overlay_opacity ?? 55))
+  const overlayOpacity = Math.min(90, Math.max(0, content.hero_overlay_opacity ?? 55))
   const titleScale = content.hero_title_scale ?? 'balanced'
   const titleFont = content.hero_title_font ?? 'inherit'
+  const titleAlign = content.hero_text_align ?? 'left'
+  const titleWeight = content.hero_title_weight ?? 'semibold'
   const titleFontFamily = titleFont === 'inherit'
     ? 'var(--store-font-heading)'
     : (FONT_FAMILY_MAP[titleFont] ?? 'var(--store-font-heading)')
   const titleSize = getHeroTitleSize(titleScale, compact)
+  const centered = titleAlign === 'center'
+  const foreground = backgroundMode ? '#ffffff' : 'var(--store-text)'
+  const softForeground = backgroundMode ? 'rgba(255,255,255,.82)' : 'var(--store-soft-text)'
+  const mutedForeground = backgroundMode ? 'rgba(255,255,255,.62)' : 'var(--store-muted-text)'
 
   return (
     <section
@@ -44,16 +46,8 @@ export function HeroSection({
       {backgroundMode ? (
         <>
           <Image src={content.hero_image_url!} alt={content.hero_title} fill className="object-cover" priority />
-          <div
-            className="absolute inset-0"
-            style={{
-              background: `linear-gradient(90deg, color-mix(in srgb, var(--store-bg) ${Math.min(86, overlayOpacity + 12)}%, transparent) 0%, color-mix(in srgb, var(--store-bg) ${overlayOpacity}%, transparent) 52%, color-mix(in srgb, var(--store-bg) ${Math.max(20, overlayOpacity - 12)}%, transparent) 100%)`,
-            }}
-          />
-          <div
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(to top, color-mix(in srgb, var(--store-bg) 45%, transparent), transparent 48%)' }}
-          />
+          <div className="absolute inset-0 bg-black" style={{ opacity: overlayOpacity / 100 }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,.36), transparent 48%)' }} />
         </>
       ) : null}
 
@@ -70,18 +64,19 @@ export function HeroSection({
             !backgroundMode && hasImage && 'lg:pr-12 xl:pr-16',
             compact && 'sm:py-16 lg:py-18',
             backgroundMode && 'min-h-[560px] max-w-4xl py-20 sm:min-h-[620px] sm:py-24 lg:py-28',
+            centered && 'mx-auto items-center text-center',
           )}
         >
           {content.support_text ? (
-            <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'var(--store-secondary)' }}>{content.support_text}</p>
+            <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: backgroundMode ? 'rgba(255,255,255,.68)' : 'var(--store-secondary)' }}>{content.support_text}</p>
           ) : null}
 
           <h1
             className="store-display max-w-4xl text-balance"
             style={{
-              color: 'var(--store-text)',
+              color: foreground,
               fontFamily: titleFontFamily,
-              fontWeight: 'var(--store-heading-weight)',
+              fontWeight: HERO_WEIGHT[titleWeight] ?? 640,
               fontSize: titleSize,
               lineHeight: titleScale === 'impact' ? '.92' : '.98',
               letterSpacing: titleFont === 'playfair' ? '-.035em' : '-.055em',
@@ -90,22 +85,22 @@ export function HeroSection({
             {content.hero_title}
           </h1>
 
-          <p className="mt-5 max-w-xl text-balance leading-7 sm:text-[1.05rem] sm:leading-8" style={{ color: 'var(--store-soft-text)' }}>{content.hero_subtitle}</p>
+          <p className="mt-5 max-w-xl text-balance leading-7 sm:text-[1.05rem] sm:leading-8" style={{ color: softForeground }}>{content.hero_subtitle}</p>
 
-          <div className="mt-7 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+          <div className={cn('mt-7 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap', centered && 'justify-center')}>
             <a href="#catalogo" className="store-button inline-flex items-center justify-center gap-2 px-6 text-sm font-semibold transition hover:-translate-y-0.5" style={{ backgroundColor: 'var(--store-primary)', color: 'var(--store-primary-contrast)' }}>
               Ver productos
               <ArrowDownRight className="size-4" />
             </a>
             {store.whatsapp ? (
-              <a href={whatsappHref} target="_blank" rel="noreferrer noopener" className="store-button inline-flex items-center justify-center gap-2 border px-6 text-sm font-semibold transition hover:-translate-y-0.5" style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-text)', backgroundColor: 'color-mix(in srgb, var(--store-surface) 90%, transparent)' }}>
+              <a href={whatsappHref} target="_blank" rel="noreferrer noopener" className="store-button inline-flex items-center justify-center gap-2 border px-6 text-sm font-semibold transition hover:-translate-y-0.5" style={{ borderColor: backgroundMode ? 'rgba(255,255,255,.26)' : 'var(--store-card-border)', color: foreground, backgroundColor: backgroundMode ? 'rgba(8,10,14,.38)' : 'color-mix(in srgb, var(--store-surface) 90%, transparent)', backdropFilter: backgroundMode ? 'blur(10px)' : undefined }}>
                 <MessageCircle className="size-4" />
                 Consultar por WhatsApp
               </a>
             ) : null}
           </div>
 
-          {productCount > 0 ? <p className="mt-5 text-xs" style={{ color: 'var(--store-muted-text)' }}>{productCount} {productCount === 1 ? 'producto disponible' : 'productos disponibles'} · Armá tu pedido y continuá por WhatsApp.</p> : null}
+          {productCount > 0 ? <p className="mt-5 text-xs" style={{ color: mutedForeground }}>{productCount} {productCount === 1 ? 'producto disponible' : 'productos disponibles'} · Armá tu pedido y continuá por WhatsApp.</p> : null}
         </div>
 
         {!backgroundMode && hasImage ? (

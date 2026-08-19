@@ -29,9 +29,11 @@ export const storeContentSchema = z.object({
   banner_mode: z.enum(['static', 'animated']),
   banner_speed: z.enum(['slow', 'normal', 'fast']),
   hero_image_layout: z.enum(['side', 'background']).optional(),
-  hero_overlay_opacity: z.number().int().min(20).max(80).optional(),
+  hero_overlay_opacity: z.number().int().min(0).max(90).optional(),
   hero_title_font: z.enum(['inherit', 'geist', 'plus-jakarta', 'playfair']).optional(),
   hero_title_scale: z.enum(['subtle', 'balanced', 'impact']).optional(),
+  hero_text_align: z.enum(['left', 'center']).optional(),
+  hero_title_weight: z.enum(['medium', 'semibold', 'bold']).optional(),
   hero_title: z
     .string()
     .max(CONTENT_LIMITS.hero_title, `Maximo ${CONTENT_LIMITS.hero_title} caracteres`)

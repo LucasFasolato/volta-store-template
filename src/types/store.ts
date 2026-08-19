@@ -1,7 +1,18 @@
 import type { Database } from './database'
 
+export type CheckoutCustomField = {
+  id: string
+  label: string
+  field_type: 'short' | 'long'
+  placeholder: string | null
+  is_required: boolean
+  is_enabled: boolean
+}
+
 export type Profile = Database['public']['Tables']['profiles']['Row']
-export type Store = Database['public']['Tables']['stores']['Row']
+export type Store = Database['public']['Tables']['stores']['Row'] & {
+  checkout_custom_fields?: CheckoutCustomField[]
+}
 export type StoreTheme = Database['public']['Tables']['store_theme']['Row']
 export type StoreLayout = Database['public']['Tables']['store_layout']['Row'] & {
   catalog_mode?: 'all' | 'sections' | 'navigation'
@@ -11,11 +22,15 @@ export type StoreLayout = Database['public']['Tables']['store_layout']['Row'] & 
 export type HeroImageLayout = 'side' | 'background'
 export type HeroTitleFont = 'inherit' | 'geist' | 'plus-jakarta' | 'playfair'
 export type HeroTitleScale = 'subtle' | 'balanced' | 'impact'
+export type HeroTextAlign = 'left' | 'center'
+export type HeroTitleWeight = 'medium' | 'semibold' | 'bold'
 export type StoreContent = Database['public']['Tables']['store_content']['Row'] & {
   hero_image_layout?: HeroImageLayout
   hero_overlay_opacity?: number
   hero_title_font?: HeroTitleFont
   hero_title_scale?: HeroTitleScale
+  hero_text_align?: HeroTextAlign
+  hero_title_weight?: HeroTitleWeight
 }
 export type Category = Database['public']['Tables']['categories']['Row']
 export type Brand = {

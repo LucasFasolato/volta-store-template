@@ -1,12 +1,14 @@
 'use client'
 
-import { MessageSquareText, Truck, UserRound } from 'lucide-react'
+import { MessageSquareText, TextCursorInput, Truck, UserRound } from 'lucide-react'
 import type { CheckoutDetails } from '@/lib/whatsapp/builder'
+import type { CheckoutCustomField } from '@/types/store'
 
 type Props = {
   askName: boolean
   askFulfillment: boolean
   allowNotes: boolean
+  customFields: CheckoutCustomField[]
   value: CheckoutDetails
   onChange: (value: CheckoutDetails) => void
 }
@@ -16,11 +18,22 @@ const readableFieldStyle = {
   color: 'var(--store-text)',
   WebkitTextFillColor: 'var(--store-text)',
   caretColor: 'var(--store-primary)',
-  background: 'var(--store-bg)',
+  background: 'color-mix(in srgb, var(--store-surface) 88%, var(--store-bg))',
 } as const
 
-export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, value, onChange }: Props) {
-  if (!askName && !askFulfillment && !allowNotes) return null
+export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, customFields, value, onChange }: Props) {
+  const activeCustomFields = customFields.filter((field) => field.is_enabled)
+  if (!askName && !askFulfillment && !allowNotes && activeCustomFields.length === 0) return null
+
+  function setCustomValue(fieldId: string, nextValue: string) {
+    onChange({
+      ...value,
+      custom: {
+        ...(value.custom ?? {}),
+        [fieldId]: nextValue,
+      },
+    })
+  }
 
   return (
     <section
@@ -45,14 +58,14 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, val
           <label className="block rounded-[var(--store-button-radius)] border p-3" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-surface)' }}>
             <span className="mb-2 flex items-center justify-between gap-2 text-xs font-semibold" style={{ color: 'var(--store-soft-text)' }}>
               <span className="flex items-center gap-2"><UserRound className="size-3.5" />Tu nombre</span>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--store-primary)' }}>Obligatorio</span>
+              <RequiredBadge />
             </span>
             <input
               value={value.customerName ?? ''}
-              onChange={(event) => onChange({ ...value, customerName: event.target.value })}
+              onChange={(event) => onChange({ ...value, customerName: event.target.value.slice(0, 80) })}
               placeholder="Ej: Lucas"
               autoComplete="name"
-              className="min-h-11 w-full rounded-[var(--store-button-radius)] border px-3.5 text-sm outline-none transition placeholder:opacity-55 focus:ring-2"
+              className="store-form-control min-h-11 w-full rounded-[var(--store-button-radius)] border px-3.5 text-sm outline-none transition focus:ring-2"
               style={readableFieldStyle}
             />
           </label>
@@ -62,21 +75,11 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, val
           <div className="rounded-[var(--store-button-radius)] border p-3" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-surface)' }}>
             <span className="mb-2 flex items-center justify-between gap-2 text-xs font-semibold" style={{ color: 'var(--store-soft-text)' }}>
               <span className="flex items-center gap-2"><Truck className="size-3.5" />¿Cómo querés recibirlo?</span>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--store-primary)' }}>Obligatorio</span>
+              <RequiredBadge />
             </span>
             <div className="grid grid-cols-2 gap-2">
-              <ChoiceButton
-                active={value.fulfillment === 'pickup'}
-                onClick={() => onChange({ ...value, fulfillment: 'pickup' })}
-              >
-                Retiro
-              </ChoiceButton>
-              <ChoiceButton
-                active={value.fulfillment === 'delivery'}
-                onClick={() => onChange({ ...value, fulfillment: 'delivery' })}
-              >
-                Envío
-              </ChoiceButton>
+              <ChoiceButton active={value.fulfillment === 'pickup'} onClick={() => onChange({ ...value, fulfillment: 'pickup' })}>Retiro</ChoiceButton>
+              <ChoiceButton active={value.fulfillment === 'delivery'} onClick={() => onChange({ ...value, fulfillment: 'delivery' })}>Envío</ChoiceButton>
             </div>
           </div>
         ) : null}
@@ -92,14 +95,45 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, val
               onChange={(event) => onChange({ ...value, notes: event.target.value.slice(0, 240) })}
               placeholder="Ej: pasar después de las 18 hs"
               rows={2}
-              className="w-full resize-none rounded-[var(--store-button-radius)] border px-3.5 py-3 text-sm outline-none placeholder:opacity-55 focus:ring-2"
+              className="store-form-control w-full resize-none rounded-[var(--store-button-radius)] border px-3.5 py-3 text-sm outline-none focus:ring-2"
               style={readableFieldStyle}
             />
           </label>
         ) : null}
+
+        {activeCustomFields.map((field) => (
+          <label key={field.id} className="block rounded-[var(--store-button-radius)] border p-3" style={{ borderColor: 'var(--store-card-border)', background: 'var(--store-surface)' }}>
+            <span className="mb-2 flex items-center justify-between gap-2 text-xs font-semibold" style={{ color: 'var(--store-soft-text)' }}>
+              <span className="flex min-w-0 items-center gap-2"><TextCursorInput className="size-3.5 shrink-0" /><span className="truncate">{field.label}</span></span>
+              {field.is_required ? <RequiredBadge /> : <span className="text-[10px] font-normal opacity-55">Opcional</span>}
+            </span>
+            {field.field_type === 'long' ? (
+              <textarea
+                value={value.custom?.[field.id] ?? ''}
+                onChange={(event) => setCustomValue(field.id, event.target.value.slice(0, 240))}
+                placeholder={field.placeholder ?? ''}
+                rows={2}
+                className="store-form-control w-full resize-none rounded-[var(--store-button-radius)] border px-3.5 py-3 text-sm outline-none focus:ring-2"
+                style={readableFieldStyle}
+              />
+            ) : (
+              <input
+                value={value.custom?.[field.id] ?? ''}
+                onChange={(event) => setCustomValue(field.id, event.target.value.slice(0, 120))}
+                placeholder={field.placeholder ?? ''}
+                className="store-form-control min-h-11 w-full rounded-[var(--store-button-radius)] border px-3.5 text-sm outline-none focus:ring-2"
+                style={readableFieldStyle}
+              />
+            )}
+          </label>
+        ))}
       </div>
     </section>
   )
+}
+
+function RequiredBadge() {
+  return <span className="text-[10px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--store-primary)' }}>Obligatorio</span>
 }
 
 function ChoiceButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {

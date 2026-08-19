@@ -17,12 +17,17 @@ type Props = {
   onOpenAdvanced: (tab: AdvancedTab) => void
 }
 
-const FRIENDLY_PRESETS = THEME_PRESETS.slice(0, 4)
+const VISIBLE_IDS = ['minimal', 'fashion', 'bakery', 'deco', 'nocturne', 'clean-commerce', 'editorial-pro', 'energy']
+const FRIENDLY_PRESETS = VISIBLE_IDS.map((id) => THEME_PRESETS.find((preset) => preset.id === id)).filter(Boolean) as ThemePreset[]
 const SHORT_COPY: Record<string, string> = {
   minimal: 'Limpio y simple',
   fashion: 'Editorial y llamativo',
   bakery: 'Suave y cercano',
   deco: 'Sobrio y elegante',
+  nocturne: 'Negro y dorado premium',
+  'clean-commerce': 'Claro y comercial',
+  'editorial-pro': 'Refinado y con identidad',
+  energy: 'Fuerte y energético',
 }
 
 function matchPreset(theme: StoreTheme) {
@@ -55,7 +60,10 @@ export function QuickAppearanceForm({ theme, store, onOpenAdvanced }: Props) {
   return (
     <div className="space-y-4">
       <section className="rounded-[16px] border border-black/8 bg-white p-4 dark:border-white/10 dark:bg-[#111820] sm:p-5">
-        <h3 className="text-lg font-semibold tracking-[-0.035em] text-foreground">Elegí cómo querés que se sienta</h3>
+        <div className="max-w-2xl">
+          <h3 className="text-lg font-semibold tracking-[-0.035em] text-foreground">Elegí cómo querés que se sienta</h3>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">Ocho estilos listos. Elegís uno y después podés ajustar colores, letras o productos sin perder simplicidad.</p>
+        </div>
         <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
           {FRIENDLY_PRESETS.map((preset) => {
             const active = selected === preset.id

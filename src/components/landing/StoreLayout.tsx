@@ -47,6 +47,7 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
     pageSize: view.pageSize,
   })
   const storeRootId = `store-shell-${store.slug}`
+  const checkoutFields = Array.isArray(store.checkout_custom_fields) ? store.checkout_custom_fields : []
 
   return (
     <div id={storeRootId} className="store-shell store-body" data-store-mode={theme.visual_mode} style={{ ...themeVars, background: 'var(--store-bg-gradient)', color: 'var(--store-text)', fontFamily: 'var(--store-font-body)' }}>
@@ -89,7 +90,7 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
         ) : null}
       </main>
       {layout.show_footer ? <StoreFooter store={store} containerClass={containerClass} productCount={productCount} categoryCount={categoryCount} /> : null}
-      <StoreInteractiveShell closeModalHref={closeModalHref} selectedProduct={view.selectedProduct} storeId={store.id} storeName={store.name} storeRootId={storeRootId} storeSlug={store.slug} theme={theme} whatsapp={store.whatsapp} checkoutAskName={store.checkout_ask_name ?? true} checkoutAskFulfillment={store.checkout_ask_fulfillment ?? true} checkoutAllowNotes={store.checkout_allow_notes ?? true} />
+      <StoreInteractiveShell closeModalHref={closeModalHref} selectedProduct={view.selectedProduct} storeId={store.id} storeName={store.name} storeRootId={storeRootId} storeSlug={store.slug} theme={theme} whatsapp={store.whatsapp} checkoutAskName={store.checkout_ask_name ?? true} checkoutAskFulfillment={store.checkout_ask_fulfillment ?? true} checkoutAllowNotes={store.checkout_allow_notes ?? true} checkoutFields={checkoutFields} />
     </div>
   )
 }
