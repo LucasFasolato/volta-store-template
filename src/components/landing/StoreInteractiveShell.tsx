@@ -6,7 +6,7 @@ import { StoreCartClient } from '@/components/cart/StoreCartClient'
 import { ProductModal } from '@/components/product/ProductModal'
 import { trackStoreEvent } from '@/lib/analytics/store-events'
 import { buildThemeVars } from '@/lib/utils/theme'
-import type { ProductWithImages, StoreTheme } from '@/types/store'
+import type { CheckoutCustomField, ProductWithImages, StoreTheme } from '@/types/store'
 
 type StoreInteractiveShellProps = {
   closeModalHref: string
@@ -20,6 +20,7 @@ type StoreInteractiveShellProps = {
   checkoutAskName: boolean
   checkoutAskFulfillment: boolean
   checkoutAllowNotes: boolean
+  checkoutFields: CheckoutCustomField[]
 }
 
 export function StoreInteractiveShell({
@@ -34,6 +35,7 @@ export function StoreInteractiveShell({
   checkoutAskName,
   checkoutAskFulfillment,
   checkoutAllowNotes,
+  checkoutFields,
 }: StoreInteractiveShellProps) {
   useEffect(() => {
     trackStoreEvent({ storeId, type: 'store_view', dedupeKey: 'store-view' })
@@ -60,6 +62,7 @@ export function StoreInteractiveShell({
         askName={checkoutAskName}
         askFulfillment={checkoutAskFulfillment}
         allowNotes={checkoutAllowNotes}
+        customFields={checkoutFields}
       />
       {selectedProduct ? (
         <StoreProductModalClient

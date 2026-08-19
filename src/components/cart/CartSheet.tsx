@@ -17,6 +17,7 @@ import { trackStoreEvent } from '@/lib/analytics/store-events'
 import { useCartStore, type CartItem as StoreCartItem } from '@/lib/stores/cart'
 import { formatCurrency } from '@/lib/utils/format'
 import { buildWhatsAppUrl, type CheckoutDetails } from '@/lib/whatsapp/builder'
+import type { CheckoutCustomField } from '@/types/store'
 
 type CartSheetProps = {
   storeId: string
@@ -25,6 +26,7 @@ type CartSheetProps = {
   askName: boolean
   askFulfillment: boolean
   allowNotes: boolean
+  customFields: CheckoutCustomField[]
 }
 
 export function CartSheet({
@@ -34,6 +36,7 @@ export function CartSheet({
   askName,
   askFulfillment,
   allowNotes,
+  customFields,
 }: CartSheetProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const [details, setDetails] = useState<CheckoutDetails>({})
@@ -44,10 +47,14 @@ export function CartSheet({
   const updateQuantity = useCartStore((state) => state.updateQuantity)
   const removeItem = useCartStore((state) => state.removeItem)
   const { subtotal, totalItems } = useMemo(() => getCartSummary(items), [items])
+  const activeCustomFields = useMemo(() => customFields.filter((field) => field.is_enabled), [customFields])
 
   const missingName = askName && !details.customerName?.trim()
   const missingFulfillment = askFulfillment && !details.fulfillment
-  const canCheckout = Boolean(whatsapp) && !missingName && !missingFulfillment
+  const missingCustomFields = activeCustomFields.filter((field) => field.is_required && !details.custom?.[field.id]?.trim())
+  const missingRequired = missingName || missingFulfillment || missingCustomFields.length > 0
+  const hasDetails = askName || askFulfillment || allowNotes || activeCustomFields.length > 0
+  const canCheckout = Boolean(whatsapp) && !missingRequired
 
   useEffect(() => {
     if (!isOpen) return
@@ -82,7 +89,13 @@ export function CartSheet({
       return
     }
 
-    const url = buildWhatsAppUrl(whatsapp, items, details)
+    if (missingCustomFields.length > 0) {
+      document.getElementById('datos-pedido')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      toast.error(`Completá ${missingCustomFields[0].label} para continuar.`)
+      return
+    }
+
+    const url = buildWhatsAppUrl(whatsapp, items, details, activeCustomFields)
     const opened = window.open('about:blank', '_blank')
 
     if (!opened) {
@@ -212,6 +225,7 @@ export function CartSheet({
                     askName={askName}
                     askFulfillment={askFulfillment}
                     allowNotes={allowNotes}
+                    customFields={activeCustomFields}
                     value={details}
                     onChange={setDetails}
                   />
@@ -220,7 +234,7 @@ export function CartSheet({
                     <div className="flex items-end justify-between gap-3 px-1">
                       <div>
                         <div className="flex items-center gap-2">
-                          {(askName || askFulfillment || allowNotes) ? <span className="flex size-6 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: 'color-mix(in srgb, var(--store-primary) 12%, transparent)', color: 'var(--store-primary)' }}>2</span> : null}
+                          {hasDetails ? <span className="flex size-6 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: 'color-mix(in srgb, var(--store-primary) 12%, transparent)', color: 'var(--store-primary)' }}>2</span> : null}
                           <h3 className="text-base font-semibold leading-6" style={{ color: 'var(--store-text)' }}>Revisá tu pedido</h3>
                         </div>
                         <p className="mt-1 text-xs leading-5" style={{ color: 'var(--store-muted-text)' }}>Podés cambiar cantidades o quitar productos.</p>
@@ -253,13 +267,9 @@ export function CartSheet({
                   <p className="max-w-[12rem] text-right text-xs leading-5" style={{ color: 'var(--store-soft-text)' }}>El negocio confirma disponibilidad, pago y entrega.</p>
                 </div>
 
-                {(missingName || missingFulfillment) ? (
+                {missingRequired ? (
                   <button type="button" onClick={() => document.getElementById('datos-pedido')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="mt-3 w-full rounded-[10px] border px-3 py-2 text-center text-xs font-medium transition hover:opacity-80" style={{ borderColor: 'color-mix(in srgb, var(--store-primary) 28%, var(--store-card-border))', color: 'var(--store-primary)', background: 'color-mix(in srgb, var(--store-primary) 6%, transparent)' }}>
-                    {missingName && missingFulfillment
-                      ? '↑ Completá nombre y forma de entrega para continuar'
-                      : missingName
-                        ? '↑ Completá tu nombre para continuar'
-                        : '↑ Elegí retiro o envío para continuar'}
+                    ↑ Completá los campos obligatorios para continuar
                   </button>
                 ) : null}
 

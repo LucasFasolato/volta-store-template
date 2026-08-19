@@ -5,6 +5,7 @@ import { CartFloatingBar } from '@/components/cart/CartFloatingBar'
 import { CartSheet } from '@/components/cart/CartSheet'
 import { trackStoreEvent } from '@/lib/analytics/store-events'
 import { useCartStore } from '@/lib/stores/cart'
+import type { CheckoutCustomField } from '@/types/store'
 
 type StoreCartClientProps = {
   storeId: string
@@ -14,6 +15,7 @@ type StoreCartClientProps = {
   askName: boolean
   askFulfillment: boolean
   allowNotes: boolean
+  customFields: CheckoutCustomField[]
 }
 
 export function StoreCartClient({
@@ -24,6 +26,7 @@ export function StoreCartClient({
   askName,
   askFulfillment,
   allowNotes,
+  customFields,
 }: StoreCartClientProps) {
   const setStoreContext = useCartStore((state) => state.setStoreContext)
   const isOpen = useCartStore((state) => state.isOpen)
@@ -46,6 +49,7 @@ export function StoreCartClient({
         askName={askName}
         askFulfillment={askFulfillment}
         allowNotes={allowNotes}
+        customFields={customFields}
       />
       <CartFloatingBar />
     </>

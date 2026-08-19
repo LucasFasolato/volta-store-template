@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { SaveButton } from '@/components/common/SaveButton'
 import { FONT_FAMILY_MAP, FONT_PRESETS, normalizeThemeFontSelection } from '@/data/defaults'
 import { updateStoreTheme } from '@/lib/actions/store'
-import { getContrastRatio } from '@/lib/utils/color'
+import { getAccessibleTextColor, getContrastRatio, mixHexColors } from '@/lib/utils/color'
 import { cn } from '@/lib/utils'
 import { storeThemeSchema, type StoreThemeInput } from '@/lib/validations/store'
 import type { StoreTheme } from '@/types/store'
@@ -29,17 +29,54 @@ export function SimpleThemeForm({ theme, activeSection }: { theme: StoreTheme; a
   const values = useWatch({ control })
   const current = { ...normalized, ...values } as StoreTheme
   const set = <K extends keyof StoreThemeInput>(name: K, value: StoreThemeInput[K]) => { setValue(name as never, value as never, { shouldDirty: true }); setSaved(false) }
-  function chooseFont(value: StoreThemeInput['font_preset']) { const preset = FONT_PRESETS.find((item) => item.value === value); if (!preset) return; set('font_preset', value); set('heading_font', preset.heading_font as StoreThemeInput['heading_font']); set('body_font', preset.body_font as StoreThemeInput['body_font']); set('font_family', preset.body_font as StoreThemeInput['font_family']); set('heading_weight', preset.heading_weight as StoreThemeInput['heading_weight']) }
-  function background(mode: 'light' | 'dark') { if (mode === 'light') { set('visual_mode', 'light'); set('background_color', '#ffffff'); set('surface_color', '#f7f8fa'); set('text_color', '#111827') } else { set('visual_mode', 'dark'); set('background_color', '#0b0b0f'); set('surface_color', '#15161a'); set('text_color', '#f8fafc') } }
-  async function onSubmit(data: StoreThemeInput) { const result = await updateStoreTheme({ ...data, font_family: data.body_font }); if (result?.error) { toast.error('No pudimos guardar.'); return } setSaved(true); toast.success('Diseño guardado.'); setTimeout(() => setSaved(false), 2200) }
+
+  function chooseFont(value: StoreThemeInput['font_preset']) {
+    const preset = FONT_PRESETS.find((item) => item.value === value)
+    if (!preset) return
+    set('font_preset', value)
+    set('heading_font', preset.heading_font as StoreThemeInput['heading_font'])
+    set('body_font', preset.body_font as StoreThemeInput['body_font'])
+    set('font_family', preset.body_font as StoreThemeInput['font_family'])
+    set('heading_weight', preset.heading_weight as StoreThemeInput['heading_weight'])
+  }
+
+  function background(mode: 'light' | 'dark') {
+    if (mode === 'light') {
+      set('visual_mode', 'light'); set('background_color', '#ffffff'); set('background_color_2', null); set('surface_color', '#f7f8fa'); set('text_color', '#111827')
+    } else {
+      set('visual_mode', 'dark'); set('background_color', '#0b0b0f'); set('background_color_2', null); set('surface_color', '#15161a'); set('text_color', '#f8fafc')
+    }
+  }
+
+  function customBackground(value: string) {
+    const text = getAccessibleTextColor(value)
+    const darkMode = text === '#f8fafc'
+    set('background_color', value)
+    set('background_color_2', null)
+    set('text_color', text)
+    set('visual_mode', darkMode ? 'dark' : 'light')
+    set('surface_color', darkMode ? mixHexColors(value, '#ffffff', 0.08) : mixHexColors(value, '#ffffff', 0.76))
+  }
+
+  async function onSubmit(data: StoreThemeInput) {
+    const result = await updateStoreTheme({ ...data, font_family: data.body_font })
+    if (result?.error) { toast.error('No pudimos guardar.'); return }
+    setSaved(true); toast.success('Diseño guardado.'); setTimeout(() => setSaved(false), 2200)
+  }
   const readable = getContrastRatio(current.text_color, current.background_color) >= 4.5
 
   return <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
     {activeSection === 'colores' ? <>
-      <Panel title="Color de tu marca" description="Se usa en botones, precios y elementos destacados."><ColorChoice label="Color principal" value={current.primary_color} onChange={(value) => set('primary_color', value)} /></Panel>
-      <Panel title="Aspecto general" description="Elegí si querés que toda la tienda se vea clara u oscura."><div className="grid grid-cols-2 gap-2"><Choice selected={current.visual_mode !== 'dark'} onClick={() => background('light')}>Tienda clara</Choice><Choice selected={current.visual_mode === 'dark'} onClick={() => background('dark')}>Tienda oscura</Choice></div><div className={cn('mt-3 flex items-center gap-2 rounded-[10px] px-3 py-2.5 text-sm font-medium', readable ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-amber-500/10 text-amber-700 dark:text-amber-300')}>{readable ? <Check className="size-4" /> : null}{readable ? 'Se lee bien' : 'Estos colores cuestan leer'}</div></Panel>
+      <Panel title="Colores principales" description="El color de marca vende la identidad. El fondo define cómo se siente toda la tienda.">
+        <div className="grid gap-2 sm:grid-cols-2">
+          <ColorChoice label="Color de tu marca" value={current.primary_color} onChange={(value) => set('primary_color', value)} />
+          <ColorChoice label="Fondo de la tienda" value={current.background_color} onChange={customBackground} />
+        </div>
+        <p className="mt-2 text-[11px] leading-5 text-muted-foreground">Al cambiar el fondo, VOLTA ajusta automáticamente texto y superficie para mantener buena lectura.</p>
+      </Panel>
+      <Panel title="Atajo de aspecto" description="Si preferís no elegir un color, usá uno de estos dos puntos de partida."><div className="grid grid-cols-2 gap-2"><Choice selected={current.visual_mode !== 'dark'} onClick={() => background('light')}>Tienda clara</Choice><Choice selected={current.visual_mode === 'dark'} onClick={() => background('dark')}>Tienda oscura</Choice></div><div className={cn('mt-3 flex items-center gap-2 rounded-[10px] px-3 py-2.5 text-sm font-medium', readable ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-amber-500/10 text-amber-700 dark:text-amber-300')}>{readable ? <Check className="size-4" /> : null}{readable ? 'Se lee bien' : 'Estos colores cuestan leer'}</div></Panel>
       <button type="button" onClick={() => setMoreColors((value) => !value)} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-[10px] border border-black/8 bg-white text-sm font-medium text-foreground dark:border-white/10 dark:bg-[#111820]">Más opciones <ChevronDown className={cn('size-4', moreColors && 'rotate-180')} /></button>
-      {moreColors ? <Panel title="Detalles opcionales" description="Solo cambialos si querés ajustar pequeños acentos de la tienda."><div className="grid gap-2 sm:grid-cols-2"><ColorChoice label="Detalles destacados" value={current.accent_color} onChange={(value) => set('accent_color', value)} /><ColorChoice label="Color secundario" value={current.secondary_color} onChange={(value) => set('secondary_color', value)} /></div></Panel> : null}
+      {moreColors ? <Panel title="Detalles opcionales" description="No hace falta tocarlos salvo que quieras afinar más el resultado."><div className="grid gap-2 sm:grid-cols-2"><ColorChoice label="Superficie de tarjetas" value={current.surface_color} onChange={(value) => set('surface_color', value)} /><ColorChoice label="Detalles destacados" value={current.accent_color} onChange={(value) => set('accent_color', value)} /><ColorChoice label="Color secundario" value={current.secondary_color} onChange={(value) => set('secondary_color', value)} /></div></Panel> : null}
     </> : null}
     {activeSection === 'fuentes' ? <Panel title="Estilo de letras" description="Elegí mirando cómo se ve una frase real. No necesitás conocer el nombre de la fuente."><div className="grid gap-2 sm:grid-cols-2">{FONT_PRESETS.slice(0, 4).map((preset) => <FontPresetChoice key={preset.value} preset={preset} selected={current.font_preset === preset.value} onClick={() => chooseFont(preset.value as StoreThemeInput['font_preset'])} />)}</div></Panel> : null}
     {activeSection === 'productos' ? <><Panel title="Cómo se ven" description="Elegí la forma de las tarjetas de producto."><div className="grid grid-cols-3 gap-2"><CardChoice variant="classic" selected={current.card_layout === 'classic'} onClick={() => set('card_layout', 'classic')} label="Clásicos" /><CardChoice variant="visual" selected={current.card_layout === 'visual'} onClick={() => set('card_layout', 'visual')} label="Visuales" /><CardChoice variant="compact" selected={current.card_layout === 'compact'} onClick={() => set('card_layout', 'compact')} label="Compactos" /></div></Panel><Panel title="Productos por fila" description="Solo cambia cuántos productos aparecen uno al lado del otro."><div className="grid grid-cols-3 gap-2"><GridChoice columns={2} selected={current.grid_columns === 2} onClick={() => set('grid_columns', 2)} /><GridChoice columns={3} selected={current.grid_columns === 3} onClick={() => set('grid_columns', 3)} /><GridChoice columns={4} selected={current.grid_columns === 4} onClick={() => set('grid_columns', 4)} /></div></Panel></> : null}

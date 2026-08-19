@@ -1,0 +1,37 @@
+/* Storefront-specific control overrides. Loaded after admin/light-mode polish so the
+   shop theme owns its controls even when the ChatGPT/admin shell is in light mode. */
+.store-shell .store-form-control,
+.light .store-shell .store-form-control,
+.dark .store-shell .store-form-control {
+  border-color: var(--store-card-border) !important;
+  background: color-mix(in srgb, var(--store-surface) 88%, var(--store-bg)) !important;
+  color: var(--store-text) !important;
+  -webkit-text-fill-color: var(--store-text) !important;
+  caret-color: var(--store-primary) !important;
+  box-shadow: none !important;
+  color-scheme: inherit;
+}
+
+.store-shell .store-form-control::placeholder,
+.light .store-shell .store-form-control::placeholder,
+.dark .store-shell .store-form-control::placeholder {
+  color: var(--store-muted-text) !important;
+  -webkit-text-fill-color: var(--store-muted-text) !important;
+  opacity: 1;
+}
+
+.store-shell .store-form-control:focus,
+.light .store-shell .store-form-control:focus,
+.dark .store-shell .store-form-control:focus {
+  border-color: color-mix(in srgb, var(--store-primary) 65%, var(--store-card-border)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--store-primary) 16%, transparent) !important;
+}
+
+.store-shell .store-form-control:-webkit-autofill,
+.store-shell .store-form-control:-webkit-autofill:hover,
+.store-shell .store-form-control:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--store-text) !important;
+  caret-color: var(--store-primary) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--store-surface) inset !important;
+  transition: background-color 9999s ease-out 0s;
+}
