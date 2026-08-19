@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
-import { MessageCircle, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react'
+import { CreditCard, MapPin, MessageCircle, Minus, Package, Plus, ShoppingBag, Trash2, Truck, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { CheckoutDetailsFields } from '@/components/cart/CheckoutDetailsFields'
 import { EmptyState } from '@/components/common/EmptyState'
@@ -13,30 +13,36 @@ import {
   getCartItemOptionEntries,
   getCartSummary,
 } from '@/lib/cart/summary'
+import { saveLastOrder } from '@/lib/cart/last-order'
 import { trackStoreEvent } from '@/lib/analytics/store-events'
+import { fulfillmentMethodsLabel, paymentMethodsLabel, storeOffersDelivery } from '@/lib/sales/settings'
 import { useCartStore, type CartItem as StoreCartItem } from '@/lib/stores/cart'
 import { formatCurrency } from '@/lib/utils/format'
 import { buildWhatsAppUrl, type CheckoutDetails } from '@/lib/whatsapp/builder'
-import type { CheckoutCustomField } from '@/types/store'
+import type { CheckoutCustomField, SalesSettings } from '@/types/store'
 
 type CartSheetProps = {
   storeId: string
+  storeSlug: string
   whatsapp: string
   storeName: string
   askName: boolean
   askFulfillment: boolean
   allowNotes: boolean
   customFields: CheckoutCustomField[]
+  salesSettings: SalesSettings
 }
 
 export function CartSheet({
   storeId,
+  storeSlug,
   whatsapp,
   storeName,
   askName,
   askFulfillment,
   allowNotes,
   customFields,
+  salesSettings,
 }: CartSheetProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const [details, setDetails] = useState<CheckoutDetails>({})
@@ -48,13 +54,29 @@ export function CartSheet({
   const removeItem = useCartStore((state) => state.removeItem)
   const { subtotal, totalItems } = useMemo(() => getCartSummary(items), [items])
   const activeCustomFields = useMemo(() => customFields.filter((field) => field.is_enabled), [customFields])
+  const fulfillmentKey = salesSettings.fulfillmentMethods.join('|')
+  const effectiveAskFulfillment = askFulfillment && salesSettings.fulfillmentMethods.length > 1
 
   const missingName = askName && !details.customerName?.trim()
-  const missingFulfillment = askFulfillment && !details.fulfillment
+  const missingFulfillment = effectiveAskFulfillment && !details.fulfillment
   const missingCustomFields = activeCustomFields.filter((field) => field.is_required && !details.custom?.[field.id]?.trim())
   const missingRequired = missingName || missingFulfillment || missingCustomFields.length > 0
-  const hasDetails = askName || askFulfillment || allowNotes || activeCustomFields.length > 0
-  const canCheckout = Boolean(whatsapp) && !missingRequired
+  const hasDetails = askName || effectiveAskFulfillment || allowNotes || activeCustomFields.length > 0
+  const minimumOrder = salesSettings.minimumOrderAmount
+  const belowMinimum = Boolean(minimumOrder && subtotal < minimumOrder)
+  const canCheckout = Boolean(whatsapp) && !missingRequired && !belowMinimum
+
+  useEffect(() => {
+    const methods = salesSettings.fulfillmentMethods
+    setDetails((current) => {
+      if (methods.length === 1) {
+        const only = methods[0]
+        return current.fulfillment === only ? current : { ...current, fulfillment: only }
+      }
+      if (current.fulfillment && !methods.includes(current.fulfillment)) return { ...current, fulfillment: undefined }
+      return current
+    })
+  }, [fulfillmentKey, salesSettings.fulfillmentMethods])
 
   useEffect(() => {
     if (!isOpen) return
@@ -76,6 +98,11 @@ export function CartSheet({
 
   function handleCheckout() {
     if (!whatsapp || items.length === 0) return
+
+    if (belowMinimum && minimumOrder) {
+      toast.error(`El pedido mínimo es ${formatCurrency(minimumOrder)}.`)
+      return
+    }
 
     if (missingName) {
       document.getElementById('datos-pedido')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -104,8 +131,11 @@ export function CartSheet({
     }
 
     opened.opener = null
+    saveLastOrder(storeSlug, items)
     trackStoreEvent({ storeId, type: 'whatsapp_checkout' })
     opened.location.href = url
+    clearCart()
+    setDetails({})
     closeCart()
     toast.success('WhatsApp abierto. Revisá el mensaje y envialo cuando estés listo.')
   }
@@ -126,10 +156,7 @@ export function CartSheet({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50"
-            style={{
-              background: 'color-mix(in srgb, var(--store-bg) 34%, black 66%)',
-              backdropFilter: 'blur(14px)',
-            }}
+            style={{ background: 'color-mix(in srgb, var(--store-bg) 34%, black 66%)', backdropFilter: 'blur(14px)' }}
             onClick={closeCart}
             aria-label="Cerrar pedido"
           />
@@ -141,8 +168,7 @@ export function CartSheet({
             transition={{ type: 'spring', damping: 30, stiffness: 260 }}
             className="cart-sheet fixed inset-y-0 right-0 z-50 w-full max-w-[30rem] overflow-y-auto overscroll-contain"
             style={{
-              background:
-                'linear-gradient(180deg, color-mix(in srgb, var(--store-surface) 94%, white 6%), color-mix(in srgb, var(--store-bg) 96%, var(--store-text) 4%))',
+              background: 'linear-gradient(180deg, color-mix(in srgb, var(--store-surface) 94%, white 6%), color-mix(in srgb, var(--store-bg) 96%, var(--store-text) 4%))',
               borderLeft: '1px solid var(--store-card-border)',
               boxShadow: 'var(--store-shadow)',
             }}
@@ -152,13 +178,7 @@ export function CartSheet({
           >
             <div className="sticky top-0 z-20 flex items-center justify-between border-b px-5 py-4 backdrop-blur-xl" style={{ borderColor: 'var(--store-card-border)', background: 'color-mix(in srgb, var(--store-surface) 92%, transparent)' }}>
               <div className="flex min-w-0 items-center gap-3">
-                <div
-                  className="flex size-10 shrink-0 items-center justify-center"
-                  style={{
-                    borderRadius: 'var(--store-button-radius)',
-                    backgroundColor: 'color-mix(in srgb, var(--store-primary) 10%, transparent)',
-                  }}
-                >
+                <div className="flex size-10 shrink-0 items-center justify-center" style={{ borderRadius: 'var(--store-button-radius)', backgroundColor: 'color-mix(in srgb, var(--store-primary) 10%, transparent)' }}>
                   <ShoppingBag className="size-4" style={{ color: 'var(--store-primary)' }} />
                 </div>
                 <div className="min-w-0">
@@ -168,32 +188,8 @@ export function CartSheet({
               </div>
 
               <div className="flex items-center gap-2">
-                {totalItems > 0 ? (
-                  <span
-                    className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
-                    style={{
-                      backgroundColor: 'color-mix(in srgb, var(--store-primary) 10%, transparent)',
-                      color: 'var(--store-primary)',
-                    }}
-                  >
-                    {totalItems}
-                  </span>
-                ) : null}
-                <button
-                  ref={closeButtonRef}
-                  type="button"
-                  onClick={closeCart}
-                  className="flex size-10 items-center justify-center transition"
-                  style={{
-                    borderRadius: 'var(--store-button-radius)',
-                    color: 'var(--store-text)',
-                    backgroundColor: 'color-mix(in srgb, var(--store-surface) 78%, transparent)',
-                    border: '1px solid var(--store-card-border)',
-                  }}
-                  aria-label="Cerrar pedido"
-                >
-                  <X className="size-4" />
-                </button>
+                {totalItems > 0 ? <span className="rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ backgroundColor: 'color-mix(in srgb, var(--store-primary) 10%, transparent)', color: 'var(--store-primary)' }}>{totalItems}</span> : null}
+                <button ref={closeButtonRef} type="button" onClick={closeCart} className="flex size-10 items-center justify-center transition" style={{ borderRadius: 'var(--store-button-radius)', color: 'var(--store-text)', backgroundColor: 'color-mix(in srgb, var(--store-surface) 78%, transparent)', border: '1px solid var(--store-card-border)' }} aria-label="Cerrar pedido"><X className="size-4" /></button>
               </div>
             </div>
 
@@ -203,27 +199,17 @@ export function CartSheet({
                   icon={ShoppingBag}
                   title="Tu pedido está vacío"
                   description="Agregá productos y volvé acá para revisarlos antes de enviarlos por WhatsApp."
-                  action={
-                    <button
-                      type="button"
-                      onClick={closeCart}
-                      className="store-button px-5 py-3 text-sm font-semibold transition duration-200 hover:-translate-y-0.5"
-                      style={{
-                        background: 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))',
-                        color: 'var(--store-primary-contrast)',
-                      }}
-                    >
-                      Seguir viendo productos
-                    </button>
-                  }
+                  action={<button type="button" onClick={closeCart} className="store-button px-5 py-3 text-sm font-semibold transition duration-200 hover:-translate-y-0.5" style={{ background: 'linear-gradient(145deg, var(--store-primary), color-mix(in srgb, var(--store-primary) 74%, black 26%))', color: 'var(--store-primary-contrast)' }}>Seguir viendo productos</button>}
                   className="border-0 bg-transparent px-4 py-12 shadow-none"
                   tone="light"
                 />
               ) : (
                 <div className="space-y-5">
+                  <SalesInfo settings={salesSettings} />
+
                   <CheckoutDetailsFields
                     askName={askName}
-                    askFulfillment={askFulfillment}
+                    askFulfillment={effectiveAskFulfillment}
                     allowNotes={allowNotes}
                     customFields={activeCustomFields}
                     value={details}
@@ -243,14 +229,7 @@ export function CartSheet({
                     </div>
 
                     <div className="mt-3 space-y-3">
-                      {items.map((item) => (
-                        <CartItem
-                          key={item.cartItemKey}
-                          item={item}
-                          onUpdateQty={(quantity) => updateQuantity(item.cartItemKey, quantity)}
-                          onRemove={() => removeItem(item.cartItemKey)}
-                        />
-                      ))}
+                      {items.map((item) => <CartItem key={item.cartItemKey} item={item} onUpdateQty={(quantity) => updateQuantity(item.cartItemKey, quantity)} onRemove={() => removeItem(item.cartItemKey)} />)}
                     </div>
                   </section>
                 </div>
@@ -267,50 +246,29 @@ export function CartSheet({
                   <p className="max-w-[12rem] text-right text-xs leading-5" style={{ color: 'var(--store-soft-text)' }}>El negocio confirma disponibilidad, pago y entrega.</p>
                 </div>
 
+                {belowMinimum && minimumOrder ? (
+                  <div className="mt-3 rounded-[10px] border px-3 py-2 text-center text-xs font-medium" style={{ borderColor: 'color-mix(in srgb, var(--store-primary) 28%, var(--store-card-border))', color: 'var(--store-primary)', background: 'color-mix(in srgb, var(--store-primary) 6%, transparent)' }}>
+                    Te faltan {formatCurrency(minimumOrder - subtotal)} para llegar al pedido mínimo.
+                  </div>
+                ) : null}
+
                 {missingRequired ? (
                   <button type="button" onClick={() => document.getElementById('datos-pedido')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="mt-3 w-full rounded-[10px] border px-3 py-2 text-center text-xs font-medium transition hover:opacity-80" style={{ borderColor: 'color-mix(in srgb, var(--store-primary) 28%, var(--store-card-border))', color: 'var(--store-primary)', background: 'color-mix(in srgb, var(--store-primary) 6%, transparent)' }}>
                     ↑ Completá los campos obligatorios para continuar
                   </button>
                 ) : null}
 
-                <button
-                  type="button"
-                  onClick={handleCheckout}
-                  disabled={!canCheckout}
-                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[calc(var(--store-button-radius)+2px)] px-6 py-4 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-45"
-                  style={{
-                    background: 'linear-gradient(145deg, #25D366, #1fb85b)',
-                    color: '#ffffff',
-                    boxShadow: '0 18px 40px rgba(37, 211, 102, 0.22)',
-                  }}
-                >
+                <button type="button" onClick={handleCheckout} disabled={!canCheckout} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[calc(var(--store-button-radius)+2px)] px-6 py-4 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-45" style={{ background: 'linear-gradient(145deg, #25D366, #1fb85b)', color: '#ffffff', boxShadow: '0 18px 40px rgba(37, 211, 102, 0.22)' }}>
                   <MessageCircle className="size-4" />
                   <span>Continuar por WhatsApp</span>
                 </button>
 
-                <p className="mt-3 text-center text-xs leading-5" style={{ color: 'var(--store-muted-text)' }}>
-                  Se abre WhatsApp con el pedido escrito. Revisalo y envialo cuando quieras.
-                </p>
-
+                <p className="mt-3 text-center text-xs leading-5" style={{ color: 'var(--store-muted-text)' }}>Se abre WhatsApp con el pedido escrito. Revisalo y envialo cuando quieras.</p>
                 {!whatsapp ? <p className="mt-3 text-center text-xs" style={{ color: 'var(--store-muted-text)' }}>El negocio todavía no configuró WhatsApp.</p> : null}
 
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={closeCart}
-                    className="min-h-11 rounded-[var(--store-button-radius)] border px-3 text-sm font-medium transition hover:opacity-80"
-                    style={{ color: 'var(--store-soft-text)', borderColor: 'var(--store-card-border)' }}
-                  >
-                    Seguir comprando
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleClearCart}
-                    className="min-h-11 rounded-[var(--store-button-radius)] border px-3 text-sm font-medium transition hover:opacity-80"
-                    style={{ color: 'var(--store-muted-text)', borderColor: 'var(--store-card-border)' }}
-                  >
-                    Vaciar pedido
-                  </button>
+                  <button type="button" onClick={closeCart} className="min-h-11 rounded-[var(--store-button-radius)] border px-3 text-sm font-medium transition hover:opacity-80" style={{ color: 'var(--store-soft-text)', borderColor: 'var(--store-card-border)' }}>Seguir comprando</button>
+                  <button type="button" onClick={handleClearCart} className="min-h-11 rounded-[var(--store-button-radius)] border px-3 text-sm font-medium transition hover:opacity-80" style={{ color: 'var(--store-muted-text)', borderColor: 'var(--store-card-border)' }}>Vaciar pedido</button>
                 </div>
               </div>
             ) : null}
@@ -321,82 +279,58 @@ export function CartSheet({
   )
 }
 
-function CartItem({
-  item,
-  onUpdateQty,
-  onRemove,
-}: {
-  item: StoreCartItem
-  onUpdateQty: (quantity: number) => void
-  onRemove: () => void
-}) {
+function SalesInfo({ settings }: { settings: SalesSettings }) {
+  const delivery = storeOffersDelivery(settings.fulfillmentMethods)
+  return (
+    <section className="rounded-[calc(var(--store-card-radius)*0.72)] border p-4" style={{ borderColor: 'var(--store-card-border)', background: 'color-mix(in srgb, var(--store-surface) 92%, var(--store-bg))' }}>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Cómo comprás</p>
+      <div className="mt-3 grid gap-2.5 text-xs">
+        <InfoLine icon={CreditCard} label="Pago" value={paymentMethodsLabel(settings.paymentMethods)} />
+        <InfoLine icon={Truck} label="Entrega" value={fulfillmentMethodsLabel(settings.fulfillmentMethods)} />
+        {delivery && settings.deliveryArea ? <InfoLine icon={MapPin} label="Zona" value={settings.deliveryArea} /> : null}
+        {settings.minimumOrderAmount ? <InfoLine icon={Package} label="Pedido mínimo" value={formatCurrency(settings.minimumOrderAmount)} /> : null}
+      </div>
+      {delivery && settings.deliveryNotes ? <p className="mt-3 border-t pt-3 text-xs leading-5" style={{ borderColor: 'var(--store-card-border)', color: 'var(--store-soft-text)' }}>{settings.deliveryNotes}</p> : null}
+      <p className="mt-3 text-[11px] leading-4" style={{ color: 'var(--store-muted-text)' }}>El negocio te confirma los detalles finales por WhatsApp.</p>
+    </section>
+  )
+}
+
+function InfoLine({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+  return <div className="flex items-start gap-2.5"><Icon className="mt-0.5 size-3.5 shrink-0" style={{ color: 'var(--store-primary)' }} /><span style={{ color: 'var(--store-muted-text)' }}>{label}:</span><span className="min-w-0 font-semibold" style={{ color: 'var(--store-text)' }}>{value}</span></div>
+}
+
+function CartItem({ item, onUpdateQty, onRemove }: { item: StoreCartItem; onUpdateQty: (quantity: number) => void; onRemove: () => void }) {
   const displayName = getCartItemDisplayName(item)
   const optionEntries = getCartItemOptionEntries(item.selectedOptions)
   const lineTotal = getCartItemLineTotal(item)
 
   return (
-    <div
-      className="rounded-[calc(var(--store-card-radius)*0.7)] p-3"
-      style={{
-        background: 'var(--store-card-background)',
-        border: '1px solid var(--store-card-border)',
-        boxShadow: 'var(--store-card-shadow)',
-      }}
-    >
+    <div className="rounded-[calc(var(--store-card-radius)*0.7)] p-3" style={{ background: 'var(--store-card-background)', border: '1px solid var(--store-card-border)', boxShadow: 'var(--store-card-shadow)' }}>
       <div className="flex items-start gap-3">
-        <div
-          className="relative size-[4.5rem] shrink-0 overflow-hidden"
-          style={{
-            borderRadius: 'calc(var(--store-radius) * 0.72)',
-            backgroundColor: 'color-mix(in srgb, var(--store-surface) 84%, transparent)',
-          }}
-        >
+        <div className="relative size-[4.5rem] shrink-0 overflow-hidden" style={{ borderRadius: 'calc(var(--store-radius) * 0.72)', backgroundColor: 'color-mix(in srgb, var(--store-surface) 84%, transparent)' }}>
           {item.imageUrl ? <Image src={item.imageUrl} alt={displayName} fill className="object-cover" /> : null}
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <p className="mt-1 line-clamp-2 min-w-0 text-sm font-semibold leading-5" style={{ color: 'var(--store-text)' }}>{displayName}</p>
-            <button
-              type="button"
-              onClick={onRemove}
-              className="flex size-9 shrink-0 items-center justify-center transition"
-              style={{
-                borderRadius: 'var(--store-button-radius)',
-                color: 'var(--store-muted-text)',
-                backgroundColor: 'color-mix(in srgb, var(--store-surface) 68%, transparent)',
-              }}
-              aria-label={`Quitar ${displayName}`}
-            >
-              <Trash2 className="size-4" />
-            </button>
+            <button type="button" onClick={onRemove} className="flex size-9 shrink-0 items-center justify-center transition" style={{ borderRadius: 'var(--store-button-radius)', color: 'var(--store-muted-text)', backgroundColor: 'color-mix(in srgb, var(--store-surface) 68%, transparent)' }} aria-label={`Quitar ${displayName}`}><Trash2 className="size-4" /></button>
           </div>
 
           {optionEntries.length > 0 ? (
             <dl className="mt-3 grid gap-2">
-              {optionEntries.map(([name, value]) => (
-                <div key={name} className="flex items-center justify-between gap-3 rounded-[calc(var(--store-button-radius)+1px)] px-3 py-2" style={{ backgroundColor: 'color-mix(in srgb, var(--store-primary) 8%, transparent)' }}>
-                  <dt className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>{name}</dt>
-                  <dd className="text-right text-sm font-medium" style={{ color: 'var(--store-text)' }}>{value}</dd>
-                </div>
-              ))}
+              {optionEntries.map(([name, value]) => <div key={name} className="flex items-center justify-between gap-3 rounded-[calc(var(--store-button-radius)+1px)] px-3 py-2" style={{ backgroundColor: 'color-mix(in srgb, var(--store-primary) 8%, transparent)' }}><dt className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>{name}</dt><dd className="text-right text-sm font-medium" style={{ color: 'var(--store-text)' }}>{value}</dd></div>)}
             </dl>
           ) : null}
 
           <div className="mt-3 flex items-end justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Subtotal</p>
-              <p className="mt-1 text-base font-semibold" style={{ color: 'var(--store-primary)' }}>{formatCurrency(lineTotal)}</p>
-            </div>
+            <div><p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--store-muted-text)' }}>Subtotal</p><p className="mt-1 text-base font-semibold" style={{ color: 'var(--store-primary)' }}>{formatCurrency(lineTotal)}</p></div>
             <p className="text-right text-xs" style={{ color: 'var(--store-soft-text)' }}>{item.quantity} × {formatCurrency(item.price)}</p>
           </div>
 
           <div className="mt-4 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <CounterButton label="Reducir cantidad" onClick={() => onUpdateQty(item.quantity - 1)}><Minus className="size-3.5" /></CounterButton>
-              <span className="w-6 text-center text-sm font-semibold" style={{ color: 'var(--store-text)' }}>{item.quantity}</span>
-              <CounterButton label="Aumentar cantidad" onClick={() => onUpdateQty(item.quantity + 1)}><Plus className="size-3.5" /></CounterButton>
-            </div>
+            <div className="flex items-center gap-2"><CounterButton label="Reducir cantidad" onClick={() => onUpdateQty(item.quantity - 1)}><Minus className="size-3.5" /></CounterButton><span className="w-6 text-center text-sm font-semibold" style={{ color: 'var(--store-text)' }}>{item.quantity}</span><CounterButton label="Aumentar cantidad" onClick={() => onUpdateQty(item.quantity + 1)}><Plus className="size-3.5" /></CounterButton></div>
             <p className="text-[11px] font-medium" style={{ color: 'var(--store-muted-text)' }}>Listo para enviar</p>
           </div>
         </div>
@@ -406,19 +340,5 @@ function CartItem({
 }
 
 function CounterButton({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex size-9 items-center justify-center transition active:scale-95"
-      style={{
-        borderRadius: 'var(--store-button-radius)',
-        border: '1px solid var(--store-card-border)',
-        color: 'var(--store-text)',
-      }}
-      aria-label={label}
-    >
-      {children}
-    </button>
-  )
+  return <button type="button" onClick={onClick} className="flex size-9 items-center justify-center transition active:scale-95" style={{ borderRadius: 'var(--store-button-radius)', border: '1px solid var(--store-card-border)', color: 'var(--store-text)' }} aria-label={label}>{children}</button>
 }

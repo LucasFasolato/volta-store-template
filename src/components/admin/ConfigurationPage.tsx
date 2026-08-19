@@ -3,14 +3,21 @@ import { BusinessTrustPreview } from '@/components/admin/BusinessTrustPreview'
 import { CheckoutSettingsForm } from '@/components/admin/CheckoutSettingsForm'
 import { ConfigForm } from '@/components/admin/ConfigForm'
 import { MobileConfigForm } from '@/components/admin/MobileConfigForm'
+import { SalesSettingsForm } from '@/components/admin/SalesSettingsForm'
 import { signOut } from '@/lib/actions/auth'
 import type { Store } from '@/types/store'
 
 export function ConfigurationPage({ store }: { store: Store }) {
   return <div className="volta-admin-page space-y-4 p-3.5 sm:p-5 lg:p-6">
     <header><p className="admin-label">Configuración</p><h1 className="mt-1 text-[1.85rem] font-semibold text-foreground">Tu negocio</h1></header>
-    <div className="max-w-4xl md:hidden"><MobileConfigForm store={store} /><Fold title="Cómo recibir pedidos"><CheckoutSettingsForm store={store} /></Fold><Fold title="Qué ve el cliente"><BusinessTrustPreview store={store} /></Fold><SignOutSection /></div>
-    <div className="hidden max-w-4xl space-y-5 md:block"><ConfigForm store={store} /><CheckoutSettingsForm store={store} /><BusinessTrustPreview store={store} /><SignOutSection /></div>
+    <div className="max-w-4xl md:hidden">
+      <MobileConfigForm store={store} />
+      <Fold title="Cómo vendés"><SalesSettingsForm store={store} /></Fold>
+      <Fold title="Qué pedir antes de WhatsApp"><CheckoutSettingsForm store={store} /></Fold>
+      <Fold title="Qué ve el cliente"><BusinessTrustPreview store={store} /></Fold>
+      <SignOutSection />
+    </div>
+    <div className="hidden max-w-4xl space-y-5 md:block"><ConfigForm store={store} /><SalesSettingsForm store={store} /><CheckoutSettingsForm store={store} /><BusinessTrustPreview store={store} /><SignOutSection /></div>
   </div>
 }
 
@@ -27,10 +34,7 @@ function SignOutSection() {
           <p className="mt-1 text-xs leading-5 text-muted-foreground">Cerrá tu sesión en este dispositivo.</p>
         </div>
         <form action={signOut}>
-          <button
-            type="submit"
-            className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-[10px] border border-red-200 bg-red-50 px-3.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300 dark:hover:bg-red-400/15"
-          >
+          <button type="submit" className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-[10px] border border-red-200 bg-red-50 px-3.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300 dark:hover:bg-red-400/15">
             <LogOut className="size-4" />
             Cerrar sesión
           </button>

@@ -9,6 +9,7 @@ import { StoreNav } from '@/components/landing/StoreNav'
 import { TrustBar } from '@/components/landing/TrustBar'
 import { getStorefrontDensityMode } from '@/components/landing/storefront-density'
 import { isProductOnPromotion } from '@/lib/products/promotion'
+import { normalizeSalesSettings } from '@/lib/sales/settings'
 import { buildStorefrontHref, type StorefrontViewModel } from '@/lib/storefront/view'
 import { buildThemeVars, CONTAINER_CLASS } from '@/lib/utils/theme'
 import type { StorePublicData } from '@/types/store'
@@ -24,7 +25,6 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
   const hasPromotions = data.products.some(isProductOnPromotion)
   const densityMode = getStorefrontDensityMode(productCount)
   const showFeaturedSection = layout.show_featured && featuredCount > 0 && productCount > 5
-  const showTrustBar = densityMode !== 'small'
   const containerClass = CONTAINER_CLASS[theme.container_width] ?? CONTAINER_CLASS.lg
   const resolvedMode: 'light' | 'dark' = theme.visual_mode === 'dark' ? 'dark' : 'light'
   const themeVars = buildThemeVars(theme, resolvedMode)
@@ -48,6 +48,14 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
   })
   const storeRootId = `store-shell-${store.slug}`
   const checkoutFields = Array.isArray(store.checkout_custom_fields) ? store.checkout_custom_fields : []
+  const salesSettings = normalizeSalesSettings(store)
+  const repeatableProducts = data.products.map((product) => ({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    imageUrl: product.images[0]?.url ?? null,
+    options: product.options.map((option) => ({ name: option.name, values: option.values })),
+  }))
 
   return (
     <div id={storeRootId} className="store-shell store-body" data-store-mode={theme.visual_mode} style={{ ...themeVars, background: 'var(--store-bg-gradient)', color: 'var(--store-text)', fontFamily: 'var(--store-font-body)' }}>
@@ -55,7 +63,7 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
       <StoreNav store={store} containerClass={containerClass} productCount={productCount} densityMode={densityMode} />
       <main id="main-content" className="relative z-10 pb-20 sm:pb-8">
         {layout.show_hero ? <HeroSection content={content} store={store} containerClass={containerClass} productCount={productCount} categoryCount={categoryCount} featuredCount={featuredCount} densityMode={densityMode} /> : null}
-        {showTrustBar ? <TrustBar store={store} content={content} productCount={productCount} categoryCount={categoryCount} /> : null}
+        <TrustBar store={store} content={content} productCount={productCount} categoryCount={categoryCount} />
         {showFeaturedSection ? <FeaturedSection products={view.featuredProducts} pathname={pathname} routeState={view} theme={theme} containerClass={containerClass} productCount={productCount} /> : null}
 
         {showDiscoveryControls ? (
@@ -72,9 +80,7 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
           />
         ) : null}
 
-        {layout.show_catalog && catalogMode === 'sections' && !hasDiscoverySelection ? (
-          <CatalogSections products={data.products} categories={categories} theme={theme} containerClass={containerClass} pathname={pathname} />
-        ) : null}
+        {layout.show_catalog && catalogMode === 'sections' && !hasDiscoverySelection ? <CatalogSections products={data.products} categories={categories} theme={theme} containerClass={containerClass} pathname={pathname} /> : null}
         {layout.show_catalog && (catalogMode !== 'sections' || hasDiscoverySelection) ? (
           <CatalogSection
             products={view.paginatedProducts}
@@ -90,7 +96,22 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
         ) : null}
       </main>
       {layout.show_footer ? <StoreFooter store={store} containerClass={containerClass} productCount={productCount} categoryCount={categoryCount} /> : null}
-      <StoreInteractiveShell closeModalHref={closeModalHref} selectedProduct={view.selectedProduct} storeId={store.id} storeName={store.name} storeRootId={storeRootId} storeSlug={store.slug} theme={theme} whatsapp={store.whatsapp} checkoutAskName={store.checkout_ask_name ?? true} checkoutAskFulfillment={store.checkout_ask_fulfillment ?? true} checkoutAllowNotes={store.checkout_allow_notes ?? true} checkoutFields={checkoutFields} />
+      <StoreInteractiveShell
+        closeModalHref={closeModalHref}
+        selectedProduct={view.selectedProduct}
+        storeId={store.id}
+        storeName={store.name}
+        storeRootId={storeRootId}
+        storeSlug={store.slug}
+        theme={theme}
+        whatsapp={store.whatsapp}
+        checkoutAskName={store.checkout_ask_name ?? true}
+        checkoutAskFulfillment={store.checkout_ask_fulfillment ?? true}
+        checkoutAllowNotes={store.checkout_allow_notes ?? true}
+        checkoutFields={checkoutFields}
+        salesSettings={salesSettings}
+        repeatableProducts={repeatableProducts}
+      />
     </div>
   )
 }

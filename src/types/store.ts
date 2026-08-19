@@ -9,9 +9,33 @@ export type CheckoutCustomField = {
   is_enabled: boolean
 }
 
+export type PaymentMethod = 'transfer' | 'cash' | 'mercado_pago' | 'arrange'
+export type FulfillmentMethod = 'pickup' | 'delivery'
+
+export type SalesSettings = {
+  paymentMethods: PaymentMethod[]
+  fulfillmentMethods: FulfillmentMethod[]
+  deliveryArea: string | null
+  minimumOrderAmount: number | null
+  deliveryNotes: string | null
+}
+
+export type RepeatableProduct = {
+  id: string
+  name: string
+  price: number
+  imageUrl: string | null
+  options: Array<{ name: string; values: string[] }>
+}
+
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Store = Database['public']['Tables']['stores']['Row'] & {
   checkout_custom_fields?: CheckoutCustomField[]
+  payment_methods?: PaymentMethod[]
+  fulfillment_methods?: FulfillmentMethod[]
+  delivery_area?: string | null
+  minimum_order_amount?: number | null
+  delivery_notes?: string | null
 }
 export type StoreTheme = Database['public']['Tables']['store_theme']['Row']
 export type StoreLayout = Database['public']['Tables']['store_layout']['Row'] & {

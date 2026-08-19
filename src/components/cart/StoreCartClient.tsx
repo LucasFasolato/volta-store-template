@@ -3,9 +3,10 @@
 import { useEffect } from 'react'
 import { CartFloatingBar } from '@/components/cart/CartFloatingBar'
 import { CartSheet } from '@/components/cart/CartSheet'
+import { RepeatOrderBar } from '@/components/cart/RepeatOrderBar'
 import { trackStoreEvent } from '@/lib/analytics/store-events'
 import { useCartStore } from '@/lib/stores/cart'
-import type { CheckoutCustomField } from '@/types/store'
+import type { CheckoutCustomField, RepeatableProduct, SalesSettings } from '@/types/store'
 
 type StoreCartClientProps = {
   storeId: string
@@ -16,6 +17,8 @@ type StoreCartClientProps = {
   askFulfillment: boolean
   allowNotes: boolean
   customFields: CheckoutCustomField[]
+  salesSettings: SalesSettings
+  repeatableProducts: RepeatableProduct[]
 }
 
 export function StoreCartClient({
@@ -27,6 +30,8 @@ export function StoreCartClient({
   askFulfillment,
   allowNotes,
   customFields,
+  salesSettings,
+  repeatableProducts,
 }: StoreCartClientProps) {
   const setStoreContext = useCartStore((state) => state.setStoreContext)
   const isOpen = useCartStore((state) => state.isOpen)
@@ -44,14 +49,17 @@ export function StoreCartClient({
     <>
       <CartSheet
         storeId={storeId}
+        storeSlug={storeSlug}
         whatsapp={whatsapp}
         storeName={storeName}
         askName={askName}
         askFulfillment={askFulfillment}
         allowNotes={allowNotes}
         customFields={customFields}
+        salesSettings={salesSettings}
       />
       <CartFloatingBar />
+      <RepeatOrderBar storeSlug={storeSlug} products={repeatableProducts} />
     </>
   )
 }
