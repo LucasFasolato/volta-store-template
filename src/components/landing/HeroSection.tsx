@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { ArrowDownRight, MessageCircle } from 'lucide-react'
 import type { StorefrontDensityMode } from '@/components/landing/storefront-density'
+import { FONT_FAMILY_MAP } from '@/data/defaults'
 import { cn } from '@/lib/utils'
 import { sanitizePhoneNumber } from '@/lib/utils/format'
 import type { Store, StoreContent } from '@/types/store'
@@ -27,6 +28,12 @@ export function HeroSection({
   const compact = densityMode === 'small'
   const backgroundMode = hasImage && content.hero_image_layout === 'background'
   const overlayOpacity = Math.min(80, Math.max(20, content.hero_overlay_opacity ?? 55))
+  const titleScale = content.hero_title_scale ?? 'balanced'
+  const titleFont = content.hero_title_font ?? 'inherit'
+  const titleFontFamily = titleFont === 'inherit'
+    ? 'var(--store-font-heading)'
+    : (FONT_FAMILY_MAP[titleFont] ?? 'var(--store-font-heading)')
+  const titleSize = getHeroTitleSize(titleScale, compact)
 
   return (
     <section
@@ -62,7 +69,7 @@ export function HeroSection({
             'flex flex-col justify-center py-14 sm:py-20 lg:py-24',
             !backgroundMode && hasImage && 'lg:pr-12 xl:pr-16',
             compact && 'sm:py-16 lg:py-18',
-            backgroundMode && 'min-h-[560px] max-w-3xl py-20 sm:min-h-[620px] sm:py-24 lg:py-28',
+            backgroundMode && 'min-h-[560px] max-w-4xl py-20 sm:min-h-[620px] sm:py-24 lg:py-28',
           )}
         >
           {content.support_text ? (
@@ -70,12 +77,14 @@ export function HeroSection({
           ) : null}
 
           <h1
-            className="store-display max-w-3xl text-balance"
+            className="store-display max-w-4xl text-balance"
             style={{
               color: 'var(--store-text)',
-              fontSize: compact ? 'clamp(2.35rem, 6vw, 4.5rem)' : 'clamp(2.7rem, 6.7vw, 5.8rem)',
-              lineHeight: '.98',
-              letterSpacing: '-.055em',
+              fontFamily: titleFontFamily,
+              fontWeight: 'var(--store-heading-weight)',
+              fontSize: titleSize,
+              lineHeight: titleScale === 'impact' ? '.92' : '.98',
+              letterSpacing: titleFont === 'playfair' ? '-.035em' : '-.055em',
             }}
           >
             {content.hero_title}
@@ -108,4 +117,10 @@ export function HeroSection({
       </div>
     </section>
   )
+}
+
+function getHeroTitleSize(scale: StoreContent['hero_title_scale'], compact: boolean) {
+  if (scale === 'subtle') return compact ? 'clamp(2rem, 5.2vw, 3.6rem)' : 'clamp(2.25rem, 5.6vw, 4.4rem)'
+  if (scale === 'impact') return compact ? 'clamp(2.65rem, 7.2vw, 5.25rem)' : 'clamp(3rem, 7.8vw, 6.8rem)'
+  return compact ? 'clamp(2.35rem, 6vw, 4.5rem)' : 'clamp(2.7rem, 6.7vw, 5.8rem)'
 }
