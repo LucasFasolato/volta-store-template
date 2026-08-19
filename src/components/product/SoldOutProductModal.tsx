@@ -4,10 +4,21 @@ import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import { PackageX, X } from 'lucide-react'
+import { RelatedProductsStrip, type RelatedProductLink } from '@/components/product/RelatedProductsStrip'
 import { formatCurrency } from '@/lib/utils/format'
 import type { ProductWithImages } from '@/types/store'
 
-export function SoldOutProductModal({ product, onClose }: { product: ProductWithImages; onClose: () => void }) {
+export function SoldOutProductModal({
+  product,
+  relatedProducts,
+  onSelectRelated,
+  onClose,
+}: {
+  product: ProductWithImages
+  relatedProducts: RelatedProductLink[]
+  onSelectRelated: (href: string) => void
+  onClose: () => void
+}) {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const image = product.images?.[0]
 
@@ -27,7 +38,7 @@ export function SoldOutProductModal({ product, onClose }: { product: ProductWith
     <AnimatePresence>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="sold-out-title">
         <button type="button" className="absolute inset-0" onClick={onClose} aria-label="Cerrar detalle" style={{ background: 'color-mix(in srgb, var(--store-bg) 32%, black 68%)', backdropFilter: 'blur(18px)' }} />
-        <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }} className="relative w-full overflow-hidden sm:max-w-3xl" style={{ background: 'var(--store-surface)', borderRadius: 'calc(var(--store-card-radius) + 8px)', border: '1px solid var(--store-card-border)', boxShadow: 'var(--store-shadow)' }}>
+        <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }} className="relative max-h-[94dvh] w-full overflow-y-auto sm:max-w-3xl" style={{ background: 'var(--store-surface)', borderRadius: 'calc(var(--store-card-radius) + 8px)', border: '1px solid var(--store-card-border)', boxShadow: 'var(--store-shadow)' }}>
           <div className="grid sm:grid-cols-[0.9fr_1.1fr]">
             <div className="relative aspect-[5/4] sm:aspect-auto sm:min-h-[28rem]" style={{ background: 'color-mix(in srgb, var(--store-surface) 88%, var(--store-bg))' }}>
               {image ? <Image src={image.url} alt={image.alt ?? product.name} fill className="object-cover opacity-75 grayscale-[0.25]" /> : <div className="flex h-full items-center justify-center"><PackageX className="size-12" style={{ color: 'var(--store-muted-text)' }} /></div>}
@@ -42,6 +53,7 @@ export function SoldOutProductModal({ product, onClose }: { product: ProductWith
               <div className="mt-7 rounded-[var(--store-card-radius)] border p-4" style={{ borderColor: 'var(--store-card-border)', background: 'color-mix(in srgb, var(--store-bg) 48%, transparent)' }}>
                 <div className="flex items-start gap-3"><PackageX className="mt-0.5 size-5 shrink-0" style={{ color: 'var(--store-primary)' }} /><div><p className="text-sm font-semibold" style={{ color: 'var(--store-text)' }}>Agotado por el momento</p><p className="mt-1 text-xs leading-5" style={{ color: 'var(--store-muted-text)' }}>Podés seguir viendo el producto, pero no se puede agregar al pedido hasta que el negocio lo marque nuevamente como disponible.</p></div></div>
               </div>
+              <RelatedProductsStrip items={relatedProducts} onSelect={onSelectRelated} title="Alternativas disponibles" />
               <button type="button" onClick={onClose} className="store-button mt-6 min-h-12 w-full px-5 text-sm font-semibold" style={{ background: 'var(--store-primary)', color: 'var(--store-primary-contrast)' }}>Seguir viendo productos</button>
             </div>
           </div>
