@@ -14,38 +14,26 @@ import {
 import { getAccessibleTextColor, mixHexColors, withAlpha } from '@/lib/utils/color'
 import type { StoreTheme } from '@/types/store'
 
-export function buildThemeVars(
-  theme: StoreTheme,
-  resolvedMode: 'light' | 'dark',
-): React.CSSProperties {
+export function buildThemeVars(theme: StoreTheme, resolvedMode: 'light' | 'dark'): React.CSSProperties {
   const isDark = resolvedMode === 'dark'
-  const background = isDark ? mixHexColors(theme.background_color, '#020617', 0.78) : theme.background_color
-  const surface = isDark ? mixHexColors(theme.surface_color, '#08111f', 0.68) : theme.surface_color
-  const text = isDark ? mixHexColors(theme.text_color, '#f8fafc', 0.84) : theme.text_color
-  const primary = isDark ? mixHexColors(theme.primary_color, '#f8fafc', 0.14) : theme.primary_color
-  const secondary = isDark ? mixHexColors(theme.secondary_color, '#d1fae5', 0.16) : theme.secondary_color
-  const accent = isDark ? mixHexColors(theme.accent_color, '#dbeafe', 0.18) : theme.accent_color
+  const autoDark = theme.visual_mode === 'auto' && isDark
+  // Explicit light/dark themes now respect the exact colors the merchant chose.
+  // Auto mode still derives a safe dark variant from a light palette.
+  const background = autoDark ? mixHexColors(theme.background_color, '#020617', 0.78) : theme.background_color
+  const surface = autoDark ? mixHexColors(theme.surface_color, '#08111f', 0.68) : theme.surface_color
+  const text = autoDark ? mixHexColors(theme.text_color, '#f8fafc', 0.84) : theme.text_color
+  const primary = autoDark ? mixHexColors(theme.primary_color, '#f8fafc', 0.14) : theme.primary_color
+  const secondary = autoDark ? mixHexColors(theme.secondary_color, '#d1fae5', 0.16) : theme.secondary_color
+  const accent = autoDark ? mixHexColors(theme.accent_color, '#dbeafe', 0.18) : theme.accent_color
   const density = DENSITY_MAP[theme.ui_density] ?? DENSITY_MAP.comfortable
   const spacing = SPACING_SCALE_MAP[theme.spacing_scale] ?? SPACING_SCALE_MAP.balanced
   const cardStyle = CARD_STYLE_TOKENS[theme.card_style] ?? CARD_STYLE_TOKENS.soft
   const requestedRadius = BORDER_RADIUS_MAP[theme.border_radius] ?? BORDER_RADIUS_MAP.lg
-  // Structural containers are intentionally capped. A legacy/full radius should
-  // never turn a product card or sheet into a giant capsule.
   const structuralRadius = theme.border_radius === 'full' ? '24px' : requestedRadius
-  const cardRadius =
-    theme.card_style === 'sharp'
-      ? `calc(${structuralRadius} * 0.72)`
-      : theme.card_style === 'glass'
-        ? `calc(${structuralRadius} * 1.08)`
-        : structuralRadius
-
-  const bgColor2 = theme.background_color_2
-    ? (isDark ? mixHexColors(theme.background_color_2, '#020617', 0.78) : theme.background_color_2)
-    : null
+  const cardRadius = theme.card_style === 'sharp' ? `calc(${structuralRadius} * 0.72)` : theme.card_style === 'glass' ? `calc(${structuralRadius} * 1.08)` : structuralRadius
+  const bgColor2 = theme.background_color_2 ? (autoDark ? mixHexColors(theme.background_color_2, '#020617', 0.78) : theme.background_color_2) : null
   const gradientAngle = (theme.background_direction ?? 'diagonal') === 'vertical' ? '180deg' : '135deg'
-  const bgGradient = bgColor2
-    ? `linear-gradient(${gradientAngle}, ${background}, ${bgColor2})`
-    : background
+  const bgGradient = bgColor2 ? `linear-gradient(${gradientAngle}, ${background}, ${bgColor2})` : background
 
   return {
     '--store-bg-gradient': bgGradient,
@@ -62,9 +50,7 @@ export function buildThemeVars(
     '--store-muted-text': withAlpha(text, isDark ? 0.54 : 0.5),
     '--store-border': withAlpha(text, isDark ? 0.12 : 0.1),
     '--store-border-strong': withAlpha(text, isDark ? 0.18 : 0.16),
-    '--store-shadow': isDark
-      ? '0 32px 80px rgba(2, 6, 23, 0.36)'
-      : '0 24px 60px rgba(15, 23, 42, 0.12)',
+    '--store-shadow': isDark ? '0 32px 80px rgba(2, 6, 23, 0.36)' : '0 24px 60px rgba(15, 23, 42, 0.12)',
     '--store-glow': withAlpha(accent, isDark ? 0.2 : 0.14),
     '--store-card-radius': cardRadius,
     '--store-button-radius': BUTTON_RADIUS_MAP[theme.button_style] ?? BUTTON_RADIUS_MAP.rounded,
@@ -81,37 +67,22 @@ export function buildThemeVars(
     '--store-space-base': spacing.base,
     '--store-space-section': spacing.section,
     '--store-space-cluster': spacing.cluster,
-    '--store-card-background':
-      theme.card_style === 'glass'
-        ? `linear-gradient(180deg, ${withAlpha(getAccessibleTextColor(surface), 0.06)}, ${withAlpha(
-            getAccessibleTextColor(surface),
-            0.01,
-          )}), ${withAlpha(surface, cardStyle.backgroundOpacity)}`
-        : theme.card_style === 'sharp'
-          ? `linear-gradient(180deg, ${withAlpha(surface, 0.96)}, ${withAlpha(
-              mixHexColors(surface, background, 0.24),
-              0.98,
-            )})`
-          : `linear-gradient(180deg, ${withAlpha(surface, 0.98)}, ${withAlpha(
-              mixHexColors(surface, background, 0.22),
-              1,
-            )})`,
+    '--store-card-background': theme.card_style === 'glass'
+      ? `linear-gradient(180deg, ${withAlpha(getAccessibleTextColor(surface), 0.06)}, ${withAlpha(getAccessibleTextColor(surface), 0.01)}), ${withAlpha(surface, cardStyle.backgroundOpacity)}`
+      : theme.card_style === 'sharp'
+        ? `linear-gradient(180deg, ${withAlpha(surface, 0.96)}, ${withAlpha(mixHexColors(surface, background, 0.24), 0.98)})`
+        : `linear-gradient(180deg, ${withAlpha(surface, 0.98)}, ${withAlpha(mixHexColors(surface, background, 0.22), 1)})`,
     '--store-card-border': withAlpha(text, cardStyle.borderOpacity),
     '--store-card-shadow': cardStyle.shadow,
     '--store-card-blur': cardStyle.blur,
     '--store-nav-bg': withAlpha(background, isDark ? 0.88 : 0.84),
     '--store-footer-bg-gradient': `linear-gradient(180deg, ${withAlpha(background, isDark ? 0.97 : 1)}, ${withAlpha(mixHexColors(surface, background, isDark ? 0.35 : 0.5), 1)})`,
-    '--store-hero-height': ({
-      tight: 'clamp(360px, 60vh, 640px)',
-      balanced: 'clamp(520px, 78vh, 880px)',
-      airy: 'clamp(660px, 92vh, 1060px)',
-    }[theme.spacing_scale] ?? 'clamp(520px, 78vh, 880px)'),
+    '--store-hero-height': ({ tight: 'clamp(360px, 60vh, 640px)', balanced: 'clamp(520px, 78vh, 880px)', airy: 'clamp(660px, 92vh, 1060px)' }[theme.spacing_scale] ?? 'clamp(520px, 78vh, 880px)'),
     colorScheme: resolvedMode,
   } as React.CSSProperties
 }
 
 export const CONTAINER_CLASS: Record<string, string> = CONTAINER_WIDTH_MAP
-
 export const GRID_COLS_CLASS: Record<number, string> = {
   2: 'grid-cols-2 sm:grid-cols-2',
   3: 'grid-cols-2 sm:grid-cols-2 xl:grid-cols-3',
