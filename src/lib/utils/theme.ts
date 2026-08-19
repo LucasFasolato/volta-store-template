@@ -113,7 +113,7 @@ export function buildThemeVars(
 export const CONTAINER_CLASS: Record<string, string> = CONTAINER_WIDTH_MAP
 
 export const GRID_COLS_CLASS: Record<number, string> = {
-  2: 'grid-cols-1 sm:grid-cols-2',
-  3: 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3',
-  4: 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4',
+  2: 'grid-cols-2 sm:grid-cols-2',
+  3: 'grid-cols-2 sm:grid-cols-2 xl:grid-cols-3',
+  4: 'grid-cols-2 sm:grid-cols-2 xl:grid-cols-4',
 }
