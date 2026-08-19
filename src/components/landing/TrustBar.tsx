@@ -1,4 +1,4 @@
-import { Clock3, Instagram, MapPin, MessageCircle, Package, Rows3, ShieldCheck } from 'lucide-react'
+import { Clock3, MapPin, MessageCircle, Package, Rows3, ShieldCheck } from 'lucide-react'
 import { sanitizeInstagramHandle, sanitizePhoneNumber } from '@/lib/utils/format'
 import type { Store, StoreContent } from '@/types/store'
 
@@ -17,7 +17,7 @@ export function TrustBar({ store, content, productCount, categoryCount }: { stor
     categoryCount > 1 ? { icon: Rows3, label: `${categoryCount} categorías para explorar` } : null,
     store.hours ? { icon: Clock3, label: store.hours } : null,
     store.address ? { icon: MapPin, label: store.address } : null,
-    instagram ? { icon: Instagram, label: `Instagram @${instagram}` } : null,
+    instagram ? { icon: InstagramIcon, label: `Instagram @${instagram}` } : null,
   ].filter(Boolean) as TrustItem[]
   const display = items.slice(0, 5)
 
@@ -28,4 +28,8 @@ export function TrustBar({ store, content, productCount, categoryCount }: { stor
 
 function TrustItemsRow({ items, ariaHidden = false, staticRow = false }: { items: TrustItem[]; ariaHidden?: boolean; staticRow?: boolean }) {
   return <div aria-hidden={ariaHidden} className={staticRow ? 'flex items-stretch' : 'flex shrink-0 items-stretch'}>{items.map((item, index) => { const Icon = item.icon; return <div key={`${item.label}-${index}-${ariaHidden ? 'ghost' : 'main'}`} className="flex items-center gap-2.5 px-5 py-4 sm:px-7 sm:py-5" style={{ borderRight: '1px solid var(--store-card-border)' }}><Icon className="size-4 shrink-0" style={{ color: 'var(--store-primary)' }} /><span className="whitespace-nowrap text-[12px] font-medium sm:text-[13px]" style={{ color: 'var(--store-soft-text)' }}>{item.label}</span></div> })}</div>
+}
+
+function InstagramIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>
 }
