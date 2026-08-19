@@ -56,13 +56,14 @@ function StoreThemeAutoSync({ storeRootId, theme }: { storeRootId: string; theme
     if (theme.visual_mode !== 'auto') return
     const storeRoot = document.getElementById(storeRootId)
     if (!storeRoot) return
+    const storeRootElement = storeRoot
     const media = window.matchMedia('(prefers-color-scheme: dark)')
     function applyMode() {
       const themeVars = buildThemeVars(theme, media.matches ? 'dark' : 'light')
       for (const [key, value] of Object.entries(themeVars)) {
         if (value == null) continue
-        if (key === 'colorScheme') storeRoot.style.colorScheme = String(value)
-        else storeRoot.style.setProperty(key, String(value))
+        if (key === 'colorScheme') storeRootElement.style.colorScheme = String(value)
+        else storeRootElement.style.setProperty(key, String(value))
       }
     }
     applyMode()
