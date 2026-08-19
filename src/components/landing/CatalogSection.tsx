@@ -1,25 +1,35 @@
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, SearchX } from 'lucide-react'
 import { EmptyState } from '@/components/common/EmptyState'
-import { ProductCard } from '@/components/product/ProductCard'
+import { ProductCatalogGrid } from '@/components/landing/ProductCatalogGrid'
 import { COPY } from '@/data/system-copy'
 import { PAGE_SIZE_OPTIONS, buildStorefrontHref, type StorefrontRouteState } from '@/lib/storefront/view'
 import { cn } from '@/lib/utils'
-import { GRID_COLS_CLASS } from '@/lib/utils/theme'
 import type { Category, ProductWithImages, StoreTheme } from '@/types/store'
 
 type CatalogSectionProps = { products: ProductWithImages[]; totalFiltered: number; categories: Category[]; theme: StoreTheme; containerClass: string; pathname: string; routeState: StorefrontRouteState; totalPages: number; catalogSize: 'small' | 'medium' | 'large' }
 
 export function CatalogSection({ products, totalFiltered, categories, theme, containerClass, pathname, routeState, totalPages, catalogSize }: CatalogSectionProps) {
   const isSmallCatalog = catalogSize === 'small'
-  const gridClass = getCatalogGridClass(theme.grid_columns, totalFiltered, catalogSize)
   const activeCategoryName = categories.find((category) => category.slug === routeState.activeCategory)?.name
-  const compactWidth = totalFiltered === 1 ? 'max-w-[23rem]' : totalFiltered === 2 ? 'max-w-[46rem]' : ''
   const eyebrow = routeState.query
     ? `Resultados para “${routeState.query}”`
     : routeState.activePromotion
       ? 'Promociones'
       : activeCategoryName ?? (routeState.activeBrand ? 'Productos de la marca' : 'Productos')
+
+  const items = products.map((product) => ({
+    product,
+    href: buildStorefrontHref(pathname, {
+      category: routeState.activeCategory,
+      brand: routeState.activeBrand,
+      promotion: routeState.activePromotion,
+      query: routeState.query,
+      page: routeState.page,
+      pageSize: routeState.pageSize,
+      product: product.slug,
+    }),
+  }))
 
   return (
     <section id="catalogo" className={cn('pb-[var(--store-space-section)]', isSmallCatalog ? 'pt-5 sm:pt-7' : 'pt-[var(--store-space-section)]')}>
@@ -35,7 +45,7 @@ export function CatalogSection({ products, totalFiltered, categories, theme, con
         {categories.length > 0 ? <div className={cn('-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0', isSmallCatalog ? 'mb-4' : 'mb-7')}><CategoryPill label="Todos" href={buildStorefrontHref(pathname, { brand: routeState.activeBrand, promotion: routeState.activePromotion, query: routeState.query, page: 1, pageSize: routeState.pageSize })} active={!routeState.activeCategory} />{categories.map((category) => <CategoryPill key={category.id} label={category.name} href={buildStorefrontHref(pathname, { category: category.slug, brand: routeState.activeBrand, promotion: routeState.activePromotion, query: routeState.query, page: 1, pageSize: routeState.pageSize })} active={routeState.activeCategory === category.slug} />)}</div> : null}
 
         {totalFiltered === 0 ? <EmptyState icon={SearchX} title={routeState.query ? `No encontramos “${routeState.query}”` : routeState.activePromotion ? 'No hay promociones con estos filtros' : activeCategoryName ? `No encontramos productos en ${activeCategoryName}` : COPY.product.noProducts} description="Probá con otra búsqueda o limpiá los filtros para volver a ver todo el catálogo." action={(routeState.activeCategory || routeState.activeBrand || routeState.activePromotion || routeState.query) ? <Link href={buildStorefrontHref(pathname, { pageSize: routeState.pageSize })} scroll={false} className="store-button px-5 py-3 text-sm font-semibold" style={{ background: 'var(--store-primary)', color: 'var(--store-primary-contrast)' }}>Limpiar filtros</Link> : undefined} className="border-0" tone="light" /> : <>
-          <div className={cn('grid w-full', isSmallCatalog ? 'gap-3 sm:gap-4' : 'gap-5 sm:gap-6', gridClass, compactWidth)}>{products.map((product) => <ProductCard key={product.id} product={product} productHref={buildStorefrontHref(pathname, { category: routeState.activeCategory, brand: routeState.activeBrand, promotion: routeState.activePromotion, query: routeState.query, page: routeState.page, pageSize: routeState.pageSize, product: product.slug })} theme={theme} />)}</div>
+          <ProductCatalogGrid items={items} theme={theme} desktopColumns={theme.grid_columns} />
           {(totalPages > 1 || totalFiltered > PAGE_SIZE_OPTIONS[0]) ? <Pagination pathname={pathname} routeState={routeState} totalPages={totalPages} totalFiltered={totalFiltered} /> : null}
         </>}
       </div>
@@ -54,12 +64,6 @@ function Pagination({ pathname, routeState, totalPages, totalFiltered }: { pathn
 function PageArrow({ disabled, href, children }: { disabled: boolean; href: string; children: React.ReactNode }) {
   if (disabled) return <span className="flex size-9 items-center justify-center rounded-full opacity-25" style={{ border: '1px solid var(--store-card-border)', color: 'var(--store-text)' }}>{children}</span>
   return <Link href={href} scroll={false} className="flex size-9 items-center justify-center rounded-full" style={{ border: '1px solid var(--store-card-border)', color: 'var(--store-text)' }}>{children}</Link>
-}
-
-function getCatalogGridClass(gridColumns: number, totalFiltered: number, catalogSize: 'small' | 'medium' | 'large') {
-  if (catalogSize === 'small') { if (totalFiltered === 1) return 'grid-cols-1'; if (totalFiltered === 2) return 'grid-cols-1 sm:grid-cols-2'; return 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3' }
-  if (catalogSize === 'medium' && gridColumns === 4) return GRID_COLS_CLASS[3]
-  return GRID_COLS_CLASS[gridColumns] ?? GRID_COLS_CLASS[2]
 }
 
 function CategoryPill({ label, href, active }: { label: string; href: string; active: boolean }) {
