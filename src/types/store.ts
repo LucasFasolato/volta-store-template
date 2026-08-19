@@ -67,14 +67,15 @@ export type Brand = {
   created_at: string
   updated_at: string
 }
+export type ProductAvailability = 'available' | 'sold_out'
 export type Product = Database['public']['Tables']['products']['Row'] & {
   brand_id: string | null
   sku: string | null
   category_sort_order: number
+  availability_status: ProductAvailability
 }
 export type ProductImage = Database['public']['Tables']['product_images']['Row']
 
-// Selectable attribute group for a product (e.g., name="Talle", values=["S","M","L","XL"])
 export type ProductOption = {
   id: string
   product_id: string
