@@ -4,7 +4,8 @@ import { useState, useTransition } from 'react'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { assignProductToCategory, createCategory } from '@/lib/actions/products'
+import { createCategory } from '@/lib/actions/products'
+import { setProductCategory } from '@/lib/actions/product-category'
 import { cn } from '@/lib/utils'
 import type { ProductWithImages } from '@/types/store'
 
@@ -53,7 +54,7 @@ export function WizardStepCategory({
       const categoryId = result.category?.id
       if (categoryId && selectedIds.size > 0) {
         await Promise.all(
-          [...selectedIds].map((productId) => assignProductToCategory(productId, categoryId)),
+          [...selectedIds].map((productId) => setProductCategory(productId, categoryId)),
         )
       }
     })
