@@ -6,6 +6,7 @@ import { requireAuthenticatedStoreContext } from '@/lib/server/store-context'
 import {
   cancelMercadoPagoSubscription,
   createMercadoPagoSubscription,
+  findMercadoPagoStoreSubscription,
   getMercadoPagoSubscription,
   isMercadoPagoConfigured,
   MercadoPagoApiError,
@@ -47,6 +48,22 @@ export async function startVoltaSubscription() {
   }
 
   try {
+    // A provider lookup makes interrupted requests recoverable without creating a
+    // second recurring contract if the API succeeded but the local save did not.
+    const recoveredSubscription = await findMercadoPagoStoreSubscription({
+      storeId: store.id,
+      payerEmail,
+    })
+
+    if (recoveredSubscription?.id) {
+      await persistProviderSubscription(store.id, recoveredSubscription)
+      revalidatePath('/admin/plan')
+      if (recoveredSubscription.status === 'pending' && recoveredSubscription.init_point) {
+        return { success: true, redirectUrl: recoveredSubscription.init_point }
+      }
+      return { success: true }
+    }
+
     const providerSubscription = await createMercadoPagoSubscription({
       storeId: store.id,
       payerEmail,
