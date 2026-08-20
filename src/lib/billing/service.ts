@@ -52,11 +52,22 @@ export async function persistProviderSubscription(
 ) {
   const admin = await createAdminClient()
   const db = admin as any
-  const providerStatus = providerSubscription.status || null
-  const localStatus = mapProviderStatus(providerStatus)
+  const { data: existing, error: existingError } = await db
+    .from('billing_subscriptions')
+    .select('*')
+    .eq('store_id', storeId)
+    .maybeSingle()
+
+  if (existingError) {
+    throw new Error(`No pudimos leer el estado actual de la suscripción: ${existingError.message}`)
+  }
+
+  const providerStatus = providerSubscription.status || existing?.provider_status || null
+  const localStatus = providerStatus ? mapProviderStatus(providerStatus) : (existing?.status || 'pending')
+  const fallbackAmount = Number(existing?.current_amount) || VOLTA_BILLING_PLAN.introAmount
   const currentAmount = toAmount(
     providerSubscription.auto_recurring?.transaction_amount,
-    localStatus === 'active' ? VOLTA_BILLING_PLAN.introAmount : VOLTA_BILLING_PLAN.introAmount,
+    fallbackAmount,
   )
   const now = new Date().toISOString()
 
@@ -65,16 +76,17 @@ export async function persistProviderSubscription(
     provider_subscription_id: providerSubscription.id,
     provider_status: providerStatus,
     status: localStatus,
-    currency: providerSubscription.auto_recurring?.currency_id || VOLTA_BILLING_PLAN.currency,
+    currency: providerSubscription.auto_recurring?.currency_id || existing?.currency || VOLTA_BILLING_PLAN.currency,
     current_amount: currentAmount,
-    next_payment_date: providerSubscription.next_payment_date || null,
-    checkout_url: providerSubscription.init_point || null,
+    next_payment_date: providerSubscription.next_payment_date ?? existing?.next_payment_date ?? null,
+    checkout_url: providerSubscription.init_point ?? existing?.checkout_url ?? null,
     last_error: null,
     last_synced_at: now,
   }
 
   if (providerSubscription.payer_email) patch.payer_email = providerSubscription.payer_email
-  if (localStatus === 'canceled') patch.canceled_at = now
+  if (localStatus === 'canceled') patch.canceled_at = existing?.canceled_at || now
+  if (localStatus !== 'canceled' && existing?.canceled_at) patch.canceled_at = null
   if (options.priceUpgradedAt !== undefined) patch.price_upgraded_at = options.priceUpgradedAt
 
   const { data, error } = await db
