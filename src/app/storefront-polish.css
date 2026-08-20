@@ -35,3 +35,10 @@
   -webkit-box-shadow: 0 0 0 1000px var(--store-surface) inset !important;
   transition: background-color 9999s ease-out 0s;
 }
+
+/* Native dropdown menus must follow each storefront's own light/dark palette. */
+.store-shell select,
+.light .store-shell select,
+.dark .store-shell select {
+  color-scheme: inherit !important;
+}
