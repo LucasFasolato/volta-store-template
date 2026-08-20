@@ -47,6 +47,18 @@ export async function startVoltaSubscription() {
     return { error: 'Ya estamos preparando tu activación. Esperá unos segundos y volvé a intentar.' }
   }
 
+  const { data: localBilling, error: billingLookupError } = await db
+    .from('billing_subscriptions')
+    .select('current_amount')
+    .eq('store_id', store.id)
+    .single()
+  if (billingLookupError) return { error: `No pudimos confirmar el precio de tu plan: ${billingLookupError.message}` }
+
+  const recurringAmount = Number(localBilling?.current_amount)
+  if (!Number.isFinite(recurringAmount) || recurringAmount <= 0) {
+    return { error: 'No pudimos confirmar el precio de tu plan.' }
+  }
+
   try {
     // A provider lookup makes interrupted requests recoverable without creating a
     // second recurring contract if the API succeeded but the local save did not.
@@ -68,6 +80,7 @@ export async function startVoltaSubscription() {
       storeId: store.id,
       payerEmail,
       idempotencyKey: String(claim.idempotency_key),
+      amount: recurringAmount,
     })
 
     if (!providerSubscription.id || !providerSubscription.init_point) {
