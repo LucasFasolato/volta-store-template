@@ -5,6 +5,7 @@ import { VOLTA_BILLING_PLAN } from '@/lib/billing/plan'
 import {
   getMercadoPagoSubscription,
   parseBillingExternalReference,
+  searchMercadoPagoAuthorizedPayments,
   updateMercadoPagoSubscriptionAmount,
   type MercadoPagoAuthorizedPayment,
   type MercadoPagoSubscription,
@@ -182,4 +183,17 @@ export async function recordAuthorizedPayment(invoice: MercadoPagoAuthorizedPaym
   }
 
   return { approvedCycles, introCyclesPaid }
+}
+
+export async function reconcileAuthorizedPayments(subscriptionId: string) {
+  const invoices = await searchMercadoPagoAuthorizedPayments(subscriptionId)
+  const ordered = [...invoices].sort((a, b) => {
+    const left = Date.parse(a.debit_date || a.date_created || '') || 0
+    const right = Date.parse(b.debit_date || b.date_created || '') || 0
+    return left - right
+  })
+  for (const invoice of ordered) {
+    await recordAuthorizedPayment(invoice)
+  }
+  return ordered.length
 }
