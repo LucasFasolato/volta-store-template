@@ -41,6 +41,11 @@ export type MercadoPagoAuthorizedPayment = {
   } | null
 }
 
+type MercadoPagoAuthorizedPaymentSearch = {
+  paging?: { total?: number; limit?: number; offset?: number }
+  results?: MercadoPagoAuthorizedPayment[]
+}
+
 export class MercadoPagoApiError extends Error {
   status: number
   details: string | null
@@ -212,4 +217,16 @@ export async function getMercadoPagoAuthorizedPayment(invoiceId: string) {
   return mercadoPagoRequest<MercadoPagoAuthorizedPayment>(
     `/authorized_payments/${encodeURIComponent(invoiceId)}`,
   )
+}
+
+export async function searchMercadoPagoAuthorizedPayments(subscriptionId: string) {
+  const params = new URLSearchParams({
+    preapproval_id: subscriptionId,
+    limit: '20',
+    offset: '0',
+  })
+  const search = await mercadoPagoRequest<MercadoPagoAuthorizedPaymentSearch>(
+    `/authorized_payments/search?${params.toString()}`,
+  )
+  return search.results || []
 }
