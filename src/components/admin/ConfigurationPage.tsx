@@ -1,4 +1,5 @@
-import { ChevronDown, LogOut } from 'lucide-react'
+import Link from 'next/link'
+import { ChevronDown, ChevronRight, CreditCard, LogOut } from 'lucide-react'
 import { BusinessTrustPreview } from '@/components/admin/BusinessTrustPreview'
 import { CheckoutSettingsForm } from '@/components/admin/CheckoutSettingsForm'
 import { ConfigForm } from '@/components/admin/ConfigForm'
@@ -15,14 +16,25 @@ export function ConfigurationPage({ store }: { store: Store }) {
       <Fold title="Cómo vendés"><SalesSettingsForm store={store} /></Fold>
       <Fold title="Qué pedir antes de WhatsApp"><CheckoutSettingsForm store={store} /></Fold>
       <Fold title="Qué ve el cliente"><BusinessTrustPreview store={store} /></Fold>
+      <BillingLinkSection />
       <SignOutSection />
     </div>
-    <div className="hidden max-w-4xl space-y-5 md:block"><ConfigForm store={store} /><SalesSettingsForm store={store} /><CheckoutSettingsForm store={store} /><BusinessTrustPreview store={store} /><SignOutSection /></div>
+    <div className="hidden max-w-4xl space-y-5 md:block"><ConfigForm store={store} /><SalesSettingsForm store={store} /><CheckoutSettingsForm store={store} /><BusinessTrustPreview store={store} /><BillingLinkSection /><SignOutSection /></div>
   </div>
 }
 
 function Fold({ title, children }: { title: string; children: React.ReactNode }) {
   return <details className="group mt-3 rounded-[14px] border border-black/8 bg-white dark:border-white/10 dark:bg-[#111820]"><summary className="flex min-h-12 cursor-pointer list-none items-center justify-between px-4 text-sm font-semibold text-foreground">{title}<ChevronDown className="size-4 transition group-open:rotate-180" /></summary><div className="border-t border-black/7 p-3 dark:border-white/8">{children}</div></details>
+}
+
+function BillingLinkSection() {
+  return (
+    <Link href="/admin/plan" className="mt-3 flex min-h-[74px] items-center gap-3 rounded-[14px] border border-black/8 bg-white p-4 transition hover:bg-black/[0.02] dark:border-white/10 dark:bg-[#111820] dark:hover:bg-white/[0.03] md:mt-0">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-[11px] bg-[#10161d] text-[#12e89a] dark:bg-white/8"><CreditCard className="size-4" /></span>
+      <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-foreground">Plan y facturación</span><span className="mt-0.5 block text-xs leading-5 text-muted-foreground">Suscripción VOLTA, próximos cobros y movimientos.</span></span>
+      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+    </Link>
+  )
 }
 
 function SignOutSection() {
