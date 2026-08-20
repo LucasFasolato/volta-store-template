@@ -19,6 +19,11 @@ export type MercadoPagoSubscription = {
   } | null
 }
 
+type MercadoPagoSubscriptionSearch = {
+  paging?: { total?: number; limit?: number; offset?: number }
+  results?: MercadoPagoSubscription[]
+}
+
 export type MercadoPagoAuthorizedPayment = {
   id: string | number
   preapproval_id: string
@@ -130,6 +135,26 @@ async function mercadoPagoRequest<T>(path: string, init: RequestInit = {}, idemp
   } finally {
     clearTimeout(timeout)
   }
+}
+
+export async function findMercadoPagoStoreSubscription(input: {
+  storeId: string
+  payerEmail: string
+}) {
+  const externalReference = buildBillingExternalReference(input.storeId)
+  const params = new URLSearchParams({
+    payer_email: input.payerEmail,
+    q: externalReference,
+    limit: '20',
+    offset: '0',
+  })
+  const search = await mercadoPagoRequest<MercadoPagoSubscriptionSearch>(`/preapproval/search?${params.toString()}`)
+  const matches = (search.results || []).filter((subscription) =>
+    String(subscription.external_reference || '') === externalReference && subscription.status !== 'canceled',
+  )
+  const priority: Record<string, number> = { authorized: 0, pending: 1, paused: 2 }
+  matches.sort((a, b) => (priority[a.status || ''] ?? 9) - (priority[b.status || ''] ?? 9))
+  return matches[0] || null
 }
 
 export async function createMercadoPagoSubscription(input: {
