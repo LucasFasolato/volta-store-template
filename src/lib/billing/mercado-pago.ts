@@ -161,6 +161,7 @@ export async function createMercadoPagoSubscription(input: {
   storeId: string
   payerEmail: string
   idempotencyKey: string
+  amount: number
 }) {
   return mercadoPagoRequest<MercadoPagoSubscription>(
     '/preapproval',
@@ -173,7 +174,7 @@ export async function createMercadoPagoSubscription(input: {
         auto_recurring: {
           frequency: 1,
           frequency_type: 'months',
-          transaction_amount: VOLTA_BILLING_PLAN.introAmount,
+          transaction_amount: input.amount,
           currency_id: VOLTA_BILLING_PLAN.currency,
         },
         back_url: `${getAppBaseUrl()}/admin/plan?billing=return`,
