@@ -41,12 +41,12 @@ export function StoreInteractiveShell(props: StoreInteractiveShellProps) {
     <>
       <StoreThemeAutoSync storeRootId={storeRootId} theme={theme} />
       <StoreCartClient storeId={props.storeId} storeSlug={props.storeSlug} storeName={props.storeName} whatsapp={props.whatsapp} askName={props.checkoutAskName} askFulfillment={props.checkoutAskFulfillment} allowNotes={props.checkoutAllowNotes} customFields={props.checkoutFields} salesSettings={props.salesSettings} repeatableProducts={props.repeatableProducts} />
-      {selectedProduct ? <StoreProductModalClient closeHref={props.closeModalHref} product={selectedProduct} relatedProducts={props.relatedProducts} storeName={props.storeName} whatsapp={props.whatsapp} /> : null}
+      {selectedProduct ? <StoreProductModalClient closeHref={props.closeModalHref} product={selectedProduct} relatedProducts={props.relatedProducts} /> : null}
     </>
   )
 }
 
-function StoreProductModalClient({ closeHref, product, relatedProducts, storeName, whatsapp }: { closeHref: string; product: ProductWithImages; relatedProducts: RelatedProductLink[]; storeName: string; whatsapp: string }) {
+function StoreProductModalClient({ closeHref, product, relatedProducts }: { closeHref: string; product: ProductWithImages; relatedProducts: RelatedProductLink[] }) {
   const router = useRouter()
   const onClose = () => router.replace(closeHref, { scroll: false })
   const onSelectRelated = (href: string) => router.replace(href, { scroll: false })
@@ -55,7 +55,7 @@ function StoreProductModalClient({ closeHref, product, relatedProducts, storeNam
     return <SoldOutProductModal key={product.id} product={product} relatedProducts={relatedProducts} onSelectRelated={onSelectRelated} onClose={onClose} />
   }
 
-  return <ProductModal key={product.id} product={product} relatedProducts={relatedProducts} onSelectRelated={onSelectRelated} storeName={storeName} whatsapp={whatsapp} onClose={onClose} />
+  return <ProductModal key={product.id} product={product} relatedProducts={relatedProducts} onSelectRelated={onSelectRelated} onClose={onClose} />
 }
 
 function StoreThemeAutoSync({ storeRootId, theme }: { storeRootId: string; theme: StoreTheme }) {

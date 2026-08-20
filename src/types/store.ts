@@ -81,6 +81,7 @@ export type ProductOption = {
   product_id: string
   name: string
   values: string[]
+  unavailable_values: string[]
   sort_order: number
   created_at: string
 }
