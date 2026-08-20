@@ -22,6 +22,51 @@ body {
   overscroll-behavior: contain;
 }
 
+/* Native form controls can fall back to OS colors (especially Safari/iOS and
+   Chromium native menus). Explicit foregrounds keep typed values readable even
+   when a browser paints the control differently than Tailwind expects. */
+.dark .admin-shell input:not([type='checkbox']):not([type='radio']):not([type='color']),
+.dark .admin-shell textarea,
+.dark .admin-shell select {
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  caret-color: #12e89a;
+  color-scheme: dark;
+}
+
+.dark .admin-shell input::placeholder,
+.dark .admin-shell textarea::placeholder {
+  color: #7d8ca1 !important;
+  -webkit-text-fill-color: #7d8ca1 !important;
+  opacity: 1;
+}
+
+.dark .admin-shell input:not([type='checkbox']):not([type='radio']):not([type='color']):-webkit-autofill,
+.dark .admin-shell input:not([type='checkbox']):not([type='radio']):not([type='color']):-webkit-autofill:hover,
+.dark .admin-shell input:not([type='checkbox']):not([type='radio']):not([type='color']):-webkit-autofill:focus,
+.dark .admin-shell textarea:-webkit-autofill {
+  -webkit-text-fill-color: #f8fafc !important;
+  caret-color: #12e89a !important;
+  -webkit-box-shadow: 0 0 0 1000px #111820 inset !important;
+  box-shadow: 0 0 0 1000px #111820 inset !important;
+}
+
+.light .admin-shell input:not([type='checkbox']):not([type='radio']):not([type='color']),
+.light .admin-shell textarea,
+.light .admin-shell select {
+  color: #0f172a;
+  -webkit-text-fill-color: #0f172a;
+  color-scheme: light;
+}
+
+/* Dark action surfaces must carry a light foreground regardless of inherited
+   theme text. This covers bulk actions and other intentionally dark CTAs. */
+.admin-shell button[class*='bg-[#10161d]'],
+.admin-shell a[class*='bg-[#10161d]'] {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
 /* Native <select> menus are rendered by the browser/OS, so styling only the
    closed control is not enough. Keep the browser color scheme aligned with
    the admin theme and provide explicit option colors as a fallback. */
@@ -33,6 +78,7 @@ body {
 .dark .admin-shell select optgroup {
   background-color: #111820;
   color: #f8fafc;
+  -webkit-text-fill-color: #f8fafc;
 }
 
 .light .admin-shell select {
@@ -43,6 +89,7 @@ body {
 .light .admin-shell select optgroup {
   background-color: #ffffff;
   color: #0f172a;
+  -webkit-text-fill-color: #0f172a;
 }
 
 @media (max-width: 640px) {
