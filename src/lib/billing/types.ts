@@ -43,9 +43,16 @@ export type BillingPayment = {
   createdAt: string
 }
 
+export type BillingAccess = {
+  mode: 'subscription' | 'complimentary'
+  hasAccess: boolean
+  complimentaryUntil: string | null
+}
+
 export type BillingOverview = {
   subscription: BillingSubscription | null
   payments: BillingPayment[]
+  access: BillingAccess
   providerConfigured: boolean
   webhookConfigured: boolean
 }
