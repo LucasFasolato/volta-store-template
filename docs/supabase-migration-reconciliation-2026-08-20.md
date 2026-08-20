@@ -10,7 +10,7 @@ metadata-only: it must not execute or revert application DDL.
 
 - Production contains 21 migration-history rows, beginning at
   `20260815230610`.
-- The repository contains 32 migrations before the tenant-integrity migration.
+- The repository contains 33 migrations before the tenant-integrity migration.
 - All objects represented by the 19 local-only versions exist in production.
   Checks covered tables, columns, constraints, indexes, RLS flags, policies,
   grants, triggers, functions and the `store-assets` bucket.
@@ -104,3 +104,53 @@ the SQL in these migrations.
 3. The production schema snapshot and zero-cross-tenant data prechecks remain
    unchanged.
 4. Do not apply the tenant-integrity migration as part of the repair.
+
+## Execution record
+
+The repair was executed on 2026-08-20 with Supabase CLI `2.115.0`, authenticated
+and linked to `zfugbeyixqaphkgfnkbb`.
+
+Before the repair, `migration list --linked` reported:
+
+- 14 versions aligned between the repository and production;
+- the 7 production-only versions documented above;
+- the 19 verified repository-only versions documented above;
+- `20260820214507_tenant_relation_integrity.sql` as local-only and deliberately
+  pending.
+
+The two documented CLI operations completed successfully: the 7 production-only
+versions were marked `reverted`, then the 19 repository versions were marked
+`applied`. No direct SQL was issued against the migration-history table.
+
+After the repair, all 33 migrations preceding the tenant-integrity migration
+were aligned local/remote. The only local-only version was
+`20260820214507_tenant_relation_integrity.sql`.
+
+Catalog fingerprints taken immediately before and after were identical for:
+
+- relations: 22;
+- columns: 253;
+- constraints: 94;
+- indexes: 65;
+- RLS flags: 22;
+- policies: 44;
+- functions: 22;
+- triggers: 16;
+- table grants: 453;
+- routine grants: 37;
+- Storage buckets: 1;
+- Storage objects: 47.
+
+Thirteen of fourteen application-table data fingerprints were also identical.
+`store_events` increased from 232 to 233 rows because production recorded one
+concurrent `store_view` event at `2026-08-20 22:49:12.904572+00`; no other
+application row count or checksum changed. The repair itself modified only
+migration metadata.
+
+Finally, `supabase db push --linked --dry-run` from PR #41 proposed exactly:
+
+```text
+20260820214507_tenant_relation_integrity.sql
+```
+
+No application DDL was executed during reconciliation.
