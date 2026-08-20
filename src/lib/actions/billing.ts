@@ -11,7 +11,7 @@ import {
   isMercadoPagoConfigured,
   MercadoPagoApiError,
 } from '@/lib/billing/mercado-pago'
-import { persistProviderSubscription } from '@/lib/billing/service'
+import { persistProviderSubscription, reconcileAuthorizedPayments } from '@/lib/billing/service'
 
 function billingError(error: unknown) {
   if (error instanceof MercadoPagoApiError) {
@@ -69,6 +69,9 @@ export async function startVoltaSubscription() {
 
     if (recoveredSubscription?.id) {
       await persistProviderSubscription(store.id, recoveredSubscription)
+      if (recoveredSubscription.status === 'authorized') {
+        await reconcileAuthorizedPayments(recoveredSubscription.id)
+      }
       revalidatePath('/admin/plan')
       if (recoveredSubscription.status === 'pending' && recoveredSubscription.init_point) {
         return { success: true, redirectUrl: recoveredSubscription.init_point }
@@ -139,6 +142,7 @@ export async function syncVoltaSubscription() {
   try {
     const providerSubscription = await getMercadoPagoSubscription(subscription.provider_subscription_id)
     await persistProviderSubscription(store.id, providerSubscription)
+    await reconcileAuthorizedPayments(subscription.provider_subscription_id)
     revalidatePath('/admin/plan')
     return { success: true }
   } catch (error) {
