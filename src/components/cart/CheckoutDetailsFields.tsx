@@ -18,7 +18,12 @@ const readableFieldStyle = {
   color: 'var(--store-text)',
   WebkitTextFillColor: 'var(--store-text)',
   caretColor: 'var(--store-primary)',
-  background: 'color-mix(in srgb, var(--store-surface) 88%, var(--store-bg))',
+  backgroundColor: 'var(--store-surface)',
+  backgroundImage: 'none',
+  WebkitBoxShadow: '0 0 0 1000px var(--store-surface) inset',
+  boxShadow: '0 0 0 1000px var(--store-surface) inset',
+  WebkitAppearance: 'none',
+  appearance: 'none',
 } as const
 
 export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, customFields, value, onChange }: Props) {
@@ -64,7 +69,9 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, cus
               value={value.customerName ?? ''}
               onChange={(event) => onChange({ ...value, customerName: event.target.value.slice(0, 80) })}
               placeholder="Ej: Lucas"
-              autoComplete="name"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
               className="store-form-control min-h-11 w-full rounded-[var(--store-button-radius)] border px-3.5 text-sm outline-none transition focus:ring-2"
               style={readableFieldStyle}
             />
@@ -95,6 +102,7 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, cus
               onChange={(event) => onChange({ ...value, notes: event.target.value.slice(0, 240) })}
               placeholder="Ej: pasar después de las 18 hs"
               rows={2}
+              autoComplete="off"
               className="store-form-control w-full resize-none rounded-[var(--store-button-radius)] border px-3.5 py-3 text-sm outline-none focus:ring-2"
               style={readableFieldStyle}
             />
@@ -113,6 +121,7 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, cus
                 onChange={(event) => setCustomValue(field.id, event.target.value.slice(0, 240))}
                 placeholder={field.placeholder ?? ''}
                 rows={2}
+                autoComplete="off"
                 className="store-form-control w-full resize-none rounded-[var(--store-button-radius)] border px-3.5 py-3 text-sm outline-none focus:ring-2"
                 style={readableFieldStyle}
               />
@@ -121,6 +130,8 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, cus
                 value={value.custom?.[field.id] ?? ''}
                 onChange={(event) => setCustomValue(field.id, event.target.value.slice(0, 120))}
                 placeholder={field.placeholder ?? ''}
+                autoComplete="off"
+                autoCorrect="off"
                 className="store-form-control min-h-11 w-full rounded-[var(--store-button-radius)] border px-3.5 text-sm outline-none focus:ring-2"
                 style={readableFieldStyle}
               />

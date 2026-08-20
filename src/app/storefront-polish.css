@@ -6,29 +6,34 @@
 .light .cart-sheet .store-form-control,
 .dark .store-shell .store-form-control,
 .dark .cart-sheet .store-form-control {
-  --store-control-bg: color-mix(in srgb, var(--store-surface) 88%, var(--store-bg));
+  --store-control-bg: var(--store-surface);
   -webkit-appearance: none;
   appearance: none;
   border-color: var(--store-card-border) !important;
+  background: var(--store-control-bg) !important;
   background-color: var(--store-control-bg) !important;
   background-image: none !important;
   color: var(--store-text) !important;
   -webkit-text-fill-color: var(--store-text) !important;
   caret-color: var(--store-primary) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--store-control-bg) inset !important;
   box-shadow: 0 0 0 1000px var(--store-control-bg) inset !important;
-  color-scheme: inherit;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  forced-color-adjust: none;
+  filter: none !important;
   opacity: 1;
 }
 
+/* The cart lives inside the storefront theme, so its own store mode must win over
+   the app/browser appearance. This prevents iOS from repainting an empty field white. */
 .store-shell[data-store-mode='dark'] .store-form-control,
-.store-shell[data-store-mode='dark'] .cart-sheet .store-form-control,
-.dark .cart-sheet .store-form-control {
+.store-shell[data-store-mode='dark'] .cart-sheet .store-form-control {
   color-scheme: dark !important;
 }
 
 .store-shell[data-store-mode='light'] .store-form-control,
-.store-shell[data-store-mode='light'] .cart-sheet .store-form-control,
-.light .cart-sheet .store-form-control {
+.store-shell[data-store-mode='light'] .cart-sheet .store-form-control {
   color-scheme: light !important;
 }
 
@@ -43,6 +48,17 @@
   opacity: 1;
 }
 
+/* Explicitly cover the blank, blurred state that iOS contact-autofill can repaint. */
+.store-shell .store-form-control:placeholder-shown,
+.cart-sheet .store-form-control:placeholder-shown,
+.store-shell .store-form-control:not(:focus),
+.cart-sheet .store-form-control:not(:focus) {
+  background: var(--store-control-bg) !important;
+  background-color: var(--store-control-bg) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--store-control-bg) inset !important;
+  box-shadow: 0 0 0 1000px var(--store-control-bg) inset !important;
+}
+
 .store-shell .store-form-control:focus,
 .cart-sheet .store-form-control:focus,
 .light .store-shell .store-form-control:focus,
@@ -50,13 +66,19 @@
 .dark .store-shell .store-form-control:focus,
 .dark .cart-sheet .store-form-control:focus {
   border-color: color-mix(in srgb, var(--store-primary) 65%, var(--store-card-border)) !important;
+  background: var(--store-control-bg) !important;
+  -webkit-box-shadow:
+    0 0 0 1000px var(--store-control-bg) inset,
+    0 0 0 3px color-mix(in srgb, var(--store-primary) 16%, transparent) !important;
   box-shadow:
     0 0 0 1000px var(--store-control-bg) inset,
     0 0 0 3px color-mix(in srgb, var(--store-primary) 16%, transparent) !important;
 }
 
-/* iOS/Safari can repaint focused/autofilled controls using a white system fill.
-   Reassert both the text and the inset fill for every WebKit autofill state. */
+/* iOS/Safari can repaint autofilled or contact-suggested controls using a white
+   system fill. Reassert the surface in both the standardized and WebKit states. */
+.store-shell .store-form-control:autofill,
+.cart-sheet .store-form-control:autofill,
 .store-shell .store-form-control:-webkit-autofill,
 .store-shell .store-form-control:-webkit-autofill:hover,
 .store-shell .store-form-control:-webkit-autofill:focus,
@@ -65,11 +87,21 @@
 .cart-sheet .store-form-control:-webkit-autofill:hover,
 .cart-sheet .store-form-control:-webkit-autofill:focus,
 .cart-sheet .store-form-control:-webkit-autofill:active {
+  background: var(--store-control-bg) !important;
+  background-color: var(--store-control-bg) !important;
   -webkit-text-fill-color: var(--store-text) !important;
   caret-color: var(--store-primary) !important;
   -webkit-box-shadow: 0 0 0 1000px var(--store-control-bg) inset !important;
   box-shadow: 0 0 0 1000px var(--store-control-bg) inset !important;
-  transition: background-color 9999s ease-out 0s;
+  transition: background-color 999999s ease-out 0s, color 999999s ease-out 0s;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .store-shell .store-form-control,
+  .cart-sheet .store-form-control {
+    background-color: var(--store-control-bg) !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--store-control-bg) inset !important;
+  }
 }
 
 /* Native dropdown menus must follow each storefront's own light/dark palette. */
