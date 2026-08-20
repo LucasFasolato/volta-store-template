@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { createClient } from '@/lib/supabase/server'
+import { buildBillingAccess, getBillingAccessOverride } from '@/lib/billing/access'
 import { isMercadoPagoConfigured, isMercadoPagoWebhookConfigured } from '@/lib/billing/mercado-pago'
 import type { BillingOverview, BillingPayment, BillingSubscription } from '@/lib/billing/types'
 
@@ -47,7 +48,7 @@ function mapPayment(row: any): BillingPayment {
 export async function getBillingOverview(storeId: string): Promise<BillingOverview> {
   const supabase = await createClient()
   const db = supabase as any
-  const [subscriptionResult, paymentsResult] = await Promise.all([
+  const [subscriptionResult, paymentsResult, accessOverride] = await Promise.all([
     db.from('billing_subscriptions').select('*').eq('store_id', storeId).maybeSingle(),
     db
       .from('billing_payments')
@@ -55,6 +56,7 @@ export async function getBillingOverview(storeId: string): Promise<BillingOvervi
       .eq('store_id', storeId)
       .order('created_at', { ascending: false })
       .limit(8),
+    getBillingAccessOverride(storeId),
   ])
 
   if (subscriptionResult.error) {
@@ -64,9 +66,12 @@ export async function getBillingOverview(storeId: string): Promise<BillingOvervi
     throw new Error(`No pudimos leer tus cobros: ${paymentsResult.error.message}`)
   }
 
+  const subscription = subscriptionResult.data ? mapSubscription(subscriptionResult.data) : null
+
   return {
-    subscription: subscriptionResult.data ? mapSubscription(subscriptionResult.data) : null,
+    subscription,
     payments: (paymentsResult.data || []).map(mapPayment),
+    access: buildBillingAccess(accessOverride, subscription),
     providerConfigured: isMercadoPagoConfigured(),
     webhookConfigured: isMercadoPagoWebhookConfigured(),
   }
