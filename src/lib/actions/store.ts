@@ -1,6 +1,14 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { normalizeThemeFontSelection } from '@/data/defaults'
+import { getPresetById } from '@/data/theme-presets'
+import {
+  removeStoragePaths,
+  STORE_ASSET_BUCKET,
+  storagePathFromPublicUrl,
+  validateOptimizedWebp,
+} from '@/lib/images/storage-assets'
 import { requireAuthenticatedStoreContext } from '@/lib/server/store-context'
 import {
   storeConfigSchema,
@@ -14,8 +22,6 @@ import {
   type StoreLayoutInput,
 } from '@/lib/validations/store'
 import { slugify } from '@/lib/utils/format'
-import { normalizeThemeFontSelection } from '@/data/defaults'
-import { getPresetById } from '@/data/theme-presets'
 
 export async function updateStoreConfig(input: StoreConfigInput) {
   const validated = storeConfigSchema.safeParse(input)
@@ -189,52 +195,82 @@ export async function updateStoreLayout(input: StoreLayoutInput) {
 
 export async function uploadLogo(formData: FormData) {
   const { supabase, store, user } = await requireAuthenticatedStoreContext()
-
-  const file = formData.get('logo') as File
+  const file = formData.get('logo') as File | null
   if (!file) return { error: 'No file provided' }
 
-  const ext = file.name.split('.').pop()
-  const path = `${user.id}/logo.${ext}`
+  const validationError = await validateOptimizedWebp(file, 'logo')
+  if (validationError) return { error: validationError }
 
+  const { data: currentStore, error: currentStoreError } = await supabase
+    .from('stores')
+    .select('logo_url')
+    .eq('id', store.id)
+    .single()
+
+  if (currentStoreError) return { error: currentStoreError.message }
+
+  const path = `${user.id}/logo.webp`
   const { error: uploadError } = await supabase.storage
-    .from('store-assets')
-    .upload(path, file, { upsert: true })
+    .from(STORE_ASSET_BUCKET)
+    .upload(path, file, {
+      upsert: true,
+      contentType: 'image/webp',
+      cacheControl: '31536000',
+    })
 
   if (uploadError) return { error: uploadError.message }
 
-  const { data: urlData } = supabase.storage.from('store-assets').getPublicUrl(path)
+  const { data: urlData } = supabase.storage.from(STORE_ASSET_BUCKET).getPublicUrl(path)
+  const versionedUrl = `${urlData.publicUrl}?v=${Date.now()}`
 
   const { error: updateError } = await supabase
     .from('stores')
-    .update({ logo_url: urlData.publicUrl })
+    .update({ logo_url: versionedUrl })
     .eq('id', store.id)
 
   if (updateError) return { error: updateError.message }
 
+  const previousPath = storagePathFromPublicUrl(currentStore.logo_url)
+  const cleanupError = previousPath && previousPath !== path
+    ? await removeStoragePaths(supabase, [previousPath])
+    : null
+
   revalidatePath('/admin')
   revalidatePath('/admin/tienda')
   revalidatePath(`/tienda/${store.slug}`)
-  return { success: true, url: urlData.publicUrl }
+  return cleanupError
+    ? { success: true, url: versionedUrl, warning: 'Logo actualizado; quedó un archivo anterior pendiente de limpieza.' }
+    : { success: true, url: versionedUrl }
 }
 
 export async function uploadHeroImage(formData: FormData) {
   const { supabase, store, user } = await requireAuthenticatedStoreContext()
-
-  const file = formData.get('hero') as File
+  const file = formData.get('hero') as File | null
   if (!file) return { error: 'No file provided' }
 
-  const ext = file.name.split('.').pop()
-  const path = `${user.id}/hero.${ext}`
+  const validationError = await validateOptimizedWebp(file, 'hero')
+  if (validationError) return { error: validationError }
 
+  const { data: currentContent, error: currentContentError } = await supabase
+    .from('store_content')
+    .select('hero_image_url')
+    .eq('store_id', store.id)
+    .single()
+
+  if (currentContentError) return { error: currentContentError.message }
+
+  const path = `${user.id}/hero.webp`
   const { error: uploadError } = await supabase.storage
-    .from('store-assets')
-    .upload(path, file, { upsert: true })
+    .from(STORE_ASSET_BUCKET)
+    .upload(path, file, {
+      upsert: true,
+      contentType: 'image/webp',
+      cacheControl: '31536000',
+    })
 
   if (uploadError) return { error: uploadError.message }
 
-  const { data: urlData } = supabase.storage.from('store-assets').getPublicUrl(path)
-  // Append a version param so Next.js Image and browser never serve a stale cached copy
-  // when the same storage path is overwritten by a new upload.
+  const { data: urlData } = supabase.storage.from(STORE_ASSET_BUCKET).getPublicUrl(path)
   const versionedUrl = `${urlData.publicUrl}?v=${Date.now()}`
 
   const { error: updateError } = await supabase
@@ -244,10 +280,17 @@ export async function uploadHeroImage(formData: FormData) {
 
   if (updateError) return { error: updateError.message }
 
+  const previousPath = storagePathFromPublicUrl(currentContent.hero_image_url)
+  const cleanupError = previousPath && previousPath !== path
+    ? await removeStoragePaths(supabase, [previousPath])
+    : null
+
   revalidatePath('/admin')
   revalidatePath('/admin/tienda')
   revalidatePath(`/tienda/${store.slug}`)
-  return { success: true, url: versionedUrl }
+  return cleanupError
+    ? { success: true, url: versionedUrl, warning: 'Portada actualizada; quedó un archivo anterior pendiente de limpieza.' }
+    : { success: true, url: versionedUrl }
 }
 
 /**
