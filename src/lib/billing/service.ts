@@ -12,6 +12,8 @@ import {
 } from '@/lib/billing/mercado-pago'
 import type { BillingStatus } from '@/lib/billing/types'
 
+const CURRENT_CONTRACT_STATUSES = new Set(['creating', 'pending', 'active', 'paused'])
+
 function toAmount(value: number | string | null | undefined, fallback: number) {
   const parsed = typeof value === 'number' ? value : Number(value)
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
@@ -61,6 +63,16 @@ export async function persistProviderSubscription(
 
   if (existingError) {
     throw new Error(`No pudimos leer el estado actual de la suscripción: ${existingError.message}`)
+  }
+
+  // A delayed webhook from an older Mercado Pago contract must never replace the
+  // contract currently attached to the store. Historical invoices are still kept.
+  if (
+    existing?.provider_subscription_id &&
+    existing.provider_subscription_id !== providerSubscription.id &&
+    CURRENT_CONTRACT_STATUSES.has(existing.status)
+  ) {
+    return existing
   }
 
   const providerStatus = providerSubscription.status || existing?.provider_status || null
@@ -168,13 +180,15 @@ export async function recordAuthorizedPayment(invoice: MercadoPagoAuthorizedPaym
 
   if (cycleError) throw new Error(`No pudimos actualizar el progreso del plan: ${cycleError.message}`)
 
+  const currentProviderSubscriptionId = localSubscription.provider_subscription_id as string | null
   if (
     approvedCycles >= VOLTA_BILLING_PLAN.introCycles &&
     Number(localSubscription.current_amount) < VOLTA_BILLING_PLAN.standardAmount &&
-    localSubscription.status === 'active'
+    localSubscription.status === 'active' &&
+    currentProviderSubscriptionId
   ) {
     const upgraded = await updateMercadoPagoSubscriptionAmount(
-      invoice.preapproval_id,
+      currentProviderSubscriptionId,
       VOLTA_BILLING_PLAN.standardAmount,
     )
     await persistProviderSubscription(localSubscription.store_id, upgraded, {
