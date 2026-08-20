@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { requireAuthenticatedStoreContext } from '@/lib/server/store-context'
+import { hasActiveComplimentaryAccess } from '@/lib/billing/access'
 import {
   cancelMercadoPagoSubscription,
   createMercadoPagoSubscription,
@@ -24,6 +25,10 @@ function billingError(error: unknown) {
 
 export async function startVoltaSubscription() {
   const { user, store } = await requireAuthenticatedStoreContext()
+  if (await hasActiveComplimentaryAccess(store.id)) {
+    return { error: 'Tu cuenta tiene acceso bonificado. No necesitás activar una suscripción.' }
+  }
+
   const payerEmail = user.email?.trim()
   if (!payerEmail) return { error: 'Tu cuenta necesita un email válido para activar el plan.' }
   if (!isMercadoPagoConfigured()) return { error: 'Falta terminar la conexión de Mercado Pago.' }
@@ -60,8 +65,6 @@ export async function startVoltaSubscription() {
   }
 
   try {
-    // A provider lookup makes interrupted requests recoverable without creating a
-    // second recurring contract if the API succeeded but the local save did not.
     const recoveredSubscription = await findMercadoPagoStoreSubscription({
       storeId: store.id,
       payerEmail,
