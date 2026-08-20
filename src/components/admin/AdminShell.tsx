@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Eye } from 'lucide-react'
 import { usePathname } from 'next/navigation'
+import { AdminImagePipeline } from '@/components/admin/AdminImagePipeline'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { MobileAdminNav } from '@/components/admin/MobileAdminNav'
 
@@ -12,6 +13,7 @@ export function AdminShell({ children, storeName }: { children: React.ReactNode;
 
   return (
     <div className="admin-gradient admin-shell min-h-screen">
+      <AdminImagePipeline />
       <AdminSidebar storeName={storeName} />
       <div className="sticky top-0 z-40 flex h-12 items-center justify-between border-b border-black/7 bg-white/95 px-4 backdrop-blur-xl dark:border-white/8 dark:bg-[#10161d]/95 lg:hidden">
         <span className="min-w-0 truncate text-sm font-semibold text-foreground">{storeName}</span>

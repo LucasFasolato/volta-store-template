@@ -1,6 +1,14 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import {
+  listStorageFolderPaths,
+  MAX_PRODUCT_IMAGES,
+  removeStoragePaths,
+  STORE_ASSET_BUCKET,
+  storagePathFromPublicUrl,
+  validateOptimizedWebp,
+} from '@/lib/images/storage-assets'
 import { createClient } from '@/lib/supabase/server'
 import { requireAuthenticatedStoreContext } from '@/lib/server/store-context'
 import { categorySchema, productSchema } from '@/lib/validations/product'
@@ -103,6 +111,19 @@ async function findRecentEquivalentProduct({
   ) ?? null
 }
 
+async function assertOwnedProduct(db: any, storeId: string, productId: string) {
+  const { data, error } = await db
+    .from('products')
+    .select('id')
+    .eq('id', productId)
+    .eq('store_id', storeId)
+    .maybeSingle()
+
+  if (error) return { error: error.message, product: null }
+  if (!data) return { error: 'Producto no encontrado.', product: null }
+  return { error: null as string | null, product: data }
+}
+
 export async function createProduct(input: ProductInput) {
   const validated = productSchema.safeParse(input)
   if (!validated.success) return { error: validated.error.flatten() }
@@ -187,40 +208,114 @@ export async function updateProduct(productId: string, input: ProductInput) {
 }
 
 export async function deleteProduct(productId: string) {
-  const { supabase, store } = await requireAuthenticatedStoreContext()
-  const { error } = await supabase.from('products').delete().eq('id', productId).eq('store_id', store.id)
+  const { supabase, store, user } = await requireAuthenticatedStoreContext()
+  const db = supabase as any
+  const ownership = await assertOwnedProduct(db, store.id, productId)
+  if (ownership.error) return { error: ownership.error }
+
+  const { data: imageRows, error: imageRowsError } = await db
+    .from('product_images')
+    .select('url')
+    .eq('product_id', productId)
+
+  if (imageRowsError) return { error: imageRowsError.message }
+
+  const folder = `${user.id}/products/${productId}`
+  const listed = await listStorageFolderPaths(supabase, folder)
+  const linkedPaths = (imageRows ?? []).map((image: { url?: string | null }) =>
+    storagePathFromPublicUrl(image.url),
+  )
+
+  const { error } = await db
+    .from('products')
+    .delete()
+    .eq('id', productId)
+    .eq('store_id', store.id)
+
   if (error) return { error: error.message }
+
+  const cleanupError = await removeStoragePaths(supabase, [...linkedPaths, ...listed.paths])
+
   revalidateStorePaths(store.slug)
-  return { success: true }
+  return cleanupError || listed.error
+    ? {
+        success: true,
+        warning: 'El producto se eliminó. Algunos archivos antiguos podrán limpiarse después.',
+      }
+    : { success: true }
 }
 
 export async function uploadProductImage(productId: string, file: FormData) {
   const { supabase, store, user } = await requireAuthenticatedStoreContext()
+  const db = supabase as any
   const imageFile = file.get('image') as File | null
   if (!imageFile) return { error: 'No image provided' }
+
+  const ownership = await assertOwnedProduct(db, store.id, productId)
+  if (ownership.error) return { error: ownership.error }
+
+  const validationError = await validateOptimizedWebp(imageFile, 'product')
+  if (validationError) return { error: validationError }
+
+  const { data: existingImages, error: existingImagesError } = await db
+    .from('product_images')
+    .select('id, sort_order')
+    .eq('product_id', productId)
+    .order('sort_order', { ascending: true })
+
+  if (existingImagesError) return { error: existingImagesError.message }
+  if ((existingImages?.length ?? 0) >= MAX_PRODUCT_IMAGES) {
+    return { error: `Podés usar hasta ${MAX_PRODUCT_IMAGES} imágenes por producto.` }
+  }
+
   const makePrimary = file.get('makePrimary') === 'true'
-  const ext = imageFile.name.split('.').pop()
-  const path = `${user.id}/products/${productId}/${Date.now()}.${ext}`
-  const { error: uploadError } = await supabase.storage.from('store-assets').upload(path, imageFile, { upsert: false })
+  const path = `${user.id}/products/${productId}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.webp`
+  const { error: uploadError } = await supabase.storage
+    .from(STORE_ASSET_BUCKET)
+    .upload(path, imageFile, {
+      upsert: false,
+      contentType: 'image/webp',
+      cacheControl: '31536000',
+    })
+
   if (uploadError) return { error: uploadError.message }
-  const { data: urlData } = supabase.storage.from('store-assets').getPublicUrl(path)
+
+  const cleanupUploadedFile = async () => {
+    await removeStoragePaths(supabase, [path])
+  }
+
+  const { data: urlData } = supabase.storage.from(STORE_ASSET_BUCKET).getPublicUrl(path)
   let sortOrder = 0
 
   if (makePrimary) {
-    const { data: existingImages, error: existingImagesError } = await supabase.from('product_images').select('id, sort_order').eq('product_id', productId)
-    if (existingImagesError) return { error: existingImagesError.message }
     for (const image of existingImages ?? []) {
-      const { error: reorderError } = await supabase.from('product_images').update({ sort_order: (image.sort_order ?? 0) + 1 }).eq('id', image.id).eq('product_id', productId)
-      if (reorderError) return { error: reorderError.message }
+      const { error: reorderError } = await db
+        .from('product_images')
+        .update({ sort_order: (image.sort_order ?? 0) + 1 })
+        .eq('id', image.id)
+        .eq('product_id', productId)
+
+      if (reorderError) {
+        await cleanupUploadedFile()
+        return { error: reorderError.message }
+      }
     }
   } else {
-    const { data: lastImage, error: lastImageError } = await supabase.from('product_images').select('sort_order').eq('product_id', productId).order('sort_order', { ascending: false }).limit(1).maybeSingle()
-    if (lastImageError) return { error: lastImageError.message }
-    sortOrder = (lastImage?.sort_order ?? -1) + 1
+    const lastSortOrder = existingImages?.at(-1)?.sort_order
+    sortOrder = (typeof lastSortOrder === 'number' ? lastSortOrder : -1) + 1
   }
 
-  const { data: image, error: insertError } = await supabase.from('product_images').insert({ product_id: productId, url: urlData.publicUrl, sort_order: sortOrder }).select('id, url, sort_order').single()
-  if (insertError) return { error: insertError.message }
+  const { data: image, error: insertError } = await db
+    .from('product_images')
+    .insert({ product_id: productId, url: urlData.publicUrl, sort_order: sortOrder })
+    .select('id, url, sort_order')
+    .single()
+
+  if (insertError) {
+    await cleanupUploadedFile()
+    return { error: insertError.message }
+  }
+
   revalidateStorePaths(store.slug)
   revalidatePath(`/admin/catalogo/${productId}`)
   return { success: true, image }
@@ -228,7 +323,30 @@ export async function uploadProductImage(productId: string, file: FormData) {
 
 export async function deleteProductImage(imageId: string, productId: string) {
   const { supabase, store } = await requireAuthenticatedStoreContext()
-  const { error } = await supabase.from('product_images').delete().eq('id', imageId).eq('product_id', productId)
+  const db = supabase as any
+  const ownership = await assertOwnedProduct(db, store.id, productId)
+  if (ownership.error) return { error: ownership.error }
+
+  const { data: image, error: imageError } = await db
+    .from('product_images')
+    .select('id, url')
+    .eq('id', imageId)
+    .eq('product_id', productId)
+    .maybeSingle()
+
+  if (imageError) return { error: imageError.message }
+  if (!image) return { error: 'Imagen no encontrada.' }
+
+  const storagePath = storagePathFromPublicUrl(image.url)
+  const storageError = await removeStoragePaths(supabase, [storagePath])
+  if (storageError) return { error: `No pudimos eliminar el archivo de Storage: ${storageError}` }
+
+  const { error } = await db
+    .from('product_images')
+    .delete()
+    .eq('id', imageId)
+    .eq('product_id', productId)
+
   if (error) return { error: error.message }
   revalidateStorePaths(store.slug)
   revalidatePath(`/admin/catalogo/${productId}`)
