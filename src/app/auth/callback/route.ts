@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { ensureOnboarding, needsOnboarding } from '@/lib/actions/onboarding'
 import { inferLoginErrorReason } from '@/lib/auth/login-feedback'
+import { sanitizeInternalRedirect } from '@/lib/auth/redirects'
 import { safeGetUser } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
 
@@ -78,8 +79,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/onboarding`)
   }
 
-  const next = searchParams.get('next') ?? ''
-  const destination = next.startsWith('/') && !next.startsWith('//') ? next : '/admin'
+  const destination = sanitizeInternalRedirect(searchParams.get('next'))
 
   return NextResponse.redirect(`${origin}${destination}`)
 }

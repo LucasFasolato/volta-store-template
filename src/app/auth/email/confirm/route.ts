@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { safeGetUser } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
+import { sanitizeInternalRedirect } from '@/lib/auth/redirects'
 
 function loginError(origin: string) {
   const url = new URL('/login', origin)
@@ -8,11 +9,6 @@ function loginError(origin: string) {
   url.searchParams.set('reason', 'invalid_link')
   url.searchParams.set('provider', 'email')
   return NextResponse.redirect(url, { status: 303 })
-}
-
-function safeNext(value: FormDataEntryValue | null) {
-  const next = typeof value === 'string' ? value : ''
-  return next.startsWith('/') && !next.startsWith('//') ? next : '/admin'
 }
 
 function completionRedirect(origin: string, next: string) {
@@ -25,7 +21,8 @@ export async function POST(request: Request) {
   const { origin } = new URL(request.url)
   const formData = await request.formData()
   const tokenHash = formData.get('token_hash')
-  const next = safeNext(formData.get('next'))
+  const rawNext = formData.get('next')
+  const next = sanitizeInternalRedirect(typeof rawNext === 'string' ? rawNext : null)
 
   if (typeof tokenHash !== 'string' || tokenHash.length < 16) {
     return loginError(origin)

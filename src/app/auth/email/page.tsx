@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { MailCheck, ShieldCheck } from 'lucide-react'
 import { EmailConfirmForm } from '@/components/auth/EmailConfirmForm'
 import { VoltaBrand } from '@/components/brand/VoltaBrand'
+import { sanitizeInternalRedirect } from '@/lib/auth/redirects'
 
 export const metadata: Metadata = {
   title: 'Confirmar acceso',
@@ -16,14 +17,10 @@ function firstValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
 }
 
-function safeNext(value: string | undefined) {
-  return value?.startsWith('/') && !value.startsWith('//') ? value : '/admin'
-}
-
 export default async function EmailAccessPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams
   const tokenHash = firstValue(params.token_hash)
-  const next = safeNext(firstValue(params.next))
+  const next = sanitizeInternalRedirect(firstValue(params.next))
 
   return (
     <main className="min-h-screen bg-[#f7f8fa] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">

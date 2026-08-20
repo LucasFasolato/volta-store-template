@@ -2,10 +2,7 @@ import { NextResponse } from 'next/server'
 import { ensureOnboarding, needsOnboarding } from '@/lib/actions/onboarding'
 import { safeGetUser } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
-
-function safeNext(value: string | null) {
-  return value?.startsWith('/') && !value.startsWith('//') ? value : '/admin'
-}
+import { sanitizeInternalRedirect } from '@/lib/auth/redirects'
 
 function loginError(origin: string) {
   const url = new URL('/login', origin)
@@ -17,7 +14,7 @@ function loginError(origin: string) {
 
 export async function GET(request: Request) {
   const { origin, searchParams } = new URL(request.url)
-  const next = safeNext(searchParams.get('next'))
+  const next = sanitizeInternalRedirect(searchParams.get('next'))
   const supabase = await createClient()
   const { user } = await safeGetUser(supabase)
 
