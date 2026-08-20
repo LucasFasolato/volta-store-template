@@ -26,6 +26,40 @@ const readableFieldStyle = {
   appearance: 'none',
 } as const
 
+type SingleLineTextFieldProps = {
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  maxLength: number
+  ariaLabel: string
+}
+
+function SingleLineTextField({ value, onChange, placeholder, maxLength, ariaLabel }: SingleLineTextFieldProps) {
+  return (
+    <textarea
+      value={value}
+      onChange={(event) => onChange(event.target.value.replace(/[\r\n]+/g, '').slice(0, maxLength))}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault()
+          event.currentTarget.blur()
+        }
+      }}
+      placeholder={placeholder}
+      rows={1}
+      maxLength={maxLength}
+      aria-label={ariaLabel}
+      autoComplete="off"
+      autoCorrect="off"
+      autoCapitalize="words"
+      spellCheck={false}
+      enterKeyHint="done"
+      className="store-form-control h-11 min-h-11 max-h-11 w-full resize-none overflow-hidden rounded-[var(--store-button-radius)] border px-3.5 py-[11px] text-sm leading-5 outline-none transition focus:ring-2"
+      style={readableFieldStyle}
+    />
+  )
+}
+
 export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, customFields, value, onChange }: Props) {
   const activeCustomFields = customFields.filter((field) => field.is_enabled)
   if (!askName && !askFulfillment && !allowNotes && activeCustomFields.length === 0) return null
@@ -65,15 +99,12 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, cus
               <span className="flex items-center gap-2"><UserRound className="size-3.5" />Tu nombre</span>
               <RequiredBadge />
             </span>
-            <input
+            <SingleLineTextField
               value={value.customerName ?? ''}
-              onChange={(event) => onChange({ ...value, customerName: event.target.value.slice(0, 80) })}
+              onChange={(customerName) => onChange({ ...value, customerName })}
               placeholder="Ej: Lucas"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck={false}
-              className="store-form-control min-h-11 w-full rounded-[var(--store-button-radius)] border px-3.5 text-sm outline-none transition focus:ring-2"
-              style={readableFieldStyle}
+              maxLength={80}
+              ariaLabel="Tu nombre"
             />
           </label>
         ) : null}
@@ -126,14 +157,12 @@ export function CheckoutDetailsFields({ askName, askFulfillment, allowNotes, cus
                 style={readableFieldStyle}
               />
             ) : (
-              <input
+              <SingleLineTextField
                 value={value.custom?.[field.id] ?? ''}
-                onChange={(event) => setCustomValue(field.id, event.target.value.slice(0, 120))}
+                onChange={(nextValue) => setCustomValue(field.id, nextValue)}
                 placeholder={field.placeholder ?? ''}
-                autoComplete="off"
-                autoCorrect="off"
-                className="store-form-control min-h-11 w-full rounded-[var(--store-button-radius)] border px-3.5 text-sm outline-none focus:ring-2"
-                style={readableFieldStyle}
+                maxLength={120}
+                ariaLabel={field.label}
               />
             )}
           </label>
