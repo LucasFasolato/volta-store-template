@@ -1,14 +1,12 @@
 import { StoreInteractiveShell } from '@/components/landing/StoreInteractiveShell'
-import { CatalogDiscoveryControls } from '@/components/landing/CatalogDiscoveryControls'
-import { CatalogSection } from '@/components/landing/CatalogSection'
-import { CatalogSections } from '@/components/landing/CatalogSections'
+import { CatalogExperience } from '@/components/landing/CatalogExperience'
 import { FeaturedSection } from '@/components/landing/FeaturedSection'
 import { HeroSection } from '@/components/landing/HeroSection'
 import { StoreFooter } from '@/components/landing/StoreFooter'
 import { StoreNav } from '@/components/landing/StoreNav'
 import { TrustBar } from '@/components/landing/TrustBar'
 import { getStorefrontDensityMode } from '@/components/landing/storefront-density'
-import { isProductSoldOut } from '@/lib/products/availability'
+import { getAvailableOptionValues, isProductSoldOut } from '@/lib/products/availability'
 import { isProductOnPromotion } from '@/lib/products/promotion'
 import { getRelatedProducts } from '@/lib/products/recommendations'
 import { normalizeSalesSettings } from '@/lib/sales/settings'
@@ -38,13 +36,6 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
     view.activeCategory || view.activeBrand || view.activePromotion || view.query || view.sort !== 'recommended',
   )
   const showFeaturedSection = layout.show_featured && featuredCount > 0 && visibleProductCount > 5 && !hasDiscoverySelection
-  const showDiscoveryControls = layout.show_catalog && (
-    showCatalogSearch ||
-    (layout.show_categories && categories.length > 0) ||
-    showCatalogBrands ||
-    hasPromotions ||
-    showSort
-  )
   const closeModalHref = buildStorefrontHref(pathname, {
     category: view.activeCategory,
     brand: view.activeBrand,
@@ -64,7 +55,7 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
       name: product.name,
       price: product.price,
       imageUrl: product.images[0]?.url ?? null,
-      options: product.options.map((option) => ({ name: option.name, values: option.values })),
+      options: product.options.map((option) => ({ name: option.name, values: getAvailableOptionValues(option) })),
     }))
   const relatedProducts = view.selectedProduct
     ? getRelatedProducts(view.selectedProduct, data.products, 4).map((product) => ({
@@ -87,12 +78,26 @@ export function StoreLayout({ data, pathname, view }: StoreLayoutProps) {
       <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-0 h-[34rem]" style={{ background: 'radial-gradient(circle at 10% 18%, var(--store-glow), transparent 26%), radial-gradient(circle at 88% 0%, rgba(255,255,255,0.08), transparent 26%)' }} />
       <StoreNav store={store} containerClass={containerClass} productCount={visibleProductCount} densityMode={densityMode} />
       <main id="main-content" className="relative z-10 pb-20 sm:pb-8">
-        {layout.show_hero ? <HeroSection content={content} store={store} containerClass={containerClass} productCount={availableProductCount} categoryCount={categoryCount} featuredCount={featuredCount} densityMode={densityMode} /> : null}
+        {layout.show_hero ? <HeroSection content={content} store={store} containerClass={containerClass} productCount={availableProductCount} categoryCount={categoryCount} featuredCount={featuredCount} densityMode={densityMode} catalogTarget={showFeaturedSection ? '#destacados' : '#catalogo'} /> : null}
         <TrustBar store={store} content={content} productCount={availableProductCount} categoryCount={categoryCount} />
         {showFeaturedSection ? <FeaturedSection products={view.featuredProducts} pathname={pathname} routeState={view} theme={theme} containerClass={containerClass} productCount={visibleProductCount} /> : null}
-        {showDiscoveryControls ? <CatalogDiscoveryControls pathname={pathname} routeState={view} categories={categories} brands={brands} hasPromotions={hasPromotions} showSearch={showCatalogSearch} showCategories={layout.show_categories} showBrands={showCatalogBrands} showSort={showSort} containerClass={containerClass} /> : null}
-        {layout.show_catalog && catalogMode === 'sections' && !hasDiscoverySelection ? <CatalogSections products={data.products} categories={categories} theme={theme} containerClass={containerClass} pathname={pathname} /> : null}
-        {layout.show_catalog && (catalogMode !== 'sections' || hasDiscoverySelection) ? <CatalogSection products={view.paginatedProducts} totalFiltered={view.filteredProducts.length} categories={[]} theme={theme} containerClass={containerClass} pathname={pathname} routeState={view} totalPages={view.totalPages} catalogSize={densityMode} /> : null}
+        {layout.show_catalog ? (
+          <CatalogExperience
+            products={data.products}
+            categories={categories}
+            brands={brands}
+            pathname={pathname}
+            routeState={view}
+            theme={theme}
+            containerClass={containerClass}
+            catalogMode={catalogMode}
+            hasPromotions={hasPromotions}
+            showSearch={showCatalogSearch}
+            showCategories={layout.show_categories}
+            showBrands={showCatalogBrands}
+            showSort={showSort}
+          />
+        ) : null}
       </main>
       {layout.show_footer ? <StoreFooter store={store} containerClass={containerClass} productCount={availableProductCount} categoryCount={categoryCount} /> : null}
       <StoreInteractiveShell closeModalHref={closeModalHref} selectedProduct={view.selectedProduct} relatedProducts={relatedProducts} storeId={store.id} storeName={store.name} storeRootId={storeRootId} storeSlug={store.slug} theme={theme} whatsapp={store.whatsapp} checkoutAskName={store.checkout_ask_name ?? true} checkoutAskFulfillment={store.checkout_ask_fulfillment ?? true} checkoutAllowNotes={store.checkout_allow_notes ?? true} checkoutFields={checkoutFields} salesSettings={salesSettings} repeatableProducts={repeatableProducts} />

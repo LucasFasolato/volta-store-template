@@ -66,9 +66,41 @@ function revalidateStorePaths(storeSlug: string) {
 
 function productWriteError(error: { code?: string; message: string }) {
   if (error.code === '23505') {
-    return { formErrors: ['El SKU ya está usado por otro producto.'], fieldErrors: {} }
+    return { formErrors: ['Ese producto ya se está creando o el SKU ya está usado.'], fieldErrors: {} }
   }
   return { formErrors: [error.message], fieldErrors: {} }
+}
+
+function sameNullable(left: string | null | undefined, right: string | null | undefined) {
+  return (left ?? null) === (right ?? null)
+}
+
+async function findRecentEquivalentProduct({
+  db,
+  storeId,
+  data,
+}: {
+  db: any
+  storeId: string
+  data: ProductInput
+}) {
+  const since = new Date(Date.now() - 20_000).toISOString()
+  const { data: candidates, error } = await db
+    .from('products')
+    .select('id, name, price, category_id, brand_id, sku, created_at')
+    .eq('store_id', storeId)
+    .eq('name', data.name.trim())
+    .eq('price', data.price)
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+    .limit(5)
+
+  if (error) return null
+  return (candidates ?? []).find((candidate: any) =>
+    sameNullable(candidate.category_id, data.category_id) &&
+    sameNullable(candidate.brand_id, data.brand_id) &&
+    sameNullable(candidate.sku, data.sku?.trim() || null),
+  ) ?? null
 }
 
 export async function createProduct(input: ProductInput) {
@@ -76,7 +108,17 @@ export async function createProduct(input: ProductInput) {
   if (!validated.success) return { error: validated.error.flatten() }
   const { supabase, store } = await requireAuthenticatedStoreContext()
   const db = supabase as any
-  const data = validated.data
+  const data = { ...validated.data, name: validated.data.name.trim() }
+
+  // The form already locks while saving, but mobile double taps/retries can still
+  // reach the server twice. Reuse a just-created equivalent product instead of
+  // silently generating a second slug (producto-1).
+  const recentEquivalent = await findRecentEquivalentProduct({ db, storeId: store.id, data })
+  if (recentEquivalent) {
+    revalidateStorePaths(store.slug)
+    return { success: true, productId: recentEquivalent.id, reused: true }
+  }
+
   const slug = await getUniqueSlug({ supabase, table: 'products', storeId: store.id, value: data.name })
   const { data: product, error } = await db
     .from('products')
@@ -98,7 +140,18 @@ export async function createProduct(input: ProductInput) {
     })
     .select('id, slug')
     .single()
-  if (error) return { error: productWriteError(error) }
+
+  if (error) {
+    if (error.code === '23505') {
+      const equivalentAfterCollision = await findRecentEquivalentProduct({ db, storeId: store.id, data })
+      if (equivalentAfterCollision) {
+        revalidateStorePaths(store.slug)
+        return { success: true, productId: equivalentAfterCollision.id, reused: true }
+      }
+    }
+    return { error: productWriteError(error) }
+  }
+
   revalidateStorePaths(store.slug)
   return { success: true, productId: product.id }
 }

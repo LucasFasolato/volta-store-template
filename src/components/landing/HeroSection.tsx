@@ -14,11 +14,12 @@ type HeroSectionProps = {
   categoryCount: number
   featuredCount: number
   densityMode: StorefrontDensityMode
+  catalogTarget?: '#destacados' | '#catalogo'
 }
 
 const HERO_WEIGHT: Record<string, number> = { medium: 560, semibold: 640, bold: 720 }
 
-export function HeroSection({ content, store, containerClass, productCount, densityMode }: HeroSectionProps) {
+export function HeroSection({ content, store, containerClass, productCount, densityMode, catalogTarget = '#catalogo' }: HeroSectionProps) {
   const whatsappHref = store.whatsapp ? `https://wa.me/${sanitizePhoneNumber(store.whatsapp)}` : '#catalogo'
   const hasImage = !!content.hero_image_url
   const compact = densityMode === 'small'
@@ -88,7 +89,7 @@ export function HeroSection({ content, store, containerClass, productCount, dens
           <p className="mt-5 max-w-xl text-balance leading-7 sm:text-[1.05rem] sm:leading-8" style={{ color: softForeground }}>{content.hero_subtitle}</p>
 
           <div className={cn('mt-7 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap', centered && 'justify-center')}>
-            <a href="#catalogo" className="store-button inline-flex items-center justify-center gap-2 px-6 text-sm font-semibold transition hover:-translate-y-0.5" style={{ backgroundColor: 'var(--store-primary)', color: 'var(--store-primary-contrast)' }}>
+            <a href={catalogTarget} className="store-button inline-flex items-center justify-center gap-2 px-6 text-sm font-semibold transition hover:-translate-y-0.5" style={{ backgroundColor: 'var(--store-primary)', color: 'var(--store-primary-contrast)' }}>
               Ver productos
               <ArrowDownRight className="size-4" />
             </a>

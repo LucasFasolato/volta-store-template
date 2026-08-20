@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Check, PackageX, Plus, ShoppingBag } from 'lucide-react'
-import { isProductSoldOut } from '@/lib/products/availability'
+import { isProductPurchasable, isProductSoldOut } from '@/lib/products/availability'
+import { getProductOptionSummary } from '@/lib/products/options-display'
 import { useCartStore } from '@/lib/stores/cart'
 import { normalizeCardLayout } from '@/lib/utils/card-layout'
 import { formatCurrency } from '@/lib/utils/format'
@@ -17,12 +18,12 @@ export function CatalogProductCard({ product, productHref, theme }: Props) {
   const addItem = useCartStore((state) => state.addItem)
   const coverImage = product.images?.[0]
   const hasOptions = (product.options?.length ?? 0) > 0
-  const soldOut = isProductSoldOut(product)
+  const soldOut = isProductSoldOut(product) || !isProductPurchasable(product)
   const [added, setAdded] = useState(false)
   const addedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const cardModel = normalizeCardLayout(theme.card_layout)
   const discountPct = product.compare_price && product.compare_price > product.price ? Math.round((1 - product.price / product.compare_price) * 100) : null
-  const summary = product.short_description || (hasOptions ? product.options!.map((option) => option.name).join(' / ') : null)
+  const summary = product.short_description || (hasOptions ? getProductOptionSummary(product.options) : null)
   const imageRatio = theme.image_ratio === '1:1' ? 'aspect-square' : theme.image_ratio === '3:4' ? 'aspect-[3/4]' : theme.image_ratio === '16:9' ? 'aspect-video' : 'aspect-[4/5]'
 
   useEffect(() => () => { if (addedTimer.current) clearTimeout(addedTimer.current) }, [])
