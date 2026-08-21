@@ -7,6 +7,8 @@ import { AnalyticsConversionFunnel } from '@/components/admin/analytics/Analytic
 import { AnalyticsMetricCard } from '@/components/admin/analytics/AnalyticsMetricCard'
 import { AnalyticsOpportunities } from '@/components/admin/analytics/AnalyticsOpportunities'
 import { AnalyticsTopProducts } from '@/components/admin/analytics/AnalyticsTopProducts'
+import { AnalyticsTrafficSources } from '@/components/admin/analytics/AnalyticsTrafficSources'
+import type { StoreAttributionSummary } from '@/lib/queries/attribution'
 import type { AnalyticsPeriodKey, StoreAnalyticsSummary } from '@/lib/queries/analytics'
 
 const PERIODS: Array<{ key: AnalyticsPeriodKey; label: string }> = [
@@ -15,7 +17,7 @@ const PERIODS: Array<{ key: AnalyticsPeriodKey; label: string }> = [
   { key: '90d', label: '90 días' },
 ]
 
-export function StoreAnalyticsPanel({ analytics }: { analytics: StoreAnalyticsSummary }) {
+export function StoreAnalyticsPanel({ analytics, attribution }: { analytics: StoreAnalyticsSummary; attribution: StoreAttributionSummary }) {
   const [period, setPeriod] = useState<AnalyticsPeriodKey>('30d')
 
   if (!analytics.available) {
@@ -82,6 +84,7 @@ export function StoreAnalyticsPanel({ analytics }: { analytics: StoreAnalyticsSu
           </div>
 
           <AnalyticsOpportunities snapshot={snapshot} />
+          <AnalyticsTrafficSources snapshot={attribution.periods[period]} available={attribution.available} />
           <AnalyticsActivityChart data={snapshot.daily} />
 
           <div className="grid gap-3.5 lg:grid-cols-[0.88fr_1.12fr] lg:gap-4">
