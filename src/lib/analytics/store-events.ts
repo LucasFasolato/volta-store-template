@@ -76,6 +76,9 @@ export function trackStoreEvent({ storeId, type, productId = null, dedupeKey }: 
   if (storageKey && window.sessionStorage.getItem(storageKey)) return
 
   const supabase = createClient()
+  // The additive migration is already live; keep this narrow cast until the next
+  // generated Database type refresh so preview rollouts remain backward-safe.
+  const events = supabase.from('store_events') as any
   const sessionId = getSessionId()
   const attribution = getSessionAttribution()
   const basePayload = {
@@ -85,20 +88,19 @@ export function trackStoreEvent({ storeId, type, productId = null, dedupeKey }: 
     session_id: sessionId,
   }
 
-  void supabase
-    .from('store_events')
+  void events
     .insert({
       ...basePayload,
       traffic_source: attribution.source,
       campaign: attribution.campaign,
     })
-    .then(async ({ error }) => {
+    .then(async ({ error }: { error: { message?: string | null } | null }) => {
       let finalError = error
 
       // Preview deployments can briefly run before the additive migration reaches
-      // production. Keep analytics alive during that safe rollout window.
+      // their connected database. Keep analytics alive during that safe rollout window.
       if (error && isMissingAttributionColumn(error)) {
-        const fallback = await supabase.from('store_events').insert(basePayload)
+        const fallback = await events.insert(basePayload)
         finalError = fallback.error
       }
 
