@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test src/lib/products/ownership.test.mjs src/lib/billing/complimentary.test.mjs src/lib/auth/redirects.test.mjs"
+    "test": "node --experimental-strip-types --test src/lib/products/ownership.test.mjs src/lib/billing/complimentary.test.mjs src/lib/auth/redirects.test.mjs src/lib/sharing/links.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
