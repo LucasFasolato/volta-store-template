@@ -1,4 +1,5 @@
 import { buildActivationFlowSteps, buildStoreLaunchPlan } from '@/lib/dashboard/store-launch'
+import { getStoreAttribution } from '@/lib/queries/attribution'
 import { getStoreAnalytics } from '@/lib/queries/analytics'
 import { getAdminCategories, getAdminProducts } from '@/lib/queries/store'
 import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
@@ -16,8 +17,11 @@ export default async function AdminPage() {
   const activeProductCount = activeProducts.length
 
   if (plan.isPublished) {
-    const analytics = await getStoreAnalytics(storeData.store.id, products)
-    return <StoreDashboard plan={plan} storeName={storeData.store.name} analytics={analytics} />
+    const [analytics, attribution] = await Promise.all([
+      getStoreAnalytics(storeData.store.id, products),
+      getStoreAttribution(storeData.store.id),
+    ])
+    return <StoreDashboard plan={plan} storeName={storeData.store.name} analytics={analytics} attribution={attribution} />
   }
 
   return (

@@ -60,6 +60,30 @@ export async function getStoreBySlug(slug: string): Promise<StorePublicData | nu
   }
 }
 
+export async function resolveHistoricalStoreSlug(slug: string): Promise<string | null> {
+  const supabase = await createClient()
+  const db = supabase as any
+
+  const { data: history, error: historyError } = await db
+    .from('store_slug_history')
+    .select('store_id')
+    .eq('slug', slug)
+    .maybeSingle()
+
+  if (historyError || !history?.store_id) return null
+
+  const { data: store } = await supabase
+    .from('stores')
+    .select('slug')
+    .eq('id', history.store_id)
+    .eq('status', 'published')
+    .eq('is_active', true)
+    .maybeSingle()
+
+  if (!store?.slug || store.slug === slug) return null
+  return store.slug
+}
+
 export async function getAdminStore(userId: string): Promise<AdminStoreData | null> {
   return getOwnerStoreData(userId) as Promise<AdminStoreData | null>
 }
