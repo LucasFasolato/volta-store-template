@@ -95,7 +95,7 @@ export function ActivationWizard({
         {activeIndex === 2 ? <WizardStepProduct categories={categories} activeProductCount={activeProductCount} /> : null}
         {activeIndex === 3 ? (
           <WizardStepStyle
-            publicPath={plan.publicPath}
+            previewPath={plan.previewPath}
             publicUrl={plan.publicUrl}
             storeName={storeData.store.name}
             hasExistingStyle={Boolean(styleDone)}
