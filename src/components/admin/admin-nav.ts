@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   CreditCard,
   LayoutDashboard,
   Package,
@@ -19,6 +20,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { href: '/admin/tienda', label: 'Apariencia', icon: Palette },
   { href: '/admin/catalogo', label: 'Productos', icon: Package },
   { href: '/admin/compartir', label: 'Compartir', icon: Share2 },
+  { href: '/admin/rendimiento', label: 'Rendimiento', icon: BarChart3 },
   { href: '/admin/plan', label: 'Plan', icon: CreditCard },
   { href: '/admin/negocio', label: 'Configuración', icon: Settings },
 ]

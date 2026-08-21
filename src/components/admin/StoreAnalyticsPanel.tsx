@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { Eye, MessageCircle, PackageOpen, ShoppingBag, TriangleAlert } from 'lucide-react'
 import { AnalyticsActivityChart } from '@/components/admin/analytics/AnalyticsActivityChart'
 import { AnalyticsConversionFunnel } from '@/components/admin/analytics/AnalyticsConversionFunnel'
-import { AnalyticsInsightCard } from '@/components/admin/analytics/AnalyticsInsightCard'
 import { AnalyticsMetricCard } from '@/components/admin/analytics/AnalyticsMetricCard'
+import { AnalyticsOpportunities } from '@/components/admin/analytics/AnalyticsOpportunities'
 import { AnalyticsTopProducts } from '@/components/admin/analytics/AnalyticsTopProducts'
 import type { AnalyticsPeriodKey, StoreAnalyticsSummary } from '@/lib/queries/analytics'
 
@@ -42,15 +42,16 @@ export function StoreAnalyticsPanel({ analytics }: { analytics: StoreAnalyticsSu
         <div>
           <p className="admin-label">Rendimiento</p>
           <h2 className="mt-1 text-lg font-semibold tracking-[-0.035em] text-foreground sm:text-xl">Qué está pasando en tu tienda</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Datos simples para entender interés, carrito y pedidos por WhatsApp.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Visitas, interés, carrito y WhatsApp convertidos en decisiones simples.</p>
         </div>
 
-        <div className="inline-flex w-fit rounded-[11px] border border-black/8 bg-white p-1 dark:border-white/10 dark:bg-[#111820]">
+        <div className="inline-flex w-fit rounded-[11px] border border-black/8 bg-white p-1 dark:border-white/10 dark:bg-[#111820]" aria-label="Período de estadísticas">
           {PERIODS.map((option) => (
             <button
               key={option.key}
               type="button"
               onClick={() => setPeriod(option.key)}
+              aria-pressed={period === option.key}
               className={`min-h-8 rounded-[8px] px-3 text-xs font-semibold transition ${
                 period === option.key
                   ? 'bg-slate-100 text-foreground dark:bg-white/10'
@@ -80,14 +81,13 @@ export function StoreAnalyticsPanel({ analytics }: { analytics: StoreAnalyticsSu
             <AnalyticsMetricCard icon={MessageCircle} label="WhatsApp" metric={snapshot.whatsappClicks} highlight />
           </div>
 
+          <AnalyticsOpportunities snapshot={snapshot} />
           <AnalyticsActivityChart data={snapshot.daily} />
 
           <div className="grid gap-3.5 lg:grid-cols-[0.88fr_1.12fr] lg:gap-4">
             <AnalyticsConversionFunnel snapshot={snapshot} />
             <AnalyticsTopProducts snapshot={snapshot} />
           </div>
-
-          {snapshot.insight ? <AnalyticsInsightCard insight={snapshot.insight} /> : null}
         </>
       )}
     </section>
