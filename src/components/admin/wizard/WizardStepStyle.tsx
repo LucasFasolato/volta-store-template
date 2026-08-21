@@ -15,12 +15,12 @@ import { cn } from '@/lib/utils'
 const ACTIVATION_PRESETS = THEME_PRESETS.filter((preset) => ['minimal', 'fashion', 'organic'].includes(preset.id))
 
 export function WizardStepStyle({
-  publicPath,
+  previewPath,
   publicUrl,
   storeName,
   hasExistingStyle,
 }: {
-  publicPath: string
+  previewPath: string
   publicUrl: string
   storeName: string
   hasExistingStyle: boolean
@@ -160,7 +160,7 @@ export function WizardStepStyle({
           {isPending ? <Loader2 className="size-4 animate-spin" /> : <Rocket className="size-4" />}
           {isPending ? 'Publicando tu tienda…' : 'Publicar mi tienda'}
         </button>
-        <Link href={publicPath} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 px-3 text-sm font-semibold text-muted-foreground transition hover:text-foreground">
+        <Link href={previewPath} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 px-3 text-sm font-semibold text-muted-foreground transition hover:text-foreground">
           Ver vista previa <ExternalLink className="size-4" />
         </Link>
       </div>
