@@ -4,10 +4,10 @@ import { redirect } from 'next/navigation'
 import {
   ArrowRight,
   BarChart3,
+  Camera,
   Check,
   CheckCircle2,
   Clock3,
-  Instagram,
   Link2,
   MessageCircle,
   PackageCheck,
@@ -280,7 +280,7 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
             ))}
           </div>
           <div className="mt-12 grid gap-4 md:grid-cols-3">
-            <ChannelCard icon={<Instagram className="size-5" />} title="Instagram">Link en bio, historias, campañas o respuestas rápidas.</ChannelCard>
+            <ChannelCard icon={<Camera className="size-5" />} title="Instagram">Link en bio, historias, campañas o respuestas rápidas.</ChannelCard>
             <ChannelCard icon={<MessageCircle className="size-5" />} title="WhatsApp">Mandá tu tienda en vez de reenviar fotos y precios todo el día.</ChannelCard>
             <ChannelCard icon={<QrCode className="size-5" />} title="QR y presencial">Convertí mostrador, packaging, ferias o folletería en acceso directo al catálogo.</ChannelCard>
           </div>
