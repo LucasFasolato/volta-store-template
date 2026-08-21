@@ -12,6 +12,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import { requireAuthenticatedStoreContext } from '@/lib/server/store-context'
 import { categorySchema, productSchema } from '@/lib/validations/product'
+import { validateOwnedProductRelations } from '@/lib/products/ownership'
 import { slugify } from '@/lib/utils/format'
 import type { CategoryInput, ProductInput } from '@/lib/validations/product'
 
@@ -130,6 +131,16 @@ export async function createProduct(input: ProductInput) {
   const { supabase, store } = await requireAuthenticatedStoreContext()
   const db = supabase as any
   const data = { ...validated.data, name: validated.data.name.trim() }
+  const relationError = await validateOwnedProductRelations(
+    db,
+    store.id,
+    data.category_id,
+    data.brand_id,
+  )
+
+  if (relationError) {
+    return { error: { formErrors: [relationError], fieldErrors: {} } }
+  }
 
   // The form already locks while saving, but mobile double taps/retries can still
   // reach the server twice. Reuse a just-created equivalent product instead of
@@ -183,6 +194,17 @@ export async function updateProduct(productId: string, input: ProductInput) {
   const { supabase, store } = await requireAuthenticatedStoreContext()
   const db = supabase as any
   const data = validated.data
+  const relationError = await validateOwnedProductRelations(
+    db,
+    store.id,
+    data.category_id,
+    data.brand_id,
+  )
+
+  if (relationError) {
+    return { error: { formErrors: [relationError], fieldErrors: {} } }
+  }
+
   const { error } = await db
     .from('products')
     .update({
@@ -404,14 +426,6 @@ export async function updateCategory(categoryId: string, input: CategoryInput) {
 export async function deleteCategory(categoryId: string) {
   const { supabase, store } = await requireAuthenticatedStoreContext()
   const { error } = await supabase.from('categories').delete().eq('id', categoryId).eq('store_id', store.id)
-  if (error) return { error: error.message }
-  revalidateStorePaths(store.slug)
-  return { success: true }
-}
-
-export async function assignProductToCategory(productId: string, categoryId: string) {
-  const { supabase, store } = await requireAuthenticatedStoreContext()
-  const { error } = await supabase.from('products').update({ category_id: categoryId }).eq('id', productId).eq('store_id', store.id)
   if (error) return { error: error.message }
   revalidateStorePaths(store.slug)
   return { success: true }
