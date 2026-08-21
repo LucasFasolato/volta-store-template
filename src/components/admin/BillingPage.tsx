@@ -1,13 +1,12 @@
 import {
-  BadgeCheck,
   CalendarDays,
   Check,
   CreditCard,
   Gift,
   ShieldCheck,
-  Sparkles,
 } from 'lucide-react'
 import { BillingActions } from '@/components/admin/BillingActions'
+import { PlanValueShowcase } from '@/components/admin/PlanValueShowcase'
 import { formatBillingAmount, formatBillingDate, VOLTA_BILLING_PLAN } from '@/lib/billing/plan'
 import type { BillingOverview, BillingStatus } from '@/lib/billing/types'
 
@@ -51,8 +50,8 @@ export function BillingPage({ storeName, overview }: { storeName: string; overvi
         <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="admin-label">Plan y facturación</p>
-            <h1 className="mt-1 text-[1.85rem] font-semibold tracking-tight text-foreground">Plan VOLTA</h1>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">Una sola suscripción, sin niveles ni extras. Todo VOLTA incluido para {storeName}.</p>
+            <h1 className="mt-1 text-[1.85rem] font-semibold tracking-tight text-foreground">Tu plan VOLTA</h1>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">Tu suscripción actual, todo lo que incluye y el camino a VOLTA PRO para {storeName}.</p>
           </div>
           <span className={`inline-flex w-fit items-center rounded-full px-3 py-1.5 text-xs font-semibold ${statusCopy.className}`}>{statusCopy.label}</span>
         </header>
@@ -88,7 +87,7 @@ export function BillingPage({ storeName, overview }: { storeName: string; overvi
           <section className="overflow-hidden rounded-[20px] border border-black/8 bg-white shadow-[0_18px_48px_rgba(15,23,42,.06)] dark:border-white/10 dark:bg-[#111820] dark:shadow-none">
             <div className="grid lg:grid-cols-[1.12fr_.88fr]">
               <div className="p-5 sm:p-7 lg:p-8">
-                <div className="flex items-center gap-2 text-[#0e9f6e] dark:text-[#12e89a]"><Sparkles className="size-4" /><span className="text-xs font-semibold uppercase tracking-[0.16em]">Precio de lanzamiento</span></div>
+                <div className="text-[#0e9f6e] dark:text-[#12e89a]"><span className="text-xs font-semibold uppercase tracking-[0.16em]">Precio de lanzamiento</span></div>
                 <div className="mt-4 flex flex-wrap items-end gap-x-3 gap-y-1"><span className="text-4xl font-semibold tracking-[-0.045em] text-foreground sm:text-5xl">{formatBillingAmount(VOLTA_BILLING_PLAN.introAmount)}</span><span className="pb-1 text-sm font-medium text-muted-foreground">/ mes</span></div>
                 <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">Durante los primeros 3 meses. Desde el cuarto mes, el plan pasa automáticamente a {formatBillingAmount(VOLTA_BILLING_PLAN.standardAmount)} por mes.</p>
                 <div className="mt-6 grid gap-2.5 sm:grid-cols-3">
@@ -119,9 +118,11 @@ export function BillingPage({ storeName, overview }: { storeName: string; overvi
           </section>
         )}
 
-        <section className="grid gap-4 md:grid-cols-[1fr_1fr]">
-          <div className="rounded-[16px] border border-black/8 bg-white p-5 dark:border-white/10 dark:bg-[#111820]"><div className="flex items-center gap-2"><BadgeCheck className="size-4 text-[#0e9f6e] dark:text-[#12e89a]" /><h2 className="text-sm font-semibold text-foreground">Qué incluye</h2></div><p className="mt-3 text-sm leading-6 text-muted-foreground">Catálogo, tienda pública, personalización, pedidos por WhatsApp, analítica y las mejoras que se incorporen al producto. Sin módulos pagos separados.</p></div>
-          <div className="rounded-[16px] border border-black/8 bg-white p-5 dark:border-white/10 dark:bg-[#111820]"><div className="flex items-center gap-2"><ShieldCheck className="size-4 text-[#0e9f6e] dark:text-[#12e89a]" /><h2 className="text-sm font-semibold text-foreground">{complimentary ? 'Acceso administrado por VOLTA' : 'Cobro seguro'}</h2></div><p className="mt-3 text-sm leading-6 text-muted-foreground">{complimentary ? 'Tu bonificación se gestiona de forma interna. No necesitás cargar un medio de pago mientras esté vigente.' : 'VOLTA no guarda datos de tarjeta. La autorización y los cobros recurrentes se realizan en Mercado Pago.'}</p></div>
+        <PlanValueShowcase complimentary={complimentary} />
+
+        <section className="rounded-[16px] border border-black/8 bg-white p-5 dark:border-white/10 dark:bg-[#111820]">
+          <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-[#0e9f6e] dark:text-[#12e89a]" /><h2 className="text-sm font-semibold text-foreground">{complimentary ? 'Acceso administrado por VOLTA' : 'Cobro seguro'}</h2></div>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">{complimentary ? 'Tu bonificación se gestiona de forma interna. No necesitás cargar un medio de pago mientras esté vigente.' : 'VOLTA no guarda datos de tarjeta. La autorización y los cobros recurrentes se realizan en Mercado Pago.'}</p>
         </section>
 
         {overview.payments.length ? (

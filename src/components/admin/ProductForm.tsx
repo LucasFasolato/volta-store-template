@@ -45,6 +45,7 @@ import {
   validateDraftProductOptions,
   type DraftProductOption,
 } from '@/lib/products/options'
+import { buildImageQualityHint, IMAGE_WIDTH_GUIDANCE } from '@/lib/images/upload-guidance'
 import { formatCurrency } from '@/lib/utils/format'
 import { productSchema, type ProductInput } from '@/lib/validations/product'
 import type { Brand, Category, ProductImage, ProductWithImages } from '@/types/store'
@@ -56,11 +57,35 @@ type ProductFormProps = {
   productId?: string
 }
 
-const MIN_PRODUCT_IMAGE_WIDTH = 800
 
 function parsePesoInput(value: string) {
   const digits = value.replace(/\D/g, '')
   return digits === '' ? 0 : Number(digits)
+}
+
+function readImageWidth(file: File) {
+  return new Promise<number | null>((resolve) => {
+    const image = document.createElement('img')
+    const objectUrl = URL.createObjectURL(file)
+
+    image.onload = () => {
+      const width = image.naturalWidth || null
+      URL.revokeObjectURL(objectUrl)
+      resolve(width)
+    }
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl)
+      resolve(null)
+    }
+    image.src = objectUrl
+  })
+}
+
+async function showImageQualityHint(file: File) {
+  const width = await readImageWidth(file)
+  if (!width) return
+  const hint = buildImageQualityHint('product', width)
+  if (hint) toast.info(hint)
 }
 
 export function ProductForm({ product, categories, brands, productId }: ProductFormProps) {
@@ -171,19 +196,7 @@ export function ProductForm({ product, categories, brands, productId }: ProductF
   async function validateImage(file: File) {
     if (!file.type.startsWith('image/')) return 'Solo se aceptan imagenes JPG, PNG o WebP.'
     if (file.size > 10 * 1024 * 1024) return 'La imagen no puede superar los 10 MB.'
-
-    return new Promise<string | null>((resolve) => {
-      const image = document.createElement('img')
-      image.onload = () => {
-        URL.revokeObjectURL(image.src)
-        if (image.naturalWidth < MIN_PRODUCT_IMAGE_WIDTH) {
-          resolve(`La imagen debe tener al menos ${MIN_PRODUCT_IMAGE_WIDTH}px de ancho.`)
-          return
-        }
-        resolve(null)
-      }
-      image.src = URL.createObjectURL(file)
-    })
+    return null
   }
 
   async function handleCoverChange(event: ChangeEvent<HTMLInputElement>) {
@@ -199,6 +212,7 @@ export function ProductForm({ product, categories, brands, productId }: ProductF
     }
 
     setImageError(null)
+    await showImageQualityHint(file)
     setLocalCoverPreview(file)
     event.target.value = ''
   }
@@ -218,6 +232,7 @@ export function ProductForm({ product, categories, brands, productId }: ProductF
     }
 
     setImageError(null)
+    await showImageQualityHint(file)
     setIsUploadingGallery(true)
 
     const formData = new FormData()
@@ -439,6 +454,7 @@ export function ProductForm({ product, categories, brands, productId }: ProductF
                     onChange={handleCoverChange}
                     className="hidden"
                     disabled={isSubmitting}
+                    data-volta-image-profile="product"
                   />
                   <div className="flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
                     <ImagePlus className="size-5 text-muted-foreground" />
@@ -446,7 +462,10 @@ export function ProductForm({ product, categories, brands, productId }: ProductF
                   <div>
                     <p className="text-sm font-medium text-foreground">Subir portada</p>
                     <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      JPG, PNG o WebP. Minimo {MIN_PRODUCT_IMAGE_WIDTH}px de ancho.
+                      JPG, PNG o WebP. VOLTA la optimiza automáticamente.
+                    </p>
+                    <p className="mt-1 text-[11px] leading-5 text-muted-foreground/75">
+                      Recomendamos {IMAGE_WIDTH_GUIDANCE.product.recommended}px o más para máxima nitidez, pero no es obligatorio.
                     </p>
                   </div>
                 </label>
@@ -460,6 +479,7 @@ export function ProductForm({ product, categories, brands, productId }: ProductF
                     onChange={handleCoverChange}
                     className="hidden"
                     disabled={isSubmitting}
+                    data-volta-image-profile="product"
                   />
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition hover:bg-white/10">
                     <Upload className="size-4" />
@@ -670,7 +690,7 @@ export function ProductForm({ product, categories, brands, productId }: ProductF
               <p className="admin-label">Galeria</p>
               <h3 className="mt-2 text-xl font-semibold text-foreground">Imagenes del producto</h3>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Suma fotos extra o refresca la portada sin salir de la ficha.
+                Suma fotos extra o refresca la portada sin salir de la ficha. VOLTA las optimiza automáticamente.
               </p>
             </div>
 
@@ -681,6 +701,7 @@ export function ProductForm({ product, categories, brands, productId }: ProductF
                 onChange={handleGalleryUpload}
                 className="hidden"
                 disabled={isUploadingGallery}
+                data-volta-image-profile="product"
               />
               <span className="inline-flex items-center gap-2 rounded-full bg-emerald-400 px-4 py-2.5 text-sm font-medium text-black transition hover:bg-emerald-300">
                 <Plus className="size-4" />
@@ -688,6 +709,10 @@ export function ProductForm({ product, categories, brands, productId }: ProductF
               </span>
             </label>
           </div>
+
+          <p className="mb-4 text-xs leading-5 text-muted-foreground">
+            Recomendamos {IMAGE_WIDTH_GUIDANCE.product.recommended}px o más para máxima nitidez, pero una imagen más chica también se puede usar.
+          </p>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {images.map((image, index) => (

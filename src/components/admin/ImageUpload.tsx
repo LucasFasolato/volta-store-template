@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { ImageIcon, Loader2, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { optimizeImageForUpload, type ImageUploadProfile } from '@/lib/images/client-optimizer'
+import { buildImageQualityHint, IMAGE_WIDTH_GUIDANCE } from '@/lib/images/upload-guidance'
 import { cn } from '@/lib/utils'
 
 type UploadResult = {
@@ -23,13 +24,6 @@ type ImageUploadProps = {
   optimizationProfile?: ImageUploadProfile
   minWidth?: number
   recommendedWidth?: number
-}
-
-const DEFAULT_MIN_WIDTH = 800
-const RECOMMENDED_WIDTHS: Record<ImageUploadProfile, number> = {
-  product: 800,
-  hero: 1200,
-  logo: 240,
 }
 
 export function ImageUpload({
@@ -52,8 +46,9 @@ export function ImageUpload({
   const displayUrl = preview ?? currentUrl
   const profile: ImageUploadProfile =
     optimizationProfile ?? (fieldName === 'logo' ? 'logo' : fieldName === 'hero' ? 'hero' : 'product')
-  const requiredMinWidth = minWidth ?? (profile === 'hero' ? null : profile === 'logo' ? 240 : DEFAULT_MIN_WIDTH)
-  const suggestedWidth = recommendedWidth ?? RECOMMENDED_WIDTHS[profile]
+  const guidance = IMAGE_WIDTH_GUIDANCE[profile]
+  const requiredMinWidth = minWidth ?? guidance.minimum
+  const suggestedWidth = recommendedWidth ?? guidance.recommended
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const sourceFile = event.target.files?.[0]
@@ -72,11 +67,12 @@ export function ImageUpload({
         throw new Error(`Elegí una imagen de al menos ${requiredMinWidth}px de ancho.`)
       }
 
-      if (optimized.width < suggestedWidth) {
+      const profileHint = buildImageQualityHint(profile, optimized.width)
+      if (profileHint && optimized.width < suggestedWidth) {
         setQualityHint(
-          profile === 'hero'
-            ? `La subimos igual. Para una portada más nítida en pantallas grandes, cuando puedas usá una imagen de ${suggestedWidth}px o más.`
-            : `La subimos igual. Para una imagen más nítida, recomendamos ${suggestedWidth}px o más de ancho.`,
+          recommendedWidth
+            ? `La subimos igual. Para una imagen más nítida, recomendamos ${suggestedWidth}px o más de ancho.`
+            : profileHint,
         )
       }
 
