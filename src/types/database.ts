@@ -357,6 +357,8 @@ export interface Database {
           event_type: 'store_view' | 'product_view' | 'add_to_cart' | 'cart_open' | 'whatsapp_checkout'
           product_id: string | null
           session_id: string | null
+          traffic_source: string | null
+          campaign: string | null
           created_at: string
         }
         Insert: {
@@ -365,12 +367,16 @@ export interface Database {
           event_type: 'store_view' | 'product_view' | 'add_to_cart' | 'cart_open' | 'whatsapp_checkout'
           product_id?: string | null
           session_id?: string | null
+          traffic_source?: string | null
+          campaign?: string | null
           created_at?: string
         }
         Update: {
           event_type?: 'store_view' | 'product_view' | 'add_to_cart' | 'cart_open' | 'whatsapp_checkout'
           product_id?: string | null
           session_id?: string | null
+          traffic_source?: string | null
+          campaign?: string | null
         }
         Relationships: []
       }
