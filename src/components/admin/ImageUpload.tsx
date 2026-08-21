@@ -22,9 +22,15 @@ type ImageUploadProps = {
   className?: string
   optimizationProfile?: ImageUploadProfile
   minWidth?: number
+  recommendedWidth?: number
 }
 
 const DEFAULT_MIN_WIDTH = 800
+const RECOMMENDED_WIDTHS: Record<ImageUploadProfile, number> = {
+  product: 800,
+  hero: 1200,
+  logo: 240,
+}
 
 export function ImageUpload({
   currentUrl,
@@ -35,22 +41,26 @@ export function ImageUpload({
   className,
   optimizationProfile,
   minWidth,
+  recommendedWidth,
 }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [qualityHint, setQualityHint] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const displayUrl = preview ?? currentUrl
   const profile: ImageUploadProfile =
     optimizationProfile ?? (fieldName === 'logo' ? 'logo' : fieldName === 'hero' ? 'hero' : 'product')
-  const requiredMinWidth = minWidth ?? (profile === 'logo' ? 240 : DEFAULT_MIN_WIDTH)
+  const requiredMinWidth = minWidth ?? (profile === 'hero' ? null : profile === 'logo' ? 240 : DEFAULT_MIN_WIDTH)
+  const suggestedWidth = recommendedWidth ?? RECOMMENDED_WIDTHS[profile]
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const sourceFile = event.target.files?.[0]
     if (!sourceFile) return
 
     setError(null)
+    setQualityHint(null)
     setIsUploading(true)
 
     let localPreview: string | null = null
@@ -58,8 +68,16 @@ export function ImageUpload({
     try {
       const optimized = await optimizeImageForUpload(sourceFile, profile)
 
-      if (optimized.width < requiredMinWidth) {
+      if (requiredMinWidth !== null && optimized.width < requiredMinWidth) {
         throw new Error(`Elegí una imagen de al menos ${requiredMinWidth}px de ancho.`)
+      }
+
+      if (optimized.width < suggestedWidth) {
+        setQualityHint(
+          profile === 'hero'
+            ? `La subimos igual. Para una portada más nítida en pantallas grandes, cuando puedas usá una imagen de ${suggestedWidth}px o más.`
+            : `La subimos igual. Para una imagen más nítida, recomendamos ${suggestedWidth}px o más de ancho.`,
+        )
       }
 
       localPreview = URL.createObjectURL(optimized.file)
@@ -71,6 +89,7 @@ export function ImageUpload({
 
       if (result && 'error' in result && result.error) {
         setError(result.error)
+        setQualityHint(null)
         setPreview(null)
       } else if (result && 'url' in result && result.url) {
         setPreview(result.url)
@@ -81,6 +100,7 @@ export function ImageUpload({
           ? uploadError.message
           : 'No pudimos subir la imagen. Intentá nuevamente.',
       )
+      setQualityHint(null)
       setPreview(null)
     } finally {
       setIsUploading(false)
@@ -152,7 +172,9 @@ export function ImageUpload({
                 {isUploading ? 'Preparando imagen…' : label}
               </p>
               <p className="mt-1 text-xs leading-5 text-neutral-400">
-                JPG, PNG o WebP · mínimo {requiredMinWidth}px · original hasta 20 MB
+                JPG, PNG o WebP · original hasta 20 MB
+                {requiredMinWidth !== null ? ` · mínimo ${requiredMinWidth}px` : ''}
+                {suggestedWidth ? ` · recomendado ${suggestedWidth}px o más` : ''}
                 {aspectHint ? ` · sugerido ${aspectHint}` : ''}
               </p>
               <p className="mt-1 text-[11px] leading-5 text-neutral-500">
@@ -166,6 +188,10 @@ export function ImageUpload({
       {error ? (
         <p role="alert" aria-live="polite" className="text-xs leading-5 text-red-300">
           {error}
+        </p>
+      ) : qualityHint ? (
+        <p role="status" aria-live="polite" className="text-xs leading-5 text-amber-300">
+          {qualityHint}
         </p>
       ) : null}
     </div>
