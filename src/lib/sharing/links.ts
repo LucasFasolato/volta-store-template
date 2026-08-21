@@ -11,6 +11,18 @@ function normalizeBaseUrl(value?: string | null) {
   }
 }
 
+export function normalizeTrackingToken(value: string, maxLength = 80) {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-')
+    .slice(0, maxLength)
+}
+
 export function getPublicAppUrl() {
   return normalizeBaseUrl(process.env.NEXT_PUBLIC_APP_URL)
 }
@@ -22,6 +34,20 @@ export function buildStorePublicUrl(slug: string, baseUrl = getPublicAppUrl()) {
 export function buildProductPublicUrl(storeSlug: string, productSlug: string, baseUrl = getPublicAppUrl()) {
   const url = new URL(buildStorePublicUrl(storeSlug, baseUrl))
   url.searchParams.set('producto', productSlug)
+  return url.toString()
+}
+
+export function buildTrackedPublicUrl(publicUrl: string, source: string, campaign?: string | null) {
+  const url = new URL(publicUrl)
+  const normalizedSource = normalizeTrackingToken(source, 64)
+  const normalizedCampaign = campaign ? normalizeTrackingToken(campaign, 80) : ''
+
+  if (normalizedSource) url.searchParams.set('src', normalizedSource)
+  else url.searchParams.delete('src')
+
+  if (normalizedCampaign) url.searchParams.set('campaign', normalizedCampaign)
+  else url.searchParams.delete('campaign')
+
   return url.toString()
 }
 
