@@ -4,7 +4,12 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/server'
 import { requireInternalAdmin } from '@/lib/internal/auth'
-import { cancelMercadoPagoSubscription, isMercadoPagoConfigured } from '@/lib/billing/mercado-pago'
+import {
+  cancelMercadoPagoSubscription,
+  getMercadoPagoSubscription,
+  isMercadoPagoConfigured,
+} from '@/lib/billing/mercado-pago'
+import { ensureMercadoPagoCancellation } from '@/lib/billing/complimentary'
 import { persistProviderSubscription } from '@/lib/billing/service'
 
 const grantSchema = z.object({
@@ -34,6 +39,11 @@ export async function grantComplimentaryAccess(input: {
   })
   if (!parsed.success) return { error: 'Revisá los datos del acceso bonificado.' }
 
+  const expiresAt = parsed.data.expiresOn ? endOfArgentinaDay(parsed.data.expiresOn) : null
+  if (expiresAt && Date.parse(expiresAt) <= Date.now()) {
+    return { error: 'La fecha de vencimiento tiene que ser futura.' }
+  }
+
   const admin = await createAdminClient()
   const db = admin as any
   const { data: store, error: storeError } = await db
@@ -50,8 +60,11 @@ export async function grantComplimentaryAccess(input: {
     .maybeSingle()
   if (subscriptionError) return { error: 'No pudimos comprobar la suscripción actual.' }
 
-  const potentiallyCharging = subscription && !['canceled', 'not_started', 'error'].includes(subscription.status)
-  if (potentiallyCharging) {
+  const requiresProviderCheck = subscription && !(
+    subscription.status === 'canceled' ||
+    (subscription.status === 'not_started' && !subscription.provider_subscription_id)
+  )
+  if (requiresProviderCheck) {
     if (!subscription.provider_subscription_id) {
       return { error: 'La tienda tiene una suscripción en curso sin identificador de proveedor. Revisala antes de bonificar.' }
     }
@@ -60,16 +73,21 @@ export async function grantComplimentaryAccess(input: {
     }
 
     try {
-      const canceled = await cancelMercadoPagoSubscription(subscription.provider_subscription_id)
-      await persistProviderSubscription(parsed.data.storeId, canceled)
+      await ensureMercadoPagoCancellation(
+        parsed.data.storeId,
+        {
+          status: subscription.status,
+          providerSubscriptionId: subscription.provider_subscription_id,
+        },
+        {
+          getSubscription: getMercadoPagoSubscription,
+          cancelSubscription: cancelMercadoPagoSubscription,
+          persistSubscription: persistProviderSubscription,
+        },
+      )
     } catch {
       return { error: 'Mercado Pago no confirmó la cancelación. No aplicamos la bonificación para evitar un cobro accidental.' }
     }
-  }
-
-  const expiresAt = parsed.data.expiresOn ? endOfArgentinaDay(parsed.data.expiresOn) : null
-  if (expiresAt && Date.parse(expiresAt) <= Date.now()) {
-    return { error: 'La fecha de vencimiento tiene que ser futura.' }
   }
 
   const { error } = await db.from('billing_access_overrides').upsert({
