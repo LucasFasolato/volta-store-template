@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import { CheckCircle2, Loader2, Store, TriangleAlert } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { checkStoreSlugAvailability, updateStoreConfig } from '@/lib/actions/store'
+import { checkStoreSlugAvailability, updateStoreConfig } from '@/lib/actions/store-config'
 import { slugify } from '@/lib/utils/format'
 import type { Store as StoreType } from '@/types/store'
 

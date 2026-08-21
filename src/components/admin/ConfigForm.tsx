@@ -10,7 +10,7 @@ import { FormFeedback } from '@/components/common/FormFeedback'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { COPY } from '@/data/system-copy'
-import { checkStoreSlugAvailability, updateStoreConfig } from '@/lib/actions/store'
+import { checkStoreSlugAvailability, updateStoreConfig } from '@/lib/actions/store-config'
 import { sanitizeInstagramHandle, slugify } from '@/lib/utils/format'
 import { storeConfigSchema, type StoreConfigInput } from '@/lib/validations/store'
 import type { Store } from '@/types/store'
@@ -102,7 +102,7 @@ export function ConfigForm({ store }: { store: Store }) {
           <Input {...register('name')} placeholder="Casa Olivia" className="h-11 rounded-[9px] bg-white dark:bg-white/5" />
         </Field>
 
-        <Field label="Enlace público" hint="Evitá cambiarlo seguido si ya compartiste tu tienda." error={errors.slug?.message}>
+        <Field label="Enlace público" hint="Si lo cambiás, VOLTA conserva los enlaces anteriores y los lleva al nuevo." error={errors.slug?.message}>
           <Input {...register('slug', { onBlur: (event) => setValue('slug', slugify(event.target.value).slice(0, 48), { shouldDirty: true }) })} placeholder="casa-olivia" className="h-11 rounded-[9px] bg-white font-mono text-sm dark:bg-white/5" />
         </Field>
 
@@ -115,7 +115,7 @@ export function ConfigForm({ store }: { store: Store }) {
             {slugStatus.tone === 'checking' ? <Loader2 className="size-3.5 animate-spin" /> : slugStatus.tone === 'error' ? <TriangleAlert className="size-3.5 text-amber-500" /> : <CheckCircle2 className="size-3.5 text-emerald-500" />}
             <span>{slugStatus.message}</span>
           </div>
-          {slugChanged ? <p className="mt-2 text-xs leading-5 text-amber-600 dark:text-amber-300">Los enlaces anteriores podrían dejar de funcionar cuando guardes.</p> : null}
+          {slugChanged ? <p className="mt-2 text-xs leading-5 text-emerald-700 dark:text-emerald-300">Los links y QR que ya compartiste seguirán funcionando y redirigirán al nuevo enlace.</p> : null}
         </div>
       </ConfigSection>
 

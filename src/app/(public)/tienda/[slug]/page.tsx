@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { StoreLayout } from '@/components/landing/StoreLayout'
 import { resolveStorefrontView, type StorefrontSearchParams } from '@/lib/storefront/view'
-import { getStoreBySlug } from '@/lib/queries/store'
+import { getStoreBySlug, resolveHistoricalStoreSlug } from '@/lib/queries/store'
 import { buildProductPublicUrl, buildStorePublicUrl } from '@/lib/sharing/links'
+import { buildStoreSlugRedirectPath, type StoreSlugRedirectSearchParams } from '@/lib/store/slug-history'
 import { formatCurrency } from '@/lib/utils/format'
 
 type Props = {
@@ -17,7 +18,13 @@ function firstValue(value: string | string[] | undefined) {
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const [{ slug }, storefrontSearchParams] = await Promise.all([params, searchParams])
-  const data = await getStoreBySlug(slug)
+  let data = await getStoreBySlug(slug)
+
+  if (!data) {
+    const canonicalSlug = await resolveHistoricalStoreSlug(slug)
+    if (canonicalSlug) data = await getStoreBySlug(canonicalSlug)
+  }
+
   if (!data) return { title: 'Tienda no encontrada', robots: { index: false, follow: false } }
 
   const requestedProductSlug = firstValue(storefrontSearchParams.producto)
@@ -85,9 +92,20 @@ export default async function TiendaPage({ params, searchParams }: Props) {
   const storefrontSearchParams = await searchParams
 
   const data = await getStoreBySlug(slug)
-  if (!data) notFound()
+  if (!data) {
+    const canonicalSlug = await resolveHistoricalStoreSlug(slug)
+    if (canonicalSlug) {
+      permanentRedirect(
+        buildStoreSlugRedirectPath(
+          canonicalSlug,
+          storefrontSearchParams as StoreSlugRedirectSearchParams,
+        ),
+      )
+    }
+    notFound()
+  }
 
   const view = resolveStorefrontView(data.products, data.categories, data.brands, storefrontSearchParams)
 
-  return <StoreLayout data={data} pathname={`/tienda/${slug}`} view={view} />
+  return <StoreLayout data={data} pathname={`/tienda/${data.store.slug}`} view={view} />
 }
