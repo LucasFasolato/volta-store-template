@@ -2,13 +2,16 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Check, Copy, ExternalLink, Package, QrCode, Sparkles } from 'lucide-react'
+import { Camera, Check, Copy, ExternalLink, Link2, Megaphone, MessageCircle, Package, QrCode, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { ShareActions } from '@/components/admin/ShareActions'
 import { StoreQrCard } from '@/components/admin/StoreQrCard'
 import {
   buildProductShareMessage,
+  buildStoreShareMessage,
   buildSuggestedStoreMessages,
+  buildTrackedPublicUrl,
+  normalizeTrackingToken,
 } from '@/lib/sharing/links'
 
 type ShareProduct = {
@@ -27,20 +30,54 @@ type GrowthSharePageProps = {
   products: ShareProduct[]
 }
 
+async function copyValue(value: string) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(value)
+    return
+  }
+
+  const textarea = document.createElement('textarea')
+  textarea.value = value
+  textarea.setAttribute('readonly', '')
+  textarea.style.position = 'fixed'
+  textarea.style.opacity = '0'
+  document.body.appendChild(textarea)
+  textarea.select()
+  const copied = document.execCommand('copy')
+  textarea.remove()
+  if (!copied) throw new Error('copy-failed')
+}
+
 export function GrowthSharePage({ storeName, storeUrl, storeMessage, products }: GrowthSharePageProps) {
   const suggestions = useMemo(() => buildSuggestedStoreMessages(storeName, storeUrl), [storeName, storeUrl])
+  const instagramUrl = useMemo(() => buildTrackedPublicUrl(storeUrl, 'instagram'), [storeUrl])
+  const whatsappUrl = useMemo(() => buildTrackedPublicUrl(storeUrl, 'whatsapp'), [storeUrl])
+  const qrUrl = useMemo(() => buildTrackedPublicUrl(storeUrl, 'qr'), [storeUrl])
+  const whatsappMessage = useMemo(() => buildStoreShareMessage(storeName, whatsappUrl), [storeName, whatsappUrl])
   const [selectedMessage, setSelectedMessage] = useState<string>(suggestions[0].text)
   const [messageCopied, setMessageCopied] = useState(false)
   const [showQr, setShowQr] = useState(false)
+  const [campaignName, setCampaignName] = useState('')
+  const normalizedCampaign = normalizeTrackingToken(campaignName, 80)
+  const campaignUrl = normalizedCampaign ? buildTrackedPublicUrl(storeUrl, 'campaign', normalizedCampaign) : ''
 
   async function copyMessage() {
     try {
-      await navigator.clipboard.writeText(selectedMessage)
+      await copyValue(selectedMessage)
       setMessageCopied(true)
       toast.success('Texto copiado.')
       window.setTimeout(() => setMessageCopied(false), 1600)
     } catch {
       toast.error('No pudimos copiar el texto.')
+    }
+  }
+
+  async function copyTracked(url: string, label: string) {
+    try {
+      await copyValue(url)
+      toast.success(`${label}: enlace copiado.`)
+    } catch {
+      toast.error('No pudimos copiar el enlace.')
     }
   }
 
@@ -54,7 +91,7 @@ export function GrowthSharePage({ storeName, storeUrl, storeMessage, products }:
               Compartir y crecer
             </div>
             <h1 className="mt-4 max-w-2xl text-2xl font-semibold tracking-[-0.045em] sm:text-3xl">Llevá gente a tu tienda sin volver a mandar el catálogo a mano.</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/60">Usá el mismo link en WhatsApp, Instagram, Facebook, historias, bio o un QR. Y cuando quieras mostrar algo puntual, compartí el producto directo.</p>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/60">Compartí el mismo catálogo donde ya vendés. Ahora también podés usar links medibles para saber qué canal trae visitas y pedidos.</p>
           </div>
           <Link href={storeUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] bg-[#12e89a] px-4 text-sm font-semibold text-[#062117]">
             Ver mi tienda <ExternalLink className="size-4" />
@@ -66,15 +103,15 @@ export function GrowthSharePage({ storeName, storeUrl, storeMessage, products }:
         <section className="rounded-[18px] border border-black/8 bg-white p-4 dark:border-white/10 dark:bg-[#111820] sm:p-5">
           <p className="admin-label">Tu enlace principal</p>
           <h2 className="mt-1 text-lg font-semibold text-foreground">Compartí toda la tienda</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Este es el link para tu bio, historias, estados, mensajes y publicaciones.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Usalo cuando no necesitás distinguir el canal. Para medir, elegí uno de los links de abajo.</p>
           <div className="mt-4 rounded-[12px] border border-black/7 bg-slate-50 px-3 py-2.5 font-mono text-xs text-slate-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/70">
             <span className="block truncate">{storeUrl}</span>
           </div>
-          <div className="mt-3"><ShareActions url={storeUrl} text={storeMessage} title={storeName} /></div>
+          <div className="mt-3"><ShareActions url={storeUrl} text={whatsappMessage || storeMessage} title={storeName} /></div>
           <button type="button" onClick={() => setShowQr((value) => !value)} className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-[9px] border border-black/8 bg-white px-3 text-xs font-semibold text-foreground dark:border-white/10 dark:bg-white/5">
-            <QrCode className="size-4" /> {showQr ? 'Ocultar QR' : 'Mostrar QR'}
+            <QrCode className="size-4" /> {showQr ? 'Ocultar QR' : 'Mostrar QR medible'}
           </button>
-          {showQr ? <div className="mt-3"><StoreQrCard publicUrl={storeUrl} storeName={storeName} /></div> : null}
+          {showQr ? <div className="mt-3"><StoreQrCard publicUrl={qrUrl} storeName={storeName} /></div> : null}
         </section>
 
         <section className="rounded-[18px] border border-black/8 bg-white p-4 dark:border-white/10 dark:bg-[#111820] sm:p-5">
@@ -95,6 +132,38 @@ export function GrowthSharePage({ storeName, storeUrl, storeMessage, products }:
           </button>
         </section>
       </div>
+
+      <section className="rounded-[18px] border border-black/8 bg-white p-4 dark:border-white/10 dark:bg-[#111820] sm:p-5">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="admin-label">Links medibles</p>
+            <h2 className="mt-1 text-lg font-semibold text-foreground">Sabé de dónde llega la gente</h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Cada link abre la misma tienda. VOLTA sólo agrega una marca simple para después comparar visitas y WhatsApps en Rendimiento.</p>
+          </div>
+          <Link href="/admin/rendimiento" className="inline-flex min-h-10 items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-[#75f5c5]">Ver rendimiento <ExternalLink className="size-3.5" /></Link>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <ChannelLink icon={Camera} label="Instagram" description="Bio, historias y publicaciones" url={instagramUrl} onCopy={copyTracked} />
+          <ChannelLink icon={MessageCircle} label="WhatsApp" description="Estados, chats y grupos" url={whatsappUrl} onCopy={copyTracked} />
+          <ChannelLink icon={QrCode} label="QR" description="Mostrador, packaging o feria" url={qrUrl} onCopy={copyTracked} />
+        </div>
+
+        <div className="mt-4 rounded-[14px] border border-black/7 bg-slate-50 p-4 dark:border-white/9 dark:bg-white/[0.03]">
+          <div className="flex items-start gap-3">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-white text-emerald-600 shadow-sm dark:bg-white/7 dark:text-[#12e89a]"><Megaphone className="size-4" /></span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-foreground">Campaña puntual</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">Poné un nombre fácil de reconocer, por ejemplo “vuelta-a-clases” o “promo-agosto”.</p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+                <input value={campaignName} onChange={(event) => setCampaignName(event.target.value)} maxLength={80} placeholder="promo-agosto" className="h-10 min-w-0 rounded-[9px] border border-black/9 bg-white px-3 text-sm outline-none focus:border-emerald-400 dark:border-white/10 dark:bg-white/5" />
+                <button type="button" onClick={() => campaignUrl && copyTracked(campaignUrl, 'Campaña')} disabled={!campaignUrl} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-[9px] bg-[#0d151b] px-4 text-xs font-semibold text-white disabled:opacity-40 dark:bg-[#12e89a] dark:text-[#062117]"><Link2 className="size-4" />Copiar link de campaña</button>
+              </div>
+              {campaignUrl ? <p className="mt-2 truncate font-mono text-[11px] text-muted-foreground">{campaignUrl}</p> : null}
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="rounded-[18px] border border-black/8 bg-white p-4 dark:border-white/10 dark:bg-[#111820] sm:p-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -136,5 +205,18 @@ export function GrowthSharePage({ storeName, storeUrl, storeMessage, products }:
         )}
       </section>
     </div>
+  )
+}
+
+function ChannelLink({ icon: Icon, label, description, url, onCopy }: { icon: typeof Camera; label: string; description: string; url: string; onCopy: (url: string, label: string) => Promise<void> }) {
+  return (
+    <article className="rounded-[13px] border border-black/7 bg-slate-50 p-3.5 dark:border-white/9 dark:bg-white/[0.03]">
+      <div className="flex items-start justify-between gap-3">
+        <span className="flex size-9 items-center justify-center rounded-[10px] bg-white text-emerald-600 shadow-sm dark:bg-white/7 dark:text-[#12e89a]"><Icon className="size-4" /></span>
+        <button type="button" onClick={() => onCopy(url, label)} className="inline-flex min-h-9 items-center gap-1.5 rounded-[8px] border border-black/8 bg-white px-2.5 text-[11px] font-semibold text-foreground dark:border-white/10 dark:bg-white/5"><Copy className="size-3.5" />Copiar</button>
+      </div>
+      <p className="mt-3 text-sm font-semibold text-foreground">{label}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+    </article>
   )
 }
