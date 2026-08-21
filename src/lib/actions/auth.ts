@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { safeGetUser } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
+import { resolveMagicLinkOrigin } from '@/lib/auth/redirects'
 
 function parseRetryAfter(message: string): number {
   const match = message.match(/(\d+)\s*second/i)
@@ -11,22 +12,12 @@ function parseRetryAfter(message: string): number {
 }
 
 async function getRequestOrigin(): Promise<string> {
+  if (process.env.NODE_ENV !== 'development') {
+    return resolveMagicLinkOrigin(process.env)
+  }
+
   const requestHeaders = await headers()
-  const forwardedHost = requestHeaders.get('x-forwarded-host')
-  const host = forwardedHost ?? requestHeaders.get('host')
-  const forwardedProto = requestHeaders.get('x-forwarded-proto')
-  const protocol = forwardedProto ?? (process.env.NODE_ENV === 'development' ? 'http' : 'https')
-
-  if (host) {
-    return `${protocol}://${host}`
-  }
-
-  const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, '')
-  if (configuredUrl) {
-    return configuredUrl
-  }
-
-  throw new Error('No se pudo resolver el origen de la aplicacion para enviar el acceso.')
+  return resolveMagicLinkOrigin(process.env, requestHeaders.get('host'))
 }
 
 export async function signInWithMagicLink(email: string) {
