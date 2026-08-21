@@ -3,24 +3,79 @@ import { notFound } from 'next/navigation'
 import { StoreLayout } from '@/components/landing/StoreLayout'
 import { resolveStorefrontView, type StorefrontSearchParams } from '@/lib/storefront/view'
 import { getStoreBySlug } from '@/lib/queries/store'
+import { buildProductPublicUrl, buildStorePublicUrl } from '@/lib/sharing/links'
+import { formatCurrency } from '@/lib/utils/format'
 
 type Props = {
   params: Promise<{ slug: string }>
   searchParams: Promise<StorefrontSearchParams>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
+function firstValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value
+}
+
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const [{ slug }, storefrontSearchParams] = await Promise.all([params, searchParams])
   const data = await getStoreBySlug(slug)
-  if (!data) return { title: 'Tienda no encontrada' }
+  if (!data) return { title: 'Tienda no encontrada', robots: { index: false, follow: false } }
+
+  const requestedProductSlug = firstValue(storefrontSearchParams.producto)
+  const product = requestedProductSlug
+    ? data.products.find((candidate) => candidate.slug === requestedProductSlug) ?? null
+    : null
+  const storeUrl = buildStorePublicUrl(data.store.slug)
+
+  if (product) {
+    const productUrl = buildProductPublicUrl(data.store.slug, product.slug)
+    const productDescription = product.short_description?.trim()
+      || product.description?.trim()
+      || `${product.name} en ${data.store.name}. ${formatCurrency(product.price)}. Consultá y armá tu pedido por WhatsApp.`
+    const images = product.images[0]?.url ? [product.images[0].url] : []
+    const title = `${product.name} · ${data.store.name}`
+
+    return {
+      title,
+      description: productDescription,
+      alternates: { canonical: productUrl },
+      openGraph: {
+        type: 'website',
+        url: productUrl,
+        siteName: data.store.name,
+        title,
+        description: productDescription,
+        images,
+      },
+      twitter: {
+        card: images.length > 0 ? 'summary_large_image' : 'summary',
+        title,
+        description: productDescription,
+        images,
+      },
+    }
+  }
+
+  const description = data.content.hero_subtitle?.trim()
+    || `Mirá el catálogo de ${data.store.name} y armá tu pedido por WhatsApp.`
+  const images = data.content.hero_image_url ? [data.content.hero_image_url] : []
 
   return {
-    title: `${data.store.name} - Tienda`,
-    description: data.content.hero_subtitle,
+    title: `${data.store.name} · Catálogo online`,
+    description,
+    alternates: { canonical: storeUrl },
     openGraph: {
+      type: 'website',
+      url: storeUrl,
+      siteName: data.store.name,
       title: data.store.name,
-      description: data.content.hero_subtitle,
-      images: data.content.hero_image_url ? [data.content.hero_image_url] : [],
+      description,
+      images,
+    },
+    twitter: {
+      card: images.length > 0 ? 'summary_large_image' : 'summary',
+      title: data.store.name,
+      description,
+      images,
     },
   }
 }
