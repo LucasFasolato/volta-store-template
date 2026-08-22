@@ -46,6 +46,18 @@ type MercadoPagoAuthorizedPaymentSearch = {
   results?: MercadoPagoAuthorizedPayment[]
 }
 
+export type MercadoPagoPayment = {
+  id: string | number
+  status?: string | null
+  status_detail?: string | null
+  transaction_amount?: number | string | null
+  transaction_details?: {
+    net_received_amount?: number | string | null
+    total_paid_amount?: number | string | null
+  } | null
+  fee_details?: Array<{ amount?: number | string | null }> | null
+}
+
 export class MercadoPagoApiError extends Error {
   status: number
   details: string | null
@@ -154,9 +166,12 @@ export async function findMercadoPagoStoreSubscription(input: {
     offset: '0',
   })
   const search = await mercadoPagoRequest<MercadoPagoSubscriptionSearch>(`/preapproval/search?${params.toString()}`)
-  const matches = (search.results || []).filter((subscription) =>
-    String(subscription.external_reference || '') === externalReference && subscription.status !== 'canceled',
-  )
+  const matches = (search.results || []).filter((subscription) => {
+    const status = String(subscription.status || '').toLowerCase()
+    return String(subscription.external_reference || '') === externalReference
+      && status !== 'canceled'
+      && status !== 'cancelled'
+  })
   const priority: Record<string, number> = { authorized: 0, pending: 1, paused: 2 }
   matches.sort((a, b) => (priority[a.status || ''] ?? 9) - (priority[b.status || ''] ?? 9))
   return matches[0] || null
@@ -167,13 +182,14 @@ export async function createMercadoPagoSubscription(input: {
   payerEmail: string
   idempotencyKey: string
   amount: number
+  planName?: string
 }) {
   return mercadoPagoRequest<MercadoPagoSubscription>(
     '/preapproval',
     {
       method: 'POST',
       body: JSON.stringify({
-        reason: 'VOLTA Store - suscripción mensual',
+        reason: `${input.planName || 'VOLTA'} - suscripción mensual`,
         external_reference: buildBillingExternalReference(input.storeId),
         payer_email: input.payerEmail,
         auto_recurring: {
@@ -182,7 +198,7 @@ export async function createMercadoPagoSubscription(input: {
           transaction_amount: input.amount,
           currency_id: VOLTA_BILLING_PLAN.currency,
         },
-        back_url: `${getAppBaseUrl()}/admin/plan?billing=return`,
+        back_url: `${getAppBaseUrl()}/billing/return`,
         status: 'pending',
       }),
     },
@@ -217,6 +233,10 @@ export async function getMercadoPagoAuthorizedPayment(invoiceId: string) {
   return mercadoPagoRequest<MercadoPagoAuthorizedPayment>(
     `/authorized_payments/${encodeURIComponent(invoiceId)}`,
   )
+}
+
+export async function getMercadoPagoPayment(paymentId: string) {
+  return mercadoPagoRequest<MercadoPagoPayment>(`/v1/payments/${encodeURIComponent(paymentId)}`)
 }
 
 export async function searchMercadoPagoAuthorizedPayments(subscriptionId: string) {

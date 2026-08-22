@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { safeGetUser } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
-import { resolveMagicLinkOrigin } from '@/lib/auth/redirects'
+import { resolveMagicLinkOrigin, sanitizeInternalRedirect } from '@/lib/auth/redirects'
 
 function parseRetryAfter(message: string): number {
   const match = message.match(/(\d+)\s*second/i)
@@ -20,7 +20,7 @@ async function getRequestOrigin(): Promise<string> {
   return resolveMagicLinkOrigin(process.env, requestHeaders.get('host'))
 }
 
-export async function signInWithMagicLink(email: string) {
+export async function signInWithMagicLink(email: string, requestedNext = '/admin') {
   const supabase = await createClient()
   let origin: string
 
@@ -32,12 +32,11 @@ export async function signInWithMagicLink(email: string) {
     }
   }
 
+  const next = sanitizeInternalRedirect(requestedNext)
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      // The email template adds the TokenHash to this scanner-safe landing page.
-      // Merely opening the email link does not consume the one-time token.
-      emailRedirectTo: `${origin}/auth/email?next=/admin&provider=email`,
+      emailRedirectTo: `${origin}/auth/email?next=${encodeURIComponent(next)}&provider=email`,
     },
   })
 

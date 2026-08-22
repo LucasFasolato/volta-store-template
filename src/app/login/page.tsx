@@ -3,10 +3,15 @@ import Link from 'next/link'
 import { LoginForm } from '@/components/auth/LoginForm'
 import { VoltaBrand } from '@/components/brand/VoltaBrand'
 import { getLoginFeedbackFromSearchParams } from '@/lib/auth/login-feedback'
+import { sanitizeInternalRedirect } from '@/lib/auth/redirects'
 
 export const metadata: Metadata = {
   title: 'Ingresar - Volta Store',
   description: 'Accedé a tu tienda en Volta Store',
+}
+
+function firstValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value
 }
 
 export default async function LoginPage({
@@ -14,7 +19,9 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const feedback = getLoginFeedbackFromSearchParams(await searchParams)
+  const params = await searchParams
+  const feedback = getLoginFeedbackFromSearchParams(params)
+  const next = sanitizeInternalRedirect(firstValue(params.next))
 
   return (
     <main className="min-h-screen bg-[#f7f8fa] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
@@ -22,7 +29,6 @@ export default async function LoginPage({
         <section className="flex flex-col justify-between p-6 sm:p-9 lg:p-12">
           <div>
             <VoltaBrand />
-
             <div className="mt-12 max-w-md lg:mt-20">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Vendé por WhatsApp</p>
               <h1 className="mt-3 text-balance text-[2.4rem] font-semibold leading-[.98] tracking-[-0.06em] sm:text-[3.2rem]">Tu tienda profesional, lista para vender.</h1>
@@ -45,7 +51,7 @@ export default async function LoginPage({
 
         <section className="flex items-center justify-center border-t border-black/7 bg-[#fbfcfd] p-4 sm:p-8 lg:border-l lg:border-t-0 lg:p-12">
           <div className="w-full max-w-md">
-            <LoginForm initialFeedback={feedback} />
+            <LoginForm initialFeedback={feedback} next={next} />
           </div>
         </section>
       </div>

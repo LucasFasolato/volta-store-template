@@ -26,7 +26,13 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginFeedback | null }) {
+export function LoginForm({
+  initialFeedback = null,
+  next = '/admin',
+}: {
+  initialFeedback?: LoginFeedback | null
+  next?: string
+}) {
   const [blockingFeedback, setBlockingFeedback] = useState<LoginFeedback | null>(
     initialFeedback?.tone === 'error' ? null : initialFeedback,
   )
@@ -39,28 +45,20 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({
-    resolver: zodResolver(schema),
-  })
+  } = useForm<FormData>({ resolver: zodResolver(schema) })
 
   async function handleGoogleSignIn() {
     setInlineFeedback(null)
     setIsGoogleLoading(true)
 
     const supabase = createClient()
-    // Vercel currently redirects the apex domain to www. Supabase only accepts
-    // allow-listed redirect URLs, so always request the canonical apex callback
-    // in production. The browser may later follow Vercel's host redirect while
-    // preserving /auth/callback and its query string.
     const redirectOrigin =
       window.location.hostname === 'www.voltastore.app' ? 'https://voltastore.app' : window.location.origin
-    const redirectTo = `${redirectOrigin}/auth/callback?next=/admin&provider=google`
+    const redirectTo = `${redirectOrigin}/auth/callback?next=${encodeURIComponent(next)}&provider=google`
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo,
-      },
+      options: { redirectTo },
     })
 
     if (error) {
@@ -76,13 +74,14 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
 
   async function onSubmit(data: FormData) {
     setInlineFeedback(null)
-    const result = await signInWithMagicLink(data.email)
+    const result = await signInWithMagicLink(data.email, next)
 
     if (result.error) {
       if ('rateLimited' in result && result.rateLimited) {
         const params = new URLSearchParams({
           reason: 'rate_limit',
           email: data.email,
+          next,
         })
         window.location.assign(`/login?${params.toString()}`)
         return
@@ -99,6 +98,7 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
     const params = new URLSearchParams({
       sent: 'magic_link',
       email: data.email,
+      next,
     })
     window.location.assign(`/login?${params.toString()}`)
   }
@@ -126,8 +126,7 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
 
         <div className="mt-6 space-y-3">
           <StatusFeedback feedback={blockingFeedback} />
-
-          <div className="rounded-[24px] border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 p-4 text-sm leading-6 text-muted-foreground">
+          <div className="rounded-[24px] border border-border bg-black/[0.04] p-4 text-sm leading-6 text-muted-foreground dark:border-white/8 dark:bg-white/4">
             El acceso funciona una sola vez y la sesion se abre en el dispositivo donde confirmas el correo.
           </div>
         </div>
@@ -138,7 +137,7 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
             setBlockingFeedback(null)
             setInlineFeedback(null)
           }}
-          className="mt-6 w-full rounded-full border border-border dark:border-white/10 px-4 py-3 text-sm font-medium text-foreground transition hover:bg-black/[0.04] dark:hover:bg-white/6"
+          className="mt-6 w-full rounded-full border border-border px-4 py-3 text-sm font-medium text-foreground transition hover:bg-black/[0.04] dark:border-white/10 dark:hover:bg-white/6"
         >
           Volver al ingreso
         </button>
@@ -149,7 +148,7 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
   return (
     <div className="surface-panel premium-ring rounded-[34px] p-8">
       <div className="mb-6">
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border dark:border-white/8 bg-black/[0.04] dark:bg-white/4 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-200">
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-black/[0.04] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600 dark:border-white/8 dark:bg-white/4 dark:text-emerald-200">
           <ShieldCheck className="size-3.5" />
           Acceso seguro
         </div>
@@ -157,6 +156,11 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Entra con Google en un click o usa magic link si prefieres seguir por email.
         </p>
+        {next.startsWith('/billing/return') ? (
+          <p className="mt-3 rounded-2xl border border-emerald-500/15 bg-emerald-500/5 px-3.5 py-3 text-xs leading-5 text-emerald-800 dark:text-emerald-200">
+            Tu operación de Mercado Pago está a salvo. Después de ingresar volvés directo a la confirmación de tu plan.
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-4">
@@ -166,26 +170,18 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
           type="button"
           disabled={isGoogleLoading || isSubmitting}
           onClick={handleGoogleSignIn}
-          className="h-12 w-full rounded-full border border-black/[0.08] dark:border-white/10 bg-white text-black shadow-[0_18px_36px_rgba(0,0,0,0.08)] dark:shadow-[0_18px_36px_rgba(255,255,255,0.08)] hover:bg-white/90"
+          className="h-12 w-full rounded-full border border-black/[0.08] bg-white text-black shadow-[0_18px_36px_rgba(0,0,0,0.08)] hover:bg-white/90 dark:border-white/10 dark:shadow-[0_18px_36px_rgba(255,255,255,0.08)]"
         >
           {isGoogleLoading ? (
-            <>
-              <Loader2 className="mr-2 size-4 animate-spin" />
-              Redirigiendo a Google...
-            </>
+            <><Loader2 className="mr-2 size-4 animate-spin" />Redirigiendo a Google...</>
           ) : (
-            <>
-              <GoogleIcon className="mr-2 size-4" />
-              Continuar con Google
-            </>
+            <><GoogleIcon className="mr-2 size-4" />Continuar con Google</>
           )}
         </Button>
 
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-border dark:bg-white/8" />
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            o usa email
-          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">o usa email</span>
           <div className="h-px flex-1 bg-border dark:bg-white/8" />
         </div>
 
@@ -200,7 +196,7 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
                   autoComplete="email"
                   placeholder="tu@email.com"
                   aria-invalid={!!errors.email}
-                  className="h-12 rounded-2xl border-border dark:border-white/10 bg-black/[0.04] dark:bg-white/5 pl-11 text-foreground placeholder:text-muted-foreground"
+                  className="h-12 rounded-2xl border-border bg-black/[0.04] pl-11 text-foreground placeholder:text-muted-foreground dark:border-white/10 dark:bg-white/5"
                 />
               </div>
             </LabelBlock>
@@ -213,21 +209,15 @@ export function LoginForm({ initialFeedback = null }: { initialFeedback?: LoginF
             className="h-12 w-full rounded-full bg-[linear-gradient(135deg,#2ee6a6,#6ff3df)] text-black shadow-[0_18px_36px_rgba(16,185,129,0.18)] hover:brightness-105"
           >
             {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 size-4 animate-spin" />
-                Enviando link...
-              </>
+              <><Loader2 className="mr-2 size-4 animate-spin" />Enviando link...</>
             ) : (
-              <>
-                Continuar
-                <ArrowRight className="ml-2 size-4" />
-              </>
+              <>Continuar<ArrowRight className="ml-2 size-4" /></>
             )}
           </Button>
         </form>
       </div>
 
-      <div className="mt-6 rounded-[24px] border border-border dark:border-white/8 bg-black/[0.04] dark:bg-black/10 p-4">
+      <div className="mt-6 rounded-[24px] border border-border bg-black/[0.04] p-4 dark:border-white/8 dark:bg-black/10">
         <p className="text-sm font-medium text-foreground">Que va a pasar despues</p>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Google te lleva directo al callback seguro. Si eliges email, abre el link desde el dispositivo donde quieras iniciar sesion.
@@ -264,26 +254,12 @@ function StatusFeedback({ feedback }: { feedback: LoginFeedback }) {
 }
 
 function statusIconClassName(tone: LoginFeedback['tone']) {
-  if (tone === 'pending') {
-    return 'mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-300/12 dark:text-amber-100'
-  }
-
-  if (tone === 'success') {
-    return 'mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-400/12 dark:text-emerald-100'
-  }
-
+  if (tone === 'pending') return 'mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-300/12 dark:text-amber-100'
+  if (tone === 'success') return 'mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-400/12 dark:text-emerald-100'
   return 'mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-red-100 text-red-700 dark:bg-red-400/12 dark:text-red-100'
 }
 
-function LabelBlock({
-  label,
-  hint,
-  children,
-}: {
-  label: string
-  hint: string
-  children: React.ReactNode
-}) {
+function LabelBlock({ label, hint, children }: { label: string; hint: string; children: React.ReactNode }) {
   return (
     <div>
       <p className="mb-2 text-sm font-medium text-foreground">{label}</p>
@@ -296,22 +272,10 @@ function LabelBlock({
 function GoogleIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
-      <path
-        d="M21.8 12.23c0-.72-.06-1.25-.2-1.8H12v3.79h5.64c-.11.94-.69 2.36-1.98 3.31l-.02.13 3.03 2.3.21.02c1.95-1.77 3.07-4.38 3.07-7.75Z"
-        fill="#4285F4"
-      />
-      <path
-        d="M12 22c2.76 0 5.08-.89 6.78-2.42l-3.22-2.45c-.86.59-2.01 1-3.56 1-2.71 0-5.01-1.77-5.83-4.21l-.12.01-3.16 2.39-.04.11C4.54 19.72 8.02 22 12 22Z"
-        fill="#34A853"
-      />
-      <path
-        d="M6.17 13.92A5.9 5.9 0 0 1 5.83 12c0-.67.12-1.32.32-1.92l-.01-.13-3.2-2.42-.1.04A9.86 9.86 0 0 0 2 12c0 1.58.38 3.07 1.05 4.43l3.12-2.51Z"
-        fill="#FBBC05"
-      />
-      <path
-        d="M12 5.87c1.96 0 3.29.83 4.05 1.53l2.95-2.82C17.07 2.82 14.76 2 12 2 8.02 2 4.54 4.28 2.85 7.57l3.31 2.51c.84-2.44 3.14-4.21 5.84-4.21Z"
-        fill="#EA4335"
-      />
+      <path d="M21.8 12.23c0-.72-.06-1.25-.2-1.8H12v3.79h5.64c-.11.94-.69 2.36-1.98 3.31l-.02.13 3.03 2.3.21.02c1.95-1.77 3.07-4.38 3.07-7.75Z" fill="#4285F4" />
+      <path d="M12 22c2.76 0 5.08-.89 6.78-2.42l-3.22-2.45c-.86.59-2.01 1-3.56 1-2.71 0-5.01-1.77-5.83-4.21l-.12.01-3.16 2.39-.04.11C4.54 19.72 8.02 22 12 22Z" fill="#34A853" />
+      <path d="M6.17 13.92A5.9 5.9 0 0 1 5.83 12c0-.67.12-1.32.32-1.92l-.01-.13-3.2-2.42-.1.04A9.86 9.86 0 0 0 2 12c0 1.58.38 3.07 1.05 4.43l3.12-2.51Z" fill="#FBBC05" />
+      <path d="M12 5.87c1.96 0 3.29.83 4.05 1.53l2.95-2.82C17.07 2.82 14.76 2 12 2 8.02 2 4.54 4.28 2.85 7.57l3.31 2.51c.84-2.44 3.14-4.21 5.84-4.21Z" fill="#EA4335" />
     </svg>
   )
 }

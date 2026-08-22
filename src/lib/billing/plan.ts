@@ -1,5 +1,16 @@
+export type CommercialPlanCode = 'free' | 'volta' | 'pro'
+
+export const FREE_PLAN = {
+  code: 'free',
+  name: 'Gratis',
+  currency: 'ARS',
+  monthlyAmount: 0,
+  productLimit: 10,
+  imagesPerProductLimit: 1,
+} as const
+
 export const VOLTA_BILLING_PLAN = {
-  code: 'volta-monthly',
+  code: 'volta',
   name: 'VOLTA',
   currency: 'ARS',
   introAmount: 15000,
@@ -7,6 +18,30 @@ export const VOLTA_BILLING_PLAN = {
   introCycles: 3,
   frequency: 'monthly',
 } as const
+
+export const VOLTA_PRO_PLAN = {
+  code: 'pro',
+  name: 'VOLTA PRO',
+  currency: 'ARS',
+  introAmount: 70000,
+  standardAmount: 70000,
+  introCycles: 0,
+  frequency: 'monthly',
+} as const
+
+export type PaidPlanCode = typeof VOLTA_BILLING_PLAN.code | typeof VOLTA_PRO_PLAN.code
+
+export function normalizeCommercialPlan(value: unknown): CommercialPlanCode {
+  return value === 'pro' || value === 'volta' ? value : 'free'
+}
+
+export function isPaidPlan(value: unknown): value is PaidPlanCode {
+  return value === 'volta' || value === 'pro'
+}
+
+export function getPaidPlanDefinition(planCode: PaidPlanCode) {
+  return planCode === 'pro' ? VOLTA_PRO_PLAN : VOLTA_BILLING_PLAN
+}
 
 export function formatBillingAmount(value: number) {
   return new Intl.NumberFormat('es-AR', {

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test src/lib/products/ownership.test.mjs src/lib/billing/complimentary.test.mjs src/lib/auth/redirects.test.mjs src/lib/sharing/links.test.mjs src/lib/analytics/commercial-insights.test.mjs src/lib/analytics/attribution.test.mjs src/lib/store/slug-history.test.mjs src/lib/images/upload-guidance.test.mjs"
+    "test": "node --experimental-strip-types --test src/lib/products/ownership.test.mjs src/lib/billing/complimentary.test.mjs src/lib/auth/redirects.test.mjs src/lib/sharing/links.test.mjs src/lib/analytics/commercial-insights.test.mjs src/lib/analytics/attribution.test.mjs src/lib/store/slug-history.test.mjs src/lib/images/upload-guidance.test.mjs src/lib/billing/plans.test.mjs src/lib/billing/return-state.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

@@ -1,3 +1,6 @@
+import type { CommercialAccess } from '@/lib/billing/commercial-access-core'
+import type { CommercialPlanCode } from '@/lib/billing/plan'
+
 export type BillingStatus =
   | 'not_started'
   | 'creating'
@@ -10,6 +13,7 @@ export type BillingStatus =
 export type BillingSubscription = {
   id: string
   storeId: string
+  planCode: CommercialPlanCode
   providerSubscriptionId: string | null
   providerStatus: string | null
   status: BillingStatus
@@ -32,11 +36,14 @@ export type BillingSubscription = {
 
 export type BillingPayment = {
   id: string
+  planCode: CommercialPlanCode
   providerInvoiceId: string
   providerPaymentId: string | null
   paymentStatus: string
   paymentStatusDetail: string | null
   amount: number
+  netReceivedAmount: number | null
+  processorDeductionsAmount: number | null
   currency: string
   debitDate: string | null
   paidAt: string | null
@@ -53,6 +60,7 @@ export type BillingOverview = {
   subscription: BillingSubscription | null
   payments: BillingPayment[]
   access: BillingAccess
+  commercialAccess: CommercialAccess
   providerConfigured: boolean
   webhookConfigured: boolean
 }

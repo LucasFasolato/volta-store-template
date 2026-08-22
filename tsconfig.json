@@ -19,6 +19,7 @@
       }
     ],
     "paths": {
+      "@/lib/actions/products": ["./src/lib/actions/products-entry.ts"],
       "@/*": ["./src/*"]
     }
   },
