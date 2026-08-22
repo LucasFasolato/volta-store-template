@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, Clock3, ExternalLink, ShieldCheck, XCircle } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Clock3, ShieldCheck, XCircle } from 'lucide-react'
 import { VoltaBrand } from '@/components/brand/VoltaBrand'
 import { BillingReturnRefresh } from '@/components/billing/BillingReturnRefresh'
+import { PaidWelcomeExperience } from '@/components/billing/PaidWelcomeExperience'
 import { getBillingOverview } from '@/lib/billing/queries'
 import { formatBillingDate } from '@/lib/billing/plan'
 import { resolveBillingReturnState } from '@/lib/billing/return-state'
@@ -20,25 +21,33 @@ function firstValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
 }
 
+function normalizeRequestedKind(value: string | null) {
+  return value === 'upgrade' || value === 'canceled' ? value : null
+}
+
 export default async function BillingReturnPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const params = await searchParams
-  const requestedKind = firstValue(params.kind) ?? null
+  const requestedKind = normalizeRequestedKind(firstValue(params.kind) ?? null)
   const user = await getAuthenticatedUser()
 
   if (!user) {
+    const returnPath = requestedKind ? `/billing/return?kind=${requestedKind}` : '/billing/return'
     return (
       <ReturnShell>
         <StatusIcon tone="safe" />
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600">Pago protegido</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-4xl">Tu operación está a salvo.</h1>
         <p className="mt-4 max-w-lg text-sm leading-7 text-slate-500">
-          Mercado Pago puede volver en otra pestaña o sin la sesión de VOLTA. Ingresá nuevamente y te llevamos directo a la confirmación, sin cobrarte otra vez.
+          Mercado Pago puede volver en otra pestaña o navegador. Si la sesión no viajó con vos, ingresá nuevamente: VOLTA conserva el destino y te devuelve directo a esta confirmación.
         </p>
-        <Link href="/login?next=%2Fbilling%2Freturn" className="mt-7 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#10161d] px-6 text-sm font-semibold text-white transition hover:bg-[#18212b]">
+        <div className="mt-5 rounded-[18px] border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs leading-5 text-emerald-800">
+          No vuelvas a pagar. Primero recuperamos tu sesión y verificamos la operación existente.
+        </div>
+        <Link href={`/login?next=${encodeURIComponent(returnPath)}`} className="mt-7 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#10161d] px-6 text-sm font-semibold text-white transition hover:bg-[#18212b]">
           Ingresar y confirmar <ArrowRight className="size-4" />
         </Link>
       </ReturnShell>
@@ -65,20 +74,24 @@ export default async function BillingReturnPage({
   const accessUntil = formatBillingDate(overview.commercialAccess.accessUntil)
   const fallbackPlanName = overview.commercialAccess.grandfathered ? 'VOLTA' : 'Gratis'
 
+  if (state === 'success' && overview.commercialAccess.planCode !== 'free') {
+    return (
+      <PaidWelcomeExperience
+        planCode={overview.commercialAccess.planCode}
+        publicUrl={publicUrl}
+        isUpgrade={requestedKind === 'upgrade'}
+      />
+    )
+  }
+
   if (state === 'success') {
     return (
       <ReturnShell>
         <StatusIcon tone="success" />
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600">Plan confirmado</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.055em] text-slate-950 sm:text-4xl">¡Ya sos parte de {planName}!</h1>
-        <p className="mt-4 max-w-lg text-sm leading-7 text-slate-500">
-          Tu suscripción quedó activa. No hay nada técnico que configurar: podés volver a vender, compartir tu tienda y aprovechar las herramientas de tu plan.
-        </p>
-        <div className="mt-7 grid gap-3 sm:grid-cols-2">
-          <Link href="/admin/compartir" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#12e89a] px-5 text-sm font-semibold text-[#062117]">Compartir mi tienda <ArrowRight className="size-4" /></Link>
-          <Link href={publicUrl} target="_blank" rel="noreferrer" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-black/10 px-5 text-sm font-semibold text-slate-800">Ver mi tienda <ExternalLink className="size-4" /></Link>
-        </div>
-        <Link href="/admin" className="mt-4 inline-flex text-sm font-semibold text-slate-500 transition hover:text-slate-900">Ir al panel</Link>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600">Operación confirmada</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.055em] text-slate-950 sm:text-4xl">Tu cuenta está lista.</h1>
+        <p className="mt-4 max-w-lg text-sm leading-7 text-slate-500">VOLTA confirmó la operación. Entrá al panel para continuar.</p>
+        <Link href="/admin" className="mt-7 inline-flex h-12 items-center justify-center rounded-full bg-[#10161d] px-6 text-sm font-semibold text-white">Ir al panel</Link>
       </ReturnShell>
     )
   }
