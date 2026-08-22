@@ -15,6 +15,15 @@
   color-scheme: dark;
 }
 
+/* iOS Safari can keep the surrounding light-shell text fill on strong text
+   even when Tailwind's text-white color wins. Lock the two visual emphasis
+   roles used by the PRO card to an explicit light fill. */
+.volta-contrast-dark h3,
+.volta-contrast-dark .text-3xl {
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
 /* Storefront surfaces own their palette independently from the admin/app theme. */
 .store-contrast-surface,
 .cart-sheet,
