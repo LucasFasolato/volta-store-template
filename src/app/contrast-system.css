@@ -1,0 +1,72 @@
+/* Local contrast contracts for intentionally dark surfaces.
+   These tokens override the surrounding app appearance so nested semantic text
+   never turns dark just because the admin shell is in light mode. */
+.volta-contrast-dark {
+  --foreground: #f8fafc;
+  --card-foreground: #f8fafc;
+  --popover-foreground: #f8fafc;
+  --muted-foreground: #9aa8b9;
+  --secondary-foreground: #dbe7f3;
+  --accent-foreground: #f8fafc;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: rgba(18, 232, 154, 0.34);
+  color: var(--foreground);
+  color-scheme: dark;
+}
+
+/* Storefront surfaces own their palette independently from the admin/app theme. */
+.store-contrast-surface,
+.cart-sheet,
+.product-commerce-modal,
+.sold-out-commerce-modal {
+  color: var(--store-text);
+}
+
+.store-shell[data-store-mode='dark'] .store-contrast-surface,
+.store-shell[data-store-mode='dark'] .cart-sheet,
+.store-shell[data-store-mode='dark'] .product-commerce-modal,
+.store-shell[data-store-mode='dark'] .sold-out-commerce-modal {
+  color-scheme: dark;
+}
+
+.store-shell[data-store-mode='light'] .store-contrast-surface,
+.store-shell[data-store-mode='light'] .cart-sheet,
+.store-shell[data-store-mode='light'] .product-commerce-modal,
+.store-shell[data-store-mode='light'] .sold-out-commerce-modal {
+  color-scheme: light;
+}
+
+/* A commerce sheet must size to its content. Safari can otherwise stretch a
+   flex item to the visual viewport and expose a large dead surface below CTA. */
+.product-commerce-modal,
+.sold-out-commerce-modal {
+  min-height: 0 !important;
+  height: fit-content !important;
+  align-self: flex-end;
+}
+
+.product-commerce-scroll {
+  min-height: 0;
+  scrollbar-gutter: stable;
+}
+
+@media (min-width: 640px) {
+  .product-commerce-modal,
+  .sold-out-commerce-modal {
+    align-self: center;
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-purchase-dock {
+    background: transparent !important;
+  }
+}
+
+@supports (-webkit-touch-callout: none) {
+  .product-commerce-modal,
+  .sold-out-commerce-modal {
+    max-height: calc(100dvh - max(10px, env(safe-area-inset-top))) !important;
+  }
+}

@@ -9,6 +9,7 @@ import './admin-nav-contrast.css'
 import './core-ux-polish.css'
 import './ux-simplification.css'
 import './storefront-polish.css'
+import './contrast-system.css'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'], display: 'swap' })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'], display: 'swap' })

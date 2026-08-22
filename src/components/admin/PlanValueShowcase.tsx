@@ -1,4 +1,4 @@
-import { Check, Minus, TrendingUp } from 'lucide-react'
+import { Check, Minus } from 'lucide-react'
 import { BillingActions } from '@/components/admin/BillingActions'
 import {
   FREE_PLAN,
@@ -123,7 +123,7 @@ export function PlanValueShowcase({
                   Renovación cancelada · disponible{accessUntilLabel ? ` hasta ${accessUntilLabel}` : ' hasta el final del período pago'}
                 </div>
               ) : complimentary ? (
-                <p className="text-xs leading-5 text-white/55">Tu bonificación cubre VOLTA. PRO requiere una suscripción propia.</p>
+                <p className="text-xs leading-5 text-white/65">Tu bonificación cubre VOLTA. PRO requiere una suscripción propia.</p>
               ) : (
                 <BillingActions status={status} providerConfigured={providerConfigured} currentPlan={currentPlan} subscriptionPlan={subscriptionPlan} targetPlan="pro" compact />
               )
@@ -188,7 +188,7 @@ function PlanCard({
   dark?: boolean
 }) {
   const shell = dark
-    ? 'border-white/10 bg-[linear-gradient(145deg,#111820,#07110e)] text-white'
+    ? 'volta-contrast-dark border-white/12 bg-[linear-gradient(145deg,#111820,#07110e)] text-white shadow-[0_24px_70px_rgba(2,8,23,.18)]'
     : featured
       ? 'border-emerald-500/30 bg-[linear-gradient(180deg,rgba(16,185,129,.065),rgba(255,255,255,.98))] shadow-[0_20px_70px_rgba(16,185,129,.09)] dark:bg-[linear-gradient(180deg,rgba(18,232,154,.08),rgba(17,24,32,.98))]'
       : 'border-black/8 bg-[#fbfcfd] dark:border-white/8 dark:bg-white/[0.025]'
@@ -201,29 +201,29 @@ function PlanCard({
           <p className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${dark ? 'text-emerald-300' : 'text-emerald-700 dark:text-emerald-300'}`}>{eyebrow}</p>
           <h3 className={`mt-2 text-2xl font-semibold tracking-[-0.045em] ${dark ? 'text-white' : 'text-foreground'}`}>{title}</h3>
         </div>
-        {badge ? <span className={`rounded-full px-3 py-1.5 text-[11px] font-semibold ${featured ? 'bg-emerald-500 text-white' : dark ? 'border border-white/10 bg-white/[0.06] text-white/75' : 'border border-black/8 bg-white text-muted-foreground dark:border-white/10 dark:bg-white/5'}`}>{badge}</span> : null}
+        {badge ? <span className={`rounded-full px-3 py-1.5 text-[11px] font-semibold ${featured ? 'bg-emerald-500 text-white' : dark ? 'border border-white/12 bg-white/[0.07] text-white/85' : 'border border-black/8 bg-white text-muted-foreground dark:border-white/10 dark:bg-white/5'}`}>{badge}</span> : null}
       </div>
 
-      <p className={`mt-3 min-h-16 text-sm leading-6 ${dark ? 'text-white/65' : 'text-muted-foreground'}`}>{description}</p>
+      <p className={`mt-3 min-h-16 text-sm leading-6 ${dark ? 'text-white/72' : 'text-muted-foreground'}`}>{description}</p>
 
-      <div className={`mt-5 rounded-[15px] border p-4 ${dark ? 'border-white/10 bg-white/[0.055]' : 'border-black/7 bg-white/75 dark:border-white/8 dark:bg-white/[0.035]'}`}>
+      <div className={`mt-5 rounded-[15px] border p-4 ${dark ? 'border-white/12 bg-white/[0.065]' : 'border-black/7 bg-white/75 dark:border-white/8 dark:bg-white/[0.035]'}`}>
         <div className="flex flex-wrap items-end gap-2">
           <span className={`text-3xl font-semibold tracking-[-0.045em] ${dark ? 'text-white' : 'text-foreground'}`}>{price}</span>
-          {price !== '$0' ? <span className={`pb-1 text-xs ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>/ mes</span> : null}
+          {price !== '$0' ? <span className={`pb-1 text-xs ${dark ? 'text-white/60' : 'text-muted-foreground'}`}>/ mes</span> : null}
         </div>
-        <p className={`mt-1.5 text-[11px] leading-5 ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>{priceDetail}</p>
+        <p className={`mt-1.5 text-[11px] leading-5 ${dark ? 'text-white/60' : 'text-muted-foreground'}`}>{priceDetail}</p>
       </div>
 
       <div className="mt-5 flex-1 space-y-2.5">
         {features.map((feature) => (
-          <div key={feature} className={`flex items-start gap-2.5 text-xs leading-5 ${dark ? 'text-white/75' : 'text-foreground'}`}>
-            <span className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full ${dark ? 'bg-emerald-300/12 text-emerald-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'}`}><Check className="size-2.5" /></span>
+          <div key={feature} className={`flex items-start gap-2.5 text-xs leading-5 ${dark ? 'text-white/82' : 'text-foreground'}`}>
+            <span className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full ${dark ? 'bg-emerald-300/14 text-emerald-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'}`}><Check className="size-2.5" /></span>
             <span>{feature}</span>
           </div>
         ))}
       </div>
 
-      <div className="mt-6 border-t border-black/7 pt-4 dark:border-white/10">{footer}</div>
+      <div className={`mt-6 border-t pt-4 ${dark ? 'border-white/12' : 'border-black/7 dark:border-white/10'}`}>{footer}</div>
     </article>
   )
 }
