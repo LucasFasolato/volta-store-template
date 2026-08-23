@@ -5,8 +5,18 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: ['/', '/tienda/'],
-      disallow: ['/admin/', '/internal/', '/api/', '/auth/', '/login'],
+      disallow: [
+        '/admin/',
+        '/internal/',
+        '/api/',
+        '/auth/',
+        '/billing/',
+        '/onboarding/',
+        '/login',
+        '/tienda-loading',
+      ],
     },
     sitemap: 'https://www.voltastore.app/sitemap.xml',
+    host: 'https://www.voltastore.app',
   }
 }

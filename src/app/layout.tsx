@@ -17,6 +17,7 @@ const plusJakarta = Plus_Jakarta_Sans({ variable: '--font-plus-jakarta', subsets
 const playfair = Playfair_Display({ variable: '--font-playfair', subsets: ['latin'], display: 'swap' })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.voltastore.app'),
   title: { default: 'Volta Store', template: '%s - Volta Store' },
   description: 'La forma más simple y profesional de vender por WhatsApp.',
   icons: {
