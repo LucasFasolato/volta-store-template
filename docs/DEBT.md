@@ -1,26 +1,39 @@
 # VOLTA Store — Material Technical Debt
 
-Debt listed here comes primarily from the original architecture audit. **Open means not yet re-verified as fixed**; it does not claim newer code definitely still has the issue. Each item should be checked against current migrations/code before implementation or closure.
+Only current, evidence-backed debt belongs here. Historical audit findings that are now fixed or intentionally accepted are recorded separately so agents do not repeatedly “rediscover” them.
 
-| ID | Priority | Area | Material impact | Recommended resolution | Status |
+## Open
+
+| ID | Priority | Area | Evidence / material impact | Recommended resolution | Status |
 |---|---|---|---|---|---|
-| STORE-DEBT-001 | P1 | Database | Duplicate stores can break single-store assumptions and navigation. | Verify production data, then enforce unique owner/store invariant at DB level if product remains one-store-per-owner. | OPEN / REVERIFY |
-| STORE-DEBT-002 | P1 | Storage | Public asset URLs remain reachable outside DB RLS. | Explicitly decide public-vs-private asset contract; use private/signed strategy if privacy is required. | OPEN / REVERIFY |
-| STORE-DEBT-003 | P1 | Onboarding | Partial multi-step bootstrap can leave inconsistent state or races. | Move bootstrap to transactional/race-safe DB/application contract. | OPEN / REVERIFY |
-| STORE-DEBT-004 | P2 | Backend | Repeated auth/store lookup logic can drift and adds queries. | Centralize authenticated merchant/store resolution. | OPEN / REVERIFY |
-| STORE-DEBT-005 | P2 | Frontend | Large appearance/client components slow iteration and testing. | Split by stable subdomain boundaries without rewriting UX. | OPEN / REVERIFY |
-| STORE-DEBT-006 | P2 | Media | DB image removal may leave Storage objects. | Track object path and remove Storage object with lifecycle-safe deletion. | OPEN / REVERIFY |
-| STORE-DEBT-007 | P2 | Database/performance | Storefront query patterns may lack optimal composites. | Verify query plans/current indexes; add store-scoped composite indexes where justified. | OPEN / REVERIFY |
-| STORE-DEBT-008 | P2 | Performance | Public storefront was audited as dynamic/uncached. | Introduce explicit cache/revalidation strategy after verifying current read path. | OPEN / REVERIFY |
-| STORE-DEBT-009 | P2 | Frontend/performance | Broad font loading increases payload. | Recheck current font strategy; scope/reduce always-on fonts if still excessive. | OPEN / REVERIFY |
-| STORE-DEBT-010 | P2 | Auth | Callback errors may be opaque to users. | Verify current login/error UX and map failures to useful user-facing states. | OPEN / REVERIFY |
-| STORE-DEBT-011 | P2 | Data integrity | Design-token enums may rely only on application validation. | Add DB checks for durable controlled sets when external/direct writers are a realistic risk. | OPEN / REVERIFY |
-| STORE-DEBT-012 | P3 | Catalog | Product rename/slug semantics may drift. | Decide and document immutable-vs-migrating product slug behavior. | OPEN / REVERIFY |
-| STORE-DEBT-013 | P3 | Admin UX | Native destructive confirmations reduce premium consistency. | Verify current flows and replace remaining native confirmation UI when present. | OPEN / REVERIFY |
+| STORE-DEBT-003 | P2 | Onboarding | `ensureOnboarding` still creates/repairs profile, store and scaffold across multiple operations. Duplicate-store races are protected, but a process failure can leave partial bootstrap state. | Keep repair/idempotency behavior; move to a transactional/RPC boundary only when the benefit justifies migration complexity. | OPEN |
+| STORE-DEBT-005 | P2 | Frontend | Appearance/admin surfaces remain large client components and costly to reason about/test. | Split only along stable domain boundaries while preserving current UX; no broad rewrite. | OPEN |
+| STORE-DEBT-008 | P2 | Performance | Public storefront is server-rendered dynamically without an explicit cache/revalidation contract. | Measure real traffic/latency, then introduce a tenant-safe freshness strategy if needed. | OPEN |
+| STORE-DEBT-009 | P3 | Frontend/performance | Root layout loads Geist, Geist Mono, Plus Jakarta Sans and Playfair Display globally. | Measure route/font cost; scope or reduce only if impact is meaningful. | OPEN |
+| STORE-DEBT-011 | P3 | Data integrity | Some durable appearance values have DB checks, while broad `store_theme` token sets still rely mainly on app validation. | Add DB checks only for genuinely durable controlled sets with realistic non-app writers. | OPEN / BOUNDED |
+
+## Verified closed / retired audit findings
+
+| ID | Prior concern | Current evidence | Status |
+|---|---|---|---|
+| STORE-DEBT-001 | One owner could have duplicate stores. | `20260405000000_enforce_store_owner_uniqueness.sql` adds `stores_owner_id_unique`; production reports `owner_id` unique. | CLOSED |
+| STORE-DEBT-002 | Public Storage could be mistaken for private media. | Public-read `store-assets` is an intentional storefront-media contract; writes/deletes are owner-folder scoped. See `STORE-ADR-003`. | ACCEPTED CONTRACT |
+| STORE-DEBT-004 | Auth/store resolution duplicated across server code. | `src/lib/server/store-context.ts` centralizes authenticated user/store identity/data/context helpers. | CLOSED |
+| STORE-DEBT-006 | Product deletion could orphan Storage assets. | Image/storage hardening enumerates linked/folder objects, removes them on product deletion and rolls back failed image DB writes. | CLOSED |
+| STORE-DEBT-007 | Generic catalog/storefront index concern from old audit. | Discovery/performance hardening and newer indexes shipped; no current query-plan evidence proves a material missing index. Re-open only from measured/EXPLAIN evidence. | RETIRED |
+| STORE-DEBT-010 | Auth callback errors were opaque. | `login-feedback.ts` provides explicit states for invalid links, rate limits, Google/provider/callback/auth failures. | CLOSED |
+| STORE-DEBT-012 | Product rename could destabilize product deep links. | Product slug is created on create and ordinary `updateProduct` does not regenerate it. | CLOSED |
+| STORE-DEBT-013 | Native destructive confirmation consistency. | This is not material technical debt by itself. Re-open only if a current flow creates measurable usability/safety risk. | RETIRED |
+
+## Delivery/revalidation gaps (not debt)
+
+- Production has `saas_funnel_events`, but application tracking is not wired yet. This is incomplete roadmap scope, not hidden debt.
+- Real Mercado Pago payment/cancellation has operator-reported manual validation, but external provider E2E is not an automated regression suite.
+- Search Console revalidation after canonical hardening is external/unknown.
 
 ## Debt policy
 
-- Security/data-integrity debt with credible production risk is addressed before unrelated feature accumulation.
-- Do not register aesthetic perfectionism as technical debt.
-- Intentionally accepted launch debt must be bounded and realistically repayable with focused work; the operating target is roughly one week or less for consciously accepted launch debt.
-- Closing an item requires evidence from current code/migrations/production behavior, not assumption.
+- Security/data-integrity issues with credible production risk beat unrelated feature accumulation.
+- Do not label aesthetic perfectionism or speculative scale work as debt.
+- Close debt only with code/migration/production evidence.
+- Prefer a narrow fix over an architecture rewrite.

@@ -3,69 +3,84 @@
 **Last reviewed:** 2026-08-25  
 **Lifecycle:** PRODUCTION  
 **Authoritative branch:** `main`  
-**Production:** `https://www.voltastore.app`  
-**Production discovery:** current public search resolves the domain and describes the product as a WhatsApp-selling catalog/storefront.  
-**Product OS adoption merge:** `a1511f3aa6b8bb630ae1c477170c141a399ce8a5` (PR #53).
+**Production:** `https://www.voltastore.app`
 
-## Production health
+## Verified production baseline
 
-**Status: operational / no known SEV-1 in the evidence reviewed for Product OS adoption.**
+- This reconciliation review started from `main` at `bc1477829bf2f6f8e83bbb1e23756817eda57327`; Vercel production was `READY` on that baseline.
+- `STORE-INIT-002` changes Product OS documentation and reconciles already-applied migration files only; it does not change application runtime behavior.
+- Supabase production schema was inspected during this review; it includes catalog, analytics, billing, slug-history and commercial-plan migrations through 2026-08-25.
+- No unresolved Product OS adoption handoff remains. `STORE-INIT-001` is shipped and archived.
 
-This status is not a synthetic uptime guarantee. Product-specific health checks are not yet automated under VOLTA OS.
+## What is shipped now
 
-## Recently shipped
+### Merchant activation and administration
 
-Recent `main` history shows active work on:
+- Google OAuth and magic-link authentication with explicit login/callback feedback.
+- One owner = one Store is enforced in the database (`stores.owner_id` unique).
+- Activation 2.0 uses a publish-first flow: **Negocio → Portada → Producto → Publicar**, then a first-share success state.
+- Admin surfaces cover business data, storefront content, appearance, catalog, sharing, performance and plan/billing.
+- Storefront media is optimized before upload; product deletion cleans linked/folder assets best-effort and failed image DB writes roll back uploaded objects.
 
-- Landing Conversion 2.0.
-- Paid activation welcome/billing return experience.
-- Premium landing assets and product previews.
-- iOS Safari contrast correction for VOLTA PRO.
-- Canonical SEO/indexability hardening.
-- Store landing conversion/mobile redesign.
-- Native premium preview rebuild.
-- VOLTA Product OS v1.0 adoption.
+### Catalog and storefront
 
-## Core system currently present
+- Products, categories and brands, multiple images, compare price, SKU, featured state and availability.
+- Product options support `unavailable_values` for sold-out option values.
+- Search, category/brand filters, URL-backed discovery, sorting, promotions and related-product behavior.
+- Product detail UX is responsive and purchase controls remain in context on mobile/desktop.
+- Checkout collects configurable customer/fulfillment/notes/custom fields and finishes with a structured WhatsApp handoff.
+- Store slug history protects shared store links and redirects old slugs while preserving query parameters.
+- Store/product metadata includes canonical, Open Graph and Twitter metadata.
+- Product slugs are created once and are not regenerated on product rename in the current write path.
 
-- Google OAuth + magic-link authentication.
-- Admin and public storefront split.
-- Store bootstrap/onboarding logic.
-- Store/content/configuration management.
-- Category/product CRUD.
-- Appearance/layout customization.
-- Public storefront by slug.
-- Persisted browser cart.
-- WhatsApp order handoff.
-- Supabase Postgres/RLS/Storage.
-- Billing/commercial-access surface with Mercado Pago return handling.
+### Distribution and measurement
 
-## Active Product OS work
+- Share Engine v1 supports store/product sharing patterns including measurable links and QR-oriented distribution.
+- Attribution accepts `src` / `utm_source` and `campaign` / `utm_campaign`, persists session attribution and records it on storefront events.
+- Merchant commercial analytics exists at `/admin/rendimiento`: visits, product opens, add-to-cart, WhatsApp intent, conversion, top products, channel/source performance and opportunity prompts.
+- These metrics represent storefront intent; they are not proof of a completed merchant sale.
 
-No Store initiative is currently recorded as active after `STORE-INIT-001` shipped. The next substantial engineering initiative should create or promote the appropriate work item rather than relying on conversation history alone.
+### Commercial access and billing
 
-## Known material risks
+Current implementation has three commercial levels:
 
-The original Store audit identified high-priority structural risks that have not been assumed fixed merely because newer feature work exists:
+- **Gratis:** 10 products and 1 image/product, with core storefront/cart/WhatsApp functionality.
+- **VOLTA:** current code uses ARS 15,000/month for the first 3 cycles, then ARS 30,000/month.
+- **VOLTA PRO:** current code uses ARS 70,000/month.
 
-1. one-store-per-owner invariant may still lack DB enforcement;
-2. audited Storage bucket strategy is public;
-3. onboarding bootstrap was non-transactional;
-4. public storefront caching/scaling needs explicit verification;
-5. large client-side admin surfaces increase maintenance cost.
+Exact prices are implementation/commercial configuration, not permanent Product OS doctrine.
 
-See `DEBT.md`. Agents must verify current implementation before closing any of these debts.
+Billing uses Mercado Pago subscriptions for the merchant SaaS, not shopper checkout. The system includes signed webhook/reconciliation logic, `/billing/return`, paid-plan welcome, cancellation/access-until behavior, internal billing operations, complimentary access and unit-economics fields. Free limits are also enforced in the database. Existing eligible early stores are protected by grandfathering.
 
-## Blocked / external validation
+### Landing and SEO
 
-A full real-money Mercado Pago end-to-end payment validation may require a buyer account distinct from the merchant/payment-owner account. This was a known practical validation constraint in recent product work and should remain an explicit external-test item rather than be simulated as completed.
+- Root landing is production and has been redesigned around native premium product previews.
+- The earlier corrupt landing WebP incident is resolved in the current runtime; the final mitigation moved critical preview UI away from fragile raster-only mockups.
+- Canonical host is `https://www.voltastore.app`; apex-to-www redirect is intentional.
+- Root metadata, canonical, OG/Twitter, JSON-LD, robots and sitemap are present.
+- Storefront metadata is dynamic per store/product.
+
+## Manual/operator validation history
+
+Project history reports a real Mercado Pago subscription payment and subsequent cancellation were manually validated, including the first promotional cycle and provider status normalization. Treat this as **operator validation, not automated regression coverage**; billing changes still require provider-level verification.
+
+## Known incomplete or requiring revalidation
+
+1. **Landing Conversion Polish 1.0 is approved but not shipped.** The current landing still uses external Unsplash photography; the approved next pass is owned/local NOVA media, pricing-copy polish, real-store proof, a mobile conversion CTA and funnel measurement without another structural redesign.
+2. **SaaS acquisition funnel instrumentation is only partially delivered.** Production Supabase already contains `saas_funnel_events`, but current application code has no writer/tracker for it. The schema migrations are reconciled into Git by `STORE-INIT-002`; wiring events remains future work.
+3. **Onboarding bootstrap is race-safe around duplicate-store creation but not atomic.** Profile/store/scaffold creation is still multi-step and repairable/idempotent rather than one transaction.
+4. **Public storefront caching strategy remains implicit/dynamic.** Optimize only when real scale/performance evidence justifies it.
+5. **Search Console revalidation status is external/unknown.** Canonical/indexability hardening shipped, but current Google validation state was not verified in this review.
+6. **Global font loading remains broad.** Four font families are loaded from the root layout; performance impact should be measured before changing it.
 
 ## Next recommended direction
 
-1. Re-verify high-risk audit debts against current migrations/code and retire/fix them based on evidence.
-2. Continue activation/conversion work with publish-readiness and analytics as high-value directions once scale-safety priorities are controlled.
-3. Validate multi-agent soft ownership during the next substantial Store initiative.
+1. Finish the approved landing conversion polish **without another redesign** and wire the existing SaaS funnel schema.
+2. Measure landing → signup → activation → first share; keep **Time to First Share < 10 minutes** as the activation target until real data justifies changing it.
+3. Add contextual feature discovery and usage-based upgrade prompts without dark patterns.
+4. Put real merchants through the full flow and prioritize the first 10 customer learnings over speculative feature breadth.
+5. Keep PRO focused on better decisions/growth intelligence once enough merchant data exists.
 
-## Last operating agent
+## Last operating review
 
-ChatGPT agent completed VOLTA Product OS adoption and closed `STORE-INIT-001` on 2026-08-25.
+`STORE-INIT-002` performs the deep truth reconciliation that the initial VOLTA OS adoption intentionally did not have enough conversation/production evidence to complete.

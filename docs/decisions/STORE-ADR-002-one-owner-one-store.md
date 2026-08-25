@@ -1,26 +1,32 @@
 # STORE-ADR-002 — One owner, one Store product assumption
 
-- **Status:** ACCEPTED / REQUIRES DB ENFORCEMENT VERIFICATION
+- **Status:** ACCEPTED / VERIFIED
 - **Decision class:** Product / data model
-- **Source:** Existing application contract and architecture audit
+- **Source:** Application contract, migration history and production schema
 
 ## Context
 
-Admin and onboarding code were designed around one authenticated owner resolving to one Store. The audit documented repeated `.single()` assumptions while `stores.owner_id` was not guaranteed unique at DB level.
+Admin, onboarding, commercial access and navigation resolve one authenticated owner to one Store. Multi-store ownership would change navigation, permissions, billing, activation and data migration semantics.
 
 ## Decision
 
-Preserve **one owner = one Store** as the current product contract until a future accepted product decision introduces multi-store ownership.
+Preserve **one owner = one Store** as the current product/data contract until an explicit accepted product decision introduces multi-store ownership.
 
-Implementation should enforce critical invariants in the database as well as application code where feasible.
+The invariant is enforced in the database, not only application code.
+
+## Verification
+
+- `supabase/migrations/20260405000000_enforce_store_owner_uniqueness.sql` detects existing duplicates before adding `stores_owner_id_unique unique(owner_id)`.
+- Production schema inspection on 2026-08-25 reports `stores.owner_id` as unique.
+- Current onboarding retries/re-resolves on uniqueness collisions instead of intentionally creating another store.
 
 ## Consequences
 
-- onboarding must not create a second store for the same owner;
-- owner/store resolution can remain simple;
-- adding multi-store later is a deliberate product/data migration, not an incidental refactor;
-- `STORE-DEBT-001` remains open until current DB enforcement is verified/fixed.
+- onboarding must never create a second store for an owner;
+- owner/store resolution can stay simple;
+- tests/refactors may rely on one Store per owner;
+- multi-store is a deliberate product + schema + billing migration, not an incidental UI feature.
 
 ## Supersession
 
-A future multi-store product decision must supersede this ADR and define migration, navigation, permissions and billing implications.
+A future multi-store decision must supersede this ADR and define migration, navigation, permissions, activation and billing behavior.
