@@ -2,78 +2,136 @@
 
 ## Purpose
 
-VOLTA Store lets a business create a professional online catalog/storefront and turn browsing into an organized order that closes through WhatsApp.
+VOLTA Store is a SaaS for small businesses, professionals and entrepreneurs who already sell mainly through WhatsApp, Instagram, Facebook, QR or in person.
 
-The product reduces the complexity of "selling online" for businesses that already operate through WhatsApp. A merchant should not need to understand ecommerce infrastructure to publish products, present them well and receive a structured buying intent.
+Core promise:
 
-## Target users
+> **Tu catálogo online para vender por WhatsApp.**
 
-Initial fit:
-
-- local and independent businesses;
-- merchants already using WhatsApp as a primary sales channel;
-- businesses with product catalogs but no structured online storefront;
-- non-technical operators who value speed and presentation quality.
+The merchant creates a professional storefront. The shopper browses, opens products, chooses options, builds a cart and sends an organized order to WhatsApp. Shopper payment, delivery and final coordination remain between merchant and customer.
 
 ## Problem
 
-Typical merchants face fragmented product presentation, repetitive conversations, slow answers, unstructured orders and excessive dependence on manual WhatsApp handling.
+Without a storefront, merchants repeatedly send photos/prices, answer the same questions, lose context across chats and receive incomplete or unstructured order requests. Traditional ecommerce often adds more setup and operational complexity than this audience needs.
 
-## Value proposition
+VOLTA organizes the commercial moment **before WhatsApp** without replacing the channel where the merchant already closes the sale.
 
-**Create a store that looks professional, share it and receive organized orders in WhatsApp without operating a traditional ecommerce stack.**
+## Target users
 
-## Core customer journey
+- local and independent businesses;
+- small product-based merchants;
+- non-technical operators;
+- businesses selling through social/WhatsApp rather than a full ecommerce operation;
+- merchants who need a professional link/QR storefront before they need enterprise commerce infrastructure.
 
-1. Merchant signs in.
-2. VOLTA ensures the initial store context exists.
-3. Merchant configures identity, WhatsApp, content and appearance.
-4. Merchant creates categories/products and publishes a storefront.
-5. A shopper opens the public store, browses and adds products to cart.
-6. VOLTA builds a structured order message.
-7. The shopper hands the order to the merchant through WhatsApp.
+## Product philosophy
+
+The internal test is simple:
+
+> A non-technical family member should be able to configure and understand it alone.
+
+Therefore:
+
+- few controls and human language;
+- automate before asking the merchant to configure;
+- mobile first;
+- premium clarity over decorative complexity;
+- every meaningful feature should create observable merchant value;
+- avoid enterprise complexity and features added only because “a SaaS/ecommerce usually has them”;
+- do not drift into a Shopify/Tiendanube clone.
+
+## Product evolution
+
+The intended ladder is:
+
+**Catálogo → Distribución → Medición → Inteligencia → Automatización**
+
+The broader thesis is that VOLTA can become the lightweight commercial layer for businesses that sell through WhatsApp, not merely a catalog builder.
+
+## Core journeys
+
+### Merchant
+
+1. Land on VOLTA Store.
+2. Create an account without requiring a paid plan.
+3. Complete Activation 2.0: **Negocio → Portada → Producto → Publicar**.
+4. Share the first store/product link.
+5. Receive traffic and WhatsApp buying intent.
+6. Learn from performance signals.
+7. Upgrade when usage/data creates a real need.
+
+Activation north-star target: **Time to First Share < 10 minutes**. This is a product target, not yet a validated production benchmark.
+
+### Shopper
+
+1. Open a store/product link.
+2. Browse/search/filter products.
+3. Open product detail and choose available options.
+4. Add items/quantities to cart.
+5. Complete the small set of merchant-configured checkout fields.
+6. Continue to WhatsApp with a structured order.
 
 ## Current product capabilities
 
-The repository currently contains:
-
-- Supabase authentication with Google OAuth and magic-link support;
-- protected admin experience;
-- store configuration/content editing;
-- category and product administration;
-- product media through Supabase Storage;
-- extensive appearance/layout customization and live-preview patterns;
-- public storefront by durable store slug;
-- browser-local persisted cart;
-- WhatsApp order handoff;
-- commercial/billing surface including Mercado Pago return handling and paid-plan welcome experience;
-- corporate/marketing landing at the root product domain.
-
-Capabilities above are source-derived from the repository/audit and recent main commits. Product OS must be updated when implementation changes materially.
-
-## Product principles
-
-- Hide operational complexity from the merchant.
-- Make the next useful action obvious.
-- Premium presentation is part of conversion, not decoration.
-- Mobile storefront quality is first-class.
-- Commerce should remain simple and understandable.
-- Configuration should show its visual consequence whenever practical.
-- Avoid technical language in merchant-facing UI.
-- Reliability, speed and data integrity are product features.
-
-## Non-goals — current stage
-
-Unless a future approved initiative changes direction, Store is not trying to become:
-
-- a generic enterprise ecommerce ERP;
-- a marketplace aggregating multiple merchants;
-- a complex omnichannel order-management suite;
-- a feature-dense platform that forces merchants to configure technical primitives;
-- a traditional payment checkout replacing the WhatsApp handoff as the core purchase flow.
-
-Billing VOLTA merchants for use of the SaaS is separate from shopper checkout.
+- Google OAuth + magic-link authentication.
+- Publish-first activation and first-share completion state.
+- Store identity/content/footer/checkout configuration.
+- Premium appearance system with themes, typography, layout and hero controls.
+- Product/category/brand administration, variants/options and availability.
+- Multi-image product media with automatic optimization and Storage lifecycle handling.
+- Search, filters, ordering, promotions and related products.
+- Responsive product detail and persisted browser cart.
+- Structured WhatsApp checkout.
+- Share Engine with store/product links and measurable distribution.
+- Storefront attribution by source/campaign.
+- Commercial analytics and opportunity prompts for merchants.
+- Durable store links through slug history/redirects.
+- Free / VOLTA / PRO commercial access, Mercado Pago merchant billing, complimentary access and grandfathering.
+- Commercial landing, canonical SEO and per-store/per-product metadata.
 
 ## Commercial model
 
-VOLTA Store is a SaaS product. The repository includes billing/commercial-access concepts; exact pricing and commercial experiments may evolve and should not be hard-coded into long-lived product doctrine unless explicitly decided.
+The durable product distinction is:
+
+- **Gratis:** discover and start using VOLTA.
+- **VOLTA:** sell with the complete practical selling toolkit.
+- **VOLTA PRO:** grow by understanding what generates commercial results and what to do next.
+
+Current exact prices and limits live in code/database and may evolve through approved commercial decisions. Product OS should preserve the **role of each tier**, not freeze every experiment.
+
+### PRO principle
+
+PRO should primarily charge for **better decisions, attribution, opportunities and growth intelligence**, not artificial capacity limits. Do not make a low-data merchant pay for “intelligence” that cannot yet produce useful insight.
+
+### Grandfathering
+
+When commercial packaging changes, already-entitled early users must not silently lose access. Grandfathering is part of the current access model and any removal/change requires explicit commercial approval and migration planning.
+
+## Conversion philosophy
+
+Upgrade prompts should respond to observed need:
+
+- catalog growth can explain why VOLTA helps;
+- traffic/data can explain why PRO helps;
+- prompts should be contextual and reversible;
+- no dark patterns, fake urgency or invented social proof.
+
+The intended funnel is:
+
+**Landing → Crear gratis → Activation → Primer producto → Publicar → Primer share → Tráfico → Valor → Upgrade VOLTA → Mercado Pago → Welcome → Más uso/datos → PRO**
+
+## Non-goals — current stage
+
+Unless an approved initiative changes direction, do not prioritize:
+
+- massive refactors or enterprise infrastructure;
+- marketplace behavior;
+- ERP/complex stock management;
+- shopper card checkout replacing WhatsApp;
+- giant Ads Manager surfaces;
+- bulk/CSV systems without demonstrated merchant pain;
+- dozens of new settings;
+- PRO differentiated mainly through arbitrary limits;
+- features justified only because larger ecommerce platforms have them.
+
+Billing the merchant for VOLTA is separate from shopper checkout.

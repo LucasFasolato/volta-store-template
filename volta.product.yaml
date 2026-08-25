@@ -25,11 +25,14 @@ stack:
   commerce_handoff: whatsapp
 
 critical_flows:
+  - marketing_landing
   - authentication
-  - onboarding
+  - onboarding_activation
   - admin_store_configuration
   - catalog_management
   - appearance_customization
+  - sharing
+  - merchant_commercial_analytics
   - public_storefront
   - cart
   - whatsapp_checkout

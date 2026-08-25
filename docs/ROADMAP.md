@@ -1,56 +1,79 @@
 # VOLTA Store — Roadmap
 
-This roadmap expresses intentional direction, not every idea. It intentionally avoids artificial dates.
+This roadmap is intentional direction, not an inventory of ideas. Already-shipped work is not repeated here as future scope.
 
 ## NOW
 
-### STORE-INIT-001 — Product OS Adoption
-Establish portable context, truthful current state, guardrails, debt, decisions and agent continuity for Store.
+### Landing Conversion Polish 1.0 — finish, then freeze visual churn
 
-### Scale-safety verification
-Re-verify the original high-risk audit findings against current code/migrations, then prioritize fixes that remain valid:
+The current landing direction is good enough to stop structural redesign. Complete the already-approved conversion pass:
 
-- DB enforcement of one-store-per-owner;
-- transactional or race-safe onboarding;
-- public asset/storage strategy;
-- composite storefront indexes where still needed;
-- auth/billing failure visibility and security boundaries.
+- replace external demo photography with owned/local NOVA media;
+- simplify merchant-facing pricing copy;
+- reinforce real-store proof without fake testimonials/metrics;
+- add a restrained mobile CTA where it helps;
+- wire the existing SaaS funnel schema;
+- QA desktop/mobile and production render.
 
-Critical debt blocks feature accumulation when it materially threatens production integrity.
+After this pass, do not keep redesigning the landing without evidence.
+
+### Measure acquisition → activation
+
+Wire and validate:
+
+- `landing_view`
+- landing CTA/store-demo/pricing/plan clicks
+- `signup_started`
+- later funnel joins through signup/store/first-product/publish/first-share where technically clean
+
+Primary activation target: **Time to First Share < 10 minutes**. First establish trustworthy measurement; do not optimize against guessed numbers.
+
+### First 10 real customer learnings
+
+Use the landing + Activation 2.0 + Share Engine with real merchants. Prefer observation, support friction and conversion evidence over speculative feature breadth.
 
 ## NEXT
 
-### Activation and publish confidence
-Continue reducing merchant time-to-value with a guided readiness model, clear publish/share confidence and an obvious next step.
+### Contextual feature discovery
 
-Potential scope derived from the existing approved product direction:
+After a user unlocks value, surface small contextual nudges rather than a long tour. Examples:
 
-- launch/setup checklist;
-- publish readiness;
-- share/publish panel improvements;
-- trust/contact completeness guidance.
+- Products: what the plan newly enables.
+- Compartir: QR/measurable links.
+- Rendimiento: newly available performance/attribution value.
 
-### Basic conversion analytics
-Give merchants evidence that the storefront is working:
+### Usage-based upgrade psychology
 
-- visits;
-- product detail opens;
-- add-to-cart;
-- WhatsApp handoff intent;
-- useful funnel/conversion summaries.
+Keep prompts tied to real need:
 
-### Public performance hardening
-Move public reads toward a cache/revalidation strategy appropriate to scale and reduce unnecessary client/runtime cost without weakening freshness or tenant isolation.
+- catalog growth → VOLTA;
+- meaningful traffic/data → PRO;
+- no dark patterns or arbitrary artificial pain.
+
+### PRO decision intelligence
+
+Extend PRO only where data can support better decisions: channel comparison, campaign attribution, opportunities and recommendations. Do not sell “intelligence” to users without enough signal.
+
+### Public performance/SEO revalidation
+
+When data warrants it:
+- evaluate storefront cache/revalidation strategy;
+- recheck Search Console canonical/index status;
+- decide whether public merchant storefronts belong in sitemap/indexing strategy.
 
 ## LATER
 
-- catalog scaling tools and bulk operations;
-- vertical starter templates;
-- media compression/lifecycle hardening;
-- theme history/draft restore;
-- share-safe slug migration/redirect strategy;
-- deeper merchant growth tools after core funnel telemetry exists.
+- operational/bulk catalog tools only after repeated merchant pain is observed;
+- automation opportunities after distribution/measurement/intelligence are working;
+- targeted refactors of oversized admin surfaces;
+- deeper media/performance optimization based on measured cost;
+- growth toward 20–30 paid merchants, with progressively more effort shifted from building to selling/observing/learning.
 
-## Idea vs roadmap
+## Explicitly not prioritized
 
-The historical `docs/ai/70-roadmap.md` remains useful input, but this file is the current intentional ordering. New ideas belong outside the roadmap until promoted by an explicit decision.
+- marketplace;
+- ERP/complex stock management;
+- shopper card checkout replacing WhatsApp;
+- giant ads manager;
+- enterprise infrastructure without scale evidence;
+- feature parity with Shopify/Tiendanube for its own sake.
