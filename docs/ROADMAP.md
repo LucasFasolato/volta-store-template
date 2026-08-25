@@ -4,33 +4,26 @@ This roadmap is intentional direction, not an inventory of ideas. Already-shippe
 
 ## NOW
 
-### Landing Conversion Polish 1.0 — finish, then freeze visual churn
+### Measure acquisition → activation end to end
 
-The current landing direction is good enough to stop structural redesign. Complete the already-approved conversion pass:
+`STORE-INIT-003` shipped the landing-side acquisition layer through `signup_started`. Extend it cleanly through:
 
-- replace external demo photography with owned/local NOVA media;
-- simplify merchant-facing pricing copy;
-- reinforce real-store proof without fake testimonials/metrics;
-- add a restrained mobile CTA where it helps;
-- wire the existing SaaS funnel schema;
-- QA desktop/mobile and production render.
-
-After this pass, do not keep redesigning the landing without evidence.
-
-### Measure acquisition → activation
-
-Wire and validate:
-
-- `landing_view`
-- landing CTA/store-demo/pricing/plan clicks
-- `signup_started`
-- later funnel joins through signup/store/first-product/publish/first-share where technically clean
+- `signup_completed`;
+- `store_created`;
+- `first_product`;
+- `published`;
+- `first_share`;
+- pricing/checkout/paid-plan transitions where the event contract is clear.
 
 Primary activation target: **Time to First Share < 10 minutes**. First establish trustworthy measurement; do not optimize against guessed numbers.
 
 ### First 10 real customer learnings
 
-Use the landing + Activation 2.0 + Share Engine with real merchants. Prefer observation, support friction and conversion evidence over speculative feature breadth.
+Use the frozen landing + Activation 2.0 + Share Engine with real merchants. Observe where they hesitate, what they understand, what they value and why they would or would not pay. Prefer evidence and support friction over speculative feature breadth.
+
+### Activation 2.x only from evidence
+
+Do not redesign onboarding pre-emptively. Use funnel drop-off and session observation to decide whether the current **Negocio → Portada → Producto → Publicar → Compartir** journey needs another pass.
 
 ## NEXT
 
@@ -68,6 +61,10 @@ When data warrants it:
 - targeted refactors of oversized admin surfaces;
 - deeper media/performance optimization based on measured cost;
 - growth toward 20–30 paid merchants, with progressively more effort shifted from building to selling/observing/learning.
+
+## Landing freeze
+
+Landing Conversion Polish 1.0 is complete. Do **not** reopen structural redesign or visual churn without conversion data, real merchant/customer feedback or a concrete product-positioning change.
 
 ## Explicitly not prioritized
 
