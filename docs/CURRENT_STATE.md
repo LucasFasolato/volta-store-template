@@ -5,7 +5,7 @@
 **Authoritative branch:** `main`  
 **Production:** `https://www.voltastore.app`  
 **Production discovery:** current public search resolves the domain and describes the product as a WhatsApp-selling catalog/storefront.  
-**Last main commit observed during adoption:** `1d614249ff315854c3741de637625222bd7b4e1e` — Rebuild landing previews as native premium UI.
+**Product OS adoption merge:** `a1511f3aa6b8bb630ae1c477170c141a399ce8a5` (PR #53).
 
 ## Production health
 
@@ -24,6 +24,7 @@ Recent `main` history shows active work on:
 - Canonical SEO/indexability hardening.
 - Store landing conversion/mobile redesign.
 - Native premium preview rebuild.
+- VOLTA Product OS v1.0 adoption.
 
 ## Core system currently present
 
@@ -41,7 +42,7 @@ Recent `main` history shows active work on:
 
 ## Active Product OS work
 
-`STORE-INIT-001 — Product OS Adoption` is being used to normalize context and make this repository independently continuable by any compliant agent.
+No Store initiative is currently recorded as active after `STORE-INIT-001` shipped. The next substantial engineering initiative should create or promote the appropriate work item rather than relying on conversation history alone.
 
 ## Known material risks
 
@@ -61,11 +62,10 @@ A full real-money Mercado Pago end-to-end payment validation may require a buyer
 
 ## Next recommended direction
 
-1. Finish Product OS adoption and use it during real Store work.
-2. Re-verify high-risk audit debts against current migrations/code before executing fixes.
-3. Continue activation/conversion work with publish-readiness and analytics as high-value directions once scale-safety priorities are controlled.
-4. Validate multi-agent soft ownership during the next substantial Store initiative.
+1. Re-verify high-risk audit debts against current migrations/code and retire/fix them based on evidence.
+2. Continue activation/conversion work with publish-readiness and analytics as high-value directions once scale-safety priorities are controlled.
+3. Validate multi-agent soft ownership during the next substantial Store initiative.
 
 ## Last operating agent
 
-VOLTA OS adoption performed by ChatGPT agent on `chore/store-INIT-001-volta-os-adoption`.
+ChatGPT agent completed VOLTA Product OS adoption and closed `STORE-INIT-001` on 2026-08-25.
