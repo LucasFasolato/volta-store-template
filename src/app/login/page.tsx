@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LoginForm } from '@/components/auth/LoginForm'
+import { SignupStartTracker } from '@/components/analytics/SignupStartTracker'
 import { VoltaBrand } from '@/components/brand/VoltaBrand'
 import { getLoginFeedbackFromSearchParams } from '@/lib/auth/login-feedback'
 import { sanitizeInternalRedirect } from '@/lib/auth/redirects'
@@ -25,6 +26,7 @@ export default async function LoginPage({
 
   return (
     <main className="min-h-screen bg-[#f7f8fa] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
+      <SignupStartTracker />
       <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-6xl overflow-hidden rounded-[22px] border border-black/8 bg-white lg:grid-cols-[.9fr_1.1fr]">
         <section className="flex flex-col justify-between p-6 sm:p-9 lg:p-12">
           <div>

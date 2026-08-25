@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Store,
 } from 'lucide-react'
+import { LandingAnalytics } from '@/components/analytics/LandingAnalytics'
 import { VoltaBrand } from '@/components/brand/VoltaBrand'
 import {
   FREE_PLAN,
@@ -18,6 +19,7 @@ import {
   VOLTA_BILLING_PLAN,
   VOLTA_PRO_PLAN,
 } from '@/lib/billing/plan'
+import type { SaasFunnelEventType } from '@/lib/analytics/saas-events'
 
 export const metadata: Metadata = {
   title: 'VOLTA — Tu catálogo online para vender por WhatsApp',
@@ -40,14 +42,8 @@ export const metadata: Metadata = {
 
 type RootSearchParams = Promise<Record<string, string | string[] | undefined>>
 
-const NOVA_HERO =
-  'https://images.unsplash.com/photo-1777840347880-747242e0db00?auto=format&fit=crop&fm=jpg&q=82&w=1800'
-const NOVA_SET =
-  'https://images.unsplash.com/photo-1617030557822-c8c35f07c60b?auto=format&fit=crop&fm=jpg&q=82&w=1400'
-const NOVA_CAP =
-  'https://images.unsplash.com/photo-1777455163868-b113d82fbe74?auto=format&fit=crop&fm=jpg&q=82&w=1200'
-const NOVA_TEE =
-  'https://images.unsplash.com/photo-1598795737563-07467e744bac?auto=format&fit=crop&fm=jpg&q=82&w=1200'
+const NOVA_HERO = '/landing/nova/hero-editorial.jpg'
+const NOVA_SET = '/landing/nova/essential-set.jpg'
 
 const faqs = [
   {
@@ -107,6 +103,7 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#f5f7f5] text-[#07120f] selection:bg-[#12e89a] selection:text-[#032319]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
+      <LandingAnalytics />
 
       <header className="sticky top-0 z-50 border-b border-black/6 bg-[#f5f7f5]/92 px-4 py-3 backdrop-blur-xl sm:px-6">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
@@ -120,14 +117,19 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
             <Link href="/login" className="hidden text-sm font-semibold text-slate-700 transition hover:text-slate-950 sm:inline-flex">Ingresar</Link>
-            <Link href="/login" className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#07120f] px-4 text-sm font-semibold text-white transition hover:bg-[#16231f] sm:px-5">
+            <Link
+              href="/login"
+              data-saas-event="landing_primary_cta_click"
+              data-saas-location="header"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#07120f] px-4 text-sm font-semibold text-white transition hover:bg-[#16231f] sm:px-5"
+            >
               Crear gratis <ArrowRight className="size-4" />
             </Link>
           </div>
         </div>
       </header>
 
-      <section className="relative px-4 pb-14 pt-10 sm:px-6 sm:pb-18 sm:pt-14 lg:pb-20 lg:pt-16">
+      <section id="landing-hero" className="relative px-4 pb-14 pt-10 sm:px-6 sm:pb-18 sm:pt-14 lg:pb-20 lg:pt-16">
         <div className="pointer-events-none absolute left-[7%] top-[-190px] h-[470px] w-[620px] rounded-full bg-[#12e89a]/10 blur-3xl" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[.82fr_1.18fr] lg:gap-14">
           <div className="max-w-xl">
@@ -141,10 +143,20 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
               Mostrá productos, precios y opciones con una presencia que esté a la altura de tu negocio. Tu cliente elige y el pedido llega ordenado a WhatsApp.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <Link href="/login" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#12e89a] px-6 text-sm font-bold text-[#04251a] shadow-[0_16px_38px_rgba(18,232,154,.22)] transition hover:-translate-y-0.5 hover:bg-[#0fdb91]">
+              <Link
+                href="/login"
+                data-saas-event="landing_primary_cta_click"
+                data-saas-location="hero"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#12e89a] px-6 text-sm font-bold text-[#04251a] shadow-[0_16px_38px_rgba(18,232,154,.22)] transition hover:-translate-y-0.5 hover:bg-[#0fdb91]"
+              >
                 Crear mi tienda gratis <ArrowRight className="size-4" />
               </Link>
-              <Link href="/tienda/strongprotein" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-6 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:bg-slate-50">
+              <Link
+                href="/tienda/strongprotein"
+                data-saas-event="landing_real_store_click"
+                data-saas-location="hero"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-6 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:bg-slate-50"
+              >
                 Ver tienda real <ExternalLink className="size-4" />
               </Link>
             </div>
@@ -164,15 +176,15 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
           <div className="grid gap-8 lg:grid-cols-[.72fr_1.28fr] lg:items-end">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[.18em] text-[#0a8f62]">Cómo funciona</p>
-              <h2 className="mt-3 max-w-lg text-balance text-3xl font-semibold tracking-[-0.05em] sm:text-4xl">De tu catálogo a un pedido ordenado, sin cambiar cómo vendés.</h2>
+              <h2 className="mt-3 max-w-lg text-balance text-3xl font-semibold tracking-[-0.05em] sm:text-4xl">Tres pasos para empezar a vender por WhatsApp.</h2>
             </div>
-            <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">VOLTA organiza lo que hoy mandás por mensajes: productos, opciones, cantidades y el paso final a WhatsApp.</p>
+            <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">VOLTA ordena lo que pasa antes del mensaje: catálogo, elección y pedido. Vos seguís atendiendo como ya sabés.</p>
           </div>
 
           <div className="mt-8 grid gap-3 md:grid-cols-3">
-            <StepCard icon={<Store className="size-5" />} number="01" title="Cargás tu catálogo">Fotos, precios, variantes y disponibilidad desde un panel simple.</StepCard>
-            <StepCard icon={<QrCode className="size-5" />} number="02" title="Compartís un link">Instagram, WhatsApp, Facebook o QR: usás los canales que ya tenés.</StepCard>
-            <StepCard icon={<MessageCircle className="size-5" />} number="03" title="Recibís el pedido">El cliente llega a WhatsApp con productos, opciones y cantidades ya definidos.</StepCard>
+            <StepCard icon={<Store className="size-5" />} number="01" title="Cargá">Productos, fotos, precios, opciones y disponibilidad.</StepCard>
+            <StepCard icon={<QrCode className="size-5" />} number="02" title="Compartí">Tu link en Instagram, WhatsApp, Facebook o QR.</StepCard>
+            <StepCard icon={<MessageCircle className="size-5" />} number="03" title="Vendé">El pedido llega a WhatsApp con productos, opciones y cantidades.</StepCard>
           </div>
         </div>
       </section>
@@ -190,7 +202,14 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
                 <DarkFeature>Pedido estructurado</DarkFeature>
                 <DarkFeature>Diseño adaptable a tu marca</DarkFeature>
               </div>
-              <Link href="/tienda/strongprotein" className="mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-[#07120f] transition hover:-translate-y-0.5">Probar una tienda real <ExternalLink className="size-4" /></Link>
+              <Link
+                href="/tienda/strongprotein"
+                data-saas-event="landing_real_store_click"
+                data-saas-location="experience"
+                className="mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-[#07120f] transition hover:-translate-y-0.5"
+              >
+                Probar una tienda real <ExternalLink className="size-4" />
+              </Link>
             </div>
 
             <MobileProductPreview />
@@ -198,12 +217,33 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
         </div>
       </section>
 
+      <section className="px-4 pb-14 sm:px-6 sm:pb-16">
+        <div className="mx-auto grid max-w-7xl gap-5 rounded-[26px] border border-black/7 bg-white p-5 shadow-sm sm:p-7 lg:grid-cols-[1fr_auto] lg:items-center lg:p-8">
+          <div className="flex items-start gap-4">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><Store className="size-5" /></span>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[.16em] text-emerald-700">Producto real</p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">Esto no es sólo una demo.</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Entrá como cliente a una tienda publicada, recorré productos y probá el flujo que termina en WhatsApp.</p>
+            </div>
+          </div>
+          <Link
+            href="/tienda/strongprotein"
+            data-saas-event="landing_real_store_click"
+            data-saas-location="proof"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-black/10 bg-[#07120f] px-5 text-sm font-semibold text-white"
+          >
+            Ver tienda funcionando <ExternalLink className="size-4" />
+          </Link>
+        </div>
+      </section>
+
       <section id="planes" className="border-y border-black/6 bg-white px-4 py-14 sm:px-6 sm:py-16">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[.18em] text-[#0a8f62]">Planes</p>
-            <h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.05em] sm:text-4xl">Empezá gratis. Subí de plan cuando tu tienda ya te esté dando valor.</h2>
-            <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">Gratis alcanza para validar. VOLTA suma herramientas para vender. PRO agrega inteligencia cuando ya tenés datos para aprovecharla.</p>
+            <h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.05em] sm:text-4xl">Empezá gratis. Subí cuando aparezca una necesidad real.</h2>
+            <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">Gratis te deja empezar. VOLTA te ayuda a vender. PRO te ayuda a entender qué genera ventas y qué hacer después.</p>
           </div>
 
           <div className="mt-8 grid gap-4 lg:grid-cols-3 lg:items-stretch">
@@ -215,26 +255,32 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
               features={[`Hasta ${FREE_PLAN.productLimit} productos`, '1 imagen por producto', 'Carrito + WhatsApp', 'Tienda pública y personalización']}
               cta="Crear gratis"
               href="/login"
+              eventType="landing_free_cta_click"
+              plan="free"
             />
             <PricingCard
               featured
               eyebrow="Para vender"
               title="VOLTA"
               price={formatBillingAmount(VOLTA_BILLING_PLAN.introAmount)}
-              detail={`por mes durante ${VOLTA_BILLING_PLAN.introCycles} meses · después ${formatBillingAmount(VOLTA_BILLING_PLAN.standardAmount)}/mes`}
-              features={['Productos sin límite artificial', 'Hasta 12 imágenes por producto', 'QR y links medibles', 'Rendimiento comercial completo']}
+              detail={`Primeros ${VOLTA_BILLING_PLAN.introCycles} meses · después ${formatBillingAmount(VOLTA_BILLING_PLAN.standardAmount)}/mes`}
+              features={['Productos ilimitados', 'Hasta 12 imágenes por producto', 'Variantes y opciones', 'QR y links medibles', 'Visitas, pedidos y conversión']}
               cta="Elegir VOLTA"
               href="/login?next=%2Fadmin%2Fplan"
+              eventType="landing_volta_cta_click"
+              plan="volta"
             />
             <PricingCard
               dark
               eyebrow="Para crecer"
               title="VOLTA PRO"
               price={formatBillingAmount(VOLTA_PRO_PLAN.standardAmount)}
-              detail="por mes · cancelás cuando quieras"
-              features={['Todo VOLTA incluido', 'Campañas y atribución', 'Comparación de conversiones', 'Inteligencia y recomendaciones']}
+              detail="Entendé qué genera ventas y qué hacer después. Cancelás cuando quieras."
+              features={['Todo VOLTA incluido', 'Campañas y atribución', 'Compará tus canales', 'Detectá oportunidades', 'Recomendaciones comerciales']}
               cta="Elegir PRO"
               href="/login?next=%2Fadmin%2Fplan"
+              eventType="landing_pro_cta_click"
+              plan="pro"
             />
           </div>
 
@@ -263,14 +309,21 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
         </div>
       </section>
 
-      <section className="px-4 pb-14 sm:px-6 sm:pb-16">
+      <section id="landing-final-cta" className="px-4 pb-14 sm:px-6 sm:pb-16">
         <div className="mx-auto max-w-7xl overflow-hidden rounded-[28px] bg-[#07120f] px-6 py-9 text-white sm:px-9 sm:py-10 lg:flex lg:items-center lg:justify-between lg:gap-10">
           <div className="max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[.18em] text-emerald-300">Empezá sin pagar</p>
             <h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.05em] sm:text-4xl">Tu próximo cliente puede ver tu catálogo en un link, no en veinte fotos sueltas.</h2>
             <p className="mt-3 text-sm leading-7 text-slate-300">Creá tu tienda, cargá tus primeros productos y compartila.</p>
           </div>
-          <Link href="/login" className="mt-6 inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-[#12e89a] px-6 text-sm font-bold text-[#04251a] transition hover:-translate-y-0.5 lg:mt-0">Crear mi tienda gratis <ArrowRight className="size-4" /></Link>
+          <Link
+            href="/login"
+            data-saas-event="landing_primary_cta_click"
+            data-saas-location="final"
+            className="mt-6 inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-[#12e89a] px-6 text-sm font-bold text-[#04251a] transition hover:-translate-y-0.5 lg:mt-0"
+          >
+            Crear mi tienda gratis <ArrowRight className="size-4" />
+          </Link>
         </div>
       </section>
 
@@ -312,7 +365,7 @@ function DesktopStorePreview() {
 
             <div className="bg-[#f7f3ed] p-2 sm:p-3">
               <div className="relative overflow-hidden rounded-[16px] bg-[#e8ddd0]">
-                <img src={NOVA_HERO} alt="Productos premium en una tienda demo de VOLTA" className="h-[190px] w-full object-cover sm:h-[220px]" />
+                <img src={NOVA_HERO} alt="Colección premium NOVA fotografiada para la tienda demo de VOLTA" className="h-[190px] w-full object-cover sm:h-[220px]" />
                 <div className="absolute inset-0 bg-gradient-to-r from-white/88 via-white/48 to-transparent" />
                 <div className="absolute inset-y-0 left-0 flex max-w-[64%] flex-col justify-center p-5 sm:p-7">
                   <p className="text-[8px] font-bold uppercase tracking-[.15em] text-[#0b9364]">Colección destacada</p>
@@ -321,10 +374,10 @@ function DesktopStorePreview() {
               </div>
 
               <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <PreviewProductCard image={NOVA_HERO} title="NOVA Bottle" price="$18.000" />
-                <PreviewProductCard image={NOVA_SET} title="Essential Set" price="$42.000" />
-                <PreviewProductCard image={NOVA_CAP} title="NOVA Cap" price="$22.000" hideOnMobile />
-                <PreviewProductCard image={NOVA_TEE} title="NOVA Tee" price="$28.000" hideOnMobile />
+                <PreviewProductCard image={NOVA_HERO} position="44% center" title="NOVA Bottle" price="$18.000" />
+                <PreviewProductCard image={NOVA_SET} position="center" title="Essential Set" price="$42.000" />
+                <PreviewProductCard image={NOVA_HERO} position="88% center" title="NOVA Cap" price="$22.000" hideOnMobile />
+                <PreviewProductCard image={NOVA_SET} position="20% center" title="Daily Objects" price="$28.000" hideOnMobile />
               </div>
 
               <div className="mt-2 flex items-center justify-between gap-3 rounded-[14px] bg-white px-3 py-2.5 shadow-sm">
@@ -342,10 +395,10 @@ function DesktopStorePreview() {
   )
 }
 
-function PreviewProductCard({ image, title, price, hideOnMobile = false }: { image: string; title: string; price: string; hideOnMobile?: boolean }) {
+function PreviewProductCard({ image, position, title, price, hideOnMobile = false }: { image: string; position: string; title: string; price: string; hideOnMobile?: boolean }) {
   return (
     <div className={`${hideOnMobile ? 'hidden sm:block' : ''} overflow-hidden rounded-[13px] bg-white shadow-sm`}>
-      <img src={image} alt="" className="aspect-[1.05/1] w-full object-cover" />
+      <img src={image} alt="" className="aspect-[1.05/1] w-full object-cover" style={{ objectPosition: position }} />
       <div className="p-2">
         <p className="truncate text-[8px] font-semibold text-slate-900">{title}</p>
         <div className="mt-1 flex items-center justify-between gap-2">
@@ -368,26 +421,26 @@ function MobileProductPreview() {
             <span className="text-sm font-semibold tracking-[-.03em]">VOLTA<span className="text-[#12e89a]">·Store</span></span>
             <span className="flex size-7 items-center justify-center rounded-full bg-white/7 text-[11px]">2</span>
           </div>
-          <img src={NOVA_HERO} alt="Detalle de producto premium en una tienda VOLTA" className="aspect-[1.2/1] w-full object-cover" />
+          <img src={NOVA_SET} alt="Essential Set de NOVA en el detalle mobile de una tienda VOLTA" className="aspect-[1.2/1] w-full object-cover" />
           <div className="p-5 sm:p-6">
             <p className="text-[9px] font-bold uppercase tracking-[.15em] text-[#28dda1]">Colección destacada</p>
             <h3 className="mt-2 font-serif text-3xl tracking-[-.04em] text-white">Essential Set</h3>
             <p className="mt-1 text-xl font-medium text-white">$42.000</p>
-            <p className="mt-3 text-xs leading-5 text-white/58">Rutina completa para el cuidado diario. Elegí tu opción y terminá el pedido por WhatsApp.</p>
+            <p className="mt-3 text-xs leading-5 text-white/58">Un set simple para todos los días. Elegí tu opción y terminá el pedido por WhatsApp.</p>
 
             <p className="mt-4 text-[10px] font-semibold text-white/80">Incluye</p>
             <div className="mt-2 flex flex-wrap gap-2">
-              {['Jabón líquido', 'Crema hidratante', 'Vela aromática'].map((item) => (
+              {['Botella', 'Accesorios', 'Packaging'].map((item) => (
                 <span key={item} className="rounded-full border border-white/9 bg-white/[.045] px-3 py-2 text-[9px] text-white/66">{item}</span>
               ))}
             </div>
 
             <div className="mt-4 grid grid-cols-[1fr_auto] gap-3 border-t border-white/8 pt-4">
               <div>
-                <p className="text-[10px] font-semibold text-white/80">Aroma</p>
+                <p className="text-[10px] font-semibold text-white/80">Color</p>
                 <div className="mt-2 flex gap-2">
-                  <span className="rounded-full border border-[#12e89a] bg-[#12e89a]/10 px-3 py-2 text-[9px] text-[#67f3be]">Ámbar</span>
-                  <span className="rounded-full border border-white/8 px-3 py-2 text-[9px] text-white/55">Sándalo</span>
+                  <span className="rounded-full border border-[#12e89a] bg-[#12e89a]/10 px-3 py-2 text-[9px] text-[#67f3be]">Negro</span>
+                  <span className="rounded-full border border-white/8 px-3 py-2 text-[9px] text-white/55">Crudo</span>
                 </div>
               </div>
               <div>
@@ -434,7 +487,7 @@ function DarkFeature({ children }: { children: React.ReactNode }) {
   return <div className="flex items-start gap-2.5 rounded-2xl border border-white/8 bg-white/[.045] px-3.5 py-3 text-sm text-white/82"><span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-400/12 text-emerald-300"><Check className="size-3" /></span><span>{children}</span></div>
 }
 
-function PricingCard({ eyebrow, title, price, detail, features, cta, href, featured = false, dark = false }: {
+function PricingCard({ eyebrow, title, price, detail, features, cta, href, eventType, plan, featured = false, dark = false }: {
   eyebrow: string
   title: string
   price: string
@@ -442,6 +495,8 @@ function PricingCard({ eyebrow, title, price, detail, features, cta, href, featu
   features: readonly string[]
   cta: string
   href: string
+  eventType: Extract<SaasFunnelEventType, 'landing_free_cta_click' | 'landing_volta_cta_click' | 'landing_pro_cta_click'>
+  plan: 'free' | 'volta' | 'pro'
   featured?: boolean
   dark?: boolean
 }) {
@@ -459,7 +514,15 @@ function PricingCard({ eyebrow, title, price, detail, features, cta, href, featu
       <h3 className={`mt-3 text-2xl font-semibold tracking-[-.045em] ${dark ? 'text-white' : 'text-slate-950'}`} style={forcedLight}>{title}</h3>
       <div className="mt-5"><div className="flex items-end gap-2"><span className={`text-4xl font-semibold tracking-[-.055em] ${dark ? 'text-white' : 'text-slate-950'}`} style={forcedLight}>{price}</span>{price !== '$0' ? <span className={`pb-1 text-xs ${dark ? 'text-white/55' : 'text-slate-500'}`}>/mes</span> : null}</div><p className={`mt-2 min-h-10 text-xs leading-5 ${dark ? 'text-white/58' : 'text-slate-500'}`}>{detail}</p></div>
       <div className="mt-5 flex-1 space-y-3">{features.map((feature) => <div key={feature} className={`flex items-start gap-2.5 text-sm ${dark ? 'text-white/80' : 'text-slate-700'}`}><span className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full ${dark ? 'bg-emerald-400/12 text-emerald-300' : 'bg-emerald-50 text-emerald-700'}`}><Check className="size-3" /></span><span>{feature}</span></div>)}</div>
-      <Link href={href} className={`mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-bold transition hover:-translate-y-0.5 ${dark ? 'bg-white text-[#07120f]' : featured ? 'bg-[#12e89a] text-[#04251a]' : 'border border-black/10 bg-white text-slate-900'}`}>{cta}<ArrowRight className="size-4" /></Link>
+      <Link
+        href={href}
+        data-saas-event={eventType}
+        data-saas-location="pricing"
+        data-saas-plan={plan}
+        className={`mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-bold transition hover:-translate-y-0.5 ${dark ? 'bg-white text-[#07120f]' : featured ? 'bg-[#12e89a] text-[#04251a]' : 'border border-black/10 bg-white text-slate-900'}`}
+      >
+        {cta}<ArrowRight className="size-4" />
+      </Link>
     </article>
   )
 }

@@ -22,7 +22,8 @@ Production SaaS built with Next.js App Router, React/TypeScript and Supabase. Se
 ## Main entrypoints
 
 - `src/app/page.tsx` — marketing/commercial landing.
-- `src/app/login/page.tsx` — merchant login.
+- `src/app/login/page.tsx` — merchant login and signup-start boundary.
+- `src/app/api/analytics/saas/route.ts` — bounded server-managed VOLTA acquisition-event ingestion.
 - `src/app/auth/callback/route.ts` — OAuth/magic-link callback.
 - `src/app/onboarding/*` — onboarding entry/completion.
 - `src/app/admin/*` — merchant admin.
@@ -59,6 +60,8 @@ The public route resolves store slug history before `notFound`, preserving share
 
 Images are optimized client-side/server-validated. Product deletion enumerates linked/folder paths and removes Storage objects best-effort; upload-to-DB failure paths clean the newly uploaded object.
 
+Landing NOVA demo media is repository-local under `public/landing/nova/` so the commercial landing does not depend on external stock-photo availability.
+
 ### Cart and checkout
 
 Zustand persists shopper cart state locally. Checkout asks only the merchant-configured fields and produces a structured WhatsApp message. No server-side “paid shopper order” should be inferred from a WhatsApp handoff event.
@@ -82,9 +85,11 @@ Store slug changes are protected by `store_slug_history`; old links redirect to 
 
 ### SaaS acquisition funnel
 
-Production Supabase contains `saas_funnel_events` for VOLTA's own acquisition funnel with no direct client privileges. The Git migration history is reconciled in `20260825030110_saas_funnel_events.sql` and `20260825030156_saas_funnel_events_explicit_deny.sql`.
+`saas_funnel_events` is VOLTA's own acquisition table. RLS denies direct `anon`/`authenticated` access.
 
-**Current application code does not yet write these events.** Do not describe SaaS funnel tracking as shipped until a server-managed ingestion/tracking path exists and is verified.
+The browser-side helper in `src/lib/analytics/saas-events.ts` owns a session id, captures `src`/UTM campaign attribution, device/viewport and CTA context, then posts a bounded payload to `/api/analytics/saas`. The API validates the event with Zod and uses the server admin client for the insert; the service-role boundary does not move into browser code.
+
+Current wired events cover landing view, landing CTA/store-demo/pricing/plan interactions and `signup_started`. Deeper activation/billing joins remain roadmap work.
 
 ### Billing and commercial access
 
@@ -108,7 +113,7 @@ Core application:
 
 Measurement:
 - `store_events`
-- `saas_funnel_events` (schema present; app writer pending)
+- `saas_funnel_events`
 
 Commercial:
 - `billing_subscriptions`
@@ -125,6 +130,7 @@ Durable links:
 - Product category/brand relations are constrained to the same tenant.
 - RLS is enabled on application tables.
 - `saas_funnel_events` denies direct `anon`/`authenticated` access.
+- SaaS acquisition inserts occur server-side after payload validation.
 - Service-role/internal-admin capabilities are privileged and must not leak into ordinary user flows.
 - Free plan DB triggers inspect commercial entitlement server-side.
 - Public Storage URLs are intentionally public; DB RLS does not make them private.
@@ -144,7 +150,7 @@ Durable links:
 - several appearance/admin client surfaces remain large;
 - root layout loads four font families globally;
 - provider billing regression remains primarily integration/manual validation rather than a fully automated external E2E;
-- SaaS acquisition-funnel DB schema exists before its application writer.
+- SaaS acquisition endpoint is intentionally minimal and has no dedicated external rate-limit layer yet; add one only if real traffic/abuse requires it.
 
 ## Reference material
 
