@@ -19,6 +19,25 @@ function clearSupabaseAuthCookies(request: NextRequest, response: NextResponse) 
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
+  const pathname = request.nextUrl.pathname
+  const isProtectedPath = pathname.startsWith('/admin') || pathname.startsWith('/onboarding')
+  const hasSupabaseAuthCookie = request.cookies
+    .getAll()
+    .some((cookie) => isSupabaseAuthCookieName(cookie.name))
+
+  // Anonymous public traffic is the normal case for the landing/storefront and
+  // acquisition analytics. Without a Supabase auth cookie there is no session
+  // to refresh, so avoid a pointless getUser request (and expected
+  // AuthSessionMissingError noise) altogether.
+  if (!hasSupabaseAuthCookie) {
+    if (isProtectedPath) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+
+    return supabaseResponse
+  }
 
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,8 +58,6 @@ export async function updateSession(request: NextRequest) {
     },
   )
 
-  const pathname = request.nextUrl.pathname
-  const isProtectedPath = pathname.startsWith('/admin') || pathname.startsWith('/onboarding')
   const authResult = await safeGetUser(supabase)
   const user = authResult.user
 
