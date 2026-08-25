@@ -1,0 +1,49 @@
+product:
+  id: store
+  prefix: STORE
+  name: VOLTA Store
+  lifecycle: production
+  os_version: "1.0"
+
+repository:
+  full_name: LucasFasolato/volta-store-template
+  default_branch: main
+  production_branch: main
+
+production:
+  public_url: https://www.voltastore.app
+  deployment: vercel
+  data_platform: supabase
+
+stack:
+  framework: nextjs-16-app-router
+  language: typescript
+  styling: tailwind-css-4
+  database: supabase-postgres
+  auth: supabase-auth
+  storage: supabase-storage
+  commerce_handoff: whatsapp
+
+critical_flows:
+  - authentication
+  - onboarding
+  - admin_store_configuration
+  - catalog_management
+  - appearance_customization
+  - public_storefront
+  - cart
+  - whatsapp_checkout
+  - billing
+
+operating:
+  current_state: docs/CURRENT_STATE.md
+  roadmap: docs/ROADMAP.md
+  guardrails: docs/GUARDRAILS.md
+  debt: docs/DEBT.md
+  handoff: docs/HANDOFF.md
+  decisions: docs/decisions
+
+security:
+  secrets_in_git: false
+  destructive_production_requires_human_approval: true
+  schema_changes_via_migrations: true
