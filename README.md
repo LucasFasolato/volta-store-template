@@ -1,241 +1,115 @@
-# Volta Store
+# VOLTA Store
 
-Plataforma multi-tenant de ventas por WhatsApp. Cada cliente administra su propia tienda configurable con branding, catálogo y checkout vía WhatsApp.
+VOLTA Store es un SaaS de comercio configurable que permite a un negocio publicar una tienda profesional, administrar su catálogo y convertir intención de compra en un pedido estructurado por WhatsApp.
+
+**Producción:** https://www.voltastore.app
+
+## Producto actual
+
+VOLTA Store está en producción y hoy incluye:
+
+- Google OAuth + Magic Link;
+- activación guiada del negocio hasta publicar/compartir;
+- catálogo con categorías, marcas, múltiples imágenes, precios, promociones, opciones y disponibilidad;
+- personalización visual y de contenido;
+- storefront público por slug con historial seguro de slugs;
+- búsqueda, filtros, ordenamiento y productos relacionados;
+- carrito persistido en navegador;
+- checkout configurable y handoff estructurado a WhatsApp;
+- Share Engine y atribución de campañas;
+- analytics comerciales para el merchant;
+- planes Gratis, VOLTA y VOLTA PRO;
+- billing SaaS mediante Mercado Pago;
+- RLS, migrations versionadas y guardrails de ownership.
+
+Los detalles de estado, deuda y próximos pasos **no se mantienen duplicados en este README**. La fuente operativa es el Product OS.
+
+## VOLTA Product OS
+
+Este repositorio opera bajo **VOLTA OS v1.0**.
+
+Antes de desarrollar, empezar por:
+
+1. [`AGENTS.md`](./AGENTS.md)
+2. [`docs/CURRENT_STATE.md`](./docs/CURRENT_STATE.md)
+3. [`docs/GUARDRAILS.md`](./docs/GUARDRAILS.md)
+4. [`docs/ROADMAP.md`](./docs/ROADMAP.md)
+5. [`docs/SYSTEM.md`](./docs/SYSTEM.md)
+
+Otros contratos útiles:
+
+- [`docs/PRODUCT.md`](./docs/PRODUCT.md) — definición del producto y alcance;
+- [`docs/DEBT.md`](./docs/DEBT.md) — deuda material basada en evidencia;
+- [`docs/decisions/`](./docs/decisions) — ADRs duraderos;
+- [`volta.product.yaml`](./volta.product.yaml) — manifiesto machine-readable;
+- [`docs/ai/`](./docs/ai) — auditoría/contexto histórico, no sustituto de la realidad actual.
 
 ## Stack
 
-- **Next.js 16** (App Router, React 19, Turbopack)
-- **TypeScript** estricto
-- **Tailwind CSS v4** + **shadcn/ui** (radix-nova)
-- **Supabase** — Auth (magic link), Postgres, Storage, RLS
-- **Zustand** — carrito con persistencia local
-- **React Hook Form** + **Zod** — validaciones robustas
-- **Framer Motion** — animaciones selectivas
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Supabase Auth + Postgres + Storage
+- Zustand
+- React Hook Form + Zod
+- Vercel
 
----
+## Arquitectura de alto nivel
 
-## Requisitos
+```text
+src/app                 rutas, landing, auth, admin y storefront
+src/components/admin    experiencia merchant
+src/components/landing  storefront público
+src/components/product  detalle/product UI
+src/components/cart     carrito/checkout
+src/lib/actions         mutaciones y reglas server-side
+src/lib/queries         read models
+src/lib/server          contexto/ownership compartido
+src/lib/analytics       medición comercial y atribución
+src/lib/billing         acceso comercial y billing
+src/lib/sharing         links/distribución
+src/lib/supabase        clientes Supabase
+supabase/migrations     schema, RLS y evolución de datos
+```
 
-- Node.js 18+
-- npm
-- Proyecto en [Supabase](https://supabase.com)
+Para arquitectura, contratos y hotspots actuales usar [`docs/SYSTEM.md`](./docs/SYSTEM.md), no este resumen.
 
----
+## Desarrollo local
 
-## Setup local
-
-### 1. Clonar e instalar dependencias
+Requiere una versión moderna de Node.js compatible con Next.js 16 y acceso a la configuración Supabase correspondiente.
 
 ```bash
-git clone https://github.com/tu-org/volta-store-template
-cd volta-store-template
 npm install
-```
-
-### 2. Variables de entorno
-
-Copiá `.env.local.example` a `.env.local` y completá los valores:
-
-```bash
-cp .env.local.example .env.local
-```
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
-SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
-
-### 3. Base de datos
-
-Ejecutá las migraciones en Supabase SQL Editor en este orden:
-
-```
-supabase/migrations/20240101000001_schema.sql
-supabase/migrations/20240101000002_rls.sql
-supabase/migrations/20240101000003_storage.sql
-supabase/migrations/20240101000004_onboarding.sql
-```
-
-O con la CLI de Supabase:
-
-```bash
-supabase db push
-```
-
-### 4. Configurar autenticación
-
-En el panel de Supabase → **Authentication → URL Configuration**:
-
-- **Site URL**: `http://localhost:3000`
-- **Redirect URLs**: `http://localhost:3000/auth/callback`
-
-Para producción, reemplazá `localhost:3000` con tu dominio real.
-
-### 5. Correr en desarrollo
-
-```bash
 npm run dev
 ```
 
-Abrí [http://localhost:3000](http://localhost:3000).
+Las credenciales y valores de entorno viven fuera de Git. No copiar secretos a documentación, commits o ejemplos versionados.
 
----
+### Base de datos
 
-## Arquitectura
+`supabase/migrations/` es la fuente de verdad estructural. Para una base conectada usar el flujo de Supabase CLI/migrations correspondiente; no reconstruir el sistema ejecutando manualmente sólo las migrations iniciales históricas.
 
-```
-src/
-├── app/
-│   ├── (public)/
-│   │   └── tienda/[slug]/       # Landing pública de cada store
-│   ├── admin/                   # Panel admin (protegido)
-│   │   ├── page.tsx             # Dashboard / resumen
-│   │   ├── apariencia/          # Tema + layout
-│   │   ├── contenido/           # Hero y textos
-│   │   ├── productos/           # CRUD productos
-│   │   ├── categorias/          # CRUD categorías
-│   │   └── configuracion/       # Info del negocio
-│   ├── auth/callback/           # Callback de magic link
-│   └── login/                   # Página de acceso
-│
-├── components/
-│   ├── admin/                   # Componentes del panel admin
-│   ├── auth/                    # Login form
-│   ├── cart/                    # CartSheet (Zustand)
-│   ├── common/                  # CharCounter, SaveButton
-│   ├── landing/                 # Hero, Catálogo, Footer
-│   └── product/                 # ProductCard, ProductModal
-│
-├── lib/
-│   ├── actions/                 # Server actions (auth, store, products)
-│   ├── queries/                 # Queries de solo lectura
-│   ├── stores/                  # Zustand (carrito)
-│   ├── supabase/                # Clients (browser, server, proxy)
-│   ├── utils/                   # format, theme
-│   ├── validations/             # Schemas Zod
-│   └── whatsapp/                # Builder de mensaje y URL wa.me
-│
-├── data/
-│   ├── defaults.ts              # Valores por defecto de tema/layout/content
-│   └── system-copy.ts           # Textos del sistema (no editables por usuarios)
-│
-└── types/
-    ├── database.ts              # Tipos de la base de datos Supabase
-    └── store.ts                 # Tipos de dominio
-```
+## Quality gate
 
----
-
-## Multi-tenant
-
-Cada usuario autenticado tiene exactamente **una store** asociada vía `owner_id`. El acceso está restringido por RLS: los admins solo pueden ver y modificar su propia data, mientras que la landing pública puede leer stores activas sin auth.
-
-### Onboarding automático
-
-En el primer login (callback de magic link), el sistema:
-1. Crea un `profile`
-2. Crea una `store` con slug único derivado del email
-3. Inserta `store_theme`, `store_layout` y `store_content` con valores por defecto
-4. Redirige a `/admin`
-
----
-
-## Theming dinámico
-
-Cada store aplica su tema via **CSS custom properties** inyectadas inline en el wrapper del store:
-
-```css
---store-primary      → color principal (botones, precios)
---store-secondary    → color de acento (badges, highlights)
---store-bg           → fondo de la tienda
---store-text         → texto principal
---store-radius       → border radius global
---store-image-ratio  → aspect ratio de imágenes de productos
-```
-
-Esto permite que cada tienda tenga su propia identidad visual sin afectar el resto de la app.
-
----
-
-## Guardrails de contenido
-
-Los textos configurables tienen límites estrictos para proteger el diseño:
-
-| Campo                      | Máximo |
-|---------------------------|--------|
-| hero_title                | 45 caracteres |
-| hero_subtitle             | 110 caracteres |
-| support_text              | 60 caracteres |
-| product_name              | 55 caracteres |
-| product_short_description | 90 caracteres |
-| product_description       | 280 caracteres |
-| badge                     | 18 caracteres |
-| category_name             | 24 caracteres |
-
-Los textos del sistema (labels de carrito, CTAs, etc.) viven en `src/data/system-copy.ts` y no son editables por los usuarios.
-
----
-
-## Storage
-
-Imágenes almacenadas en Supabase Storage, bucket `store-assets`, organizadas por usuario:
-
-```
-store-assets/
-└── {userId}/
-    ├── logo.jpg
-    ├── hero.jpg
-    └── products/
-        └── {productId}/
-            └── {timestamp}.jpg
-```
-
-Validaciones en el cliente: mínimo 800px de ancho, formatos JPG/PNG/WebP, máximo 10MB.
-
----
-
-## WhatsApp checkout
-
-Al confirmar el pedido se construye un mensaje estructurado y se abre `wa.me/{numero}?text={mensaje}`:
-
-```
-Hola, quiero confirmar este pedido:
-
-🛒 Pedido
-- Producto A x2 — $20.000
-- Producto B x1 — $8.500
-
-Subtotal: $28.500
-
-Datos:
-- Nombre:
-- Teléfono:
-- Dirección / retiro:
-- Aclaraciones:
-
-Gracias.
-```
-
-Lógica centralizada en `src/lib/whatsapp/builder.ts`.
-
----
-
-## Desarrollo
+Para cambios relevantes:
 
 ```bash
-npm run dev      # Desarrollo con Turbopack
-npm run build    # Build de producción
-npm run lint     # Lint con ESLint
+npm run lint
+npm run test
+npm run build
 ```
 
----
+Además, según el cambio, verificar auth/RLS, migrations, mobile/desktop, storefront, carrito, checkout WhatsApp, billing y producción siguiendo `AGENTS.md` y `docs/GUARDRAILS.md`.
+
+## Seguridad
+
+- un owner = una Store está protegido a nivel de base de datos;
+- nunca confiar en `store_id`/ownership provisto por el cliente;
+- RLS y migrations son parte del contrato del producto;
+- `store-assets` usa media pública de storefront por decisión explícita, con escritura/borrado restringidos por ownership;
+- operaciones destructivas de producción requieren aprobación humana según VOLTA OS.
 
 ## Deploy
 
-La app puede desplegarse en **Vercel** con configuración zero:
-
-1. Conectar el repo en Vercel
-2. Agregar las variables de entorno
-3. Actualizar las URLs de redirect en Supabase con el dominio de producción
+`main` representa código listo para producción y el destino operativo es Vercel. Los cambios sensibles o significativos deben pasar por PR y verificación antes de integrarse.
