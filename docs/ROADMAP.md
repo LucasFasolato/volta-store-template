@@ -4,9 +4,20 @@ This roadmap is intentional direction, not an inventory of ideas. Already-shippe
 
 ## NOW
 
+### Finish STORE-INIT-003 production release
+
+Runtime is merged to `main`, but Vercel rejected the post-merge build because of `build-rate-limit`.
+
+Close the initiative only after:
+- one production deployment containing the merged change is `READY`;
+- `www.voltastore.app` is verified on that SHA;
+- desktop/mobile landing visual QA is complete;
+- a controlled `saas_funnel_events` event is observed;
+- no new runtime errors appear.
+
 ### Measure acquisition → activation end to end
 
-`STORE-INIT-003` shipped the landing-side acquisition layer through `signup_started`. Extend it cleanly through:
+After STORE-INIT-003 is live, extend measurement cleanly through:
 
 - `signup_completed`;
 - `store_created`;
@@ -64,7 +75,7 @@ When data warrants it:
 
 ## Landing freeze
 
-Landing Conversion Polish 1.0 is complete. Do **not** reopen structural redesign or visual churn without conversion data, real merchant/customer feedback or a concrete product-positioning change.
+Once `STORE-INIT-003` is production-verified, Landing Conversion Polish 1.0 is complete. Do **not** reopen structural redesign or visual churn without conversion data, real merchant/customer feedback or a concrete product-positioning change.
 
 ## Explicitly not prioritized
 
