@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import {
@@ -41,14 +40,25 @@ export const metadata: Metadata = {
 
 type RootSearchParams = Promise<Record<string, string | string[] | undefined>>
 
+const NOVA_HERO =
+  'https://images.unsplash.com/photo-1777840347880-747242e0db00?auto=format&fit=crop&fm=jpg&q=82&w=1800'
+const NOVA_SET =
+  'https://images.unsplash.com/photo-1617030557822-c8c35f07c60b?auto=format&fit=crop&fm=jpg&q=82&w=1400'
+const NOVA_CAP =
+  'https://images.unsplash.com/photo-1777455163868-b113d82fbe74?auto=format&fit=crop&fm=jpg&q=82&w=1200'
+const NOVA_TEE =
+  'https://images.unsplash.com/photo-1598795737563-07467e744bac?auto=format&fit=crop&fm=jpg&q=82&w=1200'
+
 const faqs = [
   {
     question: '¿Necesito saber de tecnología?',
-    answer: 'No. Cargás productos desde un panel simple y VOLTA se ocupa de convertirlos en una tienda lista para compartir.',
+    answer:
+      'No. Cargás productos desde un panel simple y VOLTA se ocupa de convertirlos en una tienda lista para compartir.',
   },
   {
     question: '¿El cliente paga dentro de VOLTA?',
-    answer: 'El cliente arma el pedido y continúa por WhatsApp. El pago y la entrega los coordinás como ya lo hacés hoy.',
+    answer:
+      'El cliente arma el pedido y continúa por WhatsApp. El pago y la entrega los coordinás como ya lo hacés hoy.',
   },
   {
     question: '¿Puedo empezar sin pagar?',
@@ -99,8 +109,10 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
 
       <header className="sticky top-0 z-50 border-b border-black/6 bg-[#f5f7f5]/92 px-4 py-3 backdrop-blur-xl sm:px-6">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <Link href="/" aria-label="VOLTA inicio" className="shrink-0"><VoltaBrand /></Link>
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+          <Link href="/" aria-label="VOLTA inicio" className="shrink-0">
+            <VoltaBrand />
+          </Link>
           <nav className="hidden items-center gap-7 text-sm font-medium text-slate-600 lg:flex" aria-label="Navegación principal">
             <a href="#como-funciona" className="transition hover:text-slate-950">Cómo funciona</a>
             <a href="#experiencia" className="transition hover:text-slate-950">Producto</a>
@@ -115,18 +127,18 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
         </div>
       </header>
 
-      <section className="relative px-4 pb-14 pt-10 sm:px-6 sm:pb-16 sm:pt-14 lg:pb-20 lg:pt-16">
-        <div className="pointer-events-none absolute left-[8%] top-[-180px] h-[420px] w-[580px] rounded-full bg-[#12e89a]/10 blur-3xl" />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-9 lg:grid-cols-[.9fr_1.1fr] lg:gap-14">
-          <div className="max-w-2xl">
+      <section className="relative px-4 pb-14 pt-10 sm:px-6 sm:pb-18 sm:pt-14 lg:pb-20 lg:pt-16">
+        <div className="pointer-events-none absolute left-[7%] top-[-190px] h-[470px] w-[620px] rounded-full bg-[#12e89a]/10 blur-3xl" />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[.82fr_1.18fr] lg:gap-14">
+          <div className="max-w-xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#0aa66f]/15 bg-white px-3 py-1.5 text-xs font-semibold text-[#087e56] shadow-sm">
               <MessageCircle className="size-3.5" /> Catálogo + carrito + WhatsApp
             </div>
-            <h1 className="mt-5 text-balance text-[2.85rem] font-semibold leading-[.98] tracking-[-0.062em] sm:text-[4rem] lg:text-[4.6rem]">
+            <h1 className="mt-5 text-balance text-[2.9rem] font-semibold leading-[.97] tracking-[-0.062em] sm:text-[4rem] lg:text-[4.35rem]">
               Tu tienda online, lista para vender por WhatsApp.
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
-              Mostrá productos, precios y opciones en un catálogo profesional. Tu cliente elige, arma el pedido y lo termina por WhatsApp.
+            <p className="mt-5 max-w-lg text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
+              Mostrá productos, precios y opciones con una presencia que esté a la altura de tu negocio. Tu cliente elige y el pedido llega ordenado a WhatsApp.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link href="/login" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#12e89a] px-6 text-sm font-bold text-[#04251a] shadow-[0_16px_38px_rgba(18,232,154,.22)] transition hover:-translate-y-0.5 hover:bg-[#0fdb91]">
@@ -143,32 +155,12 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[620px]">
-            <div className="absolute inset-x-[14%] bottom-[-7%] h-24 rounded-full bg-[#12e89a]/16 blur-3xl" />
-            <div className="relative overflow-hidden rounded-[28px] border border-black/8 bg-[#07120f] p-2 shadow-[0_28px_80px_rgba(7,18,15,.20)] sm:p-3">
-              <div className="mb-2 flex items-center justify-between px-2 py-1 text-[10px] font-medium text-white/55 sm:px-3">
-                <span>NOVA Studio</span>
-                <span>Tienda creada con VOLTA</span>
-              </div>
-              <Image
-                src="/landing/nova-brand.webp"
-                alt="Ejemplo de una tienda creada con VOLTA"
-                width={900}
-                height={675}
-                priority
-                className="aspect-[4/3] w-full rounded-[20px] object-cover"
-              />
-            </div>
-            <div className="absolute -bottom-4 right-3 hidden rounded-2xl border border-black/8 bg-white px-4 py-3 shadow-[0_16px_45px_rgba(15,23,42,.12)] sm:block">
-              <p className="text-[10px] font-semibold uppercase tracking-[.12em] text-slate-400">Pedido listo</p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">Continúa por WhatsApp</p>
-            </div>
-          </div>
+          <DesktopStorePreview />
         </div>
       </section>
 
       <section id="como-funciona" className="border-y border-black/6 bg-white px-4 py-12 sm:px-6 sm:py-14">
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-7xl">
           <div className="grid gap-8 lg:grid-cols-[.72fr_1.28fr] lg:items-end">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[.18em] text-[#0a8f62]">Cómo funciona</p>
@@ -186,12 +178,12 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
       </section>
 
       <section id="experiencia" className="px-4 py-14 sm:px-6 sm:py-16 lg:py-20">
-        <div className="mx-auto max-w-6xl overflow-hidden rounded-[30px] bg-[#07120f] text-white shadow-[0_28px_90px_rgba(7,18,15,.14)]">
-          <div className="grid items-center gap-8 p-5 sm:p-8 lg:grid-cols-[.92fr_1.08fr] lg:gap-12 lg:p-10">
+        <div className="mx-auto max-w-7xl overflow-hidden rounded-[32px] bg-[#06110e] text-white shadow-[0_30px_100px_rgba(7,18,15,.16)]">
+          <div className="grid items-center gap-10 p-5 sm:p-8 lg:grid-cols-[.88fr_1.12fr] lg:gap-14 lg:p-12">
             <div className="max-w-xl">
               <p className="text-xs font-semibold uppercase tracking-[.18em] text-emerald-300">Experiencia de producto</p>
-              <h2 className="mt-4 text-balance text-3xl font-semibold tracking-[-0.05em] sm:text-4xl lg:text-[2.8rem]">Que comprar se sienta simple, incluso desde el celular.</h2>
-              <p className="mt-4 text-sm leading-7 text-slate-300 sm:text-base">El cliente entra, entiende el producto, elige sus opciones y avanza. Sin formularios eternos ni un checkout que compita con WhatsApp.</p>
+              <h2 className="mt-4 text-balance text-3xl font-semibold tracking-[-0.05em] sm:text-4xl lg:text-[2.9rem]">Que comprar se sienta simple y que tu marca se vea bien.</h2>
+              <p className="mt-4 text-sm leading-7 text-slate-300 sm:text-base">El cliente entra, entiende el producto, elige sus opciones y avanza. Una experiencia cuidada, pensada desde el celular y sin un checkout que compita con WhatsApp.</p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <DarkFeature>Productos y variantes claras</DarkFeature>
                 <DarkFeature>Carrito corto y entendible</DarkFeature>
@@ -201,23 +193,13 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
               <Link href="/tienda/strongprotein" className="mt-7 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-[#07120f] transition hover:-translate-y-0.5">Probar una tienda real <ExternalLink className="size-4" /></Link>
             </div>
 
-            <div className="mx-auto w-full max-w-[520px]">
-              <div className="overflow-hidden rounded-[24px] border border-white/10 bg-white/[.04] p-2 sm:p-3">
-                <Image
-                  src="/landing/nova-product.webp"
-                  alt="Detalle de producto en una tienda VOLTA"
-                  width={640}
-                  height={800}
-                  className="aspect-[4/5] w-full rounded-[18px] object-cover object-center"
-                />
-              </div>
-            </div>
+            <MobileProductPreview />
           </div>
         </div>
       </section>
 
       <section id="planes" className="border-y border-black/6 bg-white px-4 py-14 sm:px-6 sm:py-16">
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[.18em] text-[#0a8f62]">Planes</p>
             <h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.05em] sm:text-4xl">Empezá gratis. Subí de plan cuando tu tienda ya te esté dando valor.</h2>
@@ -265,7 +247,7 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
       </section>
 
       <section className="px-4 py-14 sm:px-6 sm:py-16">
-        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[.72fr_1.28fr] lg:items-start">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[.72fr_1.28fr] lg:items-start">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[.18em] text-[#0a8f62]">Preguntas frecuentes</p>
             <h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.05em]">Lo importante, sin vueltas.</h2>
@@ -282,7 +264,7 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
       </section>
 
       <section className="px-4 pb-14 sm:px-6 sm:pb-16">
-        <div className="mx-auto max-w-6xl overflow-hidden rounded-[28px] bg-[#07120f] px-6 py-9 text-white sm:px-9 sm:py-10 lg:flex lg:items-center lg:justify-between lg:gap-10">
+        <div className="mx-auto max-w-7xl overflow-hidden rounded-[28px] bg-[#07120f] px-6 py-9 text-white sm:px-9 sm:py-10 lg:flex lg:items-center lg:justify-between lg:gap-10">
           <div className="max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[.18em] text-emerald-300">Empezá sin pagar</p>
             <h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.05em] sm:text-4xl">Tu próximo cliente puede ver tu catálogo en un link, no en veinte fotos sueltas.</h2>
@@ -293,13 +275,146 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
       </section>
 
       <footer className="border-t border-black/6 bg-white px-4 py-7 sm:px-6">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3"><VoltaBrand /><span>Catálogo online para vender por WhatsApp.</span></div>
           <div className="flex flex-wrap gap-5"><Link className="hover:text-slate-900" href="/privacy">Privacidad</Link><Link className="hover:text-slate-900" href="/terms">Términos</Link><Link className="hover:text-slate-900" href="/login">Ingresar</Link></div>
         </div>
       </footer>
     </main>
   )
+}
+
+function DesktopStorePreview() {
+  return (
+    <div className="relative mx-auto w-full max-w-[760px]">
+      <div className="absolute inset-x-[12%] bottom-[-8%] h-28 rounded-full bg-[#12e89a]/16 blur-3xl" />
+      <div className="relative overflow-hidden rounded-[28px] border border-black/8 bg-[#06110e] p-2 shadow-[0_32px_90px_rgba(7,18,15,.22)] sm:p-3">
+        <div className="flex items-center justify-between px-2 pb-2 pt-1 text-[10px] font-medium text-white/50 sm:px-3">
+          <span>NOVA Studio</span>
+          <span className="hidden sm:inline">Tienda creada con VOLTA</span>
+        </div>
+        <div className="overflow-hidden rounded-[22px] bg-[#0a1713]">
+          <div className="grid min-h-[420px] sm:grid-cols-[.29fr_.71fr]">
+            <aside className="hidden border-r border-white/8 bg-[#06110e] p-5 text-white sm:flex sm:flex-col">
+              <p className="text-[11px] font-medium text-white/70">NOVA Studio</p>
+              <div className="mt-8">
+                <p className="text-3xl font-semibold tracking-[.12em]">NOVA<span className="text-[#12e89a]">·</span></p>
+                <p className="mt-1 text-xs tracking-[.28em] text-white/72">STUDIO</p>
+              </div>
+              <p className="mt-7 font-serif text-[1.35rem] leading-[1.08]">Objetos simples.<br />Diseño que queda.</p>
+              <p className="mt-3 text-[9px] leading-4 text-white/48">Piezas funcionales, materiales honestos y detalles que elevan lo cotidiano.</p>
+              <span className="mt-5 inline-flex w-fit rounded-full bg-[#12e89a] px-3 py-2 text-[9px] font-bold text-[#05251a]">Ver colección</span>
+              <div className="mt-auto rounded-2xl border border-emerald-400/20 bg-emerald-400/[.06] p-3">
+                <p className="text-[9px] font-semibold text-white">Compra por WhatsApp</p>
+                <p className="mt-1 text-[8px] leading-3 text-white/45">Elegís en la tienda. Cerrás el pedido por WhatsApp.</p>
+              </div>
+            </aside>
+
+            <div className="bg-[#f7f3ed] p-2 sm:p-3">
+              <div className="relative overflow-hidden rounded-[16px] bg-[#e8ddd0]">
+                <img src={NOVA_HERO} alt="Productos premium en una tienda demo de VOLTA" className="h-[190px] w-full object-cover sm:h-[220px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-white/88 via-white/48 to-transparent" />
+                <div className="absolute inset-y-0 left-0 flex max-w-[64%] flex-col justify-center p-5 sm:p-7">
+                  <p className="text-[8px] font-bold uppercase tracking-[.15em] text-[#0b9364]">Colección destacada</p>
+                  <p className="mt-2 font-serif text-[1.65rem] leading-[.98] tracking-[-.04em] text-[#101713] sm:text-[2.15rem]">Esenciales,<br />elevados.<br />Hechos para durar.</p>
+                </div>
+              </div>
+
+              <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <PreviewProductCard image={NOVA_HERO} title="NOVA Bottle" price="$18.000" />
+                <PreviewProductCard image={NOVA_SET} title="Essential Set" price="$42.000" />
+                <PreviewProductCard image={NOVA_CAP} title="NOVA Cap" price="$22.000" hideOnMobile />
+                <PreviewProductCard image={NOVA_TEE} title="NOVA Tee" price="$28.000" hideOnMobile />
+              </div>
+
+              <div className="mt-2 flex items-center justify-between gap-3 rounded-[14px] bg-white px-3 py-2.5 shadow-sm">
+                <div className="min-w-0">
+                  <p className="text-[9px] font-semibold text-slate-900">¿Listo para tu pedido?</p>
+                  <p className="mt-0.5 hidden text-[8px] text-slate-400 sm:block">Tu selección llega ordenada a WhatsApp.</p>
+                </div>
+                <span className="shrink-0 rounded-full bg-[#12e89a] px-3 py-2 text-[8px] font-bold text-[#05251a]">Pedir por WhatsApp</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PreviewProductCard({ image, title, price, hideOnMobile = false }: { image: string; title: string; price: string; hideOnMobile?: boolean }) {
+  return (
+    <div className={`${hideOnMobile ? 'hidden sm:block' : ''} overflow-hidden rounded-[13px] bg-white shadow-sm`}>
+      <img src={image} alt="" className="aspect-[1.05/1] w-full object-cover" />
+      <div className="p-2">
+        <p className="truncate text-[8px] font-semibold text-slate-900">{title}</p>
+        <div className="mt-1 flex items-center justify-between gap-2">
+          <span className="text-[8px] text-slate-500">{price}</span>
+          <span className="flex size-4 items-center justify-center rounded-full bg-[#07120f] text-[10px] text-white">+</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MobileProductPreview() {
+  return (
+    <div className="relative mx-auto w-full max-w-[430px]">
+      <div className="absolute inset-x-[18%] bottom-[-5%] h-24 rounded-full bg-[#12e89a]/12 blur-3xl" />
+      <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[#09130f] p-2 shadow-[0_28px_80px_rgba(0,0,0,.34)]">
+        <div className="overflow-hidden rounded-[29px] border border-white/6 bg-[#07120f]">
+          <div className="flex items-center justify-between px-5 py-4 text-white">
+            <span className="text-[11px] font-semibold">9:41</span>
+            <span className="text-sm font-semibold tracking-[-.03em]">VOLTA<span className="text-[#12e89a]">·Store</span></span>
+            <span className="flex size-7 items-center justify-center rounded-full bg-white/7 text-[11px]">2</span>
+          </div>
+          <img src={NOVA_HERO} alt="Detalle de producto premium en una tienda VOLTA" className="aspect-[1.2/1] w-full object-cover" />
+          <div className="p-5 sm:p-6">
+            <p className="text-[9px] font-bold uppercase tracking-[.15em] text-[#28dda1]">Colección destacada</p>
+            <h3 className="mt-2 font-serif text-3xl tracking-[-.04em] text-white">Essential Set</h3>
+            <p className="mt-1 text-xl font-medium text-white">$42.000</p>
+            <p className="mt-3 text-xs leading-5 text-white/58">Rutina completa para el cuidado diario. Elegí tu opción y terminá el pedido por WhatsApp.</p>
+
+            <p className="mt-4 text-[10px] font-semibold text-white/80">Incluye</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {['Jabón líquido', 'Crema hidratante', 'Vela aromática'].map((item) => (
+                <span key={item} className="rounded-full border border-white/9 bg-white/[.045] px-3 py-2 text-[9px] text-white/66">{item}</span>
+              ))}
+            </div>
+
+            <div className="mt-4 grid grid-cols-[1fr_auto] gap-3 border-t border-white/8 pt-4">
+              <div>
+                <p className="text-[10px] font-semibold text-white/80">Aroma</p>
+                <div className="mt-2 flex gap-2">
+                  <span className="rounded-full border border-[#12e89a] bg-[#12e89a]/10 px-3 py-2 text-[9px] text-[#67f3be]">Ámbar</span>
+                  <span className="rounded-full border border-white/8 px-3 py-2 text-[9px] text-white/55">Sándalo</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold text-white/80">Cantidad</p>
+                <div className="mt-2 flex items-center gap-2 text-xs text-white"><span className="flex size-7 items-center justify-center rounded-full border border-white/8">−</span><span>1</span><span className="flex size-7 items-center justify-center rounded-full border border-white/8">+</span></div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-3 gap-2 rounded-[16px] border border-white/7 bg-white/[.035] p-3">
+              <MiniTrust title="Pedido listo" text="Todo ordenado" />
+              <MiniTrust title="Envío" text="A coordinar" />
+              <MiniTrust title="Pago" text="Con tu cliente" />
+            </div>
+
+            <div className="mt-4 flex h-12 items-center justify-between rounded-[15px] bg-[#12e89a] px-4 text-sm font-bold text-[#032319]">
+              <span className="inline-flex items-center gap-2"><MessageCircle className="size-4" /> Pedir por WhatsApp</span>
+              <ArrowRight className="size-4" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MiniTrust({ title, text }: { title: string; text: string }) {
+  return <div><p className="text-[8px] font-semibold text-white/78">{title}</p><p className="mt-1 text-[7px] leading-3 text-white/35">{text}</p></div>
 }
 
 function StepCard({ icon, number, title, children }: { icon: React.ReactNode; number: string; title: string; children: React.ReactNode }) {
