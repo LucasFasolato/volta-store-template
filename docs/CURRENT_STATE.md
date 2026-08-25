@@ -7,14 +7,20 @@
 
 ## Release state
 
-- `main` currently contains `STORE-INIT-003` at `cb1edd880fff3651674de0a27ff75c9d6413d4a7`.
-- GitHub Actions for PR #56 passed 47 tests plus Next.js production build/TypeScript.
-- Vercel rejected the post-merge production build because the account hit `build-rate-limit`.
-- Latest confirmed Vercel production `READY` deployment remains on SHA `0cc1e9053f20c850611e8b5481a2949259a27c0a`.
+`STORE-INIT-003 — Landing Conversion & Acquisition Measurement` is **SHIPPED**.
 
-**Important:** the landing/acquisition changes below are merged but are **not yet production-verified**. See `docs/initiatives/STORE-INIT-003-landing-conversion-acquisition-measurement.md` and `HANDOFF.md`.
+Verified production evidence:
 
-## Production capabilities already verified before STORE-INIT-003
+- Vercel deployment `dpl_8yPgErMfNb3sgVQgXFP7sasipTVg` is `READY` on SHA `6ec32fe775c37b7f70cfabfdd5d1608d0fcb21c3`, a descendant containing the full STORE-INIT-003 runtime.
+- `www.voltastore.app` serves the new landing markup and repository-local NOVA assets.
+- `/landing/nova/hero-editorial.jpg` and `/landing/nova/essential-set.jpg` are served as valid JPEGs.
+- Production browsers have written real `landing_view`, `landing_pricing_view` and `landing_real_store_click` rows to `saas_funnel_events` across desktop/tablet/mobile viewports.
+- `/api/analytics/saas` returns accepted responses and no error/fatal runtime logs were observed for the verified production deployment.
+- PR #57 subsequently merged a non-user-facing middleware hardening that skips pointless Supabase auth refreshes for anonymous traffic while preserving protected-route behavior. Product correctness did not depend on this follow-up.
+
+The landing direction is now frozen pending conversion evidence or a genuine positioning change.
+
+## What is shipped now
 
 ### Merchant activation and administration
 
@@ -42,6 +48,16 @@
 - Merchant commercial analytics exists at `/admin/rendimiento`: visits, product opens, add-to-cart, WhatsApp intent, conversion, top products, channel/source performance and opportunity prompts.
 - These metrics represent storefront intent; they are not proof of a completed merchant sale.
 
+### Landing and acquisition measurement
+
+- Critical NOVA demo media is local under `public/landing/nova/`; the landing no longer depends on Unsplash for its core demo photography.
+- “Cómo funciona” and pricing use merchant-facing language.
+- A real-store proof block links to a live storefront without invented testimonials, counts or ratings.
+- Mobile has a restrained sticky acquisition CTA after the hero and away from pricing/final CTA visibility.
+- First-party SaaS measurement records landing view, primary/store-demo/pricing/plan interactions and `signup_started`.
+- Events preserve session id, source/campaign, device/viewport, CTA location, plan and path.
+- The browser does not insert directly into `saas_funnel_events`; `/api/analytics/saas` validates the payload and performs the privileged server-side insert.
+
 ### Commercial access and billing
 
 Current implementation has three commercial levels:
@@ -54,23 +70,11 @@ Exact prices are implementation/commercial configuration, not permanent Product 
 
 Billing uses Mercado Pago subscriptions for the merchant SaaS, not shopper checkout. The system includes signed webhook/reconciliation logic, `/billing/return`, paid-plan welcome, cancellation/access-until behavior, internal billing operations, complimentary access and unit-economics fields. Free limits are also enforced in the database. Existing eligible early stores are protected by grandfathering.
 
-### Landing and SEO currently in production
+### SEO
 
-- Root landing uses the native premium preview direction introduced before `STORE-INIT-003`.
 - Canonical host is `https://www.voltastore.app`; apex-to-www redirect is intentional.
 - Root metadata, canonical, OG/Twitter, JSON-LD, robots and sitemap are present.
 - Storefront metadata is dynamic per store/product.
-
-## Merged in STORE-INIT-003 — awaiting production deploy
-
-Once Vercel deploys the current main SHA, the landing will additionally have:
-
-- local/owned NOVA demo photography under `public/landing/nova/` instead of Unsplash;
-- simplified “Cómo funciona” and pricing copy;
-- explicit real-store proof;
-- a restrained mobile sticky CTA;
-- first-party SaaS acquisition tracking through `signup_started`;
-- server-managed `/api/analytics/saas` ingestion into the existing `saas_funnel_events` table while direct client DB access remains denied.
 
 ## Manual/operator validation history
 
@@ -78,18 +82,17 @@ Project history reports a real Mercado Pago subscription payment and subsequent 
 
 ## Known incomplete or requiring revalidation
 
-1. **STORE-INIT-003 production release is blocked by Vercel build quota.** Deploy + desktop/mobile visual QA + controlled event observation remain open.
-2. **After STORE-INIT-003 ships, the SaaS funnel will still stop at `signup_started`.** Clean joins for `signup_completed`, `store_created`, `first_product`, `published`, `first_share`, checkout and paid-plan events are the next measurement step.
-3. **Onboarding bootstrap is race-safe around duplicate-store creation but not atomic.** Profile/store/scaffold creation is still multi-step and repairable/idempotent rather than one transaction.
-4. **Public storefront caching strategy remains implicit/dynamic.** Optimize only when real scale/performance evidence justifies it.
-5. **Search Console revalidation status is external/unknown.** Canonical/indexability hardening shipped, but current Google validation state was not verified in this review.
-6. **Global font loading remains broad.** Four font families are loaded from the root layout; performance impact should be measured before changing it.
+1. **The SaaS funnel currently stops at `signup_started`.** Clean joins for `signup_completed`, `store_created`, `first_product`, `published`, `first_share`, checkout and paid-plan events are the next measurement step.
+2. **Onboarding bootstrap is race-safe around duplicate-store creation but not atomic.** Profile/store/scaffold creation is still multi-step and repairable/idempotent rather than one transaction.
+3. **Public storefront caching strategy remains implicit/dynamic.** Optimize only when real scale/performance evidence justifies it.
+4. **Search Console revalidation status is external/unknown.** Canonical/indexability hardening shipped, but current Google validation state was not verified in this review.
+5. **Global font loading remains broad.** Four font families are loaded from the root layout; performance impact should be measured before changing it.
+6. **Acquisition endpoint abuse/rate characteristics are not yet measured.** Payloads are schema-bounded and same-origin checked when Origin is present; add stronger anti-abuse only if real traffic requires it.
 
 ## Next recommended direction
 
-1. Finish `STORE-INIT-003` production deployment and verify visual/event behavior; do not claim shipped before that.
-2. Extend trustworthy SaaS measurement through signup → store → first product → publish → first share, keeping **Time to First Share < 10 minutes** as the current activation target.
-3. Put real merchants through the full flow and prioritize the first 10 customer learnings over speculative feature breadth.
-4. Add contextual feature discovery and usage-based upgrade prompts without dark patterns.
-5. Use measured drop-off to decide whether Activation 2.x needs another UX pass; do not guess.
-6. Keep PRO focused on better decisions/growth intelligence once enough merchant data exists.
+1. Extend trustworthy SaaS measurement through signup → store → first product → publish → first share, keeping **Time to First Share < 10 minutes** as the current activation target.
+2. Put real merchants through the full flow and prioritize the first 10 customer learnings over speculative feature breadth.
+3. Add contextual feature discovery and usage-based upgrade prompts without dark patterns.
+4. Use measured drop-off to decide whether Activation 2.x needs another UX pass; do not guess.
+5. Keep PRO focused on better decisions/growth intelligence once enough merchant data exists.
