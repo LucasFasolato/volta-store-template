@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import type { User } from '@supabase/supabase-js'
 import { DEFAULT_CONTENT, DEFAULT_LAYOUT, DEFAULT_THEME } from '@/data/defaults'
+import { recordSaasMilestone } from '@/lib/analytics/saas-server'
 import { getOwnerStoreIdentity } from '@/lib/server/store-context'
 import { safeGetUser } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
@@ -126,12 +127,12 @@ async function createStoreForOwner(user: User) {
       .single()
 
     if (!storeError && newStore) {
-      return newStore
+      return { store: newStore, created: true as const }
     }
 
     const existingStore = await getOwnerStoreIdentity(user.id, supabase)
     if (existingStore) {
-      return existingStore
+      return { store: existingStore, created: false as const }
     }
 
     if (storeError?.code === '23505') {
@@ -209,7 +210,11 @@ export async function completeOnboarding(data: {
   return { success: true }
 }
 
-export async function ensureOnboarding(user: User): Promise<{ storeSlug: string }> {
+export async function ensureOnboarding(user: User): Promise<{
+  storeSlug: string
+  storeId: string
+  storeCreated: boolean
+}> {
   const supabase = await createClient()
   const email = user.email?.trim()
 
@@ -220,11 +225,23 @@ export async function ensureOnboarding(user: User): Promise<{ storeSlug: string 
   await ensureProfile(user)
 
   let store = await getOwnerStoreIdentity(user.id, supabase)
+  let storeCreated = false
   if (!store) {
-    store = await createStoreForOwner(user)
+    const result = await createStoreForOwner(user)
+    store = result.store
+    storeCreated = result.created
   }
 
   await ensureStoreScaffold(store.id)
 
-  return { storeSlug: store.slug }
+  if (storeCreated) {
+    await recordSaasMilestone({
+      eventType: 'store_created',
+      userId: user.id,
+      storeId: store.id,
+      path: '/onboarding/bootstrap',
+    })
+  }
+
+  return { storeSlug: store.slug, storeId: store.id, storeCreated }
 }

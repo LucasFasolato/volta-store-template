@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Check, Copy, MessageCircle, Share2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { trackSaasEvent } from '@/lib/analytics/saas-events'
 import { buildWhatsAppShareUrl } from '@/lib/sharing/links'
 
 type ShareActionsProps = {
@@ -33,6 +34,13 @@ async function writeToClipboard(value: string) {
   if (!copied) throw new Error('clipboard-copy-failed')
 }
 
+function recordFirstShare(location: string) {
+  trackSaasEvent('first_share', {
+    dedupeKey: 'first-share',
+    ctaLocation: location,
+  })
+}
+
 export function ShareActions({ url, text, title, compact = false }: ShareActionsProps) {
   const [copied, setCopied] = useState(false)
   const whatsappUrl = buildWhatsAppShareUrl(text)
@@ -40,6 +48,7 @@ export function ShareActions({ url, text, title, compact = false }: ShareActions
   async function copyLink() {
     try {
       await writeToClipboard(url)
+      recordFirstShare('share_link_copy')
       setCopied(true)
       toast.success('Enlace copiado.')
       window.setTimeout(() => setCopied(false), 1600)
@@ -56,6 +65,7 @@ export function ShareActions({ url, text, title, compact = false }: ShareActions
 
     try {
       await navigator.share({ title, text, url })
+      recordFirstShare('share_native')
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return
       toast.error('No pudimos abrir el menú para compartir.')
@@ -72,7 +82,14 @@ export function ShareActions({ url, text, title, compact = false }: ShareActions
         {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
         {copied ? 'Copiado' : 'Copiar'}
       </button>
-      <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={buttonClass} aria-label="Compartir por WhatsApp">
+      <a
+        href={whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => recordFirstShare('share_whatsapp')}
+        className={buttonClass}
+        aria-label="Compartir por WhatsApp"
+      >
         <MessageCircle className="size-4" />
         WhatsApp
       </a>

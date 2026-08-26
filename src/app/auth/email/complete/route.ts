@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { ensureOnboarding, needsOnboarding } from '@/lib/actions/onboarding'
+import { isLikelyFirstSignup, recordSaasMilestone } from '@/lib/analytics/saas-server'
+import { sanitizeInternalRedirect } from '@/lib/auth/redirects'
 import { safeGetUser } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
-import { sanitizeInternalRedirect } from '@/lib/auth/redirects'
 
 function loginError(origin: string) {
   const url = new URL('/login', origin)
@@ -23,7 +24,15 @@ export async function GET(request: Request) {
   }
 
   try {
-    await ensureOnboarding(user)
+    const onboarding = await ensureOnboarding(user)
+    if (onboarding.storeCreated || isLikelyFirstSignup(user)) {
+      await recordSaasMilestone({
+        eventType: 'signup_completed',
+        userId: user.id,
+        storeId: onboarding.storeId,
+        path: '/auth/email/complete',
+      })
+    }
   } catch (error) {
     console.warn('VOLTA onboarding after email verification could not be completed.', error)
   }
