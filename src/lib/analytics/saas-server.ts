@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { cookies } from 'next/headers'
+import type { User } from '@supabase/supabase-js'
 import {
   SAAS_CAMPAIGN_COOKIE,
   SAAS_CAMPAIGN_MAX_LENGTH,
@@ -29,6 +30,17 @@ type RecordSaasMilestoneInput = {
 
 function fallbackSessionId(userId: string) {
   return `auth-${userId}`
+}
+
+export function isLikelyFirstSignup(user: User) {
+  if (!user.created_at || !user.last_sign_in_at) return false
+  const createdAt = Date.parse(user.created_at)
+  const signedInAt = Date.parse(user.last_sign_in_at)
+  if (!Number.isFinite(createdAt) || !Number.isFinite(signedInAt)) return false
+
+  // New OAuth/passwordless accounts are created close to their first successful
+  // sign-in. Existing merchants can still sign in without inflating signup_completed.
+  return signedInAt >= createdAt && signedInAt - createdAt <= 30 * 60 * 1000
 }
 
 export async function recordSaasMilestone({
