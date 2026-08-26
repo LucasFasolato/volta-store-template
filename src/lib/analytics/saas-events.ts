@@ -11,6 +11,8 @@ import {
   type ClientSaasFunnelEventType,
 } from '@/lib/analytics/saas-contract'
 
+export type { SaasFunnelEventType } from '@/lib/analytics/saas-contract'
+
 type TrackSaasEventOptions = {
   ctaLocation?: string | null
   plan?: 'free' | 'volta' | 'pro' | null
