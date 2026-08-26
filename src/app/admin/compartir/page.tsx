@@ -1,4 +1,5 @@
 import { GrowthSharePage } from '@/components/admin/GrowthSharePage'
+import { ShareMilestoneTracker } from '@/components/analytics/ShareMilestoneTracker'
 import { getStoreCommercialAccess } from '@/lib/billing/commercial-access'
 import { buildProductPublicUrl, buildStorePublicUrl, buildStoreShareMessage } from '@/lib/sharing/links'
 import { getAdminProducts } from '@/lib/queries/store'
@@ -25,12 +26,15 @@ export default async function SharePage() {
     }))
 
   return (
-    <GrowthSharePage
-      storeName={store.name}
-      storeUrl={storeUrl}
-      storeMessage={buildStoreShareMessage(store.name, storeUrl)}
-      products={activeProducts}
-      planCode={commercialAccess.planCode}
-    />
+    <>
+      <ShareMilestoneTracker />
+      <GrowthSharePage
+        storeName={store.name}
+        storeUrl={storeUrl}
+        storeMessage={buildStoreShareMessage(store.name, storeUrl)}
+        products={activeProducts}
+        planCode={commercialAccess.planCode}
+      />
+    </>
   )
 }
