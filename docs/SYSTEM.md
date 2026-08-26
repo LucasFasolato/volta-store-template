@@ -2,7 +2,7 @@
 
 ## System model
 
-Production SaaS built with Next.js App Router, React/TypeScript and Supabase. Server components/actions own authenticated data/business rules; client components handle editing, storefront interaction, cart state and selected analytics/share interactions.
+Production SaaS built with Next.js App Router, React/TypeScript and Supabase. Server components/actions own authenticated data and business rules; client components handle editing, storefront interaction, cart state and bounded analytics/share interactions.
 
 ## Stack
 
@@ -23,16 +23,17 @@ Production SaaS built with Next.js App Router, React/TypeScript and Supabase. Se
 
 - `src/app/page.tsx` — marketing/commercial landing.
 - `src/app/login/page.tsx` — merchant login and signup-start boundary.
-- `src/app/api/analytics/saas/route.ts` — bounded server-managed VOLTA acquisition-event ingestion.
-- `src/app/auth/callback/route.ts` — OAuth/magic-link callback.
+- `src/app/api/analytics/saas/route.ts` — bounded server-managed SaaS funnel ingestion.
+- `src/app/auth/callback/route.ts` / `src/app/auth/email/complete/route.ts` — signup/auth completion boundaries.
 - `src/app/onboarding/*` — onboarding entry/completion.
 - `src/app/admin/*` — merchant admin.
 - `src/app/admin/compartir/page.tsx` — Share Engine workspace.
-- `src/app/admin/rendimiento/page.tsx` — merchant commercial analytics.
+- `src/app/admin/rendimiento/page.tsx` — merchant storefront analytics.
 - `src/app/admin/plan/page.tsx` — commercial access/billing.
 - `src/app/(public)/tienda/[slug]/page.tsx` — public storefront and historical-slug redirect.
 - `src/app/billing/return/page.tsx` — provider return/recovery/welcome.
-- `src/app/internal/billing/page.tsx` — protected VOLTA internal billing console.
+- `src/app/internal/billing/page.tsx` — protected VOLTA billing console.
+- `src/app/internal/funnel/page.tsx` — protected VOLTA acquisition/activation funnel.
 - `src/app/api/billing/mercado-pago/webhook/route.ts` — Mercado Pago webhook.
 - `src/proxy.ts` — request proxy/middleware entry.
 
@@ -46,7 +47,7 @@ Production SaaS built with Next.js App Router, React/TypeScript and Supabase. Se
 
 `src/lib/actions/onboarding.ts` ensures profile/store/scaffold records and relies on the DB one-owner/one-store invariant. Duplicate-store races are handled defensively, but profile/store/theme/layout/content creation remains a multi-step bootstrap.
 
-Activation 2.0 is the publish-first product flow **Negocio → Portada → Producto → Publicar**, then first-share success.
+Activation 2.0 is the publish-first flow **Negocio → Portada → Producto → Publicar → Compartir**.
 
 ### Catalog and storefront
 
@@ -60,11 +61,11 @@ The public route resolves store slug history before `notFound`, preserving share
 
 Images are optimized client-side/server-validated. Product deletion enumerates linked/folder paths and removes Storage objects best-effort; upload-to-DB failure paths clean the newly uploaded object.
 
-Landing NOVA demo media is repository-local under `public/landing/nova/` so the commercial landing does not depend on external stock-photo availability.
+The current landing NOVA showcase keeps local placeholder media but uses curated remote product photography at runtime with embedded SVG fallbacks. Owned local NOVA photography remains preferable long term; do not treat remote stock availability as a durable product dependency.
 
 ### Cart and checkout
 
-Zustand persists shopper cart state locally. Checkout asks only the merchant-configured fields and produces a structured WhatsApp message. No server-side “paid shopper order” should be inferred from a WhatsApp handoff event.
+Zustand persists shopper cart state locally. Checkout asks only merchant-configured fields and produces a structured WhatsApp message. No server-side paid shopper order should be inferred from a WhatsApp handoff event.
 
 ### Sharing, attribution and durable links
 
@@ -72,7 +73,7 @@ Sharing helpers create store/product URLs and measurable distribution links. Sto
 
 Store slug changes are protected by `store_slug_history`; old links redirect to the canonical current slug while keeping query parameters/deep-link attribution.
 
-### Merchant analytics
+### Merchant storefront analytics
 
 `store_events` supports:
 - `store_view`
@@ -83,13 +84,31 @@ Store slug changes are protected by `store_slug_history`; old links redirect to 
 
 `/admin/rendimiento` aggregates visits, product interest, cart intent, WhatsApp intent, conversion, sources/campaigns, top products and simple commercial opportunities. These are intent signals, not completed-sale accounting.
 
-### SaaS acquisition funnel
+### VOLTA acquisition + activation funnel
 
-`saas_funnel_events` is VOLTA's own acquisition table. RLS denies direct `anon`/`authenticated` access.
+`saas_funnel_events` is VOLTA's own SaaS funnel table. RLS remains enabled and direct `anon` / `authenticated` privileges are denied.
 
-The browser-side helper in `src/lib/analytics/saas-events.ts` owns a session id, captures `src`/UTM campaign attribution, device/viewport and CTA context, then posts a bounded payload to `/api/analytics/saas`. The API validates the event with Zod and uses the server admin client for the insert; the service-role boundary does not move into browser code.
+The funnel now covers prospectively:
 
-Current wired events cover landing view, landing CTA/store-demo/pricing/plan interactions and `signup_started`. Deeper activation/billing joins remain roadmap work.
+`landing_view → signup_started → signup_completed → store_created → first_product → published → first_share`
+
+Architecture:
+
+- `src/lib/analytics/saas-contract.ts` defines the event contract and first-party correlation cookie names/limits.
+- `src/lib/analytics/saas-events.ts` owns browser acquisition session/source/campaign context and posts only bounded client-safe events.
+- `/api/analytics/saas` validates payloads. For authenticated `first_share`, it derives user/store server-side before privileged insert.
+- `src/lib/analytics/saas-server.ts` records authenticated server milestones using first-party session/source/campaign cookies when present, otherwise an explicit authenticated fallback session id.
+- onboarding/auth code records `signup_completed` and genuine `store_created` milestones.
+- DB trigger `record_first_product_saas_milestone()` records the first persisted product. A transaction-scoped advisory lock serializes concurrent first inserts.
+- DB trigger `record_published_saas_milestone()` records the first transition to published + active.
+- partial unique indexes make first milestones idempotent.
+- `first_share` is recorded only after successful copy/native-share actions or deliberate WhatsApp navigation; it means distribution intent, not delivery or sale.
+
+`user_id` / `store_id` are never trusted from browser payloads. First-party cookies carry non-sensitive acquisition correlation across auth/new tabs. Cross-browser loss is measured as join coverage instead of being fabricated.
+
+`src/lib/analytics/activation-funnel.ts` builds a cohort-scoped 7/30/90-day funnel, median signup→first-share, store→share, join coverage and source/device segments. `/internal/funnel` exposes this only through the existing internal-admin boundary.
+
+Historical acquisition rows are preserved. Old merchants are intentionally not backfilled into a fake activation cohort.
 
 ### Billing and commercial access
 
@@ -130,7 +149,8 @@ Durable links:
 - Product category/brand relations are constrained to the same tenant.
 - RLS is enabled on application tables.
 - `saas_funnel_events` denies direct `anon`/`authenticated` access.
-- SaaS acquisition inserts occur server-side after payload validation.
+- Browser funnel payloads cannot choose merchant `user_id` / `store_id`.
+- First activation milestones are deduplicated by partial unique indexes.
 - Service-role/internal-admin capabilities are privileged and must not leak into ordinary user flows.
 - Free plan DB triggers inspect commercial entitlement server-side.
 - Public Storage URLs are intentionally public; DB RLS does not make them private.
@@ -150,8 +170,9 @@ Durable links:
 - several appearance/admin client surfaces remain large;
 - root layout loads four font families globally;
 - provider billing regression remains primarily integration/manual validation rather than a fully automated external E2E;
-- SaaS acquisition endpoint is intentionally minimal and has no dedicated external rate-limit layer yet; add one only if real traffic/abuse requires it.
+- acquisition endpoint has no dedicated external rate-limit layer yet; add one only if real traffic/abuse requires it;
+- generated Supabase TypeScript types are not yet refreshed for the new funnel columns, so privileged funnel access currently keeps localized casts at the boundary.
 
 ## Reference material
 
-`docs/ai/` and `docs/audits/` remain historical deep maps. Use current code, migrations and production reality before relying on their old risk statements.
+`docs/ai/` and `docs/audits/` remain historical deep maps. Use current code, migrations and production reality before relying on old risk statements.
