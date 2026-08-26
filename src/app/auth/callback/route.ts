@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
+import type { User } from '@supabase/supabase-js'
 import { ensureOnboarding, needsOnboarding } from '@/lib/actions/onboarding'
+import { recordSaasMilestone } from '@/lib/analytics/saas-server'
 import { inferLoginErrorReason } from '@/lib/auth/login-feedback'
 import { sanitizeInternalRedirect } from '@/lib/auth/redirects'
 import { safeGetUser } from '@/lib/supabase/auth'
@@ -15,6 +17,27 @@ function redirectToLogin(origin: string, params: { reason: string; provider?: st
   }
 
   return NextResponse.redirect(loginUrl)
+}
+
+function isLikelyFirstSignup(user: User) {
+  if (!user.created_at || !user.last_sign_in_at) return false
+  const createdAt = Date.parse(user.created_at)
+  const signedInAt = Date.parse(user.last_sign_in_at)
+  if (!Number.isFinite(createdAt) || !Number.isFinite(signedInAt)) return false
+  return signedInAt >= createdAt && signedInAt - createdAt <= 30 * 60 * 1000
+}
+
+async function ensureAndMeasureSignup(user: User, path: string) {
+  const onboarding = await ensureOnboarding(user)
+  if (onboarding.storeCreated || isLikelyFirstSignup(user)) {
+    await recordSaasMilestone({
+      eventType: 'signup_completed',
+      userId: user.id,
+      storeId: onboarding.storeId,
+      path,
+    })
+  }
+  return onboarding
 }
 
 export async function GET(request: Request) {
@@ -40,7 +63,7 @@ export async function GET(request: Request) {
 
     if (user) {
       try {
-        await ensureOnboarding(user)
+        await ensureAndMeasureSignup(user, '/auth/callback')
       } catch {
         // Non-blocking
       }
@@ -69,7 +92,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    await ensureOnboarding(data.user)
+    await ensureAndMeasureSignup(data.user, '/auth/callback')
   } catch {
     // Non-blocking
   }
