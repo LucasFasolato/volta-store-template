@@ -63,8 +63,8 @@ comment on column public.saas_funnel_events.store_id is
 
 -- Product creation is already a tenant-checked server mutation. Capture the real
 -- first product at the database boundary so imports/future write paths cannot
--- silently bypass activation measurement. Lock the store row so concurrent first
--- inserts cannot both misclassify themselves.
+-- silently bypass activation measurement. A transaction-scoped advisory lock on
+-- the store id serializes concurrent first inserts without fighting the FK row lock.
 create or replace function public.record_first_product_saas_milestone()
 returns trigger
 language plpgsql
@@ -75,11 +75,12 @@ declare
   owner_id_value uuid;
   product_count bigint;
 begin
+  perform pg_advisory_xact_lock(hashtextextended(new.store_id::text, 91004));
+
   select owner_id
     into owner_id_value
     from public.stores
-   where id = new.store_id
-   for update;
+   where id = new.store_id;
 
   select count(*)
     into product_count
