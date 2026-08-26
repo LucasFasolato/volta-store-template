@@ -50,7 +50,7 @@ The landing direction is now frozen pending conversion evidence or a genuine pos
 
 ### Landing and acquisition measurement
 
-- Critical NOVA demo media is local under `public/landing/nova/`; the landing no longer depends on Unsplash for its core demo photography.
+- The NOVA demo keeps repository-local placeholder JPEGs, while the current runtime recovery layer replaces them with curated remote product photography and an embedded SVG fallback so a media failure cannot leave broken-image UI. Owned local NOVA photography remains the preferred long-term state.
 - “Cómo funciona” and pricing use merchant-facing language.
 - A real-store proof block links to a live storefront without invented testimonials, counts or ratings.
 - Mobile has a restrained sticky acquisition CTA after the hero and away from pricing/final CTA visibility.
