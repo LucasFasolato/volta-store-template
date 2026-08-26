@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { PlanUpgradePrompt } from '@/components/admin/PlanUpgradePrompt'
 import { ShareActions } from '@/components/admin/ShareActions'
 import { StoreQrCard } from '@/components/admin/StoreQrCard'
+import { trackSaasEvent } from '@/lib/analytics/saas-events'
 import {
   buildProductShareMessage,
   buildStoreShareMessage,
@@ -51,6 +52,22 @@ async function copyValue(value: string) {
   if (!copied) throw new Error('copy-failed')
 }
 
+function recordFirstShare(location: string) {
+  trackSaasEvent('first_share', {
+    dedupeKey: 'first-share',
+    ctaLocation: location,
+  })
+}
+
+function trackedShareLocation(label: string) {
+  const normalized = label.trim().toLowerCase()
+  if (normalized === 'campaña' || normalized === 'campana') return 'share_campaign_copy'
+  if (normalized === 'instagram') return 'share_instagram_copy'
+  if (normalized === 'whatsapp') return 'share_whatsapp_link_copy'
+  if (normalized === 'qr') return 'share_qr_copy'
+  return 'share_tracked_link_copy'
+}
+
 export function GrowthSharePage({ storeName, storeUrl, storeMessage, products, planCode }: GrowthSharePageProps) {
   const suggestions = useMemo(() => buildSuggestedStoreMessages(storeName, storeUrl), [storeName, storeUrl])
   const instagramUrl = useMemo(() => buildTrackedPublicUrl(storeUrl, 'instagram'), [storeUrl])
@@ -69,6 +86,7 @@ export function GrowthSharePage({ storeName, storeUrl, storeMessage, products, p
   async function copyMessage() {
     try {
       await copyValue(selectedMessage)
+      recordFirstShare('share_message_copy')
       setMessageCopied(true)
       toast.success('Texto copiado.')
       window.setTimeout(() => setMessageCopied(false), 1600)
@@ -80,6 +98,7 @@ export function GrowthSharePage({ storeName, storeUrl, storeMessage, products, p
   async function copyTracked(url: string, label: string) {
     try {
       await copyValue(url)
+      recordFirstShare(trackedShareLocation(label))
       toast.success(`${label}: enlace copiado.`)
     } catch {
       toast.error('No pudimos copiar el enlace.')
