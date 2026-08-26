@@ -60,3 +60,97 @@ comment on column public.saas_funnel_events.user_id is
 
 comment on column public.saas_funnel_events.store_id is
   'Merchant store derived server-side for activation milestones; never trusted from the browser.';
+
+-- Product creation is already a tenant-checked server mutation. Capture the real
+-- first product at the database boundary so imports/future write paths cannot
+-- silently bypass activation measurement. Lock the store row so concurrent first
+-- inserts cannot both misclassify themselves.
+create or replace function public.record_first_product_saas_milestone()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  owner_id_value uuid;
+  product_count bigint;
+begin
+  select owner_id
+    into owner_id_value
+    from public.stores
+   where id = new.store_id
+   for update;
+
+  select count(*)
+    into product_count
+    from public.products
+   where store_id = new.store_id;
+
+  if product_count = 1 and owner_id_value is not null then
+    insert into public.saas_funnel_events (
+      event_type,
+      session_id,
+      user_id,
+      store_id,
+      path
+    ) values (
+      'first_product',
+      'auth-' || owner_id_value::text,
+      owner_id_value,
+      new.store_id,
+      '/db/products'
+    )
+    on conflict do nothing;
+  end if;
+
+  return new;
+end;
+$$;
+
+revoke all on function public.record_first_product_saas_milestone() from public, anon, authenticated;
+
+drop trigger if exists products_record_first_product_saas_milestone on public.products;
+create trigger products_record_first_product_saas_milestone
+after insert on public.products
+for each row execute function public.record_first_product_saas_milestone();
+
+-- Publication is a durable store state transition. Record only transitions into
+-- the published+active state; the partial unique index makes later republish
+-- cycles no-ops for activation measurement.
+create or replace function public.record_published_saas_milestone()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.status = 'published'
+     and new.is_active = true
+     and (old.status is distinct from 'published' or old.is_active is distinct from true)
+  then
+    insert into public.saas_funnel_events (
+      event_type,
+      session_id,
+      user_id,
+      store_id,
+      path
+    ) values (
+      'published',
+      'auth-' || new.owner_id::text,
+      new.owner_id,
+      new.id,
+      '/db/stores/publish'
+    )
+    on conflict do nothing;
+  end if;
+
+  return new;
+end;
+$$;
+
+revoke all on function public.record_published_saas_milestone() from public, anon, authenticated;
+
+drop trigger if exists stores_record_published_saas_milestone on public.stores;
+create trigger stores_record_published_saas_milestone
+after update of status, is_active on public.stores
+for each row execute function public.record_published_saas_milestone();
