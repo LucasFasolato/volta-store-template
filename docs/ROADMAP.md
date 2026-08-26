@@ -4,26 +4,30 @@ This roadmap is intentional direction, not an inventory of ideas. Already-shippe
 
 ## NOW
 
-### Measure acquisition → activation end to end
-
-`STORE-INIT-003` shipped the landing-side acquisition layer through `signup_started`. Extend it cleanly through:
-
-- `signup_completed`;
-- `store_created`;
-- `first_product`;
-- `published`;
-- `first_share`;
-- pricing/checkout/paid-plan transitions where the event contract is clear.
-
-Primary activation target: **Time to First Share < 10 minutes**. Establish trustworthy measurement before optimizing against numbers.
-
 ### First 10 real customer learnings
 
-Use the frozen landing + Activation 2.0 + Share Engine with real merchants. Observe where they hesitate, what they understand, what they value and why they would or would not pay. Prefer evidence and support friction over speculative feature breadth.
+`STORE-INIT-004` shipped trustworthy acquisition → activation measurement through first share. Use the frozen landing + Activation 2.0 + Share Engine with real merchants and observe:
 
-### Activation 2.x only from evidence
+- where they hesitate;
+- what they understand without help;
+- how long they take to reach first share;
+- what they value;
+- why they would or would not pay.
 
-Do not redesign onboarding pre-emptively. Use funnel drop-off and session observation to decide whether the current **Negocio → Portada → Producto → Publicar → Compartir** journey needs another pass.
+Prefer evidence and support friction over speculative feature breadth.
+
+### Activation 2.x only from measured drop-off
+
+Do not redesign onboarding pre-emptively. Use `/internal/funnel`, support observation and real sessions to decide whether the current **Negocio → Portada → Producto → Publicar → Compartir** journey needs another pass.
+
+Primary activation target remains **Time to First Share < 10 minutes** until evidence justifies changing it.
+
+### Protect measurement quality while data accumulates
+
+- Treat join coverage explicitly; do not invent cross-browser attribution.
+- Keep `first_share` as merchant distribution intent, not recipient delivery or sale.
+- Do not backfill old merchants into a fake activation cohort.
+- Add checkout/paid-plan transitions to the SaaS funnel only when identity and idempotency semantics are equally trustworthy.
 
 ## NEXT
 
