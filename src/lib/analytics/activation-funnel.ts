@@ -165,7 +165,6 @@ export function buildActivationFunnel(events: ActivationFunnelEvent[]): Activati
 
   const signupToShareMinutes: number[] = []
   const storeToShareMinutes: number[] = []
-  let linkedStoreSessions = 0
 
   for (const [storeId, created] of storeCreated.entries()) {
     const share = firstShare.get(storeId)
@@ -176,7 +175,6 @@ export function buildActivationFunnel(events: ActivationFunnelEvent[]): Activati
 
     const signup = signupStarted.get(created.session_id)
     if (!signup) continue
-    linkedStoreSessions += 1
     const signupMinutes = minutesBetween(signup.created_at, share.created_at)
     if (signupMinutes !== null) signupToShareMinutes.push(signupMinutes)
   }
