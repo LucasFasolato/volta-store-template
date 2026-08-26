@@ -6,6 +6,7 @@ import {
   SAAS_SESSION_COOKIE,
   SAAS_SOURCE_COOKIE,
   SAAS_SOURCE_MAX_LENGTH,
+  isValidSaasSessionId,
   normalizeSaasToken,
   type ClientSaasFunnelEventType,
 } from '@/lib/analytics/saas-contract'
@@ -24,21 +25,43 @@ type Attribution = {
 const ATTRIBUTION_KEY = 'volta-saas-attribution'
 const EVENT_PREFIX = 'volta:saas:event:'
 
+function readCookie(name: string) {
+  const prefix = `${name}=`
+  for (const part of document.cookie.split(';')) {
+    const value = part.trim()
+    if (!value.startsWith(prefix)) continue
+    try {
+      return decodeURIComponent(value.slice(prefix.length))
+    } catch {
+      return value.slice(prefix.length)
+    }
+  }
+  return null
+}
+
 function persistSessionCookie(name: string, value: string | null) {
-  if (!value) return
   const secure = window.location.protocol === 'https:' ? '; Secure' : ''
+  if (!value) {
+    document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Lax${secure}`
+    return
+  }
   document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; SameSite=Lax${secure}`
 }
 
 function getSessionId() {
   let sessionId = window.sessionStorage.getItem(SAAS_SESSION_COOKIE)
+  if (!isValidSaasSessionId(sessionId)) {
+    const cookieSession = readCookie(SAAS_SESSION_COOKIE)
+    sessionId = isValidSaasSessionId(cookieSession) ? cookieSession : null
+  }
+
   if (!sessionId) {
     sessionId = typeof crypto !== 'undefined' && 'randomUUID' in crypto
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(36).slice(2)}`
-    window.sessionStorage.setItem(SAAS_SESSION_COOKIE, sessionId)
   }
 
+  window.sessionStorage.setItem(SAAS_SESSION_COOKIE, sessionId)
   persistSessionCookie(SAAS_SESSION_COOKIE, sessionId)
   return sessionId
 }
@@ -65,9 +88,17 @@ function getAttribution(): Attribution {
   }
 
   const params = new URLSearchParams(window.location.search)
+  const paramSource = params.get('src') || params.get('utm_source')
+  const paramCampaign = params.get('campaign') || params.get('utm_campaign')
   const attribution: Attribution = {
-    source: normalizeSaasToken(params.get('src') || params.get('utm_source'), SAAS_SOURCE_MAX_LENGTH),
-    campaign: normalizeSaasToken(params.get('campaign') || params.get('utm_campaign'), SAAS_CAMPAIGN_MAX_LENGTH),
+    source: normalizeSaasToken(
+      paramSource ?? readCookie(SAAS_SOURCE_COOKIE),
+      SAAS_SOURCE_MAX_LENGTH,
+    ),
+    campaign: normalizeSaasToken(
+      paramCampaign ?? readCookie(SAAS_CAMPAIGN_COOKIE),
+      SAAS_CAMPAIGN_MAX_LENGTH,
+    ),
   }
   window.sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(attribution))
   persistAttributionCookies(attribution)
