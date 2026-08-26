@@ -11,6 +11,7 @@ Only current, evidence-backed debt belongs here. Historical audit findings that 
 | STORE-DEBT-008 | P2 | Performance | Public storefront is server-rendered dynamically without an explicit cache/revalidation contract. | Measure real traffic/latency, then introduce a tenant-safe freshness strategy if needed. | OPEN |
 | STORE-DEBT-009 | P3 | Frontend/performance | Root layout loads Geist, Geist Mono, Plus Jakarta Sans and Playfair Display globally. | Measure route/font cost; scope or reduce only if impact is meaningful. | OPEN |
 | STORE-DEBT-011 | P3 | Data integrity | Some durable appearance values have DB checks, while broad `store_theme` token sets still rely mainly on app validation. | Add DB checks only for genuinely durable controlled sets with realistic non-app writers. | OPEN / BOUNDED |
+| STORE-DEBT-014 | P3 | Types | `saas_funnel_events` gained `user_id` / `store_id` in STORE-INIT-004, while generated Supabase TS types have not yet been refreshed; privileged funnel modules therefore keep localized casts. | Regenerate types during a low-risk maintenance pass and remove only the now-unnecessary funnel casts. | OPEN / BOUNDED |
 
 ## Verified closed / retired audit findings
 
@@ -27,7 +28,7 @@ Only current, evidence-backed debt belongs here. Historical audit findings that 
 
 ## Delivery/revalidation gaps (not debt)
 
-- Production has `saas_funnel_events`, but application tracking is not wired yet. This is incomplete roadmap scope, not hidden debt.
+- STORE-INIT-004 now wires the SaaS funnel through first share; real post-release merchants are still needed before the funnel can support activation conclusions.
 - Real Mercado Pago payment/cancellation has operator-reported manual validation, but external provider E2E is not an automated regression suite.
 - Search Console revalidation after canonical hardening is external/unknown.
 
