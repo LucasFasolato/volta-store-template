@@ -1,14 +1,14 @@
 'use client'
 
-export type SaasFunnelEventType =
-  | 'landing_view'
-  | 'landing_primary_cta_click'
-  | 'landing_real_store_click'
-  | 'landing_pricing_view'
-  | 'landing_free_cta_click'
-  | 'landing_volta_cta_click'
-  | 'landing_pro_cta_click'
-  | 'signup_started'
+import {
+  SAAS_CAMPAIGN_COOKIE,
+  SAAS_CAMPAIGN_MAX_LENGTH,
+  SAAS_SESSION_COOKIE,
+  SAAS_SOURCE_COOKIE,
+  SAAS_SOURCE_MAX_LENGTH,
+  normalizeSaasToken,
+  type ClientSaasFunnelEventType,
+} from '@/lib/analytics/saas-contract'
 
 type TrackSaasEventOptions = {
   ctaLocation?: string | null
@@ -21,33 +21,31 @@ type Attribution = {
   campaign: string | null
 }
 
-const SESSION_KEY = 'volta-saas-session-id'
 const ATTRIBUTION_KEY = 'volta-saas-attribution'
 const EVENT_PREFIX = 'volta:saas:event:'
 
-function normalize(value: string | null, maxLength: number) {
-  if (!value) return null
-  const normalized = value
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9_-]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-{2,}/g, '-')
-    .slice(0, maxLength)
-  return normalized || null
+function persistSessionCookie(name: string, value: string | null) {
+  if (!value) return
+  const secure = window.location.protocol === 'https:' ? '; Secure' : ''
+  document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; SameSite=Lax${secure}`
 }
 
 function getSessionId() {
-  let sessionId = window.sessionStorage.getItem(SESSION_KEY)
+  let sessionId = window.sessionStorage.getItem(SAAS_SESSION_COOKIE)
   if (!sessionId) {
     sessionId = typeof crypto !== 'undefined' && 'randomUUID' in crypto
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(36).slice(2)}`
-    window.sessionStorage.setItem(SESSION_KEY, sessionId)
+    window.sessionStorage.setItem(SAAS_SESSION_COOKIE, sessionId)
   }
+
+  persistSessionCookie(SAAS_SESSION_COOKIE, sessionId)
   return sessionId
+}
+
+function persistAttributionCookies(attribution: Attribution) {
+  persistSessionCookie(SAAS_SOURCE_COOKIE, attribution.source)
+  persistSessionCookie(SAAS_CAMPAIGN_COOKIE, attribution.campaign)
 }
 
 function getAttribution(): Attribution {
@@ -55,10 +53,12 @@ function getAttribution(): Attribution {
   if (stored) {
     try {
       const parsed = JSON.parse(stored) as Attribution
-      return {
+      const attribution = {
         source: typeof parsed.source === 'string' ? parsed.source : null,
         campaign: typeof parsed.campaign === 'string' ? parsed.campaign : null,
       }
+      persistAttributionCookies(attribution)
+      return attribution
     } catch {
       window.sessionStorage.removeItem(ATTRIBUTION_KEY)
     }
@@ -66,10 +66,11 @@ function getAttribution(): Attribution {
 
   const params = new URLSearchParams(window.location.search)
   const attribution: Attribution = {
-    source: normalize(params.get('src') || params.get('utm_source'), 64),
-    campaign: normalize(params.get('campaign') || params.get('utm_campaign'), 80),
+    source: normalizeSaasToken(params.get('src') || params.get('utm_source'), SAAS_SOURCE_MAX_LENGTH),
+    campaign: normalizeSaasToken(params.get('campaign') || params.get('utm_campaign'), SAAS_CAMPAIGN_MAX_LENGTH),
   }
   window.sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(attribution))
+  persistAttributionCookies(attribution)
   return attribution
 }
 
@@ -79,7 +80,7 @@ function deviceLabel(width: number) {
   return 'desktop'
 }
 
-export function trackSaasEvent(type: SaasFunnelEventType, options: TrackSaasEventOptions = {}) {
+export function trackSaasEvent(type: ClientSaasFunnelEventType, options: TrackSaasEventOptions = {}) {
   if (typeof window === 'undefined') return
 
   const storageKey = options.dedupeKey ? `${EVENT_PREFIX}${options.dedupeKey}` : null
