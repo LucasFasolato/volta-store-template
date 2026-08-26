@@ -54,11 +54,73 @@ function polishCard(image: HTMLImageElement, index: number) {
   image.style.filter = 'saturate(.92) contrast(1.025)'
 
   const body = image.nextElementSibling as HTMLElement | null
-  if (body) {
-    body.style.padding = '10px 11px 11px'
-  }
+  if (body) body.style.padding = '10px 11px 11px'
 
   setText(card, media.title, media.price)
+}
+
+function polishShowcaseShell(heroImage: HTMLImageElement) {
+  const heroFrame = heroImage.parentElement as HTMLElement | null
+  const content = heroFrame?.parentElement as HTMLElement | null
+  const grid = content?.parentElement as HTMLElement | null
+  if (!heroFrame || !content || !grid) return
+
+  const legacyAside = grid.firstElementChild as HTMLElement | null
+  if (legacyAside && legacyAside !== content) legacyAside.style.display = 'none'
+
+  grid.style.gridTemplateColumns = '1fr'
+  grid.style.minHeight = 'unset'
+  content.style.background = '#f7f4ef'
+  content.style.padding = '12px'
+
+  if (!content.querySelector('[data-nova-store-nav]')) {
+    const nav = document.createElement('div')
+    nav.dataset.novaStoreNav = 'true'
+    nav.style.display = 'flex'
+    nav.style.alignItems = 'center'
+    nav.style.justifyContent = 'space-between'
+    nav.style.gap = '12px'
+    nav.style.padding = '9px 11px 13px'
+    nav.style.color = '#101713'
+
+    const menu = document.createElement('span')
+    menu.textContent = '☰'
+    menu.style.display = 'inline-flex'
+    menu.style.width = '26px'
+    menu.style.height = '26px'
+    menu.style.alignItems = 'center'
+    menu.style.justifyContent = 'center'
+    menu.style.borderRadius = '999px'
+    menu.style.background = 'rgba(255,255,255,.78)'
+    menu.style.fontSize = '11px'
+
+    const brand = document.createElement('strong')
+    brand.innerHTML = 'NOVA <span style="color:#0aa66f;font-weight:700">Studio</span>'
+    brand.style.fontSize = '13px'
+    brand.style.letterSpacing = '-.03em'
+
+    const order = document.createElement('span')
+    order.textContent = 'Pedir por WhatsApp'
+    order.style.padding = '7px 10px'
+    order.style.borderRadius = '999px'
+    order.style.background = '#fff'
+    order.style.fontSize = '8px'
+    order.style.fontWeight = '700'
+    order.style.boxShadow = '0 5px 16px rgba(7,18,15,.06)'
+
+    nav.append(menu, brand, order)
+    content.insertBefore(nav, heroFrame)
+  }
+
+  heroFrame.style.borderRadius = '22px'
+  heroFrame.style.background = '#e8dfd2'
+  heroFrame.style.boxShadow = 'inset 0 0 0 1px rgba(7,18,15,.05)'
+
+  const heroCopy = heroFrame.querySelectorAll<HTMLElement>('p')
+  if (heroCopy.length >= 2) {
+    heroCopy[1].innerHTML = 'Diseñados<br/>para tu día.'
+    heroCopy[1].style.maxWidth = '280px'
+  }
 }
 
 export function LandingMediaRecovery() {
@@ -67,6 +129,7 @@ export function LandingMediaRecovery() {
     if (!images.length) return
 
     const cleanups: Array<() => void> = []
+    polishShowcaseShell(images[0])
 
     images.forEach((image, imageIndex) => {
       const isHero = imageIndex === 0
