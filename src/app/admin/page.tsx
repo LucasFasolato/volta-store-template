@@ -5,6 +5,7 @@ import { getStoreAnalytics } from '@/lib/queries/analytics'
 import { getAdminCategories, getAdminProducts } from '@/lib/queries/store'
 import { requireAuthenticatedAdminStore } from '@/lib/server/store-context'
 import { ActivationWizard } from '@/components/admin/ActivationWizard'
+import { AdminIntroTour } from '@/components/admin/AdminIntroTour'
 import { StoreDashboard } from '@/components/admin/StoreDashboard'
 
 export default async function AdminPage() {
@@ -15,7 +16,9 @@ export default async function AdminPage() {
   ])
   const plan = buildStoreLaunchPlan({ storeData, categories, products })
   const activeProducts = products.filter((product) => product.is_active)
-  const activeProductCount = activeProducts.length
+  const initialProduct = activeProducts.find((product) => product.images.length === 0)
+    ?? activeProducts[0]
+    ?? null
 
   if (plan.isPublished) {
     const [analytics, attribution, commercialAccess] = await Promise.all([
@@ -23,7 +26,12 @@ export default async function AdminPage() {
       getStoreAttribution(storeData.store.id),
       getStoreCommercialAccess(storeData.store.id),
     ])
-    return <StoreDashboard plan={plan} storeName={storeData.store.name} analytics={analytics} attribution={attribution} commercialPlan={commercialAccess.planCode} />
+    return (
+      <>
+        <StoreDashboard plan={plan} storeName={storeData.store.name} analytics={analytics} attribution={attribution} commercialPlan={commercialAccess.planCode} />
+        <AdminIntroTour storeId={storeData.store.id} storeName={storeData.store.name} />
+      </>
+    )
   }
 
   return (
@@ -32,8 +40,7 @@ export default async function AdminPage() {
         steps={buildActivationFlowSteps(plan)}
         plan={plan}
         storeData={storeData}
-        categories={categories}
-        activeProductCount={activeProductCount}
+        initialProduct={initialProduct}
       />
     </div>
   )
