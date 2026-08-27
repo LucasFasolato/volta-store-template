@@ -29,19 +29,22 @@ export default async function AdminPage() {
     return (
       <>
         <StoreDashboard plan={plan} storeName={storeData.store.name} analytics={analytics} attribution={attribution} commercialPlan={commercialAccess.planCode} />
-        <AdminIntroTour storeId={storeData.store.id} storeName={storeData.store.name} />
+        <AdminIntroTour storeId={storeData.store.id} storeName={storeData.store.name} isPublished />
       </>
     )
   }
 
   return (
-    <div className="p-3.5 sm:p-5 lg:p-6">
-      <ActivationWizard
-        steps={buildActivationFlowSteps(plan)}
-        plan={plan}
-        storeData={storeData}
-        initialProduct={initialProduct}
-      />
-    </div>
+    <>
+      <div className="p-3.5 sm:p-5 lg:p-6">
+        <ActivationWizard
+          steps={buildActivationFlowSteps(plan)}
+          plan={plan}
+          storeData={storeData}
+          initialProduct={initialProduct}
+        />
+      </div>
+      <AdminIntroTour storeId={storeData.store.id} storeName={storeData.store.name} isPublished={false} />
+    </>
   )
 }
