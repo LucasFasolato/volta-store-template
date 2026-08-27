@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Building2, ImageIcon, Package, Rocket } from 'lucide-react'
 import type { ActivationFlowStep, StoreLaunchPlan } from '@/lib/dashboard/store-launch'
-import type { AdminStoreData, Category } from '@/types/store'
+import type { AdminStoreData, ProductWithImages } from '@/types/store'
 import { WizardStepBusiness } from './wizard/WizardStepBusiness'
 import { WizardStepHero } from './wizard/WizardStepHero'
 import { WizardStepProduct } from './wizard/WizardStepProduct'
@@ -13,14 +13,12 @@ export function ActivationWizard({
   steps,
   plan,
   storeData,
-  categories,
-  activeProductCount,
+  initialProduct,
 }: {
   steps: ActivationFlowStep[]
   plan: StoreLaunchPlan
   storeData: AdminStoreData
-  categories: Category[]
-  activeProductCount: number
+  initialProduct: ProductWithImages | null
 }) {
   const titleRef = useRef<HTMLHeadingElement>(null)
   const businessDone = steps.find((step) => step.id === 'contact')?.status === 'done'
@@ -35,22 +33,28 @@ export function ActivationWizard({
     { id: 'publish', label: 'Publicar', icon: Rocket, done: false },
   ] as const
 
-  const firstPending = flow.findIndex((item) => !item.done)
-  const activeIndex = firstPending === -1 ? flow.length - 1 : firstPending
+  const initialPendingIndex = flow.findIndex((item) => !item.done)
+  const [activeIndex, setActiveIndex] = useState(
+    initialPendingIndex === -1 ? flow.length - 1 : initialPendingIndex,
+  )
   const active = flow[activeIndex]
   const ActiveIcon = active.icon
   const titles = [
-    'Confirmá los datos de tu negocio',
-    'Elegí la imagen principal',
-    'Agregá tu primer producto',
-    'Dale un estilo y publicá tu tienda',
+    'Confirmá lo básico de tu negocio',
+    'Elegí la portada de tu tienda',
+    'Creá tu primer producto',
+    'Elegí el estilo y publicá',
   ]
   const descriptions = [
-    'Sólo necesitamos lo esencial para que el pedido llegue a la persona correcta.',
-    'Una portada clara hace que el negocio se entienda en segundos.',
-    'Con un producto completo ya tenés algo concreto para mostrar y vender.',
-    'Elegí una base visual. Después VOLTA publica y te ayuda a compartir el primer link.',
+    'Nombre, enlace y WhatsApp. Sólo lo necesario para que la tienda funcione bien desde el inicio.',
+    'La portada es la imagen grande que presenta tu negocio cuando alguien entra. No es la foto de un producto.',
+    'Ahora sí: cargá un producto real con nombre, precio y su propia foto.',
+    'Elegí una base visual, revisá la tienda y dejá el link listo para compartir.',
   ]
+
+  function goNext() {
+    setActiveIndex((current) => Math.min(current + 1, flow.length - 1))
+  }
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -66,12 +70,15 @@ export function ActivationWizard({
             <p className="mt-1 text-sm font-semibold text-foreground">Paso {activeIndex + 1} de {flow.length}</p>
           </div>
           <div className="flex items-center gap-1.5" aria-label={`Paso ${activeIndex + 1} de ${flow.length}`}>
-            {flow.map((item, index) => (
-              <span
-                key={item.id}
-                className={`h-2 rounded-full transition-all ${index === activeIndex ? 'w-8 bg-[#12e89a]' : item.done ? 'w-3 bg-[#12e89a]' : 'w-3 bg-slate-200 dark:bg-white/15'}`}
-              />
-            ))}
+            {flow.map((item, index) => {
+              const visuallyDone = item.done || index < activeIndex
+              return (
+                <span
+                  key={item.id}
+                  className={`h-2 rounded-full transition-all ${index === activeIndex ? 'w-8 bg-[#12e89a]' : visuallyDone ? 'w-3 bg-[#12e89a]' : 'w-3 bg-slate-200 dark:bg-white/15'}`}
+                />
+              )
+            })}
           </div>
         </div>
         <div className="mt-3 grid grid-cols-4 gap-2 text-center text-[10px] font-medium text-muted-foreground">
@@ -90,9 +97,13 @@ export function ActivationWizard({
           </div>
         </div>
 
-        {activeIndex === 0 ? <WizardStepBusiness store={storeData.store} /> : null}
-        {activeIndex === 1 ? <WizardStepHero content={storeData.content} /> : null}
-        {activeIndex === 2 ? <WizardStepProduct categories={categories} activeProductCount={activeProductCount} /> : null}
+        <div className="mb-5 rounded-[11px] border border-emerald-200/80 bg-emerald-50/70 px-3.5 py-3 text-xs leading-5 text-emerald-800 dark:border-emerald-400/15 dark:bg-emerald-400/7 dark:text-emerald-100">
+          Nada avanza solo: completás, revisás y tocás <strong>Continuar</strong> cuando estés listo.
+        </div>
+
+        {activeIndex === 0 ? <WizardStepBusiness store={storeData.store} onContinue={goNext} /> : null}
+        {activeIndex === 1 ? <WizardStepHero content={storeData.content} onContinue={goNext} /> : null}
+        {activeIndex === 2 ? <WizardStepProduct initialProduct={initialProduct} onContinue={goNext} /> : null}
         {activeIndex === 3 ? (
           <WizardStepStyle
             previewPath={plan.previewPath}
