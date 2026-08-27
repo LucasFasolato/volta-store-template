@@ -53,14 +53,14 @@ export function WizardStepHero({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <ImageUpload
         currentUrl={heroImageUrl}
         onUpload={handleUpload}
         fieldName="hero"
         aspectHint="16:9"
         label="Elegir portada"
-        variant="compact"
+        variant="activation"
         showQualityHint={false}
       />
 
@@ -70,7 +70,7 @@ export function WizardStepHero({
         type="button"
         onClick={handleContinue}
         disabled={isPending || !heroImageUrl}
-        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[11px] bg-[#12e89a] px-6 text-sm font-semibold text-[#062117] transition hover:brightness-105 disabled:opacity-45"
+        className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[13px] bg-[#12e89a] px-6 text-sm font-semibold text-[#062117] shadow-[0_12px_28px_rgba(18,232,154,.18)] transition hover:brightness-105 disabled:shadow-none disabled:opacity-45"
       >
         {isPending ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
         {isPending ? 'Guardando…' : 'Continuar'}
