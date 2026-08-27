@@ -110,7 +110,7 @@ export function ImageUpload({
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/*"
         onChange={handleFileChange}
         className="hidden"
         aria-label={label}
@@ -168,7 +168,7 @@ export function ImageUpload({
                 {isUploading ? 'Preparando imagen…' : label}
               </p>
               <p className="mt-1 text-xs leading-5 text-neutral-400">
-                JPG, PNG o WebP · original hasta 20 MB
+                JPG, PNG, WebP o HEIC · original hasta 20 MB
                 {requiredMinWidth !== null ? ` · mínimo ${requiredMinWidth}px` : ''}
                 {suggestedWidth ? ` · recomendado ${suggestedWidth}px o más` : ''}
                 {aspectHint ? ` · sugerido ${aspectHint}` : ''}
