@@ -84,19 +84,19 @@ export function WizardStepBusiness({
   const slugOk = slugState === 'current' || slugState === 'available'
 
   return (
-    <div className="space-y-3.5">
+    <div className="space-y-4">
       <label className="block text-xs font-medium text-foreground">
         Nombre
-        <input value={name} onChange={(event) => setName(event.target.value)} maxLength={80} placeholder="Casa Olivia" className="mt-1.5 h-11 w-full rounded-[10px] border border-black/9 bg-white px-3 text-sm outline-none transition focus:border-emerald-400 dark:border-white/10 dark:bg-white/5" />
+        <input value={name} onChange={(event) => setName(event.target.value)} maxLength={80} placeholder="Casa Olivia" className="mt-2 h-12 w-full rounded-[12px] border border-black/9 bg-white px-3.5 text-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10 dark:border-white/10 dark:bg-white/5" />
       </label>
 
       <label className="block text-xs font-medium text-foreground">
         Enlace
-        <div className="mt-1.5 flex h-11 items-center rounded-[10px] border border-black/9 bg-white px-3 focus-within:border-emerald-400 dark:border-white/10 dark:bg-white/5">
+        <div className="mt-2 flex h-12 items-center rounded-[12px] border border-black/9 bg-white px-3.5 transition focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-400/10 dark:border-white/10 dark:bg-white/5">
           <span className="shrink-0 text-[11px] text-muted-foreground">voltastore.app/tienda/</span>
           <input value={slug} onChange={(event) => setSlug(event.target.value)} onBlur={() => setSlug(normalizedSlug)} maxLength={48} spellCheck={false} className="min-w-0 flex-1 bg-transparent pl-0.5 font-mono text-xs text-foreground outline-none" />
         </div>
-        <span className={`mt-1 flex items-center gap-1.5 text-[11px] ${slugState === 'unavailable' ? 'text-amber-600 dark:text-amber-300' : 'text-muted-foreground'}`}>
+        <span className={`mt-1.5 flex items-center gap-1.5 text-[11px] ${slugState === 'unavailable' ? 'text-amber-600 dark:text-amber-300' : 'text-muted-foreground'}`}>
           {slugState === 'checking' ? <Loader2 className="size-3 animate-spin" /> : slugOk ? <CheckCircle2 className="size-3 text-emerald-500" /> : <TriangleAlert className="size-3" />}
           {slugMessage}
         </span>
@@ -104,12 +104,12 @@ export function WizardStepBusiness({
 
       <label className="block text-xs font-medium text-foreground">
         WhatsApp
-        <input value={whatsapp} onChange={(event) => setWhatsapp(event.target.value)} inputMode="tel" autoComplete="tel" placeholder="+54 9 341 123 4567" className="mt-1.5 h-11 w-full rounded-[10px] border border-black/9 bg-white px-3 font-mono text-sm outline-none transition focus:border-emerald-400 dark:border-white/10 dark:bg-white/5" />
+        <input value={whatsapp} onChange={(event) => setWhatsapp(event.target.value)} inputMode="tel" autoComplete="tel" placeholder="+54 9 341 123 4567" className="mt-2 h-12 w-full rounded-[12px] border border-black/9 bg-white px-3.5 font-mono text-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10 dark:border-white/10 dark:bg-white/5" />
       </label>
 
-      {error ? <p role="alert" className="rounded-[10px] border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">{error}</p> : null}
+      {error ? <p role="alert" className="rounded-[11px] border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">{error}</p> : null}
 
-      <button type="button" onClick={save} disabled={pending || slugState === 'checking'} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[11px] bg-[#12e89a] px-6 text-sm font-semibold text-[#062117] transition hover:brightness-105 disabled:opacity-50">
+      <button type="button" onClick={save} disabled={pending || slugState === 'checking'} className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[13px] bg-[#12e89a] px-6 text-sm font-semibold text-[#062117] shadow-[0_12px_28px_rgba(18,232,154,.18)] transition hover:brightness-105 disabled:shadow-none disabled:opacity-50">
         {pending ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
         {pending ? 'Guardando…' : 'Continuar'}
       </button>
