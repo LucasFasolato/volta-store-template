@@ -8,7 +8,13 @@ import { checkStoreSlugAvailability, updateStoreConfig } from '@/lib/actions/sto
 import { slugify } from '@/lib/utils/format'
 import type { Store as StoreType } from '@/types/store'
 
-export function WizardStepBusiness({ store }: { store: StoreType }) {
+export function WizardStepBusiness({
+  store,
+  onContinue,
+}: {
+  store: StoreType
+  onContinue: () => void
+}) {
   const router = useRouter()
   const [name, setName] = useState(store.name)
   const [slug, setSlug] = useState(store.slug)
@@ -82,7 +88,8 @@ export function WizardStepBusiness({ store }: { store: StoreType }) {
         return
       }
 
-      toast.success('Negocio listo. Seguimos con tu tienda.')
+      toast.success('Datos guardados.')
+      onContinue()
       router.refresh()
     })
   }
