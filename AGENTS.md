@@ -43,6 +43,17 @@ Use the smallest verification set that establishes real confidence. Relevant che
 
 A visual change is not fully verified only because it compiles. `SHIPPED` means integrated and, when production applies, deployed and verified.
 
+### Vercel deployment budget — mandatory
+
+Follow `volta-os/governance/SHIPPING-PROTOCOL.md`.
+
+- **One requirement/work item = one production deployment from `main`.** The automatic Git deployment created by the final merge/push is the release deployment for that requirement.
+- Preview deployments are scarce: target **0**, normally use **at most 1** only when remote/render verification is genuinely required; a second preview is reserved for a material fix discovered in the first.
+- Never use Vercel Preview as the normal feedback loop. Run local/repository quality checks first and push a coherent near-final branch state.
+- Avoid incremental remote commits, dummy commits, throwaway branches and repeated manual redeploys. Batch multi-file agent/API changes into a coherent commit when practical.
+- A docs-only or non-runtime change should not intentionally consume a preview.
+- If Vercel is rate-limited, record the blocker and stop retrying until capacity returns; do not burn quota trying to bypass the provider limit.
+
 Update `docs/CURRENT_STATE.md` after a material state change. Leave `docs/HANDOFF.md` only when continuation context is actually needed.
 
 ## Legacy documentation
