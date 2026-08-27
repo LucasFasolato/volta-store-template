@@ -84,24 +84,24 @@ export function WizardStepProduct({
   }
 
   return (
-    <div className="space-y-3.5">
+    <div className="space-y-4">
       {!productId ? (
         <>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3.5 sm:grid-cols-2">
             <div>
-              <Label className="mb-1.5 block text-xs font-medium text-foreground">Nombre</Label>
-              <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Remera básica" disabled={isPending} className="h-11 rounded-[10px] bg-white dark:bg-white/5" />
+              <Label className="mb-2 block text-xs font-medium text-foreground">Nombre</Label>
+              <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Remera básica" disabled={isPending} className="h-12 rounded-[12px] bg-white dark:bg-white/5" />
             </div>
             <div>
-              <Label className="mb-1.5 block text-xs font-medium text-foreground">Precio</Label>
+              <Label className="mb-2 block text-xs font-medium text-foreground">Precio</Label>
               <div className="relative">
                 <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                <Input inputMode="decimal" value={price} onChange={(event) => setPrice(formatPriceTypingValue(event.target.value))} placeholder="25.000" disabled={isPending} className="h-11 rounded-[10px] bg-white pl-8 dark:bg-white/5" />
+                <Input inputMode="decimal" value={price} onChange={(event) => setPrice(formatPriceTypingValue(event.target.value))} placeholder="25.000" disabled={isPending} className="h-12 rounded-[12px] bg-white pl-8 dark:bg-white/5" />
               </div>
             </div>
           </div>
 
-          <button type="button" onClick={handleCreate} disabled={isPending || !canCreate} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[11px] bg-[#12e89a] px-6 text-sm font-semibold text-[#062117] transition hover:brightness-105 disabled:opacity-45">
+          <button type="button" onClick={handleCreate} disabled={isPending || !canCreate} className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[13px] bg-[#12e89a] px-6 text-sm font-semibold text-[#062117] shadow-[0_12px_28px_rgba(18,232,154,.18)] transition hover:brightness-105 disabled:shadow-none disabled:opacity-45">
             {isPending ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
             {isPending ? 'Creando…' : 'Crear producto'}
           </button>
@@ -115,11 +115,11 @@ export function WizardStepProduct({
             aspectHint="4:5"
             label="Elegir foto del producto"
             optimizationProfile="product"
-            variant="compact"
+            variant="activation"
             showQualityHint={false}
           />
 
-          <button type="button" onClick={handleContinue} disabled={!productReady} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[11px] bg-[#12e89a] px-6 text-sm font-semibold text-[#062117] transition hover:brightness-105 disabled:opacity-45">
+          <button type="button" onClick={handleContinue} disabled={!productReady} className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[13px] bg-[#12e89a] px-6 text-sm font-semibold text-[#062117] shadow-[0_12px_28px_rgba(18,232,154,.18)] transition hover:brightness-105 disabled:shadow-none disabled:opacity-45">
             <CheckCircle2 className="size-4" />
             Continuar
           </button>
