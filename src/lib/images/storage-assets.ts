@@ -10,11 +10,40 @@ export const OPTIMIZED_IMAGE_LIMITS = {
 } as const
 
 export type ServerImageProfile = keyof typeof OPTIMIZED_IMAGE_LIMITS
+export type OptimizedImageMime = 'image/jpeg' | 'image/png' | 'image/webp'
 
-function isWebpHeader(bytes: Uint8Array) {
-  if (bytes.length < 12) return false
+const IMAGE_EXTENSION_BY_MIME: Record<OptimizedImageMime, 'jpg' | 'png' | 'webp'> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+}
 
-  return (
+function detectImageMime(bytes: Uint8Array): OptimizedImageMime | null {
+  if (
+    bytes.length >= 3 &&
+    bytes[0] === 0xff &&
+    bytes[1] === 0xd8 &&
+    bytes[2] === 0xff
+  ) {
+    return 'image/jpeg'
+  }
+
+  if (
+    bytes.length >= 8 &&
+    bytes[0] === 0x89 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x4e &&
+    bytes[3] === 0x47 &&
+    bytes[4] === 0x0d &&
+    bytes[5] === 0x0a &&
+    bytes[6] === 0x1a &&
+    bytes[7] === 0x0a
+  ) {
+    return 'image/png'
+  }
+
+  if (
+    bytes.length >= 12 &&
     bytes[0] === 0x52 &&
     bytes[1] === 0x49 &&
     bytes[2] === 0x46 &&
@@ -23,26 +52,57 @@ function isWebpHeader(bytes: Uint8Array) {
     bytes[9] === 0x45 &&
     bytes[10] === 0x42 &&
     bytes[11] === 0x50
-  )
-}
-
-export async function validateOptimizedWebp(file: File, profile: ServerImageProfile) {
-  if (!file || file.size <= 0) return 'No recibimos una imagen válida.'
-
-  if (file.type !== 'image/webp') {
-    return 'La imagen no llegó optimizada. Volvé a seleccionarla desde VOLTA.'
-  }
-
-  if (file.size > OPTIMIZED_IMAGE_LIMITS[profile]) {
-    return 'La imagen optimizada sigue siendo demasiado pesada. Probá con otra foto.'
-  }
-
-  const header = new Uint8Array(await file.slice(0, 12).arrayBuffer())
-  if (!isWebpHeader(header)) {
-    return 'El archivo no es una imagen WebP válida.'
+  ) {
+    return 'image/webp'
   }
 
   return null
+}
+
+export async function getOptimizedImageMetadata(file: File, profile: ServerImageProfile) {
+  if (!file || file.size <= 0) {
+    return {
+      error: 'No recibimos una imagen válida.',
+      contentType: null,
+      extension: null,
+    }
+  }
+
+  if (file.size > OPTIMIZED_IMAGE_LIMITS[profile]) {
+    return {
+      error: 'La imagen optimizada sigue siendo demasiado pesada. Probá con otra foto.',
+      contentType: null,
+      extension: null,
+    }
+  }
+
+  const header = new Uint8Array(await file.slice(0, 12).arrayBuffer())
+  const contentType = detectImageMime(header)
+
+  if (!contentType) {
+    return {
+      error: 'No pudimos validar esa imagen. Volvé a seleccionarla e intentá nuevamente.',
+      contentType: null,
+      extension: null,
+    }
+  }
+
+  return {
+    error: null,
+    contentType,
+    extension: IMAGE_EXTENSION_BY_MIME[contentType],
+  }
+}
+
+/**
+ * Backward-compatible validator kept while older upload actions migrate.
+ * The browser may legitimately fall back to JPEG/PNG when WebP canvas encoding
+ * is unavailable (notably some Safari/iOS versions), so validation is based on
+ * the real file signature instead of trusting the declared MIME type.
+ */
+export async function validateOptimizedWebp(file: File, profile: ServerImageProfile) {
+  const metadata = await getOptimizedImageMetadata(file, profile)
+  return metadata.error
 }
 
 export function storagePathFromPublicUrl(publicUrl: string | null | undefined) {
