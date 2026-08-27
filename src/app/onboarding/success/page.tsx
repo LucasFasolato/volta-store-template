@@ -5,8 +5,8 @@ import { needsOnboarding } from '@/lib/actions/onboarding'
 import { requireAuthenticatedUser } from '@/lib/server/store-context'
 
 export const metadata: Metadata = {
-  title: 'Tu tienda ya existe - Volta Store',
-  description: 'VOLTA está preparando tu tienda para entrar al panel.',
+  title: 'Estamos creando tu tienda - Volta Store',
+  description: 'VOLTA está preparando tu tienda para guiarte paso a paso.',
 }
 
 export default async function OnboardingSuccessPage() {
