@@ -24,6 +24,8 @@ type ImageUploadProps = {
   optimizationProfile?: ImageUploadProfile
   minWidth?: number
   recommendedWidth?: number
+  variant?: 'default' | 'compact'
+  showQualityHint?: boolean
 }
 
 export function ImageUpload({
@@ -36,6 +38,8 @@ export function ImageUpload({
   optimizationProfile,
   minWidth,
   recommendedWidth,
+  variant = 'default',
+  showQualityHint,
 }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -49,6 +53,7 @@ export function ImageUpload({
   const guidance = IMAGE_WIDTH_GUIDANCE[profile]
   const requiredMinWidth = minWidth ?? guidance.minimum
   const suggestedWidth = recommendedWidth ?? guidance.recommended
+  const shouldShowQualityHint = showQualityHint ?? variant === 'default'
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const sourceFile = event.target.files?.[0]
@@ -106,7 +111,7 @@ export function ImageUpload({
   }
 
   return (
-    <div className={cn('space-y-3', className)} data-appearance-no-dirty="true">
+    <div className={cn('space-y-2', className)} data-appearance-no-dirty="true">
       <input
         ref={inputRef}
         type="file"
@@ -118,7 +123,57 @@ export function ImageUpload({
         data-volta-image-profile={profile}
       />
 
-      {displayUrl ? (
+      {variant === 'compact' ? (
+        displayUrl ? (
+          <div className="flex items-center gap-3 rounded-[12px] border border-black/8 bg-slate-50 p-2.5 dark:border-white/10 dark:bg-white/[0.035]">
+            <div
+              className={cn(
+                'relative shrink-0 overflow-hidden rounded-[9px] bg-slate-200 dark:bg-white/8',
+                aspectHint === '16:9' ? 'h-[68px] w-[108px]' : 'h-[76px] w-[64px]',
+              )}
+            >
+              <Image src={displayUrl} alt="Vista previa de la imagen" fill className="object-cover" />
+              {isUploading ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/55 text-white">
+                  <Loader2 className="size-5 animate-spin" />
+                </div>
+              ) : null}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-foreground">Imagen lista</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Podés cambiarla si querés.</p>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => inputRef.current?.click()}
+              disabled={isUploading}
+              className="shrink-0"
+            >
+              <Upload className="mr-1.5 size-3.5" />
+              Cambiar
+            </Button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={isUploading}
+            className="flex min-h-[92px] w-full items-center gap-3 rounded-[12px] border border-dashed border-black/12 bg-slate-50 px-4 text-left transition hover:border-emerald-400/50 hover:bg-emerald-50/45 disabled:cursor-wait disabled:opacity-70 dark:border-white/12 dark:bg-white/[0.035] dark:hover:bg-emerald-400/[0.06]"
+          >
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-white text-slate-500 shadow-sm dark:bg-white/8 dark:text-white/70">
+              {isUploading ? <Loader2 className="size-5 animate-spin" /> : <ImageIcon className="size-5" />}
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-foreground">
+                {isUploading ? 'Subiendo…' : label}
+              </span>
+              <span className="mt-1 block text-xs text-muted-foreground">JPG, PNG, WebP o HEIC · hasta 20 MB</span>
+            </span>
+          </button>
+        )
+      ) : displayUrl ? (
         <div className="surface-panel-soft premium-ring group relative overflow-hidden rounded-xl">
           <div
             className={cn(
@@ -182,11 +237,11 @@ export function ImageUpload({
       )}
 
       {error ? (
-        <p role="alert" aria-live="polite" className="text-xs leading-5 text-red-300">
+        <p role="alert" aria-live="polite" className="text-xs leading-5 text-red-500 dark:text-red-300">
           {error}
         </p>
-      ) : qualityHint ? (
-        <p role="status" aria-live="polite" className="text-xs leading-5 text-amber-300">
+      ) : shouldShowQualityHint && qualityHint ? (
+        <p role="status" aria-live="polite" className="text-xs leading-5 text-amber-600 dark:text-amber-300">
           {qualityHint}
         </p>
       ) : null}
