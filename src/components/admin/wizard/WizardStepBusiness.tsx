@@ -11,7 +11,7 @@ export function WizardStepBusiness({
   onContinue,
 }: {
   store: StoreType
-  onContinue: () => void
+  onContinue: (identity: { name: string; slug: string }) => void
 }) {
   const [name, setName] = useState(store.name)
   const [slug, setSlug] = useState(store.slug)
@@ -50,14 +50,15 @@ export function WizardStepBusiness({
   function save() {
     setError(null)
     const nextSlug = normalizedSlug
+    const nextName = name.trim()
 
-    if (name.trim().length < 2) return setError('Escribí el nombre de tu negocio.')
+    if (nextName.length < 2) return setError('Escribí el nombre de tu negocio.')
     if (nextSlug.length < 3 || slugState === 'unavailable') return setError('Revisá el enlace antes de continuar.')
     if (whatsapp.trim().length < 8) return setError('Agregá el WhatsApp que va a recibir los pedidos.')
 
     startTransition(async () => {
       const result = await updateStoreConfig({
-        name: name.trim(),
+        name: nextName,
         slug: nextSlug,
         whatsapp: whatsapp.trim(),
         instagram: store.instagram ?? '',
@@ -76,7 +77,7 @@ export function WizardStepBusiness({
         return
       }
 
-      onContinue()
+      onContinue({ name: nextName, slug: nextSlug })
     })
   }
 
