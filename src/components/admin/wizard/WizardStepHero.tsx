@@ -13,8 +13,13 @@ export function WizardStepHero({ content }: { content: StoreContent }) {
 
   async function handleUpload(formData: FormData) {
     const result = await uploadHeroImage(formData)
-    if (result?.url) { setHeroImageUrl(result.url); setError(null) }
-    if (result?.error) setError(result.error)
+    if (result?.url) {
+      setHeroImageUrl(result.url)
+      setError(null)
+    }
+    // <ImageUpload /> already renders upload/validation failures next to the
+    // picker. Keep wizard-level errors for the Continue action to avoid showing
+    // the same failure twice on the first-run screen.
     return result
   }
 
