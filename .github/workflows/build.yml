@@ -27,6 +27,8 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Store Landing 2.1 contract
+        run: node scripts/verify-store-landing.mjs
       - name: Test
         run: npm test
       - name: Build

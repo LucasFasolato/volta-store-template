@@ -86,7 +86,7 @@ export function LandingAnalytics() {
               href="/login"
               data-saas-event="landing_primary_cta_click"
               data-saas-location="mobile_sticky"
-              className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full bg-[#12e89a] px-4 text-xs font-bold text-[#04251a]"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-full bg-[#12e89a] px-4 text-xs font-bold text-[#04251a]"
             >
               Empezar <ArrowRight className="size-3.5" />
             </Link>
