@@ -24,7 +24,7 @@ type ImageUploadProps = {
   optimizationProfile?: ImageUploadProfile
   minWidth?: number
   recommendedWidth?: number
-  variant?: 'default' | 'compact'
+  variant?: 'default' | 'compact' | 'activation'
   showQualityHint?: boolean
 }
 
@@ -123,7 +123,56 @@ export function ImageUpload({
         data-volta-image-profile={profile}
       />
 
-      {variant === 'compact' ? (
+      {variant === 'activation' ? (
+        displayUrl ? (
+          <div className="group relative overflow-hidden rounded-[18px] border border-black/8 bg-slate-100 shadow-[0_12px_34px_rgba(15,23,42,.06)] dark:border-white/10 dark:bg-white/[0.04]">
+            <div className={cn('relative w-full', aspectHint === '16:9' ? 'h-[190px]' : 'h-[210px]')}>
+              <Image
+                src={displayUrl}
+                alt="Vista previa de la imagen"
+                fill
+                className={aspectHint === '16:9' ? 'object-cover' : 'object-contain p-2'}
+              />
+            </div>
+
+            <div className="absolute bottom-3 right-3">
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={() => inputRef.current?.click()}
+                disabled={isUploading}
+                className="min-h-10 rounded-[10px] bg-white/94 px-3.5 text-slate-900 shadow-lg backdrop-blur hover:bg-white"
+              >
+                <Upload className="mr-1.5 size-3.5" />
+                Cambiar
+              </Button>
+            </div>
+
+            {isUploading ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-950/60 text-white backdrop-blur-sm">
+                <Loader2 className="size-6 animate-spin" />
+                <span className="text-xs font-medium">Optimizando y subiendo…</span>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={isUploading}
+            className="group flex min-h-[172px] w-full flex-col items-center justify-center rounded-[18px] border border-dashed border-slate-300 bg-[linear-gradient(180deg,#fbfdfc,#f5faf8)] px-5 py-6 text-center shadow-[inset_0_1px_0_rgba(255,255,255,.9)] transition hover:border-emerald-400 hover:bg-emerald-50/70 disabled:cursor-wait disabled:opacity-70 dark:border-white/14 dark:bg-[linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.025))] dark:hover:bg-emerald-400/[0.07]"
+          >
+            <span className="flex size-13 items-center justify-center rounded-[15px] bg-white text-slate-600 shadow-[0_12px_30px_rgba(15,23,42,.08)] transition group-hover:-translate-y-0.5 group-hover:text-emerald-600 dark:bg-white/8 dark:text-white/75 dark:group-hover:text-[#12e89a]">
+              {isUploading ? <Loader2 className="size-6 animate-spin" /> : <ImageIcon className="size-6" />}
+            </span>
+            <span className="mt-4 block text-base font-semibold tracking-[-0.02em] text-foreground">
+              {isUploading ? 'Subiendo…' : label}
+            </span>
+            <span className="mt-1.5 block text-xs text-muted-foreground">JPG, PNG, WebP o HEIC · hasta 20 MB</span>
+          </button>
+        )
+      ) : variant === 'compact' ? (
         displayUrl ? (
           <div className="flex items-center gap-3 rounded-[12px] border border-black/8 bg-slate-50 p-2.5 dark:border-white/10 dark:bg-white/[0.035]">
             <div
