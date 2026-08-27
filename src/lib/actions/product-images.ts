@@ -3,11 +3,11 @@
 import { revalidatePath } from 'next/cache'
 import { getStoreCommercialAccess } from '@/lib/billing/commercial-access'
 import {
+  getOptimizedImageMetadata,
   MAX_PRODUCT_IMAGES,
   removeStoragePaths,
   STORE_ASSET_BUCKET,
   storagePathFromPublicUrl,
-  validateOptimizedWebp,
 } from '@/lib/images/storage-assets'
 import { requireAuthenticatedStoreContext } from '@/lib/server/store-context'
 
@@ -39,8 +39,10 @@ export async function uploadProductImageForPlan(productId: string, formData: For
   const ownership = await assertOwnedProduct(db, store.id, productId)
   if (ownership.error) return { error: ownership.error }
 
-  const validationError = await validateOptimizedWebp(imageFile, 'product')
-  if (validationError) return { error: validationError }
+  const imageMetadata = await getOptimizedImageMetadata(imageFile, 'product')
+  if (imageMetadata.error || !imageMetadata.contentType || !imageMetadata.extension) {
+    return { error: imageMetadata.error ?? 'No pudimos validar la imagen.' }
+  }
 
   const [{ data: existingImages, error: existingImagesError }, commercialAccess] = await Promise.all([
     db
@@ -64,12 +66,12 @@ export async function uploadProductImageForPlan(productId: string, formData: For
     return { error: `Podés usar hasta ${MAX_PRODUCT_IMAGES} imágenes por producto.` }
   }
 
-  const path = `${user.id}/products/${productId}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.webp`
+  const path = `${user.id}/products/${productId}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${imageMetadata.extension}`
   const { error: uploadError } = await supabase.storage
     .from(STORE_ASSET_BUCKET)
     .upload(path, imageFile, {
       upsert: false,
-      contentType: 'image/webp',
+      contentType: imageMetadata.contentType,
       cacheControl: '31536000',
     })
   if (uploadError) return { error: uploadError.message }
