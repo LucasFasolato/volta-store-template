@@ -77,7 +77,6 @@ export function WizardStepProduct({
 
     setProductImageUrl(url)
     setError(null)
-    router.refresh()
     return { success: true, url }
   }
 
