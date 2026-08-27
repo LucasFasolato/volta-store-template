@@ -37,6 +37,8 @@ export function ActivationWizard({
   const [activeIndex, setActiveIndex] = useState(
     initialPendingIndex === -1 ? flow.length - 1 : initialPendingIndex,
   )
+  const [storeName, setStoreName] = useState(storeData.store.name)
+  const [publicUrl, setPublicUrl] = useState(plan.publicUrl)
   const active = flow[activeIndex]
   const ActiveIcon = active.icon
   const titles = ['Datos del negocio', 'Portada', 'Primer producto', 'Publicar']
@@ -56,6 +58,13 @@ export function ActivationWizard({
     })
   }
 
+  function continueBusiness(identity: { name: string; slug: string }) {
+    setStoreName(identity.name)
+    const baseUrl = plan.publicUrl.slice(0, Math.max(0, plan.publicUrl.lastIndexOf('/tienda/')))
+    setPublicUrl(`${baseUrl}/tienda/${identity.slug}`)
+    goNext()
+  }
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' })
     titleRef.current?.focus({ preventScroll: true })
@@ -73,10 +82,7 @@ export function ActivationWizard({
             {flow.map((item, index) => {
               const visuallyDone = item.done || index < activeIndex
               return (
-                <span
-                  key={item.id}
-                  className={`h-2 rounded-full transition-all ${index === activeIndex ? 'w-7 bg-[#12e89a]' : visuallyDone ? 'w-2.5 bg-[#12e89a]' : 'w-2.5 bg-slate-200 dark:bg-white/15'}`}
-                />
+                <span key={item.id} className={`h-2 rounded-full transition-all ${index === activeIndex ? 'w-7 bg-[#12e89a]' : visuallyDone ? 'w-2.5 bg-[#12e89a]' : 'w-2.5 bg-slate-200 dark:bg-white/15'}`} />
               )
             })}
           </div>
@@ -88,25 +94,18 @@ export function ActivationWizard({
 
       <div className="p-4 sm:p-5">
         <div className="mb-4 flex items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-slate-100 text-slate-700 dark:bg-white/7 dark:text-white">
-            <ActiveIcon className="size-4" />
-          </span>
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-slate-100 text-slate-700 dark:bg-white/7 dark:text-white"><ActiveIcon className="size-4" /></span>
           <div className="min-w-0">
             <h1 ref={titleRef} tabIndex={-1} className="text-[1.35rem] font-semibold tracking-[-0.045em] text-foreground outline-none">{titles[activeIndex]}</h1>
             {descriptions[activeIndex] ? <p className="mt-0.5 text-xs text-muted-foreground">{descriptions[activeIndex]}</p> : null}
           </div>
         </div>
 
-        {activeIndex === 0 ? <WizardStepBusiness store={storeData.store} onContinue={goNext} /> : null}
+        {activeIndex === 0 ? <WizardStepBusiness store={storeData.store} onContinue={continueBusiness} /> : null}
         {activeIndex === 1 ? <WizardStepHero content={storeData.content} onContinue={goNext} /> : null}
         {activeIndex === 2 ? <WizardStepProduct initialProduct={initialProduct} onContinue={goNext} /> : null}
         {activeIndex === 3 ? (
-          <WizardStepStyle
-            previewPath={plan.previewPath}
-            publicUrl={plan.publicUrl}
-            storeName={storeData.store.name}
-            hasExistingStyle={Boolean(styleDone)}
-          />
+          <WizardStepStyle previewPath={plan.previewPath} publicUrl={publicUrl} storeName={storeName} hasExistingStyle={Boolean(styleDone)} />
         ) : null}
       </div>
     </section>
