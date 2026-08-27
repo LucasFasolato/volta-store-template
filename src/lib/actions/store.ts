@@ -4,10 +4,10 @@ import { revalidatePath } from 'next/cache'
 import { normalizeThemeFontSelection } from '@/data/defaults'
 import { getPresetById } from '@/data/theme-presets'
 import {
+  getOptimizedImageMetadata,
   removeStoragePaths,
   STORE_ASSET_BUCKET,
   storagePathFromPublicUrl,
-  validateOptimizedWebp,
 } from '@/lib/images/storage-assets'
 import { requireAuthenticatedStoreContext } from '@/lib/server/store-context'
 import {
@@ -198,8 +198,10 @@ export async function uploadLogo(formData: FormData) {
   const file = formData.get('logo') as File | null
   if (!file) return { error: 'No file provided' }
 
-  const validationError = await validateOptimizedWebp(file, 'logo')
-  if (validationError) return { error: validationError }
+  const imageMetadata = await getOptimizedImageMetadata(file, 'logo')
+  if (imageMetadata.error || !imageMetadata.contentType || !imageMetadata.extension) {
+    return { error: imageMetadata.error ?? 'No pudimos validar la imagen.' }
+  }
 
   const { data: currentStore, error: currentStoreError } = await supabase
     .from('stores')
@@ -209,12 +211,12 @@ export async function uploadLogo(formData: FormData) {
 
   if (currentStoreError) return { error: currentStoreError.message }
 
-  const path = `${user.id}/logo.webp`
+  const path = `${user.id}/logo.${imageMetadata.extension}`
   const { error: uploadError } = await supabase.storage
     .from(STORE_ASSET_BUCKET)
     .upload(path, file, {
       upsert: true,
-      contentType: 'image/webp',
+      contentType: imageMetadata.contentType,
       cacheControl: '31536000',
     })
 
@@ -248,8 +250,10 @@ export async function uploadHeroImage(formData: FormData) {
   const file = formData.get('hero') as File | null
   if (!file) return { error: 'No file provided' }
 
-  const validationError = await validateOptimizedWebp(file, 'hero')
-  if (validationError) return { error: validationError }
+  const imageMetadata = await getOptimizedImageMetadata(file, 'hero')
+  if (imageMetadata.error || !imageMetadata.contentType || !imageMetadata.extension) {
+    return { error: imageMetadata.error ?? 'No pudimos validar la imagen.' }
+  }
 
   const { data: currentContent, error: currentContentError } = await supabase
     .from('store_content')
@@ -259,12 +263,12 @@ export async function uploadHeroImage(formData: FormData) {
 
   if (currentContentError) return { error: currentContentError.message }
 
-  const path = `${user.id}/hero.webp`
+  const path = `${user.id}/hero.${imageMetadata.extension}`
   const { error: uploadError } = await supabase.storage
     .from(STORE_ASSET_BUCKET)
     .upload(path, file, {
       upsert: true,
-      contentType: 'image/webp',
+      contentType: imageMetadata.contentType,
       cacheControl: '31536000',
     })
 
