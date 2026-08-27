@@ -71,33 +71,33 @@ export function ActivationWizard({
   }, [activeIndex])
 
   return (
-    <section className="mx-auto max-w-xl overflow-hidden rounded-[18px] border border-black/8 bg-white shadow-[0_14px_42px_rgba(15,23,42,.045)] dark:border-white/10 dark:bg-[#111820] dark:shadow-none">
-      <div className="border-b border-black/7 bg-slate-50/75 px-4 py-3.5 dark:border-white/8 dark:bg-white/[0.025] sm:px-5">
+    <section className="mx-auto max-w-2xl overflow-hidden rounded-[24px] border border-black/8 bg-white shadow-[0_22px_70px_rgba(15,23,42,.07)] dark:border-white/10 dark:bg-[#111820] dark:shadow-none">
+      <div className="border-b border-black/7 bg-slate-50/80 px-5 py-4 dark:border-white/8 dark:bg-white/[0.025] sm:px-6 sm:py-5">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-emerald-600 dark:text-[#12e89a]">Activación VOLTA</p>
-            <p className="mt-0.5 text-sm font-semibold text-foreground">Paso {activeIndex + 1} de {flow.length}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.17em] text-emerald-600 dark:text-[#12e89a]">Activación VOLTA</p>
+            <p className="mt-1 text-[15px] font-semibold text-foreground">Paso {activeIndex + 1} de {flow.length}</p>
           </div>
           <div className="flex items-center gap-1.5" aria-label={`Paso ${activeIndex + 1} de ${flow.length}`}>
             {flow.map((item, index) => {
               const visuallyDone = item.done || index < activeIndex
               return (
-                <span key={item.id} className={`h-2 rounded-full transition-all ${index === activeIndex ? 'w-7 bg-[#12e89a]' : visuallyDone ? 'w-2.5 bg-[#12e89a]' : 'w-2.5 bg-slate-200 dark:bg-white/15'}`} />
+                <span key={item.id} className={`h-2 rounded-full transition-all ${index === activeIndex ? 'w-8 bg-[#12e89a]' : visuallyDone ? 'w-3 bg-[#12e89a]' : 'w-3 bg-slate-200 dark:bg-white/15'}`} />
               )
             })}
           </div>
         </div>
-        <div className="mt-2.5 grid grid-cols-4 gap-1 text-center text-[10px] font-medium text-muted-foreground">
+        <div className="mt-3 grid grid-cols-4 gap-1 text-center text-[11px] font-medium text-muted-foreground">
           {flow.map((item, index) => <span key={item.id} className={index === activeIndex ? 'text-foreground' : ''}>{item.label}</span>)}
         </div>
       </div>
 
-      <div className="p-4 sm:p-5">
-        <div className="mb-4 flex items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-slate-100 text-slate-700 dark:bg-white/7 dark:text-white"><ActiveIcon className="size-4" /></span>
+      <div className="p-5 sm:p-6">
+        <div className="mb-5 flex items-center gap-3.5">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-[13px] bg-slate-100 text-slate-700 shadow-[inset_0_0_0_1px_rgba(15,23,42,.02)] dark:bg-white/7 dark:text-white"><ActiveIcon className="size-5" /></span>
           <div className="min-w-0">
-            <h1 ref={titleRef} tabIndex={-1} className="text-[1.35rem] font-semibold tracking-[-0.045em] text-foreground outline-none">{titles[activeIndex]}</h1>
-            {descriptions[activeIndex] ? <p className="mt-0.5 text-xs text-muted-foreground">{descriptions[activeIndex]}</p> : null}
+            <h1 ref={titleRef} tabIndex={-1} className="text-[1.55rem] font-semibold leading-[1.05] tracking-[-0.05em] text-foreground outline-none">{titles[activeIndex]}</h1>
+            {descriptions[activeIndex] ? <p className="mt-1 text-sm text-muted-foreground">{descriptions[activeIndex]}</p> : null}
           </div>
         </div>
 
