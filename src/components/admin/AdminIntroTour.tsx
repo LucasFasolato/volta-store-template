@@ -1,15 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Eye, LayoutDashboard, Package, Palette, Sparkles, X } from 'lucide-react'
 
 export function AdminIntroTour({
   storeId,
   storeName,
+  isPublished,
 }: {
   storeId: string
   storeName: string
+  isPublished: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [stepIndex, setStepIndex] = useState(0)
@@ -18,11 +20,15 @@ export function AdminIntroTour({
   const steps = [
     {
       id: 'home',
-      eyebrow: 'Tu panel',
-      title: `Acá manejás ${storeName}`,
-      description: 'Inicio te muestra lo importante de la tienda y te deja el link listo para compartir cuando lo necesites.',
+      eyebrow: isPublished ? 'Tu panel' : 'Tu primer recorrido',
+      title: isPublished ? `Acá manejás ${storeName}` : 'Primero dejamos tu tienda lista',
+      description: isPublished
+        ? 'Inicio te muestra lo importante de la tienda y te deja el link listo para compartir cuando lo necesites.'
+        : 'VOLTA te guía con 4 pasos simples. Cuando publiques, Inicio se convierte en tu panel para manejar todo desde un solo lugar.',
       icon: LayoutDashboard,
-      items: ['Estado de la tienda', 'Visitas y actividad', 'Link para compartir'],
+      items: isPublished
+        ? ['Estado de la tienda', 'Visitas y actividad', 'Link para compartir']
+        : ['Datos del negocio', 'Portada clara', 'Primer producto'],
     },
     {
       id: 'products',
@@ -54,6 +60,15 @@ export function AdminIntroTour({
   const StepIcon = step.icon
   const isLast = stepIndex === steps.length - 1
 
+  const finish = useCallback(() => {
+    try {
+      window.localStorage.setItem(storageKey, 'done')
+    } catch {
+      // The tour can still close even when localStorage is blocked.
+    }
+    setOpen(false)
+  }, [storageKey])
+
   useEffect(() => {
     try {
       if (window.localStorage.getItem(storageKey) === 'done') return
@@ -80,16 +95,7 @@ export function AdminIntroTour({
       document.body.style.overflow = previousOverflow
       window.removeEventListener('keydown', onKeyDown)
     }
-  }, [open])
-
-  function finish() {
-    try {
-      window.localStorage.setItem(storageKey, 'done')
-    } catch {
-      // The tour can still close even when localStorage is blocked.
-    }
-    setOpen(false)
-  }
+  }, [finish, open])
 
   function next() {
     if (isLast) {
