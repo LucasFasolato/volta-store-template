@@ -3,13 +3,13 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Check } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 
 export function OnboardingSuccessTransition() {
   const router = useRouter()
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => router.replace('/admin'), 1650)
+    const timeout = window.setTimeout(() => router.replace('/admin'), 1750)
     return () => window.clearTimeout(timeout)
   }, [router])
 
@@ -22,12 +22,14 @@ export function OnboardingSuccessTransition() {
           transition={{ duration: .32, ease: [0.22, 1, 0.36, 1] }}
           className="mx-auto flex size-12 items-center justify-center rounded-full bg-[#12e89a] text-[#062117] shadow-[0_14px_36px_rgba(18,232,154,.2)]"
         >
-          <Check className="size-5" strokeWidth={2.4} />
+          <motion.div animate={{ rotate: [0, 8, -6, 0] }} transition={{ duration: 1.2, repeat: Infinity, repeatDelay: .25 }}>
+            <Sparkles className="size-5" strokeWidth={2.2} />
+          </motion.div>
         </motion.div>
 
         <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: .12, duration: .3 }}>
-          <h1 className="mt-5 text-[2rem] font-semibold tracking-[-0.055em] text-slate-950 sm:text-[2.45rem]">Tu tienda ya existe</h1>
-          <p className="mt-2 text-sm text-slate-500">Preparando tu espacio para empezar a vender.</p>
+          <h1 className="mt-5 text-[2rem] font-semibold tracking-[-0.055em] text-slate-950 sm:text-[2.45rem]">Estamos creando tu tienda</h1>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">Preparamos tu espacio y enseguida te guiamos, paso a paso, para dejarlo listo para compartir.</p>
         </motion.div>
 
         <motion.div initial={{ y: 18, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: .22, duration: .38 }} className="mx-auto mt-8 max-w-sm overflow-hidden rounded-[18px] border border-black/8 bg-white p-3 shadow-[0_18px_50px_rgba(15,23,42,.08)]">
@@ -44,6 +46,8 @@ export function OnboardingSuccessTransition() {
             {[0, 1, 2].map((item) => <motion.div key={item} animate={{ opacity: [.45, .85, .45] }} transition={{ duration: 1.2, repeat: Infinity, delay: item * .1 }} className="aspect-[4/3] rounded-[10px] bg-slate-100" />)}
           </div>
         </motion.div>
+
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .45 }} className="mt-5 text-[11px] font-medium text-slate-400">Configurando tu panel…</motion.p>
       </div>
     </main>
   )
