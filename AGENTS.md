@@ -12,11 +12,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 1. Read `docs/CURRENT_STATE.md`.
 2. Read `docs/GUARDRAILS.md`.
-3. Read the active initiative/task relevant to the requested outcome.
-4. Read `docs/WEB-DESIGN-SYSTEM.md` before changing the public marketing landing or its visual language.
-5. Read relevant ADRs in `docs/decisions/` when the work touches a durable decision.
-6. Inspect the actual code and recent Git history; documentation is context, not a substitute for reality.
-7. Check `docs/HANDOFF.md`, open PRs and overlapping branches when concurrent work may exist.
+3. Read `docs/OPEN_QUESTIONS.md` before proposing or implementing new product scope, packaging, activation changes or evidence-led roadmap work.
+4. Read the active initiative/task relevant to the requested outcome.
+5. Read `docs/WEB-DESIGN-SYSTEM.md` before changing the public marketing landing or its visual language.
+6. Read relevant ADRs in `docs/decisions/` when the work touches a durable decision.
+7. Inspect the actual code and recent Git history; documentation is context, not a substitute for reality.
+8. Check `docs/HANDOFF.md`, open PRs and overlapping branches when concurrent work may exist.
 
 For global operating rules, authority, security and shipping conventions, use the `volta-os` repository. Essential product knowledge must remain portable and must not depend on Cursor, ChatGPT, Grok or another provider.
 
@@ -27,6 +28,14 @@ Agents may autonomously fix bugs, improve performance, accessibility, minor UX, 
 Human approval is required for material new product scope, foundational product/architecture changes, material recurring cost, destructive production operations, dangerous data migrations and major commercial-model changes unless an already-approved initiative explicitly authorizes them.
 
 A clear human response such as `dale`, `aprobado`, `excelente, hacelo`, `continuá`, `implementalo` or equivalent to a concrete proposal is approval to execute that proposal.
+
+### Open-question discipline
+
+- `BLOCKING`: do not silently choose an option or ship work whose product correctness depends on the unanswered question.
+- `OPEN`: continue only when the requested work is materially independent of the answer and keep the implementation reversible.
+- `ANSWERED`: follow the linked decision and do not reopen it without new evidence or explicit human direction.
+- Agent recommendations are analysis, not product decisions.
+- When human direction answers a durable question, update `docs/OPEN_QUESTIONS.md` and reconcile the relevant ADR, `PRODUCT`, `ROADMAP`, `GUARDRAILS` and active initiative.
 
 ## Development defaults
 
