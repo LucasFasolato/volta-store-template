@@ -2,8 +2,13 @@ product:
   id: store
   prefix: STORE
   name: VOLTA Store
-  lifecycle: production
-  os_version: "1.0"
+  entity_type: product
+  lifecycle: OPERATE
+  lifecycle_confidence: moderate
+  strategic_roles:
+    - COMMERCIAL_PRODUCT
+  investment_posture: INVEST
+  company_os_baseline: VOLTA Company OS v1
 
 repository:
   full_name: LucasFasolato/volta-store-template
@@ -11,6 +16,7 @@ repository:
   production_branch: main
 
 production:
+  status: production
   public_url: https://www.voltastore.app
   deployment: vercel
   data_platform: supabase
@@ -39,14 +45,29 @@ critical_flows:
   - billing
 
 operating:
+  product_definition: docs/PRODUCT.md
   current_state: docs/CURRENT_STATE.md
   roadmap: docs/ROADMAP.md
+  evidence: docs/EVIDENCE.md
   guardrails: docs/GUARDRAILS.md
   debt: docs/DEBT.md
   handoff: docs/HANDOFF.md
   decisions: docs/decisions
+  audits: docs/audits
+
+company_context:
+  canonical_repository: LucasFasolato/volta-foundation
+  canonical_documents_registry: registry/canonical-documents.yaml
+  canonical_portfolio_registry: registry/portfolio.yaml
+  product_os: VOLTA-PRD-001
+  delivery_os: VOLTA-DLV-001
+  engineering_os: VOLTA-ENG-001
+  security_standard: VOLTA-SEC-001
+  agent_os: VOLTA-AGT-001
+  visual_foundation: VOLTA-VIS-001
+  design_system: VOLTA-DSN-001
 
 security:
   secrets_in_git: false
-  destructive_production_requires_human_approval: true
+  destructive_production_requires_authorized_approval: true
   schema_changes_via_migrations: true
