@@ -1,12 +1,29 @@
 # VOLTA Store — Agent Entry Point
 
-This repository is operated under **VOLTA OS v1.0**.
+This repository operates under the **VOLTA Company OS v1**.
 
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
+
+## Canonical company context
+
+Company-level authority lives in `LucasFasolato/volta-foundation`.
+
+Start from the minimum relevant canonical source rather than copying global standards into this repository:
+
+- Company OS registry: `volta-foundation/registry/canonical-documents.yaml`
+- Portfolio truth: `volta-foundation/registry/portfolio.yaml`
+- Product: `VOLTA-PRD-001`
+- Delivery: `VOLTA-DLV-001`
+- Engineering: `VOLTA-ENG-001`
+- Security: `VOLTA-SEC-001`
+- Agent Operations: `VOLTA-AGT-001`
+- Visual Foundation / Design when UI is materially affected: `VOLTA-VIS-001` / `VOLTA-DSN-001`
+
+Do not depend on the superseded `volta-os` repository for current VOLTA policy.
 
 ## Before changing code
 
@@ -18,12 +35,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
 6. Read relevant ADRs in `docs/decisions/` when the work touches a durable decision.
 7. Inspect the actual code and recent Git history; documentation is context, not a substitute for reality.
 8. Check `docs/HANDOFF.md`, open PRs and overlapping branches when concurrent work may exist.
+9. Load deeper Company OS context only when scope, uncertainty or consequence requires it.
 
-For global operating rules, authority, security and shipping conventions, use the `volta-os` repository. Essential product knowledge must remain portable and must not depend on Cursor, ChatGPT, Grok or another provider.
+Essential product knowledge must remain portable and must not depend on Cursor, ChatGPT, Grok, Claude or another provider.
 
 ## Authority
 
-Agents may autonomously fix bugs, improve performance, accessibility, minor UX, directly related refactors, meaningful debt and non-destructive security issues.
+Agents may autonomously fix bugs, improve performance, accessibility, minor UX, directly related refactors, meaningful debt and non-destructive security issues inside approved scope.
 
 Human approval is required for material new product scope, foundational product/architecture changes, material recurring cost, destructive production operations, dangerous data migrations and major commercial-model changes unless an already-approved initiative explicitly authorizes them.
 
@@ -39,7 +57,7 @@ A clear human response such as `dale`, `aprobado`, `excelente, hacelo`, `continu
 
 ## Development defaults
 
-- Use a dedicated branch for planned/significant work.
+- Use a dedicated branch for planned/significant work when isolation creates value.
 - Prefer targeted improvements over broad rewrites.
 - Keep business rules in server/domain layers rather than scattering them through UI.
 - Preserve mobile quality and premium simplicity.
@@ -49,23 +67,26 @@ A clear human response such as `dale`, `aprobado`, `excelente, hacelo`, `continu
 
 ## Before marking work shipped
 
-Use the smallest verification set that establishes real confidence. Relevant checks include build, typecheck, lint, tests, security/data-integrity checks, desktop/mobile visual review, critical journeys, deploy status and production verification.
+Follow `VOLTA-DLV-001` from `volta-foundation` and use the smallest verification set that establishes real confidence.
 
-A visual change is not fully verified only because it compiles. `SHIPPED` means integrated and, when production applies, deployed and verified.
+Relevant checks include build, typecheck, lint, tests, security/data-integrity checks, desktop/mobile visual review, critical journeys, deploy status and production verification.
 
-### Vercel deployment budget — mandatory
+A visual change is not fully verified only because it compiles. `SHIPPED` means integrated and, when production applies, deployed and verified at the intended release boundary.
 
-Follow `volta-os/governance/SHIPPING-PROTOCOL.md`.
+### Vercel deployment discipline
 
-- **One requirement/work item = one production deployment from `main`.** The automatic Git deployment created by the final merge/push is the release deployment for that requirement.
-- Preview deployments are scarce: target **0**, normally use **at most 1** only when remote/render verification is genuinely required; a second preview is reserved for a material fix discovered in the first.
-- Never use Vercel Preview as the normal feedback loop. Run local/repository quality checks first and push a coherent near-final branch state.
-- Avoid incremental remote commits, dummy commits, throwaway branches and repeated manual redeploys. Batch multi-file agent/API changes into a coherent commit when practical.
-- A docs-only or non-runtime change should not intentionally consume a preview.
-- If Vercel is rate-limited, record the blocker and stop retrying until capacity returns; do not burn quota trying to bypass the provider limit.
+Preview/deployment usage should remain proportional to the evidence needed for the change:
+
+- use local/repository verification before consuming remote build capacity;
+- avoid dummy commits and repeated redeploys;
+- visible changes may use preview/production rendering when that materially increases confidence;
+- docs-only changes should not intentionally consume a runtime deployment;
+- if Vercel is rate-limited, record the blocker rather than repeatedly retrying.
+
+There is no separate legacy shipping protocol that overrides `VOLTA-DLV-001`.
 
 Update `docs/CURRENT_STATE.md` after a material state change. Leave `docs/HANDOFF.md` only when continuation context is actually needed.
 
 ## Legacy documentation
 
-`docs/ai/` contains the original architecture audit and remains useful historical/reference material. When it conflicts with verified current code or the new Product OS documents, investigate reality and update the authoritative Product OS rather than silently copying stale information.
+`docs/ai/` contains the original architecture audit and remains useful historical/reference material. When it conflicts with verified current code, migrations, production reality or current Company OS/Product documentation, investigate reality and update the current canonical local source rather than silently copying stale information.
