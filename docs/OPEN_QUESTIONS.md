@@ -1,7 +1,7 @@
 # VOLTA Store — Open Product Questions
 
-**Last reviewed:** 2026-08-28  
-**Authority:** `docs/CURRENT_STATE.md` defines what exists; `docs/ROADMAP.md` defines intentional direction; this file defines unresolved human product decisions.
+**Last reviewed:** 2026-08-30  
+**Authority:** `docs/CURRENT_STATE.md` defines what exists; `docs/ROADMAP.md` defines intentional direction; this file defines unresolved human product decisions. Company-level authority lives in `LucasFasolato/volta-foundation`.
 
 ## Status contract
 
@@ -27,10 +27,10 @@ Store's current landing and Activation 2.0 remain frozen pending real conversion
 - **Decision:** Pending.
 
 ### STORE-Q003 — How customer learning becomes product evidence
-- **Status:** BLOCKING for evidence-led roadmap prioritization.
+- **Status:** ANSWERED for the current learning cycle.
 - **Question:** What lightweight process will capture the first 10 merchant learnings so they become durable evidence instead of chat history?
-- **Recommendation:** one structured record per merchant covering acquisition source, setup friction, Time to First Share, support needed, perceived value, willingness to pay and observed commercial outcome.
-- **Decision:** Pending.
+- **Decision:** Use `docs/EVIDENCE.md` as the product-level evidence summary and preserve merchant-specific observations in a lightweight structured source linked from it. Capture only decision-relevant facts: acquisition source, setup friction, Time to First Share, support needed, perceived value, willingness to pay, observed commercial outcome and follow-up/repeat usage where available.
+- **Rationale:** VOLTA Product OS requires evidence to improve decisions, not ceremony. A single evidence summary plus bounded merchant records prevents both chat dependency and unnecessary CRM/research bureaucracy.
 
 ### STORE-Q004 — Core paid-plan value
 - **Status:** OPEN; BLOCKING before major packaging changes.
@@ -55,8 +55,8 @@ Store's current landing and Activation 2.0 remain frozen pending real conversion
 ### STORE-Q007 — Shared VOLTA commercial model
 - **Status:** OPEN
 - **Question:** Should Store's `Gratis / VOLTA / PRO` vocabulary remain product-specific or become an ecosystem standard?
-- **Recommendation:** defer to `volta-os/ecosystem/OPEN_QUESTIONS.md`; do not force other products into Store economics.
-- **Decision:** Pending at ecosystem level.
+- **Recommendation:** keep it product-specific unless Strategy/Product evidence across several VOLTA products demonstrates that a shared commercial vocabulary creates real leverage. `volta-foundation` is the authority for any future cross-product policy.
+- **Decision:** Pending at company/product-strategy level.
 
 ## Agent rule
 
