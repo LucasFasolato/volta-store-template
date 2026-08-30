@@ -22,11 +22,13 @@ VOLTA Store está en producción y hoy incluye:
 - billing SaaS mediante Mercado Pago;
 - RLS, migrations versionadas y guardrails de ownership.
 
-Los detalles de estado, deuda y próximos pasos **no se mantienen duplicados en este README**. La fuente operativa es el Product OS.
+Los detalles de estado, deuda y próximos pasos **no se mantienen duplicados en este README**. La verdad local vive en los documentos canónicos del producto y la verdad company-level vive en `LucasFasolato/volta-foundation`.
 
-## VOLTA Product OS
+## VOLTA Company OS v1
 
-Este repositorio opera bajo **VOLTA OS v1.0**.
+Este repositorio opera bajo **VOLTA Company OS v1**.
+
+La autoridad global vive en `LucasFasolato/volta-foundation`; no copiar estándares globales completos a este repositorio.
 
 Antes de desarrollar, empezar por:
 
@@ -39,10 +41,14 @@ Antes de desarrollar, empezar por:
 Otros contratos útiles:
 
 - [`docs/PRODUCT.md`](./docs/PRODUCT.md) — definición del producto y alcance;
+- [`docs/EVIDENCE.md`](./docs/EVIDENCE.md) — evidencia actual, gaps y próximo aprendizaje;
 - [`docs/DEBT.md`](./docs/DEBT.md) — deuda material basada en evidencia;
 - [`docs/decisions/`](./docs/decisions) — ADRs duraderos;
 - [`volta.product.yaml`](./volta.product.yaml) — manifiesto machine-readable;
-- [`docs/ai/`](./docs/ai) — auditoría/contexto histórico, no sustituto de la realidad actual.
+- [`docs/audits/`](./docs/audits) — auditorías durables;
+- [`docs/ai/`](./docs/ai) — contexto histórico profundo, no sustituto de la realidad actual.
+
+Portfolio/lifecycle company-level: `volta-foundation/registry/portfolio.yaml`.
 
 ## Stack
 
@@ -100,7 +106,7 @@ npm run test
 npm run build
 ```
 
-Además, según el cambio, verificar auth/RLS, migrations, mobile/desktop, storefront, carrito, checkout WhatsApp, billing y producción siguiendo `AGENTS.md` y `docs/GUARDRAILS.md`.
+Además, según el cambio, verificar auth/RLS, migrations, mobile/desktop, storefront, carrito, checkout WhatsApp, billing y producción siguiendo `AGENTS.md`, `docs/GUARDRAILS.md` y el Delivery OS canónico.
 
 ## Seguridad
 
@@ -108,8 +114,8 @@ Además, según el cambio, verificar auth/RLS, migrations, mobile/desktop, store
 - nunca confiar en `store_id`/ownership provisto por el cliente;
 - RLS y migrations son parte del contrato del producto;
 - `store-assets` usa media pública de storefront por decisión explícita, con escritura/borrado restringidos por ownership;
-- operaciones destructivas de producción requieren aprobación humana según VOLTA OS.
+- operaciones destructivas de producción requieren la autoridad y controles definidos por VOLTA Company OS v1.
 
 ## Deploy
 
-`main` representa código listo para producción y el destino operativo es Vercel. Los cambios sensibles o significativos deben pasar por PR y verificación antes de integrarse.
+`main` representa código listo para producción y el destino operativo es Vercel. Los cambios sensibles o significativos deben pasar por la verificación proporcional definida por VOLTA Delivery OS antes de integrarse o declararse shipped.
