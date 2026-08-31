@@ -21,6 +21,7 @@ Start from the minimum relevant canonical source rather than copying global stan
 - Engineering: `VOLTA-ENG-001`
 - Security: `VOLTA-SEC-001`
 - Agent Operations: `VOLTA-AGT-001`
+- Vercel agent delivery: `VOLTA-AGT-PROFILE-VERCEL-001`
 - Visual Foundation / Design when UI is materially affected: `VOLTA-VIS-001` / `VOLTA-DSN-001`
 
 Do not depend on the superseded `volta-os` repository for current VOLTA policy.
@@ -75,13 +76,20 @@ A visual change is not fully verified only because it compiles. `SHIPPED` means 
 
 ### Vercel deployment discipline
 
-Preview/deployment usage should remain proportional to the evidence needed for the change:
+Follow `VOLTA-AGT-PROFILE-VERCEL-001`.
 
-- use local/repository verification before consuming remote build capacity;
-- avoid dummy commits and repeated redeploys;
-- visible changes may use preview/production rendering when that materially increases confidence;
-- docs-only changes should not intentionally consume a runtime deployment;
-- if Vercel is rate-limited, record the blocker rather than repeatedly retrying.
+Current operational budget:
+
+- **hard ceiling: stay below 100 Vercel builds in any rolling 24-hour period**;
+- **default: one final remote deployment per coherent feature/fix/work package**;
+- develop, iterate and visually inspect locally before consuming remote build capacity;
+- batch coherent changes before pushes that would trigger Vercel builds;
+- use an additional preview/deployment only when hosted evidence materially improves confidence and cannot be obtained credibly locally;
+- coordinate concurrent agents so multiple lanes do not create redundant previews for the same work;
+- avoid dummy commits, incremental redeploy loops and repeated rate-limit retries;
+- docs-only changes should not intentionally consume a runtime deployment when avoidable.
+
+> **Parallelize development; consolidate deployment.**
 
 There is no separate legacy shipping protocol that overrides `VOLTA-DLV-001`.
 
