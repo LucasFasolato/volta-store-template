@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "protocolVersion": "1.0.0",
+  "repository": "LucasFasolato/volta-store-template",
+  "authority": "LucasFasolato/volta-foundation",
+  "branches": {
+    "production": "main"
+  },
+  "entryDocs": [
+    "AGENTS.md",
+    "README.md",
+    "docs/CURRENT_STATE.md"
+  ],
+  "verification": {
+    "static": [
+      "lint"
+    ],
+    "tests": [
+      "test"
+    ],
+    "build": [
+      "build"
+    ],
+    "browser": [],
+    "security": [],
+    "focused": []
+  },
+  "delivery": {
+    "mode": "local-first",
+    "defaultHostedCandidates": 1,
+    "requiresEvidence": true
+  }
+}
