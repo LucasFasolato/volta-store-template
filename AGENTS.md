@@ -98,3 +98,8 @@ Update `docs/CURRENT_STATE.md` after a material state change. Leave `docs/HANDOF
 ## Legacy documentation
 
 `docs/ai/` contains the original architecture audit and remains useful historical/reference material. When it conflicts with verified current code, migrations, production reality or current Company OS/Product documentation, investigate reality and update the current canonical local source rather than silently copying stale information.
+
+
+## VOLTA harness
+
+Operational adapter: [`.volta/HARNESS.md`](.volta/HARNESS.md), with repository-specific commands in [`.volta/harness.json`](.volta/harness.json). The Company OS in `volta-foundation` remains authoritative; existing local product rules remain in force. Run `node .volta/check.mjs` to verify this contract. Run `node .volta/check.mjs --verify` for declared local baseline checks; browser, security and data checks remain task-dependent. Structural success is not product or production acceptance. Keep delivery local-first and batch one coherent hosted candidate according to the existing VOLTA delivery profile.
