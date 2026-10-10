@@ -89,7 +89,7 @@ export function LoginForm({
 
       setInlineFeedback({
         tone: 'error',
-        title: 'No pudimos iniciar sesion',
+        title: 'No pudimos iniciar sesión',
         message: result.error,
       })
       return
@@ -127,7 +127,7 @@ export function LoginForm({
         <div className="mt-6 space-y-3">
           <StatusFeedback feedback={blockingFeedback} />
           <div className="rounded-[24px] border border-border bg-black/[0.04] p-4 text-sm leading-6 text-muted-foreground dark:border-white/8 dark:bg-white/4">
-            El acceso funciona una sola vez y la sesion se abre en el dispositivo donde confirmas el correo.
+            El enlace funciona una sola vez y la sesión se abre en el dispositivo donde confirmás el correo.
           </div>
         </div>
 
@@ -154,7 +154,7 @@ export function LoginForm({
         </div>
         <h1 className="text-2xl font-semibold text-foreground">Ingresar al panel</h1>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Entra con Google en un click o usa magic link si prefieres seguir por email.
+          Ingresá con Google en un clic o usá un enlace por email.
         </p>
         {next.startsWith('/billing/return') ? (
           <p className="mt-3 rounded-2xl border border-emerald-500/15 bg-emerald-500/5 px-3.5 py-3 text-xs leading-5 text-emerald-800 dark:text-emerald-200">
@@ -218,9 +218,9 @@ export function LoginForm({
       </div>
 
       <div className="mt-6 rounded-[24px] border border-border bg-black/[0.04] p-4 dark:border-white/8 dark:bg-black/10">
-        <p className="text-sm font-medium text-foreground">Que va a pasar despues</p>
+        <p className="text-sm font-medium text-foreground">Qué va a pasar después</p>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Google te lleva directo al callback seguro. Si eliges email, abre el link desde el dispositivo donde quieras iniciar sesion.
+          Ingresá con Google o recibí un enlace por email. Abrilo desde el dispositivo donde quieras iniciar sesión.
         </p>
       </div>
     </div>

@@ -1,6 +1,6 @@
 # VOLTA Store — Current State
 
-**Last reviewed:** 2026-08-26  
+**Last reviewed:** 2026-10-10
 **Lifecycle:** PRODUCTION  
 **Authoritative branch:** `main`  
 **Production:** `https://www.voltastore.app`
@@ -37,6 +37,7 @@ The landing direction remains frozen pending conversion evidence or a genuine po
 - Search, category/brand filters, URL-backed discovery, sorting, promotions and related-product behavior.
 - Product detail UX is responsive and purchase controls remain in context on mobile/desktop.
 - Checkout collects configurable customer/fulfillment/notes/custom fields and finishes with a structured WhatsApp handoff.
+- The WhatsApp handoff preserves the shopper's cart and details after opening the prepared message; the customer reviews and sends it from WhatsApp.
 - Store slug history protects shared store links and redirects old slugs while preserving query parameters.
 - Store/product metadata includes canonical, Open Graph and Twitter metadata.
 - Product slugs are created once and are not regenerated on ordinary product rename.

@@ -317,7 +317,7 @@ function buildInsight(
     return {
       tone: 'positive',
       title: 'Más personas avanzan a WhatsApp',
-      body: `Los pedidos a WhatsApp subieron ${Math.round(whatsapp.changePercent)}% frente al período anterior.`,
+      body: `Los inicios de WhatsApp subieron ${Math.round(whatsapp.changePercent)}% frente al período anterior.`,
     }
   }
 

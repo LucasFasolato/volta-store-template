@@ -21,7 +21,7 @@ export function AnalyticsActivityChart({ data }: { data: AnalyticsDailyPoint[] }
           <p className="admin-label">Evolución</p>
           <h3 className="mt-1 text-base font-semibold tracking-[-0.025em] text-foreground sm:text-lg">Actividad de tu tienda</h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            {new Intl.NumberFormat('es-AR').format(total)} {metric === 'visits' ? 'visitas' : 'pedidos a WhatsApp'} en el período
+            {new Intl.NumberFormat('es-AR').format(total)} {metric === 'visits' ? 'visitas' : 'inicios de WhatsApp'} en el período
           </p>
         </div>
 

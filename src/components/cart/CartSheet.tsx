@@ -45,7 +45,7 @@ export function CartSheet({
   salesSettings,
 }: CartSheetProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
-  const [details, setDetails] = useState<CheckoutDetails>({})
+  const [storedDetails, setDetails] = useState<CheckoutDetails>({})
   const items = useCartStore((state) => state.items)
   const isOpen = useCartStore((state) => state.isOpen)
   const closeCart = useCartStore((state) => state.closeCart)
@@ -57,6 +57,19 @@ export function CartSheet({
   const fulfillmentKey = salesSettings.fulfillmentMethods.join('|')
   const effectiveAskFulfillment = askFulfillment && salesSettings.fulfillmentMethods.length > 1
 
+  const details = useMemo(() => {
+    const methods = fulfillmentKey
+      ? fulfillmentKey.split('|') as Array<NonNullable<CheckoutDetails['fulfillment']>>
+      : []
+    if (methods.length === 1) {
+      return { ...storedDetails, fulfillment: methods[0] }
+    }
+    if (storedDetails.fulfillment && !methods.includes(storedDetails.fulfillment)) {
+      return { ...storedDetails, fulfillment: undefined }
+    }
+    return storedDetails
+  }, [fulfillmentKey, storedDetails])
+
   const missingName = askName && !details.customerName?.trim()
   const missingFulfillment = effectiveAskFulfillment && !details.fulfillment
   const missingCustomFields = activeCustomFields.filter((field) => field.is_required && !details.custom?.[field.id]?.trim())
@@ -65,18 +78,6 @@ export function CartSheet({
   const minimumOrder = salesSettings.minimumOrderAmount
   const belowMinimum = Boolean(minimumOrder && subtotal < minimumOrder)
   const canCheckout = Boolean(whatsapp) && !missingRequired && !belowMinimum
-
-  useEffect(() => {
-    const methods = salesSettings.fulfillmentMethods
-    setDetails((current) => {
-      if (methods.length === 1) {
-        const only = methods[0]
-        return current.fulfillment === only ? current : { ...current, fulfillment: only }
-      }
-      if (current.fulfillment && !methods.includes(current.fulfillment)) return { ...current, fulfillment: undefined }
-      return current
-    })
-  }, [fulfillmentKey, salesSettings.fulfillmentMethods])
 
   useEffect(() => {
     if (!isOpen) return
@@ -134,10 +135,8 @@ export function CartSheet({
     saveLastOrder(storeSlug, items)
     trackStoreEvent({ storeId, type: 'whatsapp_checkout' })
     opened.location.href = url
-    clearCart()
-    setDetails({})
     closeCart()
-    toast.success('WhatsApp abierto. Revisá el mensaje y envialo cuando estés listo.')
+    toast.success('WhatsApp abierto. Revisá el mensaje y envialo cuando quieras.')
   }
 
   function handleClearCart() {
@@ -207,15 +206,6 @@ export function CartSheet({
                 <div className="space-y-5">
                   <SalesInfo settings={salesSettings} />
 
-                  <CheckoutDetailsFields
-                    askName={askName}
-                    askFulfillment={effectiveAskFulfillment}
-                    allowNotes={allowNotes}
-                    customFields={activeCustomFields}
-                    value={details}
-                    onChange={setDetails}
-                  />
-
                   <section>
                     <div className="flex items-end justify-between gap-3 px-1">
                       <div>
@@ -232,6 +222,15 @@ export function CartSheet({
                       {items.map((item) => <CartItem key={item.cartItemKey} item={item} onUpdateQty={(quantity) => updateQuantity(item.cartItemKey, quantity)} onRemove={() => removeItem(item.cartItemKey)} />)}
                     </div>
                   </section>
+
+                  <CheckoutDetailsFields
+                    askName={askName}
+                    askFulfillment={effectiveAskFulfillment}
+                    allowNotes={allowNotes}
+                    customFields={activeCustomFields}
+                    value={details}
+                    onChange={setDetails}
+                  />
                 </div>
               )}
             </div>

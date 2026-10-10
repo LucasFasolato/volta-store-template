@@ -48,7 +48,7 @@ async function persistPublicationStatus({
 
   if (!updatedStore) {
     return {
-      error: 'No pudimos actualizar el estado de publicacion de la tienda. Revisa tu sesion e intenta de nuevo.',
+      error: 'No pudimos actualizar el estado de publicación de la tienda. Revisá tu sesión e intentá de nuevo.',
     }
   }
 

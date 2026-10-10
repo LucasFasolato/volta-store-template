@@ -151,7 +151,7 @@ export function getLoginFeedbackFromSearchParams(
 
   return {
     tone: 'error',
-    title: 'No pudimos iniciar sesion',
+    title: 'No pudimos iniciar sesión',
     message: 'Intenta nuevamente con Google o pide un nuevo enlace por email.',
     detail: 'Si el problema sigue, espera un momento y vuelve a intentar.',
     email,

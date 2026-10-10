@@ -29,15 +29,15 @@ export const COPY = {
     noProductsInCategoryDescription:
       'Probá explorando otras secciones o volvé al catálogo completo.',
     modalFallbackDescription:
-      'Agregalo al pedido y seguí la compra por WhatsApp con disponibilidad, opciones y entrega.',
+      'Agregalo al pedido y coordiná disponibilidad, pago y entrega por WhatsApp.',
     backToStore: 'Volver a la tienda',
     shareProduct: 'Compartir producto',
   },
   checkout: {
-    greeting: 'Hola! Quiero hacer este pedido:',
+    greeting: '¡Hola! Me gustaría hacer este pedido:',
     orderLabel: 'Pedido',
     dataLabel: 'Datos para coordinar',
-    closing: 'Quedo atento a la confirmación. Gracias!',
+    closing: 'Quedo a disposición para coordinar y confirmar el pedido. ¡Gracias!',
   },
   admin: {
     saved: 'Guardado',

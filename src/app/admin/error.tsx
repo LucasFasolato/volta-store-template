@@ -18,7 +18,7 @@ export default function AdminError({
     <StateScreen
       eyebrow="Admin"
       title="No pudimos cargar el panel"
-      description="Puede haber sido un problema momentaneo con la sesion o los datos de tu tienda. Reintentemos sin perder el contexto."
+      description="Puede haber sido un problema momentáneo con la sesión o los datos de tu tienda. Reintentemos sin perder el contexto."
       primaryAction={<RetryButton onClick={unstable_retry} />}
       secondaryHref="/admin"
       secondaryLabel="Volver al panel"

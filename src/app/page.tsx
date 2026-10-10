@@ -24,7 +24,7 @@ import type { SaasFunnelEventType } from '@/lib/analytics/saas-events'
 export const metadata: Metadata = {
   title: 'VOLTA — Tu catálogo online para vender por WhatsApp',
   description:
-    'Creá una tienda online profesional, compartí un link y recibí pedidos ordenados por WhatsApp. Empezá gratis.',
+    'Creá una tienda online profesional, compartí un link y prepará pedidos ordenados para WhatsApp. Empezá gratis.',
   alternates: { canonical: 'https://www.voltastore.app' },
   openGraph: {
     title: 'VOLTA — Tu catálogo online para vender por WhatsApp',
@@ -129,7 +129,7 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
               Tu tienda online, lista para vender por WhatsApp.
             </h1>
             <p className="mt-5 max-w-lg text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
-              Mostrá productos, precios y opciones con una presencia profesional. Tu cliente elige y el pedido llega ordenado a WhatsApp.
+              Mostrá productos, precios y opciones con una presencia profesional. Tu cliente elige y el pedido queda listo para revisar y enviar por WhatsApp.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
@@ -151,7 +151,7 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
             </div>
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-slate-500">
               <span className="inline-flex items-center gap-1.5"><Check className="size-3.5 text-emerald-600" /> Sin tarjeta</span>
-              <span className="inline-flex items-center gap-1.5"><Check className="size-3.5 text-emerald-600" /> Publicás en minutos</span>
+              <span className="inline-flex items-center gap-1.5"><Check className="size-3.5 text-emerald-600" /> Publicás cuando esté lista</span>
               <span className="inline-flex items-center gap-1.5"><Check className="size-3.5 text-emerald-600" /> Sin comisión por venta</span>
             </div>
           </div>
@@ -175,7 +175,7 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
           <div className="mt-8 grid gap-px overflow-hidden rounded-[24px] border border-black/7 bg-black/7 md:grid-cols-3">
             <StepRow icon={<Store className="size-5" />} number="01" title="Cargá">Productos, fotos, precios y opciones.</StepRow>
             <StepRow icon={<QrCode className="size-5" />} number="02" title="Compartí">Un link en Instagram, WhatsApp o QR.</StepRow>
-            <StepRow icon={<MessageCircle className="size-5" />} number="03" title="Vendé">El pedido llega armado a WhatsApp.</StepRow>
+            <StepRow icon={<MessageCircle className="size-5" />} number="03" title="Vendé">El cliente prepara el pedido y lo envía por WhatsApp.</StepRow>
           </div>
         </div>
       </section>
@@ -254,7 +254,7 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
               title="VOLTA"
               price={formatBillingAmount(VOLTA_BILLING_PLAN.introAmount)}
               detail={`Primeros ${VOLTA_BILLING_PLAN.introCycles} meses · después ${formatBillingAmount(VOLTA_BILLING_PLAN.standardAmount)}/mes`}
-              features={['Productos ilimitados', 'Hasta 12 imágenes por producto', 'Variantes y opciones', 'QR y links medibles', 'Visitas, pedidos y conversión']}
+              features={['Productos ilimitados', 'Hasta 12 imágenes por producto', 'Variantes y opciones', 'QR y links medibles', 'Visitas e intención de pedido']}
               cta="Elegir VOLTA"
               href="/login?next=%2Fadmin%2Fplan"
               eventType="landing_volta_cta_click"
@@ -291,7 +291,7 @@ export default async function RootPage({ searchParams }: { searchParams: RootSea
           <div className="max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[.18em] text-emerald-300">Empezá sin pagar</p>
             <h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.05em] sm:text-4xl">Tu catálogo puede estar online hoy.</h2>
-            <p className="mt-3 text-sm leading-7 text-slate-300">Cargá tus primeros productos, compartí el link y dejá que el pedido llegue ordenado.</p>
+            <p className="mt-3 text-sm leading-7 text-slate-300">Cargá tus primeros productos, compartí el link y recibí consultas con el pedido preparado.</p>
           </div>
           <Link
             href="/login"

@@ -45,7 +45,7 @@ export default function OpenGraphImage() {
             Tu catálogo online para vender por WhatsApp.
           </div>
           <div style={{ fontSize: 30, lineHeight: 1.3, color: '#b9c7c1' }}>
-            Subí productos, compartí tu tienda y recibí pedidos ordenados directamente en WhatsApp.
+            Subí productos, compartí tu tienda y prepará pedidos ordenados para WhatsApp.
           </div>
         </div>
 
